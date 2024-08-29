@@ -159,7 +159,6 @@ curl_exit: $error: $curl_res"
     if [[ "$2" == "type" ]]; then
       #if [[ "$ft" = *text/html* ]]; then
       if [[ "$ft" == "text/html" ]]; then
-        fn="${fn}.${fe}"
         if [[ $(echo "$URL" | grep -o '/' | wc -l) -le 2 ]]; then
           mv "${fn}" "${fn}.html"
           fn="${fn}.html"
