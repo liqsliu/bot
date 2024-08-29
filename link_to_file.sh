@@ -162,6 +162,7 @@ curl_exit: $error: $curl_res"
         if [[ $(echo "$URL" | grep -o '/' | wc -l) -le 2 ]]; then
           mv "${fn}" "${fn}.html"
           fn="${fn}.html"
+          my_url="${my_url}.html"
         fi
         if [[ $( file -i -- "$fn"| grep -c "application/gzip" ) -eq 1 ]]; then
           title=$(cat -- "$fn" | gzip -d -c -)
