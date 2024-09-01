@@ -4,8 +4,8 @@
 
 (
 
+pkill -x mt
 cd ~/bot
-
 while true
 do
 vgp
