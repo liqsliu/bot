@@ -244,3 +244,4 @@
 #测试 X liqsliu: ceshi
 #直播 X liqsliu_: 中国之声的地址为： http://ngcdn001.cnr.cn/live/zgzs/index.m3u8
 #直播 X liqsliu_: https://omii.top/web/%E5%BD%B1%E8%A7%86/#download
+#default X jerryxqj: xmpp

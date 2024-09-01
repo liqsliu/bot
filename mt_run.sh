@@ -1,11 +1,22 @@
 #!/bin/bash
 
+
 cd ~/bot/ && bash init.sh || exit 1
 
 cd ~/
 
+while true; do
+
+
 #./matterbridge "$@" || bash tg.sh "matterbridge exit $?"
-./mt "$@" || bash tg.sh "matterbridge exit $?"
+./mt "$@" || {
+  bash tg.sh "matterbridge exit $?"
+}
+
+echo 'restart ...'
+sleep 8
+done
+
 exit 0
 
 TTY=$(tty)
@@ -17,6 +28,8 @@ msg=$( ./matterbridge 2>&1 | tee $TTY )
 
 
 bash tg.sh "$msg"
+
+
 
 exit 0
 
