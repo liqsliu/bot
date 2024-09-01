@@ -8,12 +8,20 @@ cd ~/
 while true; do
 
 
+r=0
 #./matterbridge "$@" || bash tg.sh "matterbridge exit $?"
 ./mt "$@" || {
+  r=$?
   bash tg.sh "matterbridge exit $?"
 }
-
+echo "res: $r"
+date
 echo 'restart ...'
+if [[ "$r" -eq 143 ]]; then
+  echo now
+  continue
+fi
+
 sleep 8
 done
 
