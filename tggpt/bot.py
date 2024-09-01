@@ -5871,7 +5871,7 @@ async def xmppbot():
 async def xmppbot2():
   while True:
     if XB.running:
-      await asyncio.sleep(300)
+      await asyncio.sleep(6)
       continue
     logger.info("需要重新启动xmppbot")
     #  try:
