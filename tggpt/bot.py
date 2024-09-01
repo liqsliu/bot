@@ -5431,7 +5431,7 @@ async def login(client=None):
 
     await regisger_handler(client)
 
-  except TimeoutError:
+  except TimeoutError as e:
     warn(f"登录失败(超时)：{jid}, {e=}")
     await stop(client)
     return False
