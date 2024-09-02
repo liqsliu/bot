@@ -32,8 +32,8 @@ get_gateways(){
 #
 # https://ipfs.pixura.io/api/v0/add https://ipfs.pixura.io/ipfs/HASH_CID 0 0
 local IPFS_GATEWAYS="
-https://cdn.ipfsscan.io/api/v0/add https://ipfs.crossbell.io/ipfs/HASH_CID 0 0
-https://cdn.ipfsscan.io/api/v0/add https://cdn.crossbell.io/ipfs/HASH_CID 0 0
+https://cdn.ipfsscan.io/api/v0/add https://ipfs.ipfsscan.io/ipfs/HASH_CID 0 0
+https://cdn.ipfsscan.io/api/v0/add https://cdn.ipfsscan.io/ipfs/HASH_CID 0 0
 "
 # https://ipfs.crossbell.io/ipfs/QmRJpSm6cPHnqUqonBMSviJLSQ6Cnzx2AieadFnkxf5UXs?filename=图片.png
 
