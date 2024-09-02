@@ -303,8 +303,9 @@ auto_to_all(){
 
 
 FILE_PATH="$1"
-debug="$2"
-if [[ -n "$debug" ]]; then
+# debug="$2"
+# if [[ -n "$debug" ]]; then
+if [[ "$2" = debug ]]; then
   debug=1
   echo "debug: on"
 fi
