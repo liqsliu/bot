@@ -10,10 +10,12 @@ cd ~/bot
 while true
 do
 vgp
+r=0
 tgp && bash init.sh && python3 -m tggpt && {
   echo ok
   break
-}
+} || r=$?
+echo "res: $r"
 
 pkill -x mt
 date

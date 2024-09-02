@@ -31,12 +31,16 @@ get_gateways(){
 # upload_URL(need /api/v0/add) IPFS_URL cid_version gfwed [token]
 #
 # https://ipfs.pixura.io/api/v0/add https://ipfs.pixura.io/ipfs/HASH_CID 0 0
+# https://cdn.ipfsscan.io/api/v0/add https://ipfs.crossbell.io/ipfs/HASH_CID 0 0
+# https://cdn.ipfsscan.io/api/v0/add https://cdn.ipfsscan.io/ipfs/HASH_CID 0 0
+# https://cdn.ipfsscan.io/api/v0/add https://gateway.ipfsscan.io/ipfs/HASH_CID 0 0
+# https://cdn.ipfsscan.io/api/v0/add https://4everland.io/ipfs/HASH_CID 0 0
 local IPFS_GATEWAYS="
-https://cdn.ipfsscan.io/api/v0/add https://ipfs.ipfsscan.io/ipfs/HASH_CID 0 0
-https://cdn.ipfsscan.io/api/v0/add https://cdn.ipfsscan.io/ipfs/HASH_CID 0 0
+https://ipfs.pixura.io/api/v0/add https://ipfs.pixura.io/ipfs/HASH_CID 0 0
 "
 # curl 'https://cdn.ipfsscan.io/api/v0/add' --compressed -X POST -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 GLS/100.10.9939.100' -H 'Accept: application/json, text/javascript, */*; q=0.01' -H 'Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2' -H 'Accept-Encoding: gzip, deflate, br, zstd' -H 'X-Requested-With: XMLHttpRequest' -H 'Content-Type: multipart/form-data; boundary=---------------------------30114403322458380701248967467' -H 'Origin: https://cdn.ipfsscan.io' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' -H 'sec-ch-ua-platform: "Windows"' -H 'sec-ch-ua: "Google Chrome";v="125", "Chromium";v="125", "Not=A?Brand";v="24"' -H 'sec-ch-ua-mobile: ?0' -H 'Priority: u=0' --data-binary $'-----------------------------30114403322458380701248967467\r\nContent-Disposition: form-data; name="file"; filename="\xe5\x9b\xbe\xe7\x89\x87.png"\r\nContent-Type: image/png\r\n\r\n-----------------------------30114403322458380701248967467--\r\n'
 # https://ipfs.crossbell.io/ipfs/QmRJpSm6cPHnqUqonBMSviJLSQ6Cnzx2AieadFnkxf5UXs?filename=图片.png
+# curl 'https://cdn.ipfsscan.io/api/v0/add' --compressed -X POST -H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 GLS/100.10.9939.100' -H 'Accept: application/json, text/javascript, */*; q=0.01' -H 'Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2' -H 'Accept-Encoding: gzip, deflate, br, zstd' -H 'X-Requested-With: XMLHttpRequest' -H 'Content-Type: multipart/form-data; boundary=---------------------------68793484727637958703343046544' -H 'Origin: https://cdn.ipfsscan.io' -H 'DNT: 1' -H 'Connection: keep-alive' -H 'Sec-Fetch-Dest: empty' -H 'Sec-Fetch-Mode: cors' -H 'Sec-Fetch-Site: same-origin' -H 'sec-ch-ua-platform: "Windows"' -H 'sec-ch-ua: "Google Chrome";v="125", "Chromium";v="125", "Not=A?Brand";v="24"' -H 'sec-ch-ua-mobile: ?0' -H 'Priority: u=0' -H 'TE: trailers' --data-binary $'-----------------------------68793484727637958703343046544\r\nContent-Disposition: form-data; name="file"; filename="\xe5\x9b\xbe\xe7\x89\x87.png"\r\nContent-Type: image/png\r\n\r\n-----------------------------68793484727637958703343046544--\r\n'
 
 if [[ "$1" == "" ]]; then
   echo "$IPFS_GATEWAYS" | shuf | sed '/^ *$/d' | cut -d" " -f1
@@ -155,12 +159,20 @@ upload_to_ipfs_gateway(){
       continue
     fi
     delay_time=0
+    local host=${GATEWAY_URL#https://}
+    local host=${host#http://}
+    local host=${host%%/*}
+    # opts="-H 'User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36 GLS/100.10.9939.100' -H 'Accept: application/json, text/javascript, */*; q=0.01' -H 'Accept-Language: zh-CN,zh;q=0.8,zh-TW;q=0.7,zh-HK;q=0.5,en-US;q=0.3,en;q=0.2' -H 'Accept-Encoding: gzip, deflate, br, zstd' -H 'Origin: ${GATEWAY_URL%%/*}//$host'"
+    opts=''
+    if [[ -n "$debug" ]]; then
+      echo "opts: $opts"
+    fi
 #    if [[ "$(curl -m 3 -X POST -s -o /dev/null -w '%{http_code}' $GATEWAY_URL/api/v0/version | tail -n 1)" == "200" ]] ; then
 #echo  "check:  $GATEWAY_URL/api/v0/add " 
 #echo  "check: $(curl -m 3 -X POST -s -o /dev/null -w '%{http_code}' $GATEWAY_URL/api/v0/add)" 
     # res_code=$(curl -m 5 -X POST -s -o /dev/null -w '%{http_code}' $GATEWAY_URL/api/v0/add | tail -n 1 2>/dev/null )
-    res_code=$(curl -m 5 -X POST -s -o /dev/null -w '%{http_code}' $GATEWAY_URL | tail -n 1 2>/dev/null )
-    if [[ "$res_code" == "411" ]] || [[ "$res_code" == "401" ]] || [[ "$res_code" == "400" ]] ; then
+    res_code=$(curl -m 5 -X POST -s -o /dev/null -w '%{http_code}' $opts $GATEWAY_URL | tail -n 1 2>/dev/null )
+    if [[ "$res_code" == "411" ]] || [[ "$res_code" == "401" ]] || [[ "$res_code" == "400" ]] || [[ "$res_code" == "403" ]]; then
       local existed=0
       # if [[ "$GATEWAY_URL" == "https://ipfs.infura.io:5001" ]] ; then
       #   if [[ "$(curl -m 2 --max-filesize 1 -s -o /dev/null -w '%{http_code}' https://${HASH_CID}.ipfs.infura-ipfs.io | tail -n 1)" == "200" ]] ; then
@@ -182,9 +194,15 @@ upload_to_ipfs_gateway(){
       if [[ -n "$HASH_CID" && "$(curl -m 5 --max-filesize 1 -s -o /dev/null -w '%{http_code}' "$(get_gateways $GATEWAY_URL | sed "s|GATEWAY_URL|$GATEWAY_URL|1" | sed "s|HASH_CID|$HASH_CID|1")" | tail -n 1 2>/dev/null )" == "200" ]] ; then
         existed=1
         hash=$HASH_CID
+        if [[ -n "$debug" ]]; then
+          echo "existed: $hash"
+        fi
       fi
 
       if [[ $existed -eq 0 ]]; then
+        if [[ -n "$debug" ]]; then
+          echo "not existed: $hash"
+        fi
         # if [[ "$GATEWAY_URL" == 'https://api.nft.storage/upload' ]]; then
         if [[ -n "$token" ]]; then
           if [[ -n "$debug" ]]; then
@@ -204,10 +222,10 @@ upload_to_ipfs_gateway(){
           # hash=$(curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" "$GATEWAY_URL/api/v0/add${cid_version}" | jq -r '.Hash')
           if [[ -n "$debug" ]]; then
             cat <<EOF
-curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" "$GATEWAY_URL${cid_version}"
+curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" $opts "$GATEWAY_URL${cid_version}"
 EOF
           fi
-          hash=$(curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" "$GATEWAY_URL${cid_version}" | jq -r '.Hash')
+          hash=$(curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" $opts "$GATEWAY_URL${cid_version}" | jq -r '.Hash')
         fi
       fi
 
@@ -225,12 +243,17 @@ EOF
         break
       fi
 #      nohup curl -m $(( 2 * MAX_UPLOAD_TIME )) -s -X POST --compressed -F file=@"$FILE_PATH" https://snap1.d.tube/api/v0/add &>/dev/null &
-    fi
-    try_time=$(( $try_time + 1 ))
-    if [[ $try_time -ge 2 ]]; then
+      try_time=$(( $try_time + 1 ))
+      if [[ $try_time -ge 2 ]]; then
+        break
+      fi
+      sleep 2
+    else
+      if [[ -n "$debug" ]]; then
+        echo "res error: $res_code"
+      fi
       break
     fi
-    sleep 2
 
   done
   [[ -n "$hash" ]] && return 0 || return 1
@@ -277,8 +300,14 @@ auto_to_all(){
 
 FILE_PATH="$1"
 debug="$2"
+if [[ -n "$debug" ]]; then
+  debug=1
+  echo "debug: on"
+fi
+
 hash=""
 real_ipfs_url=
+
 file_to_ipfs() {
   local FILE_PATH="$1"
   local fn=${FILE_PATH##*/}
