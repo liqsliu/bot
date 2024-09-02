@@ -220,12 +220,16 @@ upload_to_ipfs_gateway(){
         else
           # hash=$(curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" "$GATEWAY_URL/api/v0/add${cid_version}" | jq -r '.Hash' 2>/dev/null )
           # hash=$(curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" "$GATEWAY_URL/api/v0/add${cid_version}" | jq -r '.Hash')
+          # hash=$(curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" $opts "$GATEWAY_URL${cid_version}" | jq -r '.Hash')
+          res=$(curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" $opts "$GATEWAY_URL${cid_version}")
           if [[ -n "$debug" ]]; then
             cat <<EOF
 curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" $opts "$GATEWAY_URL${cid_version}"
+---
+$res
 EOF
+          hash=$(echo "$res" | jq -r '.Hash')
           fi
-          hash=$(curl -m $MAX_UPLOAD_TIME -s --compressed -X POST -F file=@"$FILE_PATH" $opts "$GATEWAY_URL${cid_version}" | jq -r '.Hash')
         fi
       fi
 
