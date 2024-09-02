@@ -187,6 +187,9 @@ upload_to_ipfs_gateway(){
       if [[ $existed -eq 0 ]]; then
         # if [[ "$GATEWAY_URL" == 'https://api.nft.storage/upload' ]]; then
         if [[ -n "$token" ]]; then
+          if [[ -n "$debug" ]]; then
+            echo "token: $token"
+          fi
           if [[ "$GATEWAY_URL" == 'https://api.nft.storage/upload' ]]; then
             # local res=$(curl -m $MAX_UPLOAD_TIME -H "Authorization: Bearer ${token}" -s --compressed -X POST -F file=@"$FILE_PATH" "$GATEWAY_URL" )
             # echo "res: $res" >&2
@@ -297,6 +300,7 @@ file_to_ipfs() {
           [[ -e "$LP/$fn" ]] || cp "$FILE_PATH" "${LP}/"
           echo "tmp link: https://$DOMAIN/$(bash "$SH_PATH/"urldecode.sh "$fn")" >&2
         }
+
         if [[ -z "$hash" ]]; then
           :
         else
