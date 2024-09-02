@@ -28,11 +28,14 @@ get_gateways(){
 # https://$DOMAIN GATEWAY_URL/ipfs/HASH_CID 0 0
 
 # https://api.nft.storage/upload https://HASH_CID.ipfs.nftstorage.link/ 1 0 ${IPFS_API_KEY}
-
 # upload_URL(need /api/v0/add) IPFS_URL cid_version gfwed [token]
+#
+# https://ipfs.pixura.io/api/v0/add https://ipfs.pixura.io/ipfs/HASH_CID 0 0
 local IPFS_GATEWAYS="
-https://ipfs.pixura.io/api/v0/add https://ipfs.pixura.io/ipfs/HASH_CID 0 0
+https://cdn.ipfsscan.io/api/v0/add https://ipfs.crossbell.io/ipfs/HASH_CID 0 0
+https://cdn.ipfsscan.io/api/v0/add https://cdn.crossbell.io/ipfs/HASH_CID 0 0
 "
+# https://ipfs.crossbell.io/ipfs/QmRJpSm6cPHnqUqonBMSviJLSQ6Cnzx2AieadFnkxf5UXs?filename=图片.png
 
 if [[ "$1" == "" ]]; then
   echo "$IPFS_GATEWAYS" | shuf | sed '/^ *$/d' | cut -d" " -f1
