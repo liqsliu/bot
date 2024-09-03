@@ -2251,10 +2251,10 @@ async def mt2tg(msg):
 
   #  print(f"I: got msg: {name}: {text}")
   if not text:
-    logger.info("I: ignore msg: no text")
+    logger.info(f"I: ignore msg: no text {msgd=}")
     return
   if not name:
-    logger.info("I: ignore msg: no name")
+    logger.info(f"I: ignore msg: no name {msgd=}")
     return
 
   #  if name == "C twitter: ":
