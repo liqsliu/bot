@@ -2249,6 +2249,22 @@ async def mt2tg(msg):
   #        await send(text, last_mt_res_jid)
   #    return
 
+  if msgd["Extra"]:
+      # file
+      #,"id":"","Extra":{"file":[{"Name":"proxy-image.jpg","Data":"/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAA ... 6P9ZgOT6tI33Ff5p/MAOfNnzPzQAN4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAGQAAYAkAAGTGAAAAAAAAwsAAHLAAAK//9k=","Comment":"","URL":"https://liuu.tk/ddb833ad/proxy_image.jpg","Size":0,"Avatar":false,"SHA":"ddb833ad"}]}}\n\r\n'
+      for file in msgd["Extra"]["file"]:
+          if text:
+              if text == file["Name"]:
+                  text = ""
+              else:
+                  text += "\n\n"
+          text += "[{}]({})".format(file["Name"], file["URL"])
+      msgd.pop("Extra")
+      logger.warning("removed file info from mt api(saved)")
+  else:
+      msgd.pop("Extra")
+      logger.warning("removed file info from mt api")
+
   #  print(f"I: got msg: {name}: {text}")
   if not text:
     logger.info(f"I: ignore msg: no text {msgd=}")
@@ -2282,23 +2298,7 @@ async def mt2tg(msg):
   #    return
   logger.info("msg of mt_read: %s" % msgd)
 
-
-
-  if msgd["Extra"]:
-      # file
-      #,"id":"","Extra":{"file":[{"Name":"proxy-image.jpg","Data":"/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAA ... 6P9ZgOT6tI33Ff5p/MAOfNnzPzQAN4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAGQAAYAkAAGTGAAAAAAAAwsAAHLAAAK//9k=","Comment":"","URL":"https://liuu.tk/ddb833ad/proxy_image.jpg","Size":0,"Avatar":false,"SHA":"ddb833ad"}]}}\n\r\n'
-      for file in msgd["Extra"]["file"]:
-          if text:
-              if text == file["Name"]:
-                  text = ""
-              else:
-                  text += "\n\n"
-          text += "[{}]({})".format(file["Name"], file["URL"])
-  else:
-      msgd.pop("Extra")
-      logger.warning("removed file info from mt api")
-
-  logger.info("got msg from mt: {}".format(msgd))
+  #  logger.info("got msg from mt: {}".format(msgd))
   #      if name == "C Telegram: ":
   if gateway == "gateway1":
 
