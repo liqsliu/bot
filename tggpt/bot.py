@@ -121,6 +121,7 @@ music_bot_name = 'Music163bot'
 
 
 interval = 10
+download_time_max = 300
 
 wtf_time = 5
 wtf_time_max = 1800
@@ -2635,7 +2636,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
       else:
         logger.info(f"ignore button: {i}")
   #  await mt_send(f"{res} 下载中...", gateway=gateway)
-  res = f"{res} 下载中..."
+  #  res = f"{res} 下载中..."
   if src:
     await send(res, src, xmpp_only=True, correct=True)
   #  last_time[src] = time.time()
@@ -2669,7 +2670,8 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
         #  if now > 60:
         #    await send(f"等待超时: {res}", src, xmpp_only=True, correct=True)
         #    break
-        await send("执行中({:.0f}s)：{}".format(now, res), src, xmpp_only=True, correct=True)
+        #  await send("准备中({:.0f}s)：{}".format(now, res), src, xmpp_only=True, correct=True)
+        await send("准备中({:.0f}s)：{}".format(now, res), src, correct=True)
       else:
         current = last_time[1]
         total = last_time[2]
@@ -2677,14 +2679,14 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
           info(f"下载完成：{res}")
           break
         #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
-        await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
+        await send("执行中({:.0f}s)：{} 下载中... {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
         last_time[0] = time.time()
         last_current = current
 
 
   async def _download_media(msg, path):
     try:
-      path = await asyncio.wait_for(msg.download_media(path, progress_callback=download_media_callback), timeout=1000)
+      path = await asyncio.wait_for(msg.download_media(path, progress_callback=download_media_callback), timeout=download_time_max)
     except TimeoutError as e:
       path = None
     return path
@@ -2709,11 +2711,14 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
           res = f"{res} 下载失败(下载速度太慢)"
         break
       if len(last_time) == 2:
-        if time.time() - now > 60:
+        #  if time.time() - now > 60:
+        if time.time() - now > download_time_max:
           t1.cancel()
           path = None
-          res = f"{res} 下载失败(等待超时)"
+          res = f"下载失败(等待超时): {res}"
           break
+        else:
+          info("等待上游下载完成：{res}")
   finally:
     if not t1.done():
       t1.cancel()
@@ -2727,7 +2732,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     path = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
     return path
   else:
-    res = f"{res} 下载失败: {path}"
+    #  res = f"{res} 下载失败: {path}"
     if src:
       await send(res, src)
     warn(res)
