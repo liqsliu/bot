@@ -2701,14 +2701,14 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
       await asyncio.sleep(interval+1)
       if src:
         if src not in music_bot_state or music_bot_state[src] < 3:
-          info("下载中止：{res}")
+          info(f"下载中止：{res}")
           path = None
-          res = f"{res} 下载取消"
+          res = f"下载取消: {res}"
           break
       if t1.done():
         path = t1.result()
         if path is None:
-          res = f"{res} 下载失败(下载速度太慢)"
+          res = f"下载失败(下载速度太慢): {res}"
         break
       if len(last_time) == 2:
         #  if time.time() - now > 60:
@@ -2718,14 +2718,14 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
           res = f"下载失败(等待超时): {res}"
           break
         else:
-          info("等待上游下载完成：{res}")
+          info(f"等待上游下载完成：{res}")
   finally:
     if not t1.done():
       t1.cancel()
       #  return
-    if src:
-      if not t.done():
-        t.cancel()
+    #  if src:
+    #    if not t.done():
+    #      t.cancel()
 
   if path:
     #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
