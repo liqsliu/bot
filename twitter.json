@@ -1,0 +1,345 @@
+{
+  "__typename": "Tweet",
+  "lang": "zh",
+  "favorite_count": 145,
+  "possibly_sensitive": false,
+  "created_at": "2024-07-03T02:27:55.000Z",
+  "display_text_range": [
+    0,
+    148
+  ],
+  "entities": {
+    "hashtags": [
+      {
+        "indices": [
+          0,
+          7
+        ],
+        "text": "开源项目推荐"
+      }
+    ],
+    "urls": [],
+    "user_mentions": [],
+    "symbols": [],
+    "media": [
+      {
+        "display_url": "pic.x.com/7dN5NiADsu",
+        "expanded_url": "https://x.com/dotey/status/1808326779083579400/photo/1",
+        "indices": [
+          149,
+          172
+        ],
+        "url": "https://t.co/7dN5NiADsu"
+      }
+    ]
+  },
+  "id_str": "1808326779083579400",
+  "text": "#开源项目推荐：React-Tweet\n\n这是 Vercel 出的一个可以在你的 React 项目中，在网页内嵌入一条推文。不止是可以用在 React 项目，它也提供了 API 可以帮你根据 ID 抓取推文内容、评论数、图片等信息。并且是完全免费的，不需要申请开发者账号，也不需要给 X 交钱。… https://t.co/7dN5NiADsu",
+  "user": {
+    "id_str": "3178231",
+    "name": "宝玉",
+    "profile_image_url_https": "https://pbs.twimg.com/profile_images/561086911561736192/6_g58vEs_normal.jpeg",
+    "screen_name": "dotey",
+    "verified": false,
+    "is_blue_verified": true,
+    "profile_image_shape": "Circle"
+  },
+  "edit_control": {
+    "edit_tweet_ids": [
+      "1808326779083579400"
+    ],
+    "editable_until_msecs": "1719977275000",
+    "is_edit_eligible": false,
+    "edits_remaining": "5"
+  },
+  "mediaDetails": [
+    {
+      "display_url": "pic.x.com/7dN5NiADsu",
+      "expanded_url": "https://x.com/dotey/status/1808326779083579400/photo/1",
+      "ext_media_availability": {
+        "status": "Available"
+      },
+      "indices": [
+        149,
+        172
+      ],
+      "media_url_https": "https://pbs.twimg.com/media/GRh2ws6XUAAn1oU.jpg",
+      "original_info": {
+        "height": 1068,
+        "width": 1484,
+        "focus_rects": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 1484,
+            "h": 831
+          },
+          {
+            "x": 96,
+            "y": 0,
+            "w": 1068,
+            "h": 1068
+          },
+          {
+            "x": 162,
+            "y": 0,
+            "w": 937,
+            "h": 1068
+          },
+          {
+            "x": 363,
+            "y": 0,
+            "w": 534,
+            "h": 1068
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 1484,
+            "h": 1068
+          }
+        ]
+      },
+      "sizes": {
+        "large": {
+          "h": 1068,
+          "resize": "fit",
+          "w": 1484
+        },
+        "medium": {
+          "h": 864,
+          "resize": "fit",
+          "w": 1200
+        },
+        "small": {
+          "h": 489,
+          "resize": "fit",
+          "w": 680
+        },
+        "thumb": {
+          "h": 150,
+          "resize": "crop",
+          "w": 150
+        }
+      },
+      "type": "photo",
+      "url": "https://t.co/7dN5NiADsu"
+    },
+    {
+      "display_url": "pic.x.com/7dN5NiADsu",
+      "expanded_url": "https://x.com/dotey/status/1808326779083579400/photo/1",
+      "ext_media_availability": {
+        "status": "Available"
+      },
+      "indices": [
+        149,
+        172
+      ],
+      "media_url_https": "https://pbs.twimg.com/media/GRh3TgTXwAAC9dL.jpg",
+      "original_info": {
+        "height": 1234,
+        "width": 890,
+        "focus_rects": [
+          {
+            "x": 0,
+            "y": 90,
+            "w": 890,
+            "h": 498
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 890,
+            "h": 890
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 890,
+            "h": 1015
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 617,
+            "h": 1234
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 890,
+            "h": 1234
+          }
+        ]
+      },
+      "sizes": {
+        "large": {
+          "h": 1234,
+          "resize": "fit",
+          "w": 890
+        },
+        "medium": {
+          "h": 1200,
+          "resize": "fit",
+          "w": 865
+        },
+        "small": {
+          "h": 680,
+          "resize": "fit",
+          "w": 490
+        },
+        "thumb": {
+          "h": 150,
+          "resize": "crop",
+          "w": 150
+        }
+      },
+      "type": "photo",
+      "url": "https://t.co/7dN5NiADsu"
+    }
+  ],
+  "photos": [
+    {
+      "backgroundColor": {
+        "red": 204,
+        "green": 214,
+        "blue": 221
+      },
+      "cropCandidates": [
+        {
+          "x": 0,
+          "y": 0,
+          "w": 1484,
+          "h": 831
+        },
+        {
+          "x": 96,
+          "y": 0,
+          "w": 1068,
+          "h": 1068
+        },
+        {
+          "x": 162,
+          "y": 0,
+          "w": 937,
+          "h": 1068
+        },
+        {
+          "x": 363,
+          "y": 0,
+          "w": 534,
+          "h": 1068
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "w": 1484,
+          "h": 1068
+        }
+      ],
+      "expandedUrl": "https://x.com/dotey/status/1808326779083579400/photo/1",
+      "url": "https://pbs.twimg.com/media/GRh2ws6XUAAn1oU.jpg",
+      "width": 1484,
+      "height": 1068
+    },
+    {
+      "backgroundColor": {
+        "red": 204,
+        "green": 214,
+        "blue": 221
+      },
+      "cropCandidates": [
+        {
+          "x": 0,
+          "y": 90,
+          "w": 890,
+          "h": 498
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "w": 890,
+          "h": 890
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "w": 890,
+          "h": 1015
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "w": 617,
+          "h": 1234
+        },
+        {
+          "x": 0,
+          "y": 0,
+          "w": 890,
+          "h": 1234
+        }
+      ],
+      "expandedUrl": "https://x.com/dotey/status/1808326779083579400/photo/1",
+      "url": "https://pbs.twimg.com/media/GRh3TgTXwAAC9dL.jpg",
+      "width": 890,
+      "height": 1234
+    }
+  ],
+  "conversation_count": 4,
+  "news_action_type": "conversation",
+  "quoted_tweet": {
+    "lang": "zh",
+    "reply_count": 5,
+    "retweet_count": 19,
+    "favorite_count": 91,
+    "possibly_sensitive": false,
+    "created_at": "2024-07-02T04:49:05.000Z",
+    "display_text_range": [
+      0,
+      174
+    ],
+    "entities": {
+      "hashtags": [],
+      "urls": [
+        {
+          "display_url": "youtu.be/HInd4QQrgKI?si…",
+          "expanded_url": "https://youtu.be/HInd4QQrgKI?si=vP2pf9IzwiWxjJyV",
+          "indices": [
+            149,
+            172
+          ],
+          "url": "https://t.co/XAQpDIRYkj"
+        }
+      ],
+      "user_mentions": [],
+      "symbols": []
+    },
+    "id_str": "1807999917040062970",
+    "text": "这个视频有点意思，听起来好像是这样子：Josh在做一个SaaS，应用会调用Twitter API来获取推文内容，然而这个API是收费的，而且极其昂贵，他付费了basic plan，结果每分钟只能调用一次！然后他又发现一个代码仓库，react-tweet，竟然可以免费实现这功能！哈哈，立省！😎😄\n\nhttps://t.co/XAQpDIRYkj",
+    "user": {
+      "id_str": "1724024070008938496",
+      "name": "Jasper 🍀 Build in Public",
+      "profile_image_url_https": "https://pbs.twimg.com/profile_images/1777870199515164672/47EBkHLm_normal.jpg",
+      "screen_name": "javayhuwx",
+      "verified": false,
+      "is_blue_verified": true,
+      "profile_image_shape": "Circle"
+    },
+    "edit_control": {
+      "edit_tweet_ids": [
+        "1807999917040062970"
+      ],
+      "editable_until_msecs": "1719899345000",
+      "is_edit_eligible": false,
+      "edits_remaining": "5"
+    },
+    "isEdited": false,
+    "isStaleEdit": false
+  },
+  "isEdited": false,
+  "isStaleEdit": false,
+  "note_tweet": {
+    "id": "Tm90ZVR3ZWV0UmVzdWx0czoxODA4MzI2Nzc4OTM2ODcyOTYy"
+  }
+}

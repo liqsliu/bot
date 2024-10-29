@@ -1,0 +1,384 @@
+{
+  "__typename": "Tweet",
+  "lang": "zh",
+  "favorite_count": 237,
+  "possibly_sensitive": false,
+  "created_at": "2024-06-14T14:05:54.000Z",
+  "display_text_range": [
+    0,
+    181
+  ],
+  "entities": {
+    "hashtags": [],
+    "urls": [
+      {
+        "display_url": "removerized.vercel.app",
+        "expanded_url": "https://removerized.vercel.app/",
+        "indices": [
+          19,
+          42
+        ],
+        "url": "https://t.co/m4Cv5qOzof"
+      },
+      {
+        "display_url": "github.com/yossTheDev/rem…",
+        "expanded_url": "https://github.com/yossTheDev/removerized",
+        "indices": [
+          119,
+          142
+        ],
+        "url": "https://t.co/e0tE5iJDnD"
+      },
+      {
+        "display_url": "github.com/imgly/backgrou…",
+        "expanded_url": "https://github.com/imgly/background-removal-js",
+        "indices": [
+          158,
+          181
+        ],
+        "url": "https://t.co/f0ezK2zfEa"
+      }
+    ],
+    "user_mentions": [],
+    "symbols": []
+  },
+  "id_str": "1801617061271245041",
+  "text": "搭建了一个基于 AI 的背景去除服务 https://t.co/m4Cv5qOzof ，去除操作在浏览器侧完成，初次使用会自动拉取下载模型。\n多数情况下，效果还是挺不错的，对于复杂场景图片，切割出来的人物可能会有虚边。\n\n- 代码来源于 https://t.co/e0tE5iJDnD\n- 服务中用到的核心代码库是 https://t.co/f0ezK2zfEa",
+  "user": {
+    "id_str": "1156212486963642368",
+    "name": "理想拖",
+    "profile_image_url_https": "https://pbs.twimg.com/profile_images/1612855572562575363/KNlAhJdn_normal.jpg",
+    "screen_name": "slippertopia",
+    "verified": false,
+    "is_blue_verified": false,
+    "profile_image_shape": "Circle"
+  },
+  "edit_control": {
+    "edit_tweet_ids": [
+      "1801617061271245041"
+    ],
+    "editable_until_msecs": "1718377554000",
+    "is_edit_eligible": false,
+    "edits_remaining": "5"
+  },
+  "conversation_count": 9,
+  "news_action_type": "conversation",
+  "card": {
+    "card_platform": {
+      "platform": {
+        "audience": {
+          "name": "production"
+        },
+        "device": {
+          "name": "iPhone",
+          "version": "13"
+        }
+      }
+    },
+    "name": "summary_large_image",
+    "url": "https://t.co/f0ezK2zfEa",
+    "binding_values": {
+      "photo_image_full_size_large": {
+        "image_value": {
+          "height": 419,
+          "width": 800,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=800x419"
+        },
+        "type": "IMAGE"
+      },
+      "thumbnail_image": {
+        "image_value": {
+          "height": 200,
+          "width": 400,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=400x400"
+        },
+        "type": "IMAGE"
+      },
+      "description": {
+        "string_value": "Remove backgrounds from images directly in the browser environment with ease and no additional costs or privacy concerns. Explore an interactive demo. - imgly/background-removal-js",
+        "type": "STRING"
+      },
+      "domain": {
+        "string_value": "github.com",
+        "type": "STRING"
+      },
+      "thumbnail_image_large": {
+        "image_value": {
+          "height": 300,
+          "width": 600,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=600x600"
+        },
+        "type": "IMAGE"
+      },
+      "summary_photo_image_small": {
+        "image_value": {
+          "height": 202,
+          "width": 386,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=386x202"
+        },
+        "type": "IMAGE"
+      },
+      "thumbnail_image_original": {
+        "image_value": {
+          "height": 640,
+          "width": 1280,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=orig"
+        },
+        "type": "IMAGE"
+      },
+      "site": {
+        "scribe_key": "publisher_id",
+        "type": "USER",
+        "user_value": {
+          "id_str": "13334762",
+          "path": []
+        }
+      },
+      "photo_image_full_size_small": {
+        "image_value": {
+          "height": 202,
+          "width": 386,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=386x202"
+        },
+        "type": "IMAGE"
+      },
+      "summary_photo_image_large": {
+        "image_value": {
+          "height": 419,
+          "width": 800,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=800x419"
+        },
+        "type": "IMAGE"
+      },
+      "thumbnail_image_small": {
+        "image_value": {
+          "height": 72,
+          "width": 144,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=144x144"
+        },
+        "type": "IMAGE"
+      },
+      "thumbnail_image_x_large": {
+        "image_value": {
+          "height": 640,
+          "width": 1280,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=png&name=2048x2048_2_exp"
+        },
+        "type": "IMAGE"
+      },
+      "photo_image_full_size_original": {
+        "image_value": {
+          "height": 640,
+          "width": 1280,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=orig"
+        },
+        "type": "IMAGE"
+      },
+      "photo_image_full_size_alt_text": {
+        "string_value": "Remove backgrounds from images directly in the browser environment with ease and no additional costs or privacy concerns. Explore an interactive demo. - imgly/background-removal-js",
+        "type": "STRING"
+      },
+      "vanity_url": {
+        "scribe_key": "vanity_url",
+        "string_value": "github.com",
+        "type": "STRING"
+      },
+      "photo_image_full_size": {
+        "image_value": {
+          "height": 314,
+          "width": 600,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=600x314"
+        },
+        "type": "IMAGE"
+      },
+      "summary_photo_image_alt_text": {
+        "string_value": "Remove backgrounds from images directly in the browser environment with ease and no additional costs or privacy concerns. Explore an interactive demo. - imgly/background-removal-js",
+        "type": "STRING"
+      },
+      "thumbnail_image_color": {
+        "image_color_value": {
+          "palette": [
+            {
+              "rgb": {
+                "blue": 195,
+                "green": 222,
+                "red": 166
+              },
+              "percentage": 37.7
+            },
+            {
+              "rgb": {
+                "blue": 240,
+                "green": 240,
+                "red": 240
+              },
+              "percentage": 26.81
+            },
+            {
+              "rgb": {
+                "blue": 32,
+                "green": 34,
+                "red": 26
+              },
+              "percentage": 24.74
+            },
+            {
+              "rgb": {
+                "blue": 255,
+                "green": 51,
+                "red": 91
+              },
+              "percentage": 2.83
+            },
+            {
+              "rgb": {
+                "blue": 254,
+                "green": 98,
+                "red": 130
+              },
+              "percentage": 1.22
+            }
+          ]
+        },
+        "type": "IMAGE_COLOR"
+      },
+      "title": {
+        "string_value": "GitHub - imgly/background-removal-js: Remove backgrounds from images directly in the browser...",
+        "type": "STRING"
+      },
+      "summary_photo_image_color": {
+        "image_color_value": {
+          "palette": [
+            {
+              "rgb": {
+                "blue": 195,
+                "green": 222,
+                "red": 166
+              },
+              "percentage": 37.7
+            },
+            {
+              "rgb": {
+                "blue": 240,
+                "green": 240,
+                "red": 240
+              },
+              "percentage": 26.81
+            },
+            {
+              "rgb": {
+                "blue": 32,
+                "green": 34,
+                "red": 26
+              },
+              "percentage": 24.74
+            },
+            {
+              "rgb": {
+                "blue": 255,
+                "green": 51,
+                "red": 91
+              },
+              "percentage": 2.83
+            },
+            {
+              "rgb": {
+                "blue": 254,
+                "green": 98,
+                "red": 130
+              },
+              "percentage": 1.22
+            }
+          ]
+        },
+        "type": "IMAGE_COLOR"
+      },
+      "summary_photo_image_x_large": {
+        "image_value": {
+          "height": 640,
+          "width": 1280,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=png&name=2048x2048_2_exp"
+        },
+        "type": "IMAGE"
+      },
+      "summary_photo_image": {
+        "image_value": {
+          "height": 314,
+          "width": 600,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=600x314"
+        },
+        "type": "IMAGE"
+      },
+      "photo_image_full_size_color": {
+        "image_color_value": {
+          "palette": [
+            {
+              "rgb": {
+                "blue": 195,
+                "green": 222,
+                "red": 166
+              },
+              "percentage": 37.7
+            },
+            {
+              "rgb": {
+                "blue": 240,
+                "green": 240,
+                "red": 240
+              },
+              "percentage": 26.81
+            },
+            {
+              "rgb": {
+                "blue": 32,
+                "green": 34,
+                "red": 26
+              },
+              "percentage": 24.74
+            },
+            {
+              "rgb": {
+                "blue": 255,
+                "green": 51,
+                "red": 91
+              },
+              "percentage": 2.83
+            },
+            {
+              "rgb": {
+                "blue": 254,
+                "green": 98,
+                "red": 130
+              },
+              "percentage": 1.22
+            }
+          ]
+        },
+        "type": "IMAGE_COLOR"
+      },
+      "photo_image_full_size_x_large": {
+        "image_value": {
+          "height": 640,
+          "width": 1280,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=png&name=2048x2048_2_exp"
+        },
+        "type": "IMAGE"
+      },
+      "card_url": {
+        "scribe_key": "card_url",
+        "string_value": "https://t.co/f0ezK2zfEa",
+        "type": "STRING"
+      },
+      "summary_photo_image_original": {
+        "image_value": {
+          "height": 640,
+          "width": 1280,
+          "url": "https://pbs.twimg.com/card_img/1850100506464817152/FHUufQWV?format=jpg&name=orig"
+        },
+        "type": "IMAGE"
+      }
+    }
+  },
+  "isEdited": false,
+  "isStaleEdit": false
+}

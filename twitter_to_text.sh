@@ -32,7 +32,97 @@ get_tw_name(){
 
 }
 
+myjq(){
+  local tmp=$(cat | jq -r ".$1")
+  if [[ "$tmp" != "null" ]]; then
+    echo "$tmp"
+  fi
+}
+
+get_tw_text(){
+  local tw_res=$1
+  local name=$(echo "$tw_res" | jq -r ".user.name")
+  local name_id=$(echo "$tw_res" | jq -r ".user.screen_name")
+  local text=$(echo "$tw_res" | jq -r ".text")
+
+
+  # echo "$name@$name_id: $text"
+  # echo entities
+  local entities_num=$(echo "$tw_res" | jq -r ".entities.urls|length")
+  # local res=''
+  for((i=0; i<$entities_num ; i++ )); do
+    local url1=$(echo "$tw_res" | jq -r ".entities.urls[$i].url")
+    local url2=$(echo "$tw_res" | jq -r ".entities.urls[$i].expanded_url")
+#     if [[ -z "$res" ]]; then
+#       echo
+#       res='urls:'
+#     fi
+#     res+="
+# - $url1 $url2"
+    text=$( echo "$text" | sed "s|$url1| $url2 |" )
+  done
+  # echo "$res"
+  echo "$name@$name_id: $text"
+
+  local media_num=$(echo "$tw_res" | jq -r ".mediaDetails|length")
+  local res=''
+  for((i=0; i<$media_num ; i++ )); do
+    if [[ -z "$res" ]]; then
+      echo
+      res='meidia:'
+    fi
+    res+="
+- $(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https")"
+  done
+  echo "$res"
+
+
+  # echo card
+  local card=$(echo "$tw_res" | jq -r ".card")
+  if [[ "$card" != "null" ]]; then
+    echo
+    # echo card: $(echo "$tw_res" | jq -r ".card.url")
+    echo -n "card: "
+    echo "$card" | myjq binding_values.title.string_value
+    echo "$card" | myjq url
+    echo "$card" | myjq binding_values.description.string_value
+  fi
+}
+
+get_tw_url(){
+  local tw_res=$1
+  local name_id=$(echo "$tw_res" | jq -r ".user.screen_name")
+  local id_str=$(echo "$tw_res" | jq -r ".id_str")
+  echo "https://x.com/$name_id/status/$id_str"
+}
+
+
 get_tw(){
+  local id=$1
+  # https://x.com/slippertopia/status/1850867135897280708
+  # https://cdn.syndication.twimg.com/tweet-result?id=1808326779083579400&token=123
+  local tw_res=$(curl -s --request GET "https://cdn.syndication.twimg.com/tweet-result?id=$id&token=thx" )
+  # [[ "$2" == "debug" ]] && local tw_res=$(cat twitter3.json)
+  # [[ "$2" == "debug" ]] && echo "tw_res: $tw_res"
+  # name=$(echo "$tw_res" | jq -r ".user.name")
+  # name_id=$(echo "$tw_res" | jq -r ".user.screen_name")
+  # text=$(echo "$tw_res" | jq -r ".text")
+  # local res=$(get_tw_text "$tw_res")
+  get_tw_text "$tw_res"
+
+  local tw_res_q=$(echo "$tw_res" | jq -r ".quoted_tweet")
+  if [[ "$tw_res_q" != "null" ]]; then
+    echo
+    echo "---"
+    echo "引用推文: $(get_tw_url "$tw_res_q")"
+    get_tw_text "$tw_res_q"
+  fi
+
+
+}
+
+
+get_tw_____(){
   local id=$1
   id=${id%%\"}
   id=${id##\"}
@@ -141,20 +231,27 @@ $type: $url"
 
 #twitter link to text
 twitter_to_text(){
-local URL="$1"
-if [[ "$URL" == "" ]]; then
-  return 1
-fi
-  URL=$( echo "$URL" | grep -v -P "^>( >)* ?" | grep -o -P "^https://(mobile\.)?twitter\.com/[a-zA-Z0-9_./=&%-]+" )
+  local URL="$1"
+  shift
+  if [[ "$URL" == "" ]]; then
+    return 1
+  fi
+  # URL=$( echo "$URL" | grep -v -P "^>( >)* ?" | grep -o -P "^https://(mobile\.)?twitter\.com/[a-zA-Z0-9_./=&%-]+" )
 
-if [[ $(echo "$URL" | grep -v -P "^>( >)* ?" | grep -c -P "^https://(mobile\.)?twitter\.com/[a-zA-Z0-9_./?=&%-]+$") -eq 1 ]]; then
-  local id=$( echo "$URL" | grep -v -P "^>( >)* ?" | grep -o -P "^https://(mobile\.)?twitter\.com/[a-zA-Z0-9_./?=&%-]+$" | grep -i -o -E "/status/[0-9]{5,}" | grep -i -o -E "[0-9]{5,}" )
+# if [[ $(echo "$URL" | grep -v -P "^>( >)* ?" | grep -c -P "^https://(mobile\.)?twitter\.com/[a-zA-Z0-9_./?=&%-]+$") -eq 1 ]]; then
+  if echo "$URL" | grep -q -P "^https://(mobile\.)?(twitter|x)\.com/[a-zA-Z0-9_./?=&%-]+$"; then
+    local id=$( echo "$URL" | grep -v -P "^>( >)* ?" | grep -o -P "^https://(mobile\.)?(twitter|x)\.com/[a-zA-Z0-9_./?=&%-]+$" | grep -i -o -E "/status/[0-9]{5,}" | grep -i -o -E "[0-9]{5,}" )
 
-  [[ -n "$id" ]] && get_tw $id $2
-else
-  echo "E: error twitter url"
-  return 2
-fi
+    if [[ -n "$id" ]]; then
+      echo $URL
+      get_tw $id "$@"
+    else
+      echo "E: error twitter id"
+    fi
+  else
+    echo "E: error twitter url"
+    return 2
+  fi
 
 }
 
