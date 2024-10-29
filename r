@@ -9,10 +9,9 @@ sleep 8
 cd ~/bot
 while true
 do
-vgp
-r=0
-tgp && bash init.sh && python3 -m tggpt && {
-  echo ok
+vgp && tgp && bash init.sh || break
+python3 -m tggpt && {
+  echo 'ok. stop ...'
   break
 } || r=$?
 echo "res: $r"
