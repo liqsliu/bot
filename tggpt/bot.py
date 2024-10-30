@@ -2723,9 +2723,9 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     if not t1.done():
       t1.cancel()
       #  return
-    #  if src:
-    #    if not t.done():
-    #      t.cancel()
+    if src:
+      if not t.done():
+        t.cancel()
 
   if path:
     #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
