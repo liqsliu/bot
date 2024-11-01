@@ -14,9 +14,11 @@ MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-15000000}
 #BEARER_TOKEN="$(cat ~/keys | grep BEARER_TOKEN | cut -d' ' -f 2)"
 # BEARER_TOKEN="$(cat "$SH_PATH//keys" | grep BEARER_TOKEN | cut -d' ' -f 2)"
 
-PRIVATE_KEYS_PATH="${HOME}/.ssh/private_keys.txt"
-BEARER_TOKEN=$(grep BEARER_TOKEN "$PRIVATE_KEYS_PATH")
-BEARER_TOKEN=${BEARER_TOKEN#* }
+# PRIVATE_KEYS_PATH="${HOME}/vps/private_keys.txt"
+# BEARER_TOKEN=$(grep BEARER_TOKEN "$PRIVATE_KEYS_PATH")
+# BEARER_TOKEN=${BEARER_TOKEN#* }
+
+set_my_value BEARER_TOKEN
 
 
 
