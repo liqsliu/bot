@@ -5658,7 +5658,11 @@ def on_muc_role_request(form, submission_future):
   print(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
   print(form)
   print(submission_future)
+
   #  await send(f"发言申请: {form}")
+  if submission_future.done():
+    send_log(f"skip: 发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
+    return
   send_log(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
   #默认拒绝
   form.request_allow=False
