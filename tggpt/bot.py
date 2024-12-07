@@ -5654,10 +5654,14 @@ async def _bypass(msg):
 
 
 def on_muc_role_request(form, submission_future):
+  print(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
   print(form)
   print(submission_future)
   #  await send(f"发言申请: {form}")
-  send_log(f"发言申请: {form}")
+  send_log(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
+  #默认拒绝
+  form.request_allow=False
+  submission_future.set_result(form)
 
 
 #  test_group = 'ipfs@salas.suchat.org'
