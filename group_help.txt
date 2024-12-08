@@ -24,10 +24,10 @@ C bot自动回复或推送的新闻
 ...
 
 群组管理:
-xmpp: liqsliu@(suchat.org yax.im jabber.fr jabb3r.org...)
-matrix: @liqsliu:matrix.org @liqsliu:mozilla.org
-discord: liqsliu
+xmpp: liqsliu@conversations.im
 telegram: @liqsliu
+matrix: @liqsliu:matrix.org
+discord: liqsliu
 
 查看群规: .help rule
 本群和ipfs官方没关系。
