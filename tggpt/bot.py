@@ -1458,7 +1458,7 @@ async def load_config():
       data = await read_file(DATA_PATH, "rb")
       if data:
         gd = pickle.loads(data)
-        logger.info(f"loaded gd: {gd}")
+        #  logger.info(f"loaded gd: {gd}")
       else:
         gd = {}
     except Exception as e:
@@ -3326,7 +3326,6 @@ async def regisger_handler(client):
       None,
       None,
       xmpp_msgp_in,
-      res = rc.approve(msg.from_)
   )
 
 #  client.stream.register_iq_request_handler(
