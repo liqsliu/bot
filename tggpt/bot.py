@@ -2836,7 +2836,7 @@ async def print_tg_msg(event, to_xmpp=False):
     res = msg.text
   else:
     res = None
-  if msg.file:
+  if False and msg.file:
     path = await download_media(msg)
     if path is not None:
       if res:
@@ -3743,15 +3743,15 @@ async def xmpp_msgp(msg):
       #  pprint(rc)
       res = rc.approve(msg.from_)
       #  print(f"结果：{res}")
-      res = rc.subscribe(msg.from_)
       #  print(f"结果：{res}")
       await send("ok", msg.from_)
-      log(f"已同意状态订阅请求：{msg.from_}")
+      log(f"已同意状态订阅请求：{msg.from_} {res}")
+      res = rc.subscribe(msg.from_)
     else:
       # https://docs.zombofant.net/aioxmpp/devel/api/public/roster.html#aioxmpp.RosterClient.remove_entry
       res = await rc.remove_entry(msg.from_, timeout=5)
       await send("非管理禁止订阅", msg.from_)
-      log(f"已拒绝状态订阅请求：{msg.from_}")
+      log(f"已拒绝状态订阅请求：{msg.from_} {res}")
   elif msg.type_ == PresenceType.UNAVAILABLE:
     print(f"离线: {msg.from_} {msg.status}")
     #  if muc in my_groups:
