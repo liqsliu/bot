@@ -3326,6 +3326,7 @@ async def regisger_handler(client):
       None,
       None,
       xmpp_msgp_in,
+      res = rc.approve(msg.from_)
   )
 
 #  client.stream.register_iq_request_handler(
@@ -3735,18 +3736,22 @@ async def xmpp_msgp(msg):
     #    pprint(i)
   elif msg.type_ == PresenceType.SUBSCRIBE:
     #  pprint(msg)
-    log(f"状态订阅请求：{msg.from_}")
+    # https://docs.zombofant.net/aioxmpp/devel/api/public/roster.html#aioxmpp.RosterClient.approve
+    rc = XB.summon(aioxmpp.RosterClient)
     #  if get_jid(msg.from_) in me:
     if muc in me:
-      rc = XB.summon(aioxmpp.RosterClient)
       #  pprint(rc)
       res = rc.approve(msg.from_)
       #  print(f"结果：{res}")
       res = rc.subscribe(msg.from_)
       #  print(f"结果：{res}")
       await send("ok", msg.from_)
+      log(f"已同意状态订阅请求：{msg.from_}")
     else:
-      await send("不可以", msg.from_)
+      # https://docs.zombofant.net/aioxmpp/devel/api/public/roster.html#aioxmpp.RosterClient.remove_entry
+      res = await rc.remove_entry(msg.from_, timeout=5)
+      await send("非管理禁止订阅", msg.from_)
+      log(f"已拒绝状态订阅请求：{msg.from_}")
   elif msg.type_ == PresenceType.UNAVAILABLE:
     print(f"离线: {msg.from_} {msg.status}")
     #  if muc in my_groups:
@@ -3754,7 +3759,7 @@ async def xmpp_msgp(msg):
     #  else:
     #    await sendg(f"离线: {msg.from_} {msg.status}")
     #  if hasattr(msg, "xep0045_muc_user"):
-    #    print(f"离线: {msg.from_} {msg.status} {msg.xep0045_muc_user}")
+    #    print(f"离线: {msg.from_} {msg.status} {msg.xep0046_muc_user}")
     #    if msg.xep0045_muc_user is None:
     #      #  if msg.xep0045_muc_user:
     #      #  pprint(msg.xep0045_muc_user)
