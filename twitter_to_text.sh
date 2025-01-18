@@ -71,7 +71,7 @@ get_tw_text(){
   for((i=0; i<$media_num ; i++ )); do
     if [[ -z "$res" ]]; then
       echo
-      res='meidia:'
+      res='media:'
     fi
     res+="
 - $(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https")"
