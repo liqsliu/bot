@@ -815,9 +815,11 @@ $TEXT"
       # NAME=$(echo "$NAME" | tail -n1)
     # NAME="${NAME:0:-2}"
     elif echo "$TEXT" | grep -q -P '[^\s]+'; then
+      # 消息非空
       :
     else
-      blockthismessage
+      # blockthismessage
+      block_msg
     fi
     if [[ -z "$NAME" ]] || [[ "$NAME" == " " ]]; then
       NAME="error"
