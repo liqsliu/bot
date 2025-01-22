@@ -506,8 +506,8 @@ fi
 echo "b0 :|$text|" >> $LOG_FILE
 # if [[ "${text:0:6}" == ".note " ]]; then
 #text=$(cmds $text 2>&1)
-echo "$text" >> $LOG
-echo "---" >> $LOG
+echo "$text" >> $LOG_FILE
+echo "---" >> $LOG_FILE
 
 # if [[ $(echo "$text" | wc -l) -gt 1 ]]; then
 H=$(echo "$text"| sed -n 1p)
@@ -523,10 +523,10 @@ fi
 
 e=0
 if [[ -z "$ex" ]]; then
-  echo $H >> $LOG
+  echo $H >> $LOG_FILE
   text=$(cmds $H) || e=$?
 else
-  echo $H "$ex" >> $LOG
+  echo $H "$ex" >> $LOG_FILE
   text=$(cmds $H "$ex") || e=$?
 fi
 
