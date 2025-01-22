@@ -2251,17 +2251,19 @@ async def mt2tg(msg):
   #    return
 
   if msgd["Extra"]:
-      # file
-      #,"id":"","Extra":{"file":[{"Name":"proxy-image.jpg","Data":"/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAA ... 6P9ZgOT6tI33Ff5p/MAOfNnzPzQAN4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAGQAAYAkAAGTGAAAAAAAAwsAAHLAAAK//9k=","Comment":"","URL":"https://liuu.tk/ddb833ad/proxy_image.jpg","Size":0,"Avatar":false,"SHA":"ddb833ad"}]}}\n\r\n'
-      for file in msgd["Extra"]["file"]:
-          if text:
-              if text == file["Name"]:
-                  text = ""
-              else:
-                  text += "\n\n"
-          text += "[{}]({})".format(file["Name"], file["URL"])
-      msgd.pop("Extra")
-      logger.warning("removed file info from mt api(saved)")
+    logger.info("original msg of mt_read: %s" % msgd)
+    # file
+    #,"id":"","Extra":{"file":[{"Name":"proxy-image.jpg","Data":"/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAA ... 6P9ZgOT6tI33Ff5p/MAOfNnzPzQAN4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAGQAAYAkAAGTGAAAAAAAAwsAAHLAAAK//9k=","Comment":"","URL":"https://liuu.tk/ddb833ad/proxy_image.jpg","Size":0,"Avatar":false,"SHA":"ddb833ad"}]}}\n\r\n'
+    for file in msgd["Extra"]["file"]:
+      if text:
+        if text == file["Name"]:
+          text = ""
+        else:
+          text += "\n\n"
+      text += "[{}]({})".format(file["Name"], file["URL"])
+    msgd.pop("Extra")
+    logger.warning("removed file info from mt api(saved)")
+    msgd['text'] = text
   else:
       msgd.pop("Extra")
       logger.warning("removed file info from mt api")
