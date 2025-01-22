@@ -77,7 +77,7 @@ log_msg(){
   echo
   echo "##"
 }
-log_msg "$@" >> ~/mt.log
+# log_msg "$@" >> ~/mt.log
 
 # alias log_msg='_log_msg "$@" >> ~/mt.log'
   # log_msg
@@ -825,8 +825,7 @@ $TEXT"
       :
     else
       # blockthismessage
-      # block_msg
-      :
+      block_msg
     fi
     if [[ -z "$NAME" ]] || [[ "$NAME" == " " ]]; then
       NAME="error"
