@@ -626,7 +626,7 @@ if [[ -n "$4" ]] ; then
   case $8 in
   # xmpp)
   xmpp.*)
-    echo "#msg>xmpp"
+    echo "#msg>xmpp" >> ~/mt.log
     log_msg "$@" >> ~/mt.log
   # if [[ "$9" == "xmpp" ]] ; then
     # if [[ "$NAME" == "C twitter: " ]]; then
@@ -807,7 +807,7 @@ ${NAME}"
 #     fi
 #     ;;
   discord.*)
-    echo "#msg>discord"
+    echo "#msg>dc" >> ~/mt.log
     log_msg "$@" >> ~/mt.log
     if [[ -n "$QT" ]]; then
       # TEXT="$(echo "$NAME" | sed '$d')
