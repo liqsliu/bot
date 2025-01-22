@@ -626,6 +626,8 @@ if [[ -n "$4" ]] ; then
   case $8 in
   # xmpp)
   xmpp.*)
+    echo "#msg>xmpp"
+    log_msg
   # if [[ "$9" == "xmpp" ]] ; then
     # if [[ "$NAME" == "C twitter: " ]]; then
     #   TEXT=$(echo "$TEXT" | sed '2,$s/^/> /' )
@@ -805,6 +807,8 @@ ${NAME}"
 #     fi
 #     ;;
   discord.*)
+    echo "#msg>discord"
+    log_msg
     if [[ -n "$QT" ]]; then
       # TEXT="$(echo "$NAME" | sed '$d')
       TEXT="$QT
@@ -819,7 +823,8 @@ $TEXT"
       :
     else
       # blockthismessage
-      block_msg
+      # block_msg
+      :
     fi
     if [[ -z "$NAME" ]] || [[ "$NAME" == " " ]]; then
       NAME="error"
