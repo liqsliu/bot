@@ -2260,6 +2260,9 @@ async def mt2tg(msg):
           text = ""
         else:
           text += "\n\n"
+      if file["Comment"]:
+        text += file["Comment"]
+        text += " "
       text += "[{}]({})".format(file["Name"], file["URL"])
     msgd.pop("Extra")
     logger.warning("removed file info from mt api(saved)")
