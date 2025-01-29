@@ -98,7 +98,7 @@ get_tw_text(){
           res+=" /"
         else
           if [[ -n "$m3u8" ]]; then
-            res+="$m3u8 /"
+            res+=" / $m3u8"
           fi
         fi
         res+=" "
