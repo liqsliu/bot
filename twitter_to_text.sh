@@ -90,19 +90,18 @@ get_tw_text(){
           res+=" "
           res+=$(echo "$videos" | jq -r ".[$j].bitrate")
         else
-          m3u8="[$type_v]($url_v)"
+          m3u8+="[$type_v]($url_v) "
           continue
         fi
         res+="]($url_v)"
         if [[ $j -ne $[length_v-1] ]]; then
           res+=" /"
-        else
-          if [[ -n "$m3u8" ]]; then
-            res+=" / $m3u8"
-          fi
         fi
         res+=" "
       done
+      if [[ -n "$m3u8" ]]; then
+        res+="/ $m3u8"
+      fi
       res+="[photo]($(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https"))"
     else
       res+=$(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https")
