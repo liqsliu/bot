@@ -81,17 +81,25 @@ get_tw_text(){
       res+="$media_type: "
       local videos=$(echo "$tw_res" | jq -r ".mediaDetails[$i].video_info.variants")
       local length_v=$(echo "$videos" | jq -r ".|length")
+      local m3u8
       for((j=0; j<$length_v; j++ )); do
         local url_v=$(echo "$videos" | jq -r ".[$j].url")
         local type_v=$(echo "$videos" | jq -r ".[$j].content_type")
-          res+="[$type_v"
         if [[ "$type_v" == "video/mp4" ]]; then
+          res+="[$type_v"
           res+=" "
           res+=$(echo "$videos" | jq -r ".[$j].bitrate")
+        else
+          m3u8="[$type_v]($url_v)"
+          continue
         fi
         res+="]($url_v)"
         if [[ $j -ne $[length_v-1] ]]; then
           res+=" /"
+        else
+          if [[ -n "$m3u8" ]]; then
+            res+="$m3u8 /"
+          fi
         fi
         res+=" "
       done
