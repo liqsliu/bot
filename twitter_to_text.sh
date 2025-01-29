@@ -74,7 +74,30 @@ get_tw_text(){
       res='media:'
     fi
     res+="
-- $(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https")"
+- "
+
+    local media_type=$(echo "$tw_res" | jq -r ".mediaDetails[$i].type")
+    if [[ "$media_type" == video ]]; then
+      local videos=$(echo "$tw_res" | jq -r ".mediaDetails[$i].video_info.variants")
+      local length_v=$(echo "$videos" | jq -r ".|length")
+      for((j=0; j<$length_v; j++ )); do
+        local url_v=$(echo "$videos" | jq -r ".[$j].url")
+        local type_v=$(echo "$videos" | jq -r ".[$j].content_type")
+          res+="[$type_v"
+        if [[ "$type_v" == "video/mp4" ]]; then
+          res+=$(echo "$videos" | jq -r ".[$j].bitrate")
+        fi
+        res+="]($url_v)"
+        if [[ $j -lt $length_v ]]; then
+          res+=" /"
+        fi
+        res+=" "
+      done
+      res+="[photo]($(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https"))"
+    else
+      res+=$(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https")
+    fi
+
   done
   echo "$res"
 
@@ -103,6 +126,7 @@ get_tw(){
   local id=$1
   # https://x.com/slippertopia/status/1850867135897280708
   # https://cdn.syndication.twimg.com/tweet-result?id=1808326779083579400&token=123
+  # https://cdn.syndication.twimg.com/tweet-result?id=1884149421535002849&token=thx
   local tw_res=$(curl -s --request GET "https://cdn.syndication.twimg.com/tweet-result?id=$id&token=thx" )
   # [[ "$2" == "debug" ]] && local tw_res=$(cat twitter3.json)
   # [[ "$2" == "debug" ]] && echo "tw_res: $tw_res"
