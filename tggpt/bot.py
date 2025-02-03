@@ -22,7 +22,7 @@ import aiofiles, aioxmpp, aiohttp
 
 import zstandard
 
-from  urltitle.urltitle import URLTitleError
+#  from  urltitle.urltitle import URLTitleError
 from urltitle import URLTitleReader
 from urltitle import config as urltitle_config
 
@@ -1554,13 +1554,14 @@ urltitle_config.REQUEST_TIMEOUT = 8
 urltitle_config.MAX_REQUEST_ATTEMPTS = 2
 
 
-urltitle_config.DEFAULT_REQUEST_SIZE = 1024 ** 2
+#  urltitle_config.DEFAULT_REQUEST_SIZE = 1024 ** 2
+urltitle_config.DEFAULT_REQUEST_SIZE = 1024 ** 2 * 8
 
 #  MiB = 1024 ** 2
 #  urltitle_config.MAX_REQUEST_SIZES = {"html": MiB, "ipynb": 8 * MiB, "pdf": 8 * MiB}  # Title observed toward the bottom.
 #  #  print(urltitle_config)
 #  #  print(urltitle_config.MAX_REQUEST_SIZES)
-urltitle_config.MAX_REQUEST_SIZES.update({ 'html': 1024 ** 2 * 5 })
+urltitle_config.MAX_REQUEST_SIZES.update({ 'html': 1024 ** 2 * 16 })
 
 # Titles for HTML content
 reader = URLTitleReader(verify_ssl=True)
