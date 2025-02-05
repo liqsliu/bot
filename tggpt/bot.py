@@ -1555,7 +1555,7 @@ urltitle_config.MAX_REQUEST_ATTEMPTS = 2
 
 
 #  urltitle_config.DEFAULT_REQUEST_SIZE = 1024 ** 2
-urltitle_config.DEFAULT_REQUEST_SIZE = 1024 ** 2 * 8
+urltitle_config.DEFAULT_REQUEST_SIZE = 1024 ** 2 * 16
 
 #  MiB = 1024 ** 2
 #  urltitle_config.MAX_REQUEST_SIZES = {"html": MiB, "ipynb": 8 * MiB, "pdf": 8 * MiB}  # Title observed toward the bottom.
