@@ -1078,7 +1078,7 @@ async def update_stderr(data):
 
 async def my_popen(cmd,
            shell=True,
-           max_time=64,
+           max_time=180,
            client=None,
            src=None,
            combine=True,
