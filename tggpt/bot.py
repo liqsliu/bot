@@ -1573,6 +1573,10 @@ EXTRA_HEADERS = {
 }
 
 async def get_title(url):
+  shell_cmd = ["bash", SH_PATH + "/title.sh"]
+  shell_cmd.append(url)
+  res = await my_popen(shell_cmd, shell=False, src=src)
+  return res
   try:
     #  res = reader.title(url)
     netloc = reader.netloc(url)
@@ -1599,6 +1603,7 @@ async def get_title(url):
     #  prof.cons_show(res)
     warn(res)
   return res
+
 
 
 
