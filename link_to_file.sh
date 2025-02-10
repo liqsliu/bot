@@ -132,7 +132,9 @@ curl_exit: $error: $curl_res"
       if [[ -e "$fn" ]]; then
         :
       else
-        error_info=$( wget -T 60 -q "$URL" -O "$fn" 2>&1 ) && my_url="https://$DOMAIN/${sub_dir_en}$fn_en" || { error=$?; flag=64; }
+        export http_proxy="http://127.0.0.1:6080"
+        export https_proxy="http://127.0.0.1:6080"
+        error_info=$( wget -T $MAX_TIMEOUT -q "$URL" -O "$fn" 2>&1 ) && my_url="https://$DOMAIN/${sub_dir_en}$fn_en" || { error=$?; flag=64; }
         if [[ "$(du -b -- "$fn" | cut -f1)" == "0" ]]; then
           echo "wget download error, empty file"
           [[ "$flag" -eq 0 ]] && flag=5

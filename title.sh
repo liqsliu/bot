@@ -1,12 +1,17 @@
 #!/bin/bash
+MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-64000000}
+# https://stackoverflow.com/questions/20317945/limit-size-wget-can-download/20318140#20318140
+ulimit -f 204800
+
+MAX_TIMEOUT=16
 export http_proxy="http://127.0.0.1:6080"
 export https_proxy="http://127.0.0.1:6080"
 # https://stackoverflow.com/questions/55842311/get-page-titles-from-a-list-of-urls
 while read -r URL; do
-    echo -n "$URL --> "
-    wget -q -O - "$URL" | \
+    # echo -n "$URL --> "
+    wget -T $MAX_TIMEOUT -q -O - "$URL" | \
        tr "\n" " " | \
-       sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||'
+       sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || echo $?
     echo
 done
 
