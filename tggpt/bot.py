@@ -5392,9 +5392,9 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
 
     if res:
       res = f"{name}{res}"
-      res2 = await send_cmd_to_bash(src, "", text)
-      if res2:
-        res += f"\n{res2}"
+      #  res2 = await send_cmd_to_bash(src, "", text)
+      #  if res2:
+      #    res += f"\n{res2}"
       return res
     else:
       res = await send_cmd_to_bash(src, name, text)
