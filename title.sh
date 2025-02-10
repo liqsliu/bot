@@ -7,13 +7,14 @@ MAX_TIMEOUT=16
 export http_proxy="http://127.0.0.1:6080"
 export https_proxy="http://127.0.0.1:6080"
 # https://stackoverflow.com/questions/55842311/get-page-titles-from-a-list-of-urls
-while read -r URL; do
+# while read -r URL; do
     # echo -n "$URL --> "
+    URL=$1
     wget -T $MAX_TIMEOUT -q -O - "$URL" | \
        tr "\n" " " | \
        sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || echo $?
     echo
-done
+# done
 
 
        # sed 's|.*<title[^>]*>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||'

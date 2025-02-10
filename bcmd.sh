@@ -361,7 +361,7 @@ cmds() {
       echo ".tl \$URL"
     else
       shift
-      bash "$SH_PATH/title.sh" <<< "$*" || echo "E: $?"
+      bash "$SH_PATH/title.sh" "$*" || echo "E: $?"
     fi
     ;;
   note)
