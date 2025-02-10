@@ -356,6 +356,13 @@ cmds() {
       bash "$SH_PATH/link_to_file.sh" "$2" type "$3" || echo "E: $?"
     fi
     ;;
+  tl)
+    if [[ -z "$2" ]]; then
+      echo ".tl \$URL"
+    else
+      bash "$SH_PATH/title.sh" <<< "$*" || echo "E: $?"
+    fi
+    ;;
   note)
     # shift
     # bash "$SH_PATH/note.sh" "$username" "$@" || echo "E: $?"

@@ -16,6 +16,8 @@ LP=${LP:-$HOME/tera/tmp}
 export DOMAIN=${DOMAIN:-$(cat "$SH_PATH/DOMAIN")}
 MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-64000000}
 
+MAX_TIMEOUT=16
+
 
 
 # $2 type
@@ -56,12 +58,12 @@ link_to_file() {
   cd $LP
 
   # local curl_res=$(curl -L -m 8 --max-filesize $MAX_SHARE_FILE_SIZE -s -o "$fn" -w '%{http_code}'  "$URL") || error=$?
-    local curl_res=$(curl -L -m 15 --max-filesize $MAX_SHARE_FILE_SIZE -s -o "$fn" -w '%{http_code}' -H "Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6" "$URL" -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' ) || error=$?
+    local curl_res=$(curl -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -s -o "$fn" -w '%{http_code}' -H "Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6" "$URL" -A 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36' ) || error=$?
     # [[ "$curl_res" != "200" ]] && curl_res=$(curl -L -m 8 --max-filesize $MAX_SHARE_FILE_SIZE -s -o "$fn" -w '%{http_code}'  "$URL" -A 'Mozilla/5.0 (Linux; Android 11; KB2000) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.56 Mobile Safari/537.36' )
     [[ "$curl_res" != "200" ]] && {
       unset http_proxy
       unset https_proxy
-      local curl_res=$(curl -L -m 8 --max-filesize $MAX_SHARE_FILE_SIZE -s -o "$fn" -w '%{http_code}' -H "Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6" "$URL") || error=$?
+      local curl_res=$(curl -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -s -o "$fn" -w '%{http_code}' -H "Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6" "$URL") || error=$?
     }
 
   if [[ "$curl_res" == "200" ]]; then
@@ -77,9 +79,11 @@ curl_exit: $error: $curl_res"
 
   # if [[ "$flag" -eq 512  ]]; then
   if [[ "$flag" -ne 0  ]]; then
+    export http_proxy="http://127.0.0.1:6080"
+    export https_proxy="http://127.0.0.1:6080"
   #  spider_res=$(wget -T 8 --spider "$URL" 2>&1 | grep Length) || ( error=$?; flag=512 )
     # spider_res=$(wget -T 8 --spider "$URL" 2>&1) || { error=$?; flag=512; } || local spider_res="$?: $spider_res"
-    spider_res=$(wget -T 8 --spider "$URL" 2>&1) || { error=$?; flag=512; }
+    spider_res=$(wget -T $MAX_TIMEOUT --spider "$URL" 2>&1) || { error=$?; flag=512; }
 
 
   fi
