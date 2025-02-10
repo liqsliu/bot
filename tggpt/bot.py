@@ -1572,38 +1572,39 @@ EXTRA_HEADERS = {
     "Accept-Language": "zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6",
 }
 
-async def get_title(url):
+#  async def get_title(url):
+#    try:
+#      #  res = reader.title(url)
+#      netloc = reader.netloc(url)
+#      if netloc not in urltitle_config.NETLOC_OVERRIDES:
+#        urltitle_config.NETLOC_OVERRIDES[netloc] = {"extra_headers": {}}
+#      elif "extra_headers" not in urltitle_config.NETLOC_OVERRIDES[netloc]:
+#        urltitle_config.NETLOC_OVERRIDES[netloc]["extra_headers"] = {}
+#      EXTRA_CONFIG_HEADERS = urltitle_config.NETLOC_OVERRIDES[netloc]["extra_headers"]
+#      EXTRA_CONFIG_HEADERS.update(EXTRA_HEADERS)
+#      res = await asyncio.to_thread(reader.title, url)
+#    except TypeError as e:
+#      res=f"{e=}"
+#      #  logger.info(res)
+#      warn(res)
+#      #  prof.cons_show(res)
+#    #  except urltitle.urltitle.URLTitleError as e:
+#    except URLTitleError as e:
+#      res=f"URLTitleError: {e=}"
+#      #  prof.cons_show(res)
+#      warn(res)
+#    except Exception as e:
+#      #  logger.warning(f"E: {e=}", exc_info=True, stack_info=True)
+#      res=f"{e=}"
+#      #  prof.cons_show(res)
+#      warn(res)
+#    return res
+
+async def get_title(url, src):
   shell_cmd = ["bash", SH_PATH + "/title.sh"]
   shell_cmd.append(url)
   res = await my_popen(shell_cmd, shell=False, src=src)
   return res
-  try:
-    #  res = reader.title(url)
-    netloc = reader.netloc(url)
-    if netloc not in urltitle_config.NETLOC_OVERRIDES:
-      urltitle_config.NETLOC_OVERRIDES[netloc] = {"extra_headers": {}}
-    elif "extra_headers" not in urltitle_config.NETLOC_OVERRIDES[netloc]:
-      urltitle_config.NETLOC_OVERRIDES[netloc]["extra_headers"] = {}
-    EXTRA_CONFIG_HEADERS = urltitle_config.NETLOC_OVERRIDES[netloc]["extra_headers"]
-    EXTRA_CONFIG_HEADERS.update(EXTRA_HEADERS)
-    res = await asyncio.to_thread(reader.title, url)
-  except TypeError as e:
-    res=f"{e=}"
-    #  logger.info(res)
-    warn(res)
-    #  prof.cons_show(res)
-  #  except urltitle.urltitle.URLTitleError as e:
-  except URLTitleError as e:
-    res=f"URLTitleError: {e=}"
-    #  prof.cons_show(res)
-    warn(res)
-  except Exception as e:
-    #  logger.warning(f"E: {e=}", exc_info=True, stack_info=True)
-    res=f"{e=}"
-    #  prof.cons_show(res)
-    warn(res)
-  return res
-
 
 
 
@@ -5384,10 +5385,10 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         return
       if not res:
         if len(urls) == 1:
-          res="%s" % await get_title(url)
+          res="%s" % await get_title(url, src)
           break
         res="[ %s urls ]" % len(urls)
-      res+="\n\n> %s\n%s" % (url, await get_title(url))
+      res+="\n\n> %s\n%s" % (url, await get_title(url, src))
 
     if res:
       res = f"{name}{res}"
