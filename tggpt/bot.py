@@ -1166,7 +1166,7 @@ async def my_popen(cmd,
         res = "my_popen: timeout, killed, cmd: {}\nres: {}".format(cmd, res)
         warn(res)
         if src:
-          await send("killed", src, xmpp_only=True, correct=True)
+          await send(f"E: killed(timeout): {cmd_str}", src, xmpp_only=True, correct=True)
         #  await cmd_answer(res, client, msg)
         #  logger.info(f"最终输出: {res}")
         break
