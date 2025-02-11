@@ -3144,6 +3144,7 @@ async def parse_tg_msg(event):
 
 @exceptions_handler
 async def parse_tg_out_msg(event):
+  info(event.stringify)
   msg = event.message
   text = msg.text
   chat_id = event.chat_id
@@ -3162,7 +3163,7 @@ async def parse_tg_out_msg(event):
     if not text:
       return
     if text == 'id':
-      await UB.send_message('me', "id @name https://t.me/name\nchat_id: {chat_id}")
+      await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
       return
     if text.startswith("id "):
       url = text.split(' ')[1]
