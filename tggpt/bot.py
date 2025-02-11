@@ -3144,7 +3144,7 @@ async def parse_tg_msg(event):
 
 @exceptions_handler
 async def parse_tg_out_msg(event):
-  info(event.stringify)
+  info(event.stringify())
   msg = event.message
   text = msg.text
   chat_id = event.chat_id
