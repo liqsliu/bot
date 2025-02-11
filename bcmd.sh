@@ -358,7 +358,7 @@ cmds() {
     ;;
   tl)
     if [[ -z "$2" ]]; then
-      echo ".tl \$URL raw/direct"
+      echo ".tl \$URL raw/direct/curl"
     else
       shift
       bash "$SH_PATH/title.sh" "$@" || echo "E: $?"

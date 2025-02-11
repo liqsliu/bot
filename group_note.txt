@@ -245,3 +245,5 @@
 #直播 X liqsliu_: 中国之声的地址为： http://ngcdn001.cnr.cn/live/zgzs/index.m3u8
 #直播 X liqsliu_: https://omii.top/web/%E5%BD%B1%E8%A7%86/#download
 #default X jerryxqj: xmpp
+#pb G ⁠liqs: https://fars.ee/\nhttps://paste.sensio.no/\nhttps://0x0.st/
+#pb G ⁠liqs: sharex自定义上传设置：{\n  "Version": "14.1.0",\n  "Name": "ipfs pixura",\n  "DestinationType": "ImageUploader, TextUploader, FileUploader",\n  "RequestMethod": "POST",\n  "RequestURL": "https://ipfs.pixura.io/api/v0/add",\n  "Parameters": {\n    "quieter": "true",\n    "quiet": "true",\n    "pin": "true"\n  },\n  "Body": "MultipartFormData",\n  "FileFormName": "file",\n  "URL": "https://ipfs.pixura.io/ipfs/{json:Hash}?filename={filename}",\n  "ThumbnailURL": "https://ipfs.io/ipfs/{json:Hash}?filename={filename}",\n  "DeletionURL": "https://cf-ipfs.com/ipfs/{json:Hash}?filename={filename}",\n  "ErrorMessage": "{response}"\n}
