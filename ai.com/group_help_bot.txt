@@ -1,0 +1,6 @@
+要和bot进行长段对话，请转到下面的分群，命令相同：
+- xmpp:wtfipfs_bot@salas.suchat.org?join
+- xmpp:wtfipfs_bot@conference.conversations.im?join
+- xmpp:wtfipfs_bot@conference.jabb3r.de?join
+
+后面会增加其他服务器上的镜像群。

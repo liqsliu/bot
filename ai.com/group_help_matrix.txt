@@ -1,0 +1,22 @@
+主群: #wtfipfs:matrix.org
+非官服备用群: #wtfipfs:mozilla.org (使用傀儡用户与discord和telegram桥接)
+国内: #wtfipfs:chat.neboer.site (该服务器屏蔽了国外ip访问)
+
+rss: 
+  新闻: #wtfipfs_rss:matrix.org
+  ACG:  #wtfipfs_acg:matrix.org
+
+群组管理:
+  - matrix: @liqsliu:matrix.org (不常用matrix)
+  - xmpp: liqsliu@suchat.org
+
+第三方(非本频道管理，无管理)镜像频道:
+  - #xmpp_ipfs_salas.suchat.org:matrix.org <=> xmpp( ipfs@salas.suchat.org )
+  - #_bifrost_ipfs_salas.suchat.org:aria-net.org <=> xmpp( ipfs@salas.suchat.org )
+  ...
+
+关于matrix官方桥的介绍: https://github.com/matrix-org/matrix-bifrost/wiki/Address-syntax
+matrix官方桥(几乎都是坏的，别用了): https://ems-docs.element.io/books/element-cloud-documentation/page/public-slack-bridge
+第三方维护的桥: 
+https://t2bot.io/
+https://aria-net.org/SitePages/Portal/Bridges.aspx

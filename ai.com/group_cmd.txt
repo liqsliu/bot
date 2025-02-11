@@ -1,0 +1,17 @@
+
+[.]ping 检测自己网络状态及bot状态或ping特定地址
+.dig dns查询
+.google|g 谷歌搜索
+.an archive
+.tw 获取指定推文链接的推文内容
+.ip 查询指定域名或ip的地理位置（纯真数据库）
+.ip6 查询指定域名的ipv6地址
+.ipfs 根据文件链接得到该文件的ipfs链接
+.sf 根据sourceforge文件的网页地址生成文件的直连地址
+.wtf 网络梗查询
+.type 获取链接详情
+.note 公共记事本
+.hhsh|wtf 能不能好好说话
+.gpt|gptmode chatgpt(开启了上下文，重置命令：.gpt reset)
+.gt|gtz|gptr translate by chatgpt
+.tr|trans|trmode 谷歌翻译
