@@ -5385,6 +5385,12 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         return
       if url.startswith("https://icq.im"):
         return
+      if url.startswith("https://x.com/"):
+        res = await send_cmd_to_bash(src, name, url)
+        return res
+      if url.startswith("https://twitter.com/"):
+        res = await send_cmd_to_bash(src, name, url)
+        return res
       if not res:
         if len(urls) == 1:
           res="%s" % await get_title(url, src)
