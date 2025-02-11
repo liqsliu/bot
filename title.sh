@@ -11,11 +11,23 @@ export https_proxy="http://127.0.0.1:6080"
 # while read -r URL; do
     # echo -n "$URL --> "
     URL=$1
+  if [[ "$2" == raw ]]; then
+    wget -T $MAX_TIMEOUT -q -O - "$URL" | \
+      tr "\n" " " | \
+      sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || echo "E: $?"
+  elif [[ "$2" == direct ]]; then
+    unset http_proxy
+    unset https_proxy
+    wget -T $MAX_TIMEOUT -q -O - "$URL" | \
+      tr "\n" " " | \
+      sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || echo "E: $?"
+  else
     wget --header='Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6' \
       --user-agent=="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36" \
       -T $MAX_TIMEOUT -q -O - "$URL" | \
-       tr "\n" " " | \
-       sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || echo "E: $?"
+      tr "\n" " " | \
+      sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || echo "E: $?"
+  fi
     echo
 # done
 
