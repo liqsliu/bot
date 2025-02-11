@@ -6031,7 +6031,7 @@ async def amain():
     #  loop.run_until_complete(run())
 
     global MY_NAME, MY_ID, CHAT_ID
-    CHAT_ID = get_my_key("TELEGRAM_GROUP_LIQS")
+    CHAT_ID = int(get_my_key("TELEGRAM_GROUP_LIQS"))
     #  await UB.start()
     async with UB:
       me = await UB.get_me()
