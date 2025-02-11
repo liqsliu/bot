@@ -3776,9 +3776,16 @@ async def xmpp_msgp(msg):
       res = rc.subscribe(msg.from_)
     else:
       # https://docs.zombofant.net/aioxmpp/devel/api/public/roster.html#aioxmpp.RosterClient.remove_entry
-      res = await rc.remove_entry(msg.from_, timeout=5)
-      await send("非管理禁止订阅", msg.from_)
-      log(f"已拒绝状态订阅请求：{msg.from_} {res}")
+      await send("非管理禁止订阅，可以私聊，暂时只支持ping命令。", msg.from_)
+      try:
+        res = await rc.remove_entry(msg.from_, timeout=5)
+      except errors.XMPPModifyError as e:
+        res = "err"
+        if e.args[0] == "{urn:ietf:params:xml:ns:xmpp-stanzas}item-not-found":
+          info("多余的联系人删除，此段代码可以删掉")
+        else:
+          warn(f"未知错误，待修复的联系人删除: {msg.from_} {e=}")
+      log(f"已拒绝状态订阅请求：{msg.from_} {res=}")
   elif msg.type_ == PresenceType.UNAVAILABLE:
     print(f"离线: {msg.from_} {msg.status}")
     #  if muc in my_groups:
