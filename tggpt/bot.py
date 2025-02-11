@@ -2260,7 +2260,7 @@ async def mt2tg(msg):
   #    return
 
   if msgd["Extra"]:
-    logger.info("original msg of mt_read: %s" % msgd)
+    logger.debug("original msg of mt_read: %s" % msgd)
     # file
     #,"id":"","Extra":{"file":[{"Name":"proxy-image.jpg","Data":"/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAA ... 6P9ZgOT6tI33Ff5p/MAOfNnzPzQAN4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAGQAAYAkAAGTGAAAAAAAAwsAAHLAAAK//9k=","Comment":"","URL":"https://liuu.tk/ddb833ad/proxy_image.jpg","Size":0,"Avatar":false,"SHA":"ddb833ad"}]}}\n\r\n'
     for file in msgd["Extra"]["file"]:
@@ -3144,13 +3144,25 @@ async def parse_tg_msg(event):
 
 @exceptions_handler
 async def parse_tg_out_msg(event):
-  if event.chat_id == MY_ID:
-    msg = event.message
-    text = msg.text
+  msg = event.message
+  text = msg.text
+  chat_id = event.chat_id
+  if text.startswith("$"):
+    if text == "$get id":
+      await UB.send_message('me', f"{event.chat_id}")
+      return
+    if text == "$get event":
+      await UB.send_message('me', f"{event.stringify()}")
+      return
+    if text == "$get msg":
+      await UB.send_message('me', f"{msg.stringify()}")
+      return
+
+  if chat_id == MY_ID:
     if not text:
       return
     if text == 'id':
-      await UB.send_message('me', "id @name https://t.me/name")
+      await UB.send_message('me', "id @name https://t.me/name\nchat_id: {chat_id}")
       return
     if text.startswith("id "):
       url = text.split(' ')[1]
@@ -3545,6 +3557,7 @@ def msg_out(msg):
 
 #  @exceptions_handler
 def xmpp_msgp_in(msg):
+  # 状态消息，在线离线等
   if not allright.is_set():
     return
   asyncio.create_task(xmpp_msgp(msg))
@@ -4057,6 +4070,9 @@ async def xmpp_msg(msg):
       reply = msg.make_reply()
       reply.body[None] = "pong"
       await send(reply)
+      return
+    chat = await get_entity(CHAT_ID, True)
+    await UB.send_message(chat, f"{msg.type_} {msg.from_}: {msg.body}")
     return
     #  pprint(msg)
 
@@ -6006,7 +6022,8 @@ async def amain():
     # with UB:
     #  loop.run_until_complete(run())
 
-    global MY_NAME, MY_ID
+    global MY_NAME, MY_ID, CHAT_ID
+    CHAT_ID = get_my_key("TELEGRAM_GROUP_LIQS")
     #  await UB.start()
     async with UB:
       me = await UB.get_me()
