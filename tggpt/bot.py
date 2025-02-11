@@ -3776,7 +3776,7 @@ async def xmpp_msgp(msg):
       res = rc.subscribe(msg.from_)
     else:
       # https://docs.zombofant.net/aioxmpp/devel/api/public/roster.html#aioxmpp.RosterClient.remove_entry
-      await send("非管理禁止订阅，可以私聊，暂时只支持ping命令。", msg.from_)
+      await send(f"非管理禁止订阅，但可以私聊。暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
       try:
         res = await rc.remove_entry(msg.from_, timeout=5)
       except errors.XMPPModifyError as e:
@@ -4079,8 +4079,9 @@ async def xmpp_msg(msg):
       reply.body[None] = "pong"
       await send(reply)
       return
+    await send(f"暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
     chat = await get_entity(CHAT_ID, True)
-    await UB.send_message(chat, f"{msg.type_} {msg.from_}: {msg.body}")
+    await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
     return
     #  pprint(msg)
 
