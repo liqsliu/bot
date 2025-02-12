@@ -1621,7 +1621,7 @@ async def get_title(url, src, down=False):
   shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
   shell_cmd.append(url)
   if down:
-    shell_cmd.append("%s" % 1000*2**20)
+    shell_cmd.append("%s" % (2**20*1000))
   r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False)
   if r == 0:
     s = out.splitlines()
