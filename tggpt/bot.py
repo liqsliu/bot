@@ -1120,7 +1120,7 @@ async def my_popen(cmd,
     errs = ""
     data = ["", "", p]
     asyncio.create_task(update_stdouterr(data))
-    await asyncio.sleep(1)
+    await asyncio.sleep(2)
     logger.info(f"popen cmd: {p.args}")
     if type(cmd) == list:
       if len(cmd) == 6 and "bcmd.sh" in cmd[1]:
@@ -5677,10 +5677,6 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       #  await mt_send(res, gateway=gateway, name="titlebot")
 
   return False
-
-
-
-
 
 
 @exceptions_handler

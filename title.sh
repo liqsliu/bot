@@ -52,7 +52,8 @@ fi
     unset http_proxy
     unset https_proxy
     # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
-      wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+      # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+      wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
     # }
   else
     export http_proxy="http://127.0.0.1:6080"
@@ -64,11 +65,13 @@ fi
 
     elif [[ "$2" == raw ]]; then
       # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
-        wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+        # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+        wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
       # }
     else
       # wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
-        wget --server-response --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+        # wget --server-response --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+        wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
       # }
     fi
   fi
