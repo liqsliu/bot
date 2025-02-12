@@ -2444,6 +2444,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
       #  raise
       res = f"{e=}"
     async with res:
+      info(f"http status: {res.status} {res.reason} url: {res.url}")
       # print("All:", res)
   #    res.raise_for_status()
       if res.status == 304:
@@ -2453,7 +2454,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
           return None, res.headers
         else:
           return
-      if res.status != 200:
+      if res.status != 200 and res.status != 201:
   #      logger.error(res)
   #      put(str(res))
         #  html = f"E: error http status: {res.status} {res.reason} url: {res.url} headers: {res.headers}"
