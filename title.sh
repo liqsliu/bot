@@ -101,11 +101,12 @@ MAX_TIMEOUT=16
     echo "$fs"
     echo "$ft"
     echo "$ft3"
-    echo "$(bash "$SH_PATH/file_to_ipfs.sh" "${fn}")"
+    echo
+    echo "- $(bash "$SH_PATH/file_to_ipfs.sh" "${fn}")"
 
     # nohup mv "$fn" "$LP/$fno$fe" &>/dev/null &
-    my_url="https://$DOMAIN/${fno}${fe}"
-    echo "$my_url"
+    echo
+    echo "- https://$DOMAIN/${fno}${fe}"
     echo "$fn"
 
   fi

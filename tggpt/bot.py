@@ -1625,7 +1625,11 @@ async def get_title(url, src):
     s = out.splitlines()
     path = s[-1]
     if os.path.exists(path):
-      s[-1] = await upload(path)
+      url = await upload(path)
+      if url:
+        s[-1] = f"\n- {url}"
+      else:
+        s.pop(-1)
     else:
       s.pop(-1)
     return "\n".join(s)
