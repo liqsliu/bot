@@ -3339,8 +3339,9 @@ async def disco_item(jid=None, node=None, client=None):
 
 async def get_server_name(jid):
   res = await disco_info(jid)
-  if res.identities:
-    return res.identities[0]
+  if res:
+    if res.identities:
+      return res.identities[0]
 
 
 
