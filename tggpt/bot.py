@@ -1604,11 +1604,33 @@ EXTRA_HEADERS = {
 #      warn(res)
 #    return res
 
+async def backup(path, src=None):
+  url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
+  shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
+  res = await run_my_bash(shell_cmd, shell=False)
+  info(res)
+  if src:
+    await send(url, src)
+  return url
+
+
+
 async def get_title(url, src):
-  shell_cmd = ["bash", SH_PATH + "/title.sh"]
+  shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
   shell_cmd.append(url)
-  res = await my_popen(shell_cmd, shell=False, src=src)
-  return res
+  r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False)
+  if err:
+    warn("%s\n--\nE: %s\n%s" % (out, r, err))
+  if r:
+    s = out.splitlines()
+    path = s[-1]
+    if os.path.exists(path):
+      s[-1] = await upload(path)
+    else:
+      s.pop(-1)
+    return "\n".join(s)
+  else:
+    return "%s\n--\nE: %s\n%s" % (out, r, err)
 
 
 
@@ -2752,24 +2774,21 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     res = await upload(path)
 
       #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
-    url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
-    async def mymv(path, url, src=None):
-      shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
-      res = await run_my_bash(shell_cmd, shell=False)
-      info(res)
-      if src:
-        await send(url, src)
     if res:
       #  await send(f"{res}\n{path}", src)
       #  await send(f"{res}", src)
       info(f"use xmpp server: {res}")
-      asyncio.create_task(mymv(path, url, src))
+      asyncio.create_task(backup(path, url, src))
       #  res += f"\n{url}"
       return res
     else:
       warn(f"xmpp server is not ok: {res}")
-      t = asyncio.create_task(mymv(path, url))
+      t = asyncio.create_task(backup(path, url))
       await t
+      if t.done():
+        url = t.result()
+      else:
+        url = None
       return url
   else:
     #  res = f"{res} 下载失败: {path}"
@@ -4622,7 +4641,7 @@ async def add_cmd():
     if res:
       tmp = ""
       for i in res.items:
-        tmp += "%s %s %s %s" % (i.name, i.node, i.jid, await get_server_name(i.jid))
+        tmp += "%s %s %s %s\n\n" % (i.name, i.node, i.jid, await get_server_name(i.jid))
       res = tmp
       
     return res
