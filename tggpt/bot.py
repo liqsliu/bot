@@ -4148,11 +4148,24 @@ async def xmpp_msg(msg):
     #  if text.startswith('> ') or text.startswith('>> '):
     if text.startswith('>'):
       qt=[]
-      tmp=text.splitlines()
+      tmp= text.splitlines()
+      exqt = False
       for i in tmp:
-        if i.startswith('> ') or i.startswith('>> '):
+        if i.startswith('>> '):
+          qt.append("%s" % i.split(' ', 1)[1])
+          exqt = True
+        elif i.startswith('> > '):
+          qt.append("%s" % i.split(' ', 2)[2])
+          exqt = True
+        elif i.startswith('> '):
+          if exqt:
+            qt.append("")
+            exqt = False
           qt.append("%s" % i.split(' ', 1)[1])
         elif i.startswith('>'):
+          if exqt:
+            qt.append("")
+            exqt = False
           qt.append("%s" % i[1:])
         elif i == "":
           qt.append(i)
@@ -4230,20 +4243,23 @@ async def xmpp_msg(msg):
   if text == "disco":
     #  res = await disco_info(get_jid(msg.from_))
     cmds = get_cmd(text)
-    if len(cmds) > 2:
-      res = await disco_info(msg.to, cmds[1])
+    if len(cmds) > 1:
+      if cmds[1] == "None":
+        res = await disco_info(msg.to)
+      else:
+        res = await disco_info(msg.to, cmds[1])
     else:
-      res = await disco_info(msg.to, msg.from_.domain)
+      res = await disco_info(XB.local_jid, msg.from_.domain)
     reply = msg.make_reply()
     reply.body[None] = str(res)
     await send(reply)
   elif text == "discoi":
     #  res = await disco_info(get_jid(msg.from_))
     cmds = get_cmd(text)
-    if len(cmds) > 2:
+    if len(cmds) > 1:
       res = await disco_item(msg.to, cmds[1])
     else:
-      res = await disco_item(msg.to, msg.from_.domain)
+      res = await disco_item(XB.local_jid, msg.from_.domain)
     reply = msg.make_reply()
     reply.body[None] = str(res)
     await send(reply)
