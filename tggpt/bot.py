@@ -2491,7 +2491,8 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
       res = await session.request(url=url, method=method, *args, **kwargs)
     except asyncio.TimeoutError as e:
       #  raise
-      res = f"{e=}"
+      info(f"{e=}")
+      pass
     async with res:
       info(f"http status: {res.status} {res.reason} url: {res.url}")
       # print("All:", res)
@@ -2803,24 +2804,29 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
         t.cancel()
 
   if path:
+    await send(f"下载完成，正在上传到xmpp... {res}", src, correct=True)
     res = await upload(path)
 
       #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
+    t = asyncio.create_task(backup(path))
+    await t
+    if t.done():
+      url = t.result()
+    else:
+      url = None
     if res:
       #  await send(f"{res}\n{path}", src)
       #  await send(f"{res}", src)
-      info(f"use xmpp server: {res}")
-      asyncio.create_task(backup(path, src))
-      #  res += f"\n{url}"
+      info(f"xmpp server is ok: {res}")
+
+      #  asyncio.create_task(backup(path, src))
+
+      if url:
+        res += f"\n\n{url}"
+
       return res
     else:
       warn(f"xmpp server is not ok: {res}")
-      t = asyncio.create_task(backup(path, url))
-      await t
-      if t.done():
-        url = t.result()
-      else:
-        url = None
       return url
   else:
     #  res = f"{res} 下载失败: {path}"
