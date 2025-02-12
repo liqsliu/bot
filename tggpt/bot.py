@@ -3376,7 +3376,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
   info(slot.get)
 
   async with aiofiles.open(file_path, "rb") as file:
-    res = await http(slot.put.url, method="PUT", headers=slot.put.headers, data=file)
+    res = await http(slot.put.url, method="PUT", headers=headers, data=file)
     info(f"res: {res}\nslot: {slot}")
   info(slot.put)
   info(slot.get)
