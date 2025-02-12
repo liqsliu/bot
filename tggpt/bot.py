@@ -1618,7 +1618,7 @@ async def backup(path, src=None):
 
 
 
-async def get_title(url, src=none, down=False):
+async def get_title(url, src=None, down=False):
   shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
   shell_cmd.append(url)
   if down:
