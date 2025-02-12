@@ -121,7 +121,7 @@ music_bot = 1404457467
 music_bot_name = 'Music163bot'
 
 
-interval = 10
+interval = 5
 download_time_max = 300
 
 wtf_time = 5
@@ -2703,14 +2703,14 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     res = f"{msg.file.name}"
   else:
     res = ''
-  #  if msg.buttons:
-  #    logger.info(msg.buttons)
-  #    for i in get_buttons(msg.buttons):
-  #      if isinstance(i.button, KeyboardButtonUrl):
-  #        logger.info(f"add url from: {i}")
-  #        res += f" {i.url}"
-  #      else:
-  #        logger.info(f"ignore button: {i}")
+  if msg.buttons:
+    logger.info(msg.buttons)
+    for i in get_buttons(msg.buttons):
+      if isinstance(i.button, KeyboardButtonUrl):
+        logger.info(f"add url from: {i}")
+        res += f" {i.url}"
+      else:
+        logger.info(f"ignore button: {i}")
   #  await mt_send(f"{res} 下载中...", gateway=gateway)
   #  res = f"{res} 下载中..."
   if src:
@@ -2759,7 +2759,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
         #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
         await send("-{:.0f}K".format((total-current)/1024), src)
         last_time[0] = time.time()
-        last_current = current
+        #  last_current = current
 
 
   async def _download_media(msg, path):
@@ -2806,7 +2806,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
         t.cancel()
 
   if path:
-    await send(f"下载完成，正在上传到xmpp... {res}", src, correct=True)
+    await send("下载完成，正在上传到xmpp...", src, correct=True)
     res = await upload(path)
 
       #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
