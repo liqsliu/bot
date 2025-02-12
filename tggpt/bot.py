@@ -1621,7 +1621,7 @@ async def get_title(url, src):
   r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False)
   if err:
     warn("%s\n--\nE: %s\n%s" % (out, r, err))
-  if r:
+  if r == 0:
     s = out.splitlines()
     path = s[-1]
     if os.path.exists(path):
