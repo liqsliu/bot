@@ -2724,7 +2724,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     last_time[1] = current
     if len(last_time) == 2:
       last_time.append(total)
-      await send("开始下载：{} {:.1f}MB".format(res, total/1024/1024), src)
+      asyncio.create_task(send("开始下载：{} {:.1f}MB".format(res, total/1024/1024), src))
     #  print('Downloaded', current, 'out of', total,
     #    'bytes: {:.2%}'.format(current / total))
     #  if time.time() - last_time[src] > interval:
