@@ -4560,6 +4560,7 @@ async def add_cmd():
       tmp = ""
       for i in res.items:
         tmp += "%s %s %s %s" % (i.name, i.node, i.jid, await get_server_name(i.jid))
+      res = tmp
       
     return res
   cmd_funs["discoi"] = _
@@ -6011,7 +6012,7 @@ async def join(jid=None, nick=None, client=None):
 @exceptions_handler
 async def xmppbot():
   logger.info("开始登录xmpp")
-  global XB, myjid, UPLOAD
+  global XB, myjid, UPLOAD, UPLOAD_MAX
   myjid = get_my_key("JID")
   password = get_my_key("JID_PASS")
   logger.info(f"xmpp: {myjid} {password[:3]}...")
@@ -6024,15 +6025,12 @@ async def xmppbot():
   t = asyncio.create_task(load_config())
   await t
   if await login():
-
-
     logger.info(f"join all groups...\n%s" % my_groups)
     #  await join()
     #  global mucsv
     #  mucsv = client.summon(aioxmpp.MUCClient)
     #  for coro in asyncio.as_completed(map(join, my_groups),
     await join_all()
-
   else:
     err(f"登陆失败：{myjid}")
     return
@@ -6047,6 +6045,7 @@ async def xmppbot():
     await sendg("已重新启动xmppbot")
     
   UPLOAD = None
+  UPLOAD_MAX = 0
   res = await disco_item()
   if res:
     for i in res.items:
@@ -6054,9 +6053,18 @@ async def xmppbot():
       if r:
         if "urn:xmpp:http:upload:0" in r.features:
           UPLOAD = i.jid
+          info(f"上传文件用的服务器地址：{UPLOAD}")
+          for j in r.to_dict().forms:
+            if j["FORM_TYPE"]:
+              if j["FORM_TYPE"][0] == "urn:xmpp:http:upload:0":
+                if j["max-file-size"]:
+                  UPLOAD_MAX = int(j["max-file-size"][0])
+                  info(f"上传文件大小限制：{UPLOAD_MAX}")
           break
   if UPLOAD is None:
     warn(f"没找到上传文件用的服务器地址：{myjid}")
+  if UPLOAD_MAX == 0:
+    warn(f"没找到文件大小限制：{myjid}")
 
 @exceptions_handler
 async def xmppbot2():
