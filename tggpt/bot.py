@@ -3360,17 +3360,18 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
   #  filename = file_path.split("/")[-1]
   filename = p.name
   print(XB,UPLOAD, filename, os.path.getsize(file_path), mimetypes.guess_type(file_path)[0])
-  #  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, os.path.getsize(file_path), mimetypes.guess_type(file_path)[0])
-  slot = await XB.send(aioxmpp.IQ(
-      type_=aioxmpp.IQType.GET,
-      to=UPLOAD,
-      payload=aioxmpp.httpupload.Request(
-          filename,
-          os.path.getsize(file_path),
-          mimetypes.guess_type(file_path)[0],
-      )
-  ))
-  slot.put.headrs["Content-Length"] = str(os.path.getsize(file_path))
+  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, os.path.getsize(file_path), mimetypes.guess_type(file_path)[0])
+  #  slot = await XB.send(aioxmpp.IQ(
+  #      type_=aioxmpp.IQType.GET,
+  #      to=UPLOAD,
+  #      payload=aioxmpp.httpupload.Request(
+  #          filename,
+  #          os.path.getsize(file_path),
+  #          mimetypes.guess_type(file_path)[0],
+  #      )
+  #  ))
+  headers = slot.put.headers.copy()
+  headers["Content-Length"] = str(os.path.getsize(file_path))
   info(slot.put)
   info(slot.get)
 
