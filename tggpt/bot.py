@@ -39,6 +39,7 @@ from inspect import isawaitable, currentframe
 
 from functools import wraps
 import pickle
+from pathlib import Path
 
 import os
 import sys
