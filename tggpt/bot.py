@@ -3221,10 +3221,11 @@ async def parse_tg_msg(event):
 
 @exceptions_handler
 async def parse_tg_out_msg(event):
-  info(event.stringify())
+  #  info(event.stringify())
   msg = event.message
   text = msg.text
   chat_id = event.chat_id
+  info(f"tg out msg: {chat_id}: {text}")
   if text.startswith("$"):
     if text == "$get id":
       await UB.send_message('me', f"{event.chat_id}")
