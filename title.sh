@@ -71,24 +71,80 @@ MAX_TIMEOUT=16
   else
 
     # echo "$html" > "$fn"
-    fes=$(file --extension -b -- "$fn" | grep -o -P "[^\s/]+")
-    unset fe
-    if [[ -z "$fes" ]]; then
+    # fes=$(file --extension -b -- "$fn" | grep -o -P "[^\s/]+")
+    # unset fe
+    # if [[ -z "$fes" ]]; then
+    #   :
+    #   # fe=bin
+    # else
+    #   for i in $fes; do
+    #     if [[ "${fno%.${i}}" == "$fno" ]]; then
+    #       if [[ -z "$fe" ]]; then
+    #         fe=".$i"
+    #       fi
+    #     else
+    #       fno=${fno%.${i}}
+    #       fe=".$i"
+    #       break
+    #     fi
+    #   done
+    # fi
+    #
+  mime_type=$ft
+  # 定义 MIME 类型到扩展名的映射
+  case "$mime_type" in
+      "image/jpeg")
+          ext="jpg"
+          ;;
+      "image/png")
+          ext="png"
+          ;;
+      "image/gif")
+          ext="gif"
+          ;;
+      "text/plain")
+          ext="txt"
+          ;;
+      "text/html")
+          ext="html"
+          ;;
+      "application/pdf")
+          ext="pdf"
+          ;;
+      "application/zip")
+          ext="zip"
+          ;;
+      "application/msword")
+          ext="doc"
+          ;;
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+          ext="docx"
+          ;;
+      "audio/mpeg")
+          ext="mp3"
+          ;;
+      "video/mp4")
+          ext="mp4"
+          ;;
+      *)
+          # echo "未知 MIME 类型: $mime_type"
+          # exit 1
+          ext=""
+          ;;
+  esac
+  unset fe
+  if [[ -n "$ext" ]]; then
+    fe=".$ext"
+    if [[ "${fno%.${ext}}" == "$fno" ]]; then
       :
-      # fe=bin
     else
-      for i in $fes; do
-        if [[ "${fno%.${i}}" == "$fno" ]]; then
-          if [[ -z "$fe" ]]; then
-            fe=".$i"
-          fi
-        else
-          fno=${fno%.${i}}
-          fe=".$i"
-          break
-        fi
-      done
+      fno=${fno%.${ext}}
     fi
+  fi
+
+
+
+
 
     # fs=$(du -b -- "$fn" | cut -f1)
     fs=$(du -h -- "$fn" | cut -f1)
