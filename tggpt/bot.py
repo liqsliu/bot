@@ -2762,9 +2762,11 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     if res:
       #  await send(f"{res}\n{path}", src)
       #  await send(f"{res}", src)
+      info(f"use xmpp server: {res}")
       asyncio.create_task(mymv(path, url, src))
       return res
     else:
+      warn(f"xmpp server is not ok: {res}")
       t = asyncio.create_task(mymv(path, url))
       await t
       return url
