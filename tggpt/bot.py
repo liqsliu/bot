@@ -2399,7 +2399,7 @@ async def mt2tg(msg):
 
 
 
-async def send_to_tg_bot(text, chat_id, src=None):
+async def send_to_tg_bot(text, chat_id):
   chat = await get_entity(chat_id, True)
   msg = await UB.send_message(chat, text)
   #  if src:
@@ -3248,6 +3248,11 @@ async def parse_tg_out_msg(event):
         else:
           await UB.send_message('me', "not fount input entity")
 
+  res = await run_cmd(text, CHAT_ID, "G me")
+  if res is True:
+    return
+  if res:
+    await UB.send_message(CHAT_ID, res)
 
 
 #  @UB.on(events.NewMessage(incoming=True))
@@ -5472,7 +5477,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           mtmsgs = mtmsgsg[src]
           mtmsgs.clear()
           #  mtmsgs[mid][0] = name
-          mid = await send_to_tg_bot(res[2], res[1], src)
+          mid = await send_to_tg_bot(res[2], res[1])
           mtmsgs[mid] = [name]
           gid_src[mid] = src
         #  elif res[0] == 2:
@@ -5529,7 +5534,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
 
           mtmsgs.clear()
 
-          mid = await send_to_tg_bot(text, pid, src)
+          mid = await send_to_tg_bot(text, pid)
           mtmsgs[mid] = [name]
           gid_src[mid] = src
           #  mid = res[1]
