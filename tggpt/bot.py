@@ -239,7 +239,7 @@ def get_cmd(text):
   if tmp:
     cmd = tmp
     logger.info(f"return cmd {len(cmd)}: {cmd=}")
-    return cmd
+  return cmd
 
 def check_str(nick, nicks):
   for i in nicks:
@@ -2110,10 +2110,14 @@ async def send1(text, jid=None, *args, **kwargs):
 #    #  return await client.send(msg)
 #    return await _send(msg, client, gpm=gpm)
 
+async def sendme(text):
+  chat = await get_entity(CHAT_ID, True)
+  await UB.send_message(chat, text)
 
 async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kwargs):
   if name:
     text = f"{name}{text}"
+  asyncio.create_task(sendme(text))
   logger.info(f"send group msg: {jid} {text}")
   if jid is None:
     jid = log_group_private
@@ -3284,18 +3288,38 @@ async def stop(client=None):
 
 
 
-async def get_disco(jid, client=None):
+async def disco_info(jid, node=None, client=None):
   if client is None:
     client = XB
   #  for i in my_groups:
   #    jid = i
   #    break
-  jid = test_group.rsplit('@', 1)[1]
+  #  jid = test_group.rsplit('@', 1)[1]
   dc = client.summon(aioxmpp.DiscoClient)
-  res = await dc.query_info(JID.fromstr(jid))
+  #  res = await dc.query_info(JID.fromstr(jid))
+  res = await dc.query_info(jid, node)
   pprint(res)
   print(jid, res.to_dict())
   return res
+
+async def disco_item(jid, node=None, client=None):
+  if client is None:
+    client = XB
+  #  for i in my_groups:
+  #    jid = i
+  #    break
+  #  jid = test_group.rsplit('@', 1)[1]
+  dc = client.summon(aioxmpp.DiscoClient)
+  #  res = await dc.query_info(JID.fromstr(jid))
+  res = await dc.query_items(jid, node)
+  pprint(res)
+  print(jid, res.to_dict())
+  return res
+
+
+
+async def upload():
+  httpupload = client.summon(aioxmpp.httpupload.Service)
 
 
 
@@ -4080,8 +4104,9 @@ async def xmpp_msg(msg):
       await send(reply)
       return
     await send(f"暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
-    chat = await get_entity(CHAT_ID, True)
-    await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
+    #  chat = await get_entity(CHAT_ID, True)
+    #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
+    await sendme(f"{msg.type_} {msg.from_}: {text}")
     return
     #  pprint(msg)
 
@@ -4159,13 +4184,14 @@ async def xmpp_msg(msg):
     warn(f"normal msg: {msg}")
     return
   elif msg.type_ == MessageType.CHAT:
+    logger.info("群内私聊: %s" % msg)
+    if text == "ping":
+      reply = msg.make_reply()
+      reply.body[None] = "pong"
+      await send(reply)
+      return
     if is_admin is False:
-      if text == "ping":
-        reply = msg.make_reply()
-        reply.body[None] = "pong"
-        await send(reply)
-        return
-      #  logger.info("已忽略群内私聊: %s" % msg)
+      await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
       return
     #  if get_jid(msg.to) in my_groups:
     #  if get_jid(msg.from_) in my_groups:
@@ -4200,7 +4226,25 @@ async def xmpp_msg(msg):
     return
   #  awai:t mt_send(text, 'me', get_jid(msg.from_))
   if text == "disco":
-    await get_disco(get_jid(msg.from_))
+    #  res = await disco_info(get_jid(msg.from_))
+    cmds = get_cmd(text)
+    if len(cmds) > 2:
+      res = await disco_info(msg.to, cmds[1])
+    else:
+      res = await disco_info(msg.to, msg.from_.domain)
+    reply = msg.make_reply()
+    reply.body[None] = str(res)
+    await send(reply)
+  elif text == "discoi":
+    #  res = await disco_info(get_jid(msg.from_))
+    cmds = get_cmd(text)
+    if len(cmds) > 2:
+      res = await disco_item(msg.to, cmds[1])
+    else:
+      res = await disco_item(msg.to, msg.from_.domain)
+    reply = msg.make_reply()
+    reply.body[None] = str(res)
+    await send(reply)
   elif text == "test":
     logger.setLevel(logging.DEBUG)
     reply = msg.make_reply()
