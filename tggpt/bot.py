@@ -3371,16 +3371,19 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
   #          mimetypes.guess_type(file_path)[0],
   #      )
   #  ))
+
+  # 流式上传需要手动设置Length
   headers = slot.put.headers.copy()
   headers["Content-Length"] = str(os.path.getsize(file_path))
-  info(slot.put)
-  info(slot.get)
+
+  dbg(slot.put.headers)
+  dbg(slot.get.url)
 
   async with aiofiles.open(file_path, "rb") as file:
     res = await http(slot.put.url, method="PUT", headers=headers, data=file)
     info(f"res: {res}\nslot: {slot}")
-  info(slot.put)
-  info(slot.get)
+  dbg(slot.put.headers)
+  info(slot.get.url)
 
 
 
