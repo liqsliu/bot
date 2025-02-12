@@ -4245,6 +4245,7 @@ async def xmpp_msg(msg):
     await send(reply)
     return
 
+  return
   if get_jid(msg.from_) not in me:
     return
   #  awai:t mt_send(text, 'me', get_jid(msg.from_))
@@ -4261,32 +4262,6 @@ async def xmpp_msg(msg):
     await send(reply, correct=True)
   #  elif text == "correct":
   #    pprint(msg.xep308_replace)
-  else:
-    cmds = get_cmd(text)
-    if cmds:
-      cmd = cmds[0]
-      if cmd == "disco":
-        #  res = await disco_info(get_jid(msg.from_))
-        if len(cmds) > 1:
-          if cmds[1] == "None":
-            res = await disco_info(XB.local_jid.domain)
-          else:
-            res = await disco_info(JID.fromstr(cmds[1]))
-        else:
-          res = await disco_info(msg.from_.domain)
-        reply = msg.make_reply()
-        reply.body[None] = str(res)
-        await send(reply)
-      elif cmd == "discoi":
-        #  res = await disco_info(get_jid(msg.from_))
-        cmds = get_cmd(text)
-        if len(cmds) > 1:
-          res = await disco_item(cmds[1])
-        else:
-          res = await disco_item(msg.from_.domain)
-        reply = msg.make_reply()
-        reply.body[None] = str(res)
-        await send(reply)
 
   #  pprint(msg)
   return
@@ -4528,6 +4503,33 @@ async def add_cmd():
       res += '\n'.join(cmds_admin)
     return res
   cmd_funs["cmd"] = _
+
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"disco\n.{cmds[0]} $domain\nhttps://docs.zombofant.net/aioxmpp/devel/api/public/disco.html?highlight=disco#aioxmpp.DiscoClient"
+    if cmds[1] == "me":
+      res = await disco_info(msg.from_.domain)
+    elif cmds[1] == "you":
+      res = await disco_info(XB.local_jid.domain)
+    else:
+      res = await disco_info(cmds[1])
+    return res
+  cmd_funs["disco"] = _
+  cmd_for_admin.add('disco')
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"discoi\n.{cmds[0]} $domain\nhttps://docs.zombofant.net/aioxmpp/devel/api/public/disco.html?highlight=disco#aioxmpp.DiscoClient"
+    if cmds[1] == "me":
+      res = await disco_item(msg.from_.domain)
+    elif cmds[1] == "you":
+      res = await disco_item(XB.local_jid.domain)
+    else:
+      res = await disco_item(cmds[1])
+    return res
+  cmd_funs["discoi"] = _
+  cmd_for_admin.add('discoi')
 
   async def _(cmds, src):
     if len(cmds) == 1:
