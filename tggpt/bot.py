@@ -3301,10 +3301,10 @@ async def disco_info(jid, node=None, client=None):
     res = await dc.query_info(JID.fromstr(jid), node=node, timeout=5)
     pprint(res)
     print(jid, res.to_dict())
+    return res
   except TimeoutError as e:
     warn(f"失败(超时)：{jid}, {e=}")
-    res = "失败(超时)"
-  return res
+    #  res = "失败(超时)"
 
 async def disco_item(jid, node=None, client=None):
   if client is None:
@@ -3320,10 +3320,9 @@ async def disco_item(jid, node=None, client=None):
     pprint(res)
     for i in res.items:
       print(i.name, i.node, i.jid)
+    return res
   except TimeoutError as e:
     warn(f"失败(超时)：{jid}, {e=}")
-    res = "失败(超时)"
-  return res
 
 
 
@@ -4249,30 +4248,7 @@ async def xmpp_msg(msg):
   if get_jid(msg.from_) not in me:
     return
   #  awai:t mt_send(text, 'me', get_jid(msg.from_))
-  if text == "disco":
-    #  res = await disco_info(get_jid(msg.from_))
-    cmds = get_cmd(text)
-    if len(cmds) > 1:
-      if cmds[1] == "None":
-        res = await disco_info(XB.local_jid.domain)
-      else:
-        res = await disco_info(JID.fromstr(cmds[1]))
-    else:
-      res = await disco_info(msg.from_.domain)
-    reply = msg.make_reply()
-    reply.body[None] = str(res)
-    await send(reply)
-  elif text == "discoi":
-    #  res = await disco_info(get_jid(msg.from_))
-    cmds = get_cmd(text)
-    if len(cmds) > 1:
-      res = await disco_item(cmds[1])
-    else:
-      res = await disco_item(msg.from_.domain)
-    reply = msg.make_reply()
-    reply.body[None] = str(res)
-    await send(reply)
-  elif text == "test":
+  if text == "test":
     logger.setLevel(logging.DEBUG)
     reply = msg.make_reply()
     reply.body[None] = "ok"
@@ -4285,6 +4261,32 @@ async def xmpp_msg(msg):
     await send(reply, correct=True)
   #  elif text == "correct":
   #    pprint(msg.xep308_replace)
+  else:
+    cmds = get_cmd(text)
+    if cmds:
+      cmd = cmds[0]
+      if cmd == "disco":
+        #  res = await disco_info(get_jid(msg.from_))
+        if len(cmds) > 1:
+          if cmds[1] == "None":
+            res = await disco_info(XB.local_jid.domain)
+          else:
+            res = await disco_info(JID.fromstr(cmds[1]))
+        else:
+          res = await disco_info(msg.from_.domain)
+        reply = msg.make_reply()
+        reply.body[None] = str(res)
+        await send(reply)
+      elif cmd == "discoi":
+        #  res = await disco_info(get_jid(msg.from_))
+        cmds = get_cmd(text)
+        if len(cmds) > 1:
+          res = await disco_item(cmds[1])
+        else:
+          res = await disco_item(msg.from_.domain)
+        reply = msg.make_reply()
+        reply.body[None] = str(res)
+        await send(reply)
 
   #  pprint(msg)
   return
