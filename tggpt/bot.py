@@ -4106,7 +4106,8 @@ async def xmpp_msg(msg):
     await send(f"暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
     #  chat = await get_entity(CHAT_ID, True)
     #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
-    await sendme(f"{msg.type_} {msg.from_}: {text}")
+    #  await sendme(f"{msg.type_} {msg.from_}: {text}")
+    send_log(f"{msg.type_} {msg.from_}: {text}")
     return
     #  pprint(msg)
 
@@ -4191,7 +4192,8 @@ async def xmpp_msg(msg):
       await send(reply)
       return
     if is_admin is False:
-      await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
+      #  await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
+      send_log(f"{msg.type_} {msg.from_}: {text}")
       return
     #  if get_jid(msg.to) in my_groups:
     #  if get_jid(msg.from_) in my_groups:
