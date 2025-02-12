@@ -2750,15 +2750,24 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
 
   if path:
     res = await upload(path)
+
+    url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
+    async def mymv(path, url, src=None):
+      shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
+      res = await run_my_bash(shell_cmd, shell=False)
+      info(res)
+      if src:
+        await send(url, src)
+      #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
     if res:
       #  await send(f"{res}\n{path}", src)
-      await send(f"{res}", src)
-    shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
-    res = await run_my_bash(shell_cmd, shell=False)
-    info(res)
-    #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
-    path = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
-    return path
+      #  await send(f"{res}", src)
+      asyncio.create_task(mymv(path, url, src))
+      return res
+    else:
+      t = asyncio.create_task(mymv(path, url))
+      await t
+      return url
   else:
     #  res = f"{res} 下载失败: {path}"
     if src:
