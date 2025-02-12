@@ -6054,7 +6054,7 @@ async def xmppbot():
         if "urn:xmpp:http:upload:0" in r.features:
           UPLOAD = i.jid
           info(f"上传文件用的服务器地址：{UPLOAD}")
-          for j in r.to_dict().forms:
+          for j in r.to_dict()["forms"]:
             if j["FORM_TYPE"]:
               if j["FORM_TYPE"][0] == "urn:xmpp:http:upload:0":
                 if j["max-file-size"]:
