@@ -3359,7 +3359,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
   #  httpupload = client.summon(aioxmpp.httpupload.Service)
   #  filename = file_path.split("/")[-1]
   filename = p.name
-  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, os.path.getsize(file_path), mimetypes.guess_type(file_path))
+  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, os.path.getsize(file_path), mimetypes.guess_type(file_path)[0])
 
   async with aiofiles.open(file_path, "rb") as file:
     res = await http(slot.put.url, method="PUT", headers=slot.put.headers, data=file)
