@@ -3452,7 +3452,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
   #  filename = file_path.split("/")[-1]
   filename = fp.name
   length = os.path.getsize(fp)
-  print(XB,UPLOAD, filename, os.path.getsize(fp), mimetypes.guess_type(fp)[0])
+  print(XB,UPLOAD, filename, os.path.getsize(fp), mimetypes.guess_type(fp)[0], file_path)
   slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, length, mimetypes.guess_type(fp)[0])
   #  slot = await XB.send(aioxmpp.IQ(
   #      type_=aioxmpp.IQType.GET,
