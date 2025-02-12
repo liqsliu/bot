@@ -9,11 +9,24 @@ UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Ge
 UA="curl/7.88.1"
 LA='Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6'
 
+
+
+if [[ -z "$2" ]]; then
+
 # https://stackoverflow.com/questions/20317945/limit-size-wget-can-download/20318140#20318140
 ulimit -f 204800
 MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-100000000}
-
 MAX_TIMEOUT=16
+
+else
+
+  # 暂时忽略自定义大小
+ulimit -f 2048000
+MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-1000000000}
+MAX_TIMEOUT=300
+
+fi
+
 # https://stackoverflow.com/questions/55842311/get-page-titles-from-a-list-of-urls
 # while read -r URL; do
     # echo -n "$URL --> "
@@ -33,36 +46,42 @@ MAX_TIMEOUT=16
     fno=$fn
     fn="$HOME/t/$fn"
 
+
+
   if [[ "$2" == direct ]]; then
     unset http_proxy
     unset https_proxy
-    wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
-      wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL"
-      exit $?
-    }
+    # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
+      wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+    # }
   else
     export http_proxy="http://127.0.0.1:6080"
     export https_proxy="http://127.0.0.1:6080"
     if [[ "$2" == curl ]]; then
-      curl -s -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || {
-        curl -v -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA"
-        exit $?
-      }
+      # curl -s -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || {
+        curl -v -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || exit $?
+      # }
 
     elif [[ "$2" == raw ]]; then
-      wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
-        wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL"
-        exit $?
-      }
+      # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
+        wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+      # }
     else
-      wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
-        wget --server-response --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL"
-        exit $?
-      }
+      # wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
+        wget --server-response --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+      # }
     fi
   fi
+
+
+
+
+
+  if [[ -z "$2" ]]; then
+    ft=$(file --mime-type -b -- "$fn") 
+  fi
+
   # ft=$(echo "$html" | file --mime-type -b -- -)
-  ft=$(file --mime-type -b -- "$fn") 
   if [[ "$ft" == "text/html" ]]; then
     # echo "$html" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
     cat "$fn" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?

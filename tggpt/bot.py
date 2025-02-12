@@ -314,9 +314,11 @@ MY_ID = int(get_my_key("TELEGRAM_MY_ID"))
 
 MAX_MSG_BYTES = 8000
 
-HTTP_RES_MAX_BYTES = 15000000
-FILE_DOWNLOAD_MAX_BYTES = 64000000
-TMP_PATH=HOME+"/tera/tmp"
+HTTP_RES_MAX_BYTES = 15*2**20
+HTTP_FILE_MAX_BYTES = 50*2**20
+
+FILE_DOWNLOAD_MAX_BYTES = 64*2**20
+TMP_PATH=f"{HOME}/tera/tmp"
 
 DOWNLOAD_PATH0 = "/var/www/dav/tmp"
 DOWNLOAD_PATH = f"{HOME}/t"
@@ -1615,12 +1617,12 @@ async def backup(path, src=None):
 
 
 
-async def get_title(url, src):
+async def get_title(url, src, down=False):
   shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
   shell_cmd.append(url)
+  if down:
+    shell_cmd.append("%s" % 1000*2**20)
   r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False)
-  if err:
-    warn("%s\n--\nE: %s\n%s" % (out, r, err))
   if r == 0:
     s = out.splitlines()
     path = s[-1]
@@ -1635,6 +1637,8 @@ async def get_title(url, src):
       s.pop(-1)
     return "\n".join(s)
   else:
+    #  if err:
+    warn("%s\n--\nE: %s\n%s" % (out, r, err))
     return "%s\n--\nE: %s\n%s" % (out, r, err)
 
 
@@ -2504,8 +2508,12 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
       try:
         data = None
         html = None
-        if 'Content-Length' in res.headers and int(res.headers['Content-Length']) > HTTP_RES_MAX_BYTES:
-          logger.warning(f"skip: too big: {url}")
+        length =  0
+        if 'Content-Length' in res.headers:
+          length = int(res.headers['Content-Length'])
+        #  if 'Content-Length' in res.headers and int(res.headers['Content-Length']) > HTTP_RES_MAX_BYTES:
+        if length > HTTP_RES_MAX_BYTES:
+          warn(f"skip: too big({length}): {url}")
         elif 'Transfer-Encoding' in res.headers and res.headers['Transfer-Encoding'] == "chunked":
 
           #  async for data in res.content.iter_chunked(HTTP_RES_MAX_BYTES):
@@ -2513,12 +2521,14 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
           data = b""
           async for tmp, _ in res.content.iter_chunks():
             data += tmp
-            if len(data) > HTTP_RES_MAX_BYTES:
+            if len(data) > HTTP_FILE_MAX_BYTES:
               break
+            info(f"http downlod({length})... {len(tmp)} > {len(data)}")
         else:
+          info(f"http downlod({length})...")
         # if res.headers['content-type'] == "text/plain; charset=utf-8":
           #  data = await res.read()
-          data = await res.content.read(HTTP_RES_MAX_BYTES)
+          data = await res.content.read(HTTP_FILE_MAX_BYTES)
 
         if data is not None:
           try:
@@ -4652,6 +4662,17 @@ async def add_cmd():
     return res
   cmd_funs["discoi"] = _
   cmd_for_admin.add('discoi')
+
+
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"download file by url\n.{cmds[0]} $url"
+    res = await get_title(cmds[1], src, True)
+    return f"{res}"
+  cmd_funs["down"] = _
+  cmd_for_admin.add('down')
+
 
   async def _(cmds, src):
     if len(cmds) == 1:
