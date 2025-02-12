@@ -3297,9 +3297,13 @@ async def disco_info(jid, node=None, client=None):
   #  jid = test_group.rsplit('@', 1)[1]
   dc = client.summon(aioxmpp.DiscoClient)
   #  res = await dc.query_info(JID.fromstr(jid))
-  res = await dc.query_info(JID.fromstr(jid), node=node)
-  pprint(res)
-  print(jid, res.to_dict())
+  try:
+    res = await dc.query_info(JID.fromstr(jid), node=node, timeout=5)
+    pprint(res)
+    print(jid, res.to_dict())
+  except TimeoutError as e:
+    warn(f"失败(超时)：{jid}, {e=}")
+    res = "失败(超时)"
   return res
 
 async def disco_item(jid, node=None, client=None):
@@ -3311,10 +3315,14 @@ async def disco_item(jid, node=None, client=None):
   #  jid = test_group.rsplit('@', 1)[1]
   dc = client.summon(aioxmpp.DiscoClient)
   #  res = await dc.query_info(JID.fromstr(jid))
-  res = await dc.query_items(jid=JID.fromstr(jid), node=node)
-  pprint(res)
-  for i in res.items:
-    print(i.name, i.node, i.jid)
+  try:
+    res = await dc.query_items(jid=JID.fromstr(jid), node=node, timeout=5)
+    pprint(res)
+    for i in res.items:
+      print(i.name, i.node, i.jid)
+  except TimeoutError as e:
+    warn(f"失败(超时)：{jid}, {e=}")
+    res = "失败(超时)"
   return res
 
 
