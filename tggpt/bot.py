@@ -2010,6 +2010,9 @@ async def send(text, jid=None, *args, **kwargs):
     text0 = text
     text = f"{name}{text}"
 
+  if jid == log_group_private:
+    await UB.send_message(CHAT_ID, text)
+
   ms = get_mucs(muc)
   if ms:
   #  if muc in my_groups:
