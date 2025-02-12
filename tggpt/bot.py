@@ -2810,7 +2810,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
       #  await send(f"{res}\n{path}", src)
       #  await send(f"{res}", src)
       info(f"use xmpp server: {res}")
-      asyncio.create_task(backup(path, url, src))
+      asyncio.create_task(backup(path, src))
       #  res += f"\n{url}"
       return res
     else:
