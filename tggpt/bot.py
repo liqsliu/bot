@@ -3406,7 +3406,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
     info(f"res: {res}\nslot: {slot}")
     dbg(slot.put.headers)
     info(slot.get.url)
-    return(slot.get.url)
+    return slot.get.url
 
 
 
