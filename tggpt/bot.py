@@ -3316,7 +3316,7 @@ async def disco_item(jid=None, node=None, client=None):
   if client is None:
     client = XB
   if jid is None:
-    jid = XB.local_jid
+    jid = JID.fromstr(XB.local_jid.domain)
   elif isinstance(jid, JID):
     pass
   else:
@@ -4534,7 +4534,7 @@ async def add_cmd():
     if cmds[1] == "me":
       res = await disco_info(JID.fromstr(src).domain, node=ns)
     elif cmds[1] == "you":
-      res = await disco_info(XB.local_jid, node=ns)
+      res = await disco_info(node=ns)
     else:
       res = await disco_info(cmds[1], node=ns)
     if res:
@@ -4553,7 +4553,7 @@ async def add_cmd():
     if cmds[1] == "me":
       res = await disco_item(JID.fromstr(src).domain, node=ns)
     elif cmds[1] == "you":
-      res = await disco_item(XB.local_jid, node=ns)
+      res = await disco_item(node=ns)
     else:
       res = await disco_item(cmds[1], node=ns)
     if res:
