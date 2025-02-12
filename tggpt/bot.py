@@ -2703,14 +2703,14 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     res = f"{msg.file.name}"
   else:
     res = ''
-  if msg.buttons:
-    logger.info(msg.buttons)
-    for i in get_buttons(msg.buttons):
-      if isinstance(i.button, KeyboardButtonUrl):
-        logger.info(f"add url from: {i}")
-        res += f" {i.url}"
-      else:
-        logger.info(f"ignore button: {i}")
+  #  if msg.buttons:
+  #    logger.info(msg.buttons)
+  #    for i in get_buttons(msg.buttons):
+  #      if isinstance(i.button, KeyboardButtonUrl):
+  #        logger.info(f"add url from: {i}")
+  #        res += f" {i.url}"
+  #      else:
+  #        logger.info(f"ignore button: {i}")
   #  await mt_send(f"{res} 下载中...", gateway=gateway)
   #  res = f"{res} 下载中..."
   if src:
@@ -2724,6 +2724,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     last_time[1] = current
     if len(last_time) == 2:
       last_time.append(total)
+      await send("开始下载：{} {:.1f}MB".format(res, total/1024/1024), src)
     #  print('Downloaded', current, 'out of', total,
     #    'bytes: {:.2%}'.format(current / total))
     #  if time.time() - last_time[src] > interval:
@@ -2755,7 +2756,8 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
           info(f"下载完成：{res}")
           break
         #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
-        await send("执行中({:.0f}s)：{} 下载中... {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
+        #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
+        await send("-{:.0f}K".format((total-current)/1024), src)
         last_time[0] = time.time()
         last_current = current
 

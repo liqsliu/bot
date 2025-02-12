@@ -80,6 +80,12 @@ fi
 
 
 
+  if [[ ${#fno} -gt 4 ]]; then
+    fno=${fno::4}
+    mv "$fn" "$HOME/t/$fno$fe"
+    fn="$HOME/t/$fno$fe"
+  fi
+
   if [[ -z "$2" ]]; then
     ft=$(file --mime-type -b -- "$fn") 
   fi
