@@ -3337,7 +3337,7 @@ async def disco_item(jid=None, node=None, client=None):
     warn(f"失败(超时)：{jid}, {e=}")
 
 
-def get_server_name(jid):
+async def get_server_name(jid):
   res = await disco_info(jid)
   if res.identities:
     return res.identities[0]
@@ -4558,7 +4558,7 @@ async def add_cmd():
     if res:
       tmp = ""
       for i in res.items:
-        tmp += "%s %s %s %s" % (i.name, i.node, i.jid, get_server_name(i.jid))
+        tmp += "%s %s %s %s" % (i.name, i.node, i.jid, await get_server_name(i.jid))
       
     return res
   cmd_funs["discoi"] = _
