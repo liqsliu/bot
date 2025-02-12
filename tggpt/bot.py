@@ -3338,6 +3338,7 @@ async def disco_item(jid=None, node=None, client=None):
 
 
 async def get_server_name(jid):
+  await asyncio.sleep(0.5)
   res = await disco_info(jid)
   if res:
     if res.identities:
@@ -3345,8 +3346,23 @@ async def get_server_name(jid):
 
 
 
-async def upload():
-  httpupload = client.summon(aioxmpp.httpupload.Service)
+async def upload(file_path=f"{HOME}/t/1.jpg"):
+  if UPLOAD is None:
+    err(f"服务器不支持文件上传: {myjid}")
+    return False
+
+  p = Path(file_path)
+  if not p.is_file():
+    err(f"仅支持文件: {file_path}")
+    return
+  #  httpupload = client.summon(aioxmpp.httpupload.Service)
+  #  filename = file_path.split("/")[-1]
+  filename = p.name
+  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, os.path.getsize(file_path), mimetypes.guess_type(file_path))
+
+  async with aiofiles.open(file_path, "rb") as file:
+    res = await http(slot.put.url, method="PUT", headers=slot.put.headers, data=file)
+    info(f"res: {res}\nslot: {slot}")
 
 
 
@@ -6065,6 +6081,8 @@ async def xmppbot():
     warn(f"没找到上传文件用的服务器地址：{myjid}")
   if UPLOAD_MAX == 0:
     warn(f"没找到文件大小限制：{myjid}")
+
+  await upload()
 
 @exceptions_handler
 async def xmppbot2():
