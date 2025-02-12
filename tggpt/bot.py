@@ -3291,6 +3291,12 @@ async def stop(client=None):
 async def disco_info(jid, node=None, client=None):
   if client is None:
     client = XB
+  if jid is None:
+    jid = XB.local_jid
+  elif isinstance(jid, JID):
+    pass
+  else:
+    jid = JID.fromstr(jid)
   #  for i in my_groups:
   #    jid = i
   #    break
@@ -3298,7 +3304,7 @@ async def disco_info(jid, node=None, client=None):
   dc = client.summon(aioxmpp.DiscoClient)
   #  res = await dc.query_info(JID.fromstr(jid))
   try:
-    res = await dc.query_info(JID.fromstr(jid), node=node, timeout=5)
+    res = await dc.query_info(jid, node=node, timeout=5)
     pprint(res)
     print(jid, res.to_dict())
     return res
@@ -3306,9 +3312,15 @@ async def disco_info(jid, node=None, client=None):
     warn(f"失败(超时)：{jid}, {e=}")
     #  res = "失败(超时)"
 
-async def disco_item(jid, node=None, client=None):
+async def disco_item(jid=None, node=None, client=None):
   if client is None:
     client = XB
+  if jid is None:
+    jid = XB.local_jid
+  elif isinstance(jid, JID):
+    pass
+  else:
+    jid = JID.fromstr(jid)
   #  for i in my_groups:
   #    jid = i
   #    break
@@ -3316,13 +3328,19 @@ async def disco_item(jid, node=None, client=None):
   dc = client.summon(aioxmpp.DiscoClient)
   #  res = await dc.query_info(JID.fromstr(jid))
   try:
-    res = await dc.query_items(jid=JID.fromstr(jid), node=node, timeout=5)
+    res = await dc.query_items(jid, node=node, timeout=5)
     pprint(res)
     for i in res.items:
       print(i.name, i.node, i.jid)
     return res
   except TimeoutError as e:
     warn(f"失败(超时)：{jid}, {e=}")
+
+
+def get_server_name(jid):
+  res = await disco_info(jid)
+  if res.identities:
+    return res.identities[0]
 
 
 
@@ -4515,7 +4533,7 @@ async def add_cmd():
     if cmds[1] == "me":
       res = await disco_info(JID.fromstr(src).domain, node=ns)
     elif cmds[1] == "you":
-      res = await disco_info(XB.local_jid.domain, node=ns)
+      res = await disco_info(XB.local_jid, node=ns)
     else:
       res = await disco_info(cmds[1], node=ns)
     if res:
@@ -4534,11 +4552,14 @@ async def add_cmd():
     if cmds[1] == "me":
       res = await disco_item(JID.fromstr(src).domain, node=ns)
     elif cmds[1] == "you":
-      res = await disco_item(XB.local_jid.domain, node=ns)
+      res = await disco_item(XB.local_jid, node=ns)
     else:
       res = await disco_item(cmds[1], node=ns)
     if res:
-      res = res.items
+      tmp = ""
+      for i in res.items:
+        tmp += "%s %s %s %s" % (i.name, i.node, i.jid, get_server_name(i.jid))
+      
     return res
   cmd_funs["discoi"] = _
   cmd_for_admin.add('discoi')
@@ -5989,7 +6010,7 @@ async def join(jid=None, nick=None, client=None):
 @exceptions_handler
 async def xmppbot():
   logger.info("开始登录xmpp")
-  global XB, myjid
+  global XB, myjid, UPLOAD
   myjid = get_my_key("JID")
   password = get_my_key("JID_PASS")
   logger.info(f"xmpp: {myjid} {password[:3]}...")
@@ -6000,14 +6021,21 @@ async def xmppbot():
   )
   logger.info(f"已导入新账户: {myjid} password: {password[:4]}...")
   t = asyncio.create_task(load_config())
+  await t
   if await login():
-    await t
+
+
     logger.info(f"join all groups...\n%s" % my_groups)
     #  await join()
     #  global mucsv
     #  mucsv = client.summon(aioxmpp.MUCClient)
     #  for coro in asyncio.as_completed(map(join, my_groups),
     await join_all()
+
+  else:
+    err(f"登陆失败：{myjid}")
+    return
+
 
   global allright_task
   if allright_task > 0:
@@ -6016,6 +6044,18 @@ async def xmppbot():
     asyncio.create_task(xmppbot2(), name="xmppbot2")
   else:
     await sendg("已重新启动xmppbot")
+    
+  UPLOAD = None
+  res = await disco_item()
+  if res:
+    for i in res.items:
+      r = await disco_info(i.jid)
+      if r:
+        if "urn:xmpp:http:upload:0" in r.features:
+          UPLOAD = i.jid
+          break
+  if UPLOAD is None:
+    warn(f"没找到上传文件用的服务器地址：{myjid}")
 
 @exceptions_handler
 async def xmppbot2():
