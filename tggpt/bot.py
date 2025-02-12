@@ -313,6 +313,7 @@ MY_ID = int(get_my_key("TELEGRAM_MY_ID"))
 
 
 MAX_MSG_BYTES = 8000
+MAX_MSG_BYTES_TG = 4000
 
 HTTP_RES_MAX_BYTES = 15*2**20
 HTTP_FILE_MAX_BYTES = 50*2**20
@@ -1622,20 +1623,26 @@ async def get_title(url, src, down=False):
   shell_cmd.append(url)
   if down:
     shell_cmd.append("%s" % (2**20*1000))
-  r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=600)
+    max_time = 600
+  else:
+    max_time = 60
+  r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=max_time)
   if r == 0:
     s = out.splitlines()
-    path = s[-1]
-    if os.path.exists(path):
-      url = await upload(path)
-      asyncio.create_task(backup(path, url))
-      if url:
-        s[-1] = f"\n- {url}"
+    if len(s) > 1:
+      path = s[-1]
+      if os.path.exists(path):
+        url = await upload(path)
+        asyncio.create_task(backup(path, url))
+        if url:
+          s[-1] = f"\n- {url}"
+        else:
+          s.pop(-1)
       else:
         s.pop(-1)
+      return "\n".join(s)
     else:
-      s.pop(-1)
-    return "\n".join(s)
+      return out
   else:
     #  if err:
     warn("%s\n--\nE: %s\n%s" % (out, r, err))
@@ -1899,9 +1906,12 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
     text = None
     for i in msg.body:
       text = msg.body[i]
-      break
+      if text:
+        break
 
     if text:
+      if jid == log_group_private:
+        sendme(text)
       msgs = []
       for text in split_long_text(text, MAX_MSG_BYTES):
         if msgs:
@@ -2010,8 +2020,6 @@ async def send(text, jid=None, *args, **kwargs):
     text0 = text
     text = f"{name}{text}"
 
-  if jid == log_group_private:
-    await UB.send_message(CHAT_ID, text)
 
   ms = get_mucs(muc)
   if ms:
@@ -2146,14 +2154,20 @@ async def send1(text, jid=None, *args, **kwargs):
 #    #  return await client.send(msg)
 #    return await _send(msg, client, gpm=gpm)
 
-async def sendme(text):
+def sendme(text):
+  asyncio.create_task(_sendme(text))
+
+async def _sendme(text):
+  for text in split_long_text(text, MAX_MSG_BYTES_TG):
+    await UB.send_message(CHAT_ID, text)
+  return True
   chat = await get_entity(CHAT_ID, True)
   await UB.send_message(chat, text)
 
 async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kwargs):
   if name:
     text = f"{name}{text}"
-  asyncio.create_task(sendme(text))
+  sendme(text)
   logger.info(f"send group msg: {jid} {text}")
   if jid is None:
     jid = log_group_private
