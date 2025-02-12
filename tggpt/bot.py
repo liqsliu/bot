@@ -3311,7 +3311,7 @@ async def disco_item(jid, node=None, client=None):
   #  jid = test_group.rsplit('@', 1)[1]
   dc = client.summon(aioxmpp.DiscoClient)
   #  res = await dc.query_info(JID.fromstr(jid))
-  res = await dc.query_items(jid, node=node)
+  res = await dc.query_items(jid=JID.fromstr(jid))
   pprint(res)
   print(jid, res.to_dict())
   return res
@@ -4245,9 +4245,9 @@ async def xmpp_msg(msg):
     cmds = get_cmd(text)
     if len(cmds) > 1:
       if cmds[1] == "None":
-        res = await disco_info(msg.to)
+        res = await disco_info(XB.local_jid)
       else:
-        res = await disco_info(msg.to, cmds[1])
+        res = await disco_info(JID.fromstr(cmds[1]))
     else:
       res = await disco_info(XB.local_jid, msg.from_.domain)
     reply = msg.make_reply()
@@ -4257,9 +4257,9 @@ async def xmpp_msg(msg):
     #  res = await disco_info(get_jid(msg.from_))
     cmds = get_cmd(text)
     if len(cmds) > 1:
-      res = await disco_item(msg.to, cmds[1])
+      res = await disco_item(cmds[1])
     else:
-      res = await disco_item(XB.local_jid, msg.from_.domain)
+      res = await disco_item(msg.from_.domain)
     reply = msg.make_reply()
     reply.body[None] = str(res)
     await send(reply)
