@@ -3297,7 +3297,7 @@ async def disco_info(jid, node=None, client=None):
   #  jid = test_group.rsplit('@', 1)[1]
   dc = client.summon(aioxmpp.DiscoClient)
   #  res = await dc.query_info(JID.fromstr(jid))
-  res = await dc.query_info(jid, node=node)
+  res = await dc.query_info(JID.fromstr(jid), node=node)
   pprint(res)
   print(jid, res.to_dict())
   return res
@@ -4199,13 +4199,13 @@ async def xmpp_msg(msg):
     warn(f"normal msg: {msg}")
     return
   elif msg.type_ == MessageType.CHAT:
-    logger.info("群内私聊: %s" % msg)
     if text == "ping":
       reply = msg.make_reply()
       reply.body[None] = "pong"
       await send(reply)
       return
     if is_admin is False:
+      logger.info("群内私聊: %s" % msg)
       #  await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
       send_log(f"{msg.type_} {msg.from_}: {text}")
       return
@@ -4246,7 +4246,7 @@ async def xmpp_msg(msg):
     cmds = get_cmd(text)
     if len(cmds) > 1:
       if cmds[1] == "None":
-        res = await disco_info(XB.local_jid)
+        res = await disco_info(XB.local_jid.domain)
       else:
         res = await disco_info(JID.fromstr(cmds[1]))
     else:
