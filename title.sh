@@ -80,7 +80,7 @@ MAX_TIMEOUT=16
       for i in $fes; do
         if [[ "${fno%.${i}}" == "$fno" ]]; then
           if [[ -z "$fe" ]]; then
-            fe=$i
+            fe=".$i"
           fi
         else
           fno=${fno%.${i}}
