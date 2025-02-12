@@ -318,7 +318,8 @@ HTTP_RES_MAX_BYTES = 15000000
 FILE_DOWNLOAD_MAX_BYTES = 64000000
 TMP_PATH=HOME+"/tera/tmp"
 
-DOWNLOAD_PATH = "/var/www/dav/tmp"
+DOWNLOAD_PATH0 = "/var/www/dav/tmp"
+DOWNLOAD_PATH = f"{HOME}/t"
 URL_PATH = ""
 
 #  DOWNLOAD_PATH = "/var/www/dav/home"
@@ -1218,7 +1219,7 @@ async def my_popen(cmd,
       return p.returncode, res, errs
 
 
-async def run_my_bash(cmd, shell=True, max_time=64):
+async def run_my_bash(cmd, shell=True, max_time=120):
   p = Popen(cmd,
         shell=shell,
         stdout=PIPE,
@@ -2748,8 +2749,15 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
         t.cancel()
 
   if path:
-    #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
     path = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
+    res = await upload(path)
+    if res:
+      #  await send(f"{res}\n{path}", src)
+      await send(f"{res}", src)
+    shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
+    res = await run_my_bash(shell_cmd, shell=False)
+    info(res)
+    #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
     return path
   else:
     #  res = f"{res} 下载失败: {path}"
@@ -3353,24 +3361,27 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
     err(f"服务器不支持文件上传: {myjid}")
     return False
 
-  p = Path(file_path)
-  file_path = Path(file_path)
-  if not p.is_file():
+  if type(file_path) is str:
+    fp = Path(file_path)
+    #  file_path = Path(file_path)
+  else:
+    fp = file_path
+  if not fp.is_file():
     err(f"仅支持文件: {file_path}")
     return
   #  httpupload = client.summon(aioxmpp.httpupload.Service)
   #  filename = file_path.split("/")[-1]
-  filename = p.name
-  length = os.path.getsize(file_path)
-  print(XB,UPLOAD, filename, os.path.getsize(file_path), mimetypes.guess_type(file_path)[0])
-  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, length, mimetypes.guess_type(file_path)[0])
+  filename = fp.name
+  length = os.path.getsize(fp)
+  print(XB,UPLOAD, filename, os.path.getsize(fp), mimetypes.guess_type(fp)[0])
+  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, length, mimetypes.guess_type(fp)[0])
   #  slot = await XB.send(aioxmpp.IQ(
   #      type_=aioxmpp.IQType.GET,
   #      to=UPLOAD,
   #      payload=aioxmpp.httpupload.Request(
   #          filename,
-  #          os.path.getsize(file_path),
-  #          mimetypes.guess_type(file_path)[0],
+  #          os.path.getsize(fp),
+  #          mimetypes.guess_type(fp)[0],
   #      )
   #  ))
 
@@ -3381,11 +3392,12 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
   info(slot.put.headers)
   dbg(slot.get.url)
 
-  async with aiofiles.open(file_path, "rb") as file:
+  async with aiofiles.open(fp, "rb") as file:
     res = await http(slot.put.url, method="PUT", headers=headers, data=file)
     info(f"res: {res}\nslot: {slot}")
-  dbg(slot.put.headers)
-  info(slot.get.url)
+    dbg(slot.put.headers)
+    info(slot.get.url)
+    return(slot.get.url)
 
 
 
