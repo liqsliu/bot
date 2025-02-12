@@ -3452,6 +3452,12 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
   #  filename = file_path.split("/")[-1]
   filename = fp.name
   length = os.path.getsize(fp)
+  if UPLOAD_MAX > 0:
+    if length > UPLOAD_MAX:
+      err(f"file is too big: {length} {file_path}")
+      return False
+  else:
+    warn(f"unknown file size limit: {UPLOAD}")
   print(XB,UPLOAD, filename, os.path.getsize(fp), mimetypes.guess_type(fp)[0], file_path)
   slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, length, mimetypes.guess_type(fp)[0])
   #  slot = await XB.send(aioxmpp.IQ(
