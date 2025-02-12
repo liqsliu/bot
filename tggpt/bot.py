@@ -4508,12 +4508,18 @@ async def add_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"disco\n.{cmds[0]} $domain\nhttps://docs.zombofant.net/aioxmpp/devel/api/public/disco.html?highlight=disco#aioxmpp.DiscoClient"
-    if cmds[1] == "me":
-      res = await disco_info(msg.from_.domain)
-    elif cmds[1] == "you":
-      res = await disco_info(XB.local_jid.domain)
+    if len(cmds) == 3:
+      ns = cmds[2]
     else:
-      res = await disco_info(cmds[1])
+      ns = None
+    if cmds[1] == "me":
+      res = await disco_info(JID.fromstr(src).domain, node=ns)
+    elif cmds[1] == "you":
+      res = await disco_info(XB.local_jid.domain, node=ns)
+    else:
+      res = await disco_info(cmds[1], node=ns)
+    if res:
+      res = res.to_dict()
     return res
   cmd_funs["disco"] = _
   cmd_for_admin.add('disco')
@@ -4521,12 +4527,18 @@ async def add_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"discoi\n.{cmds[0]} $domain\nhttps://docs.zombofant.net/aioxmpp/devel/api/public/disco.html?highlight=disco#aioxmpp.DiscoClient"
-    if cmds[1] == "me":
-      res = await disco_item(msg.from_.domain)
-    elif cmds[1] == "you":
-      res = await disco_item(XB.local_jid.domain)
+    if len(cmds) == 3:
+      ns = cmds[2]
     else:
-      res = await disco_item(cmds[1])
+      ns = None
+    if cmds[1] == "me":
+      res = await disco_item(JID.fromstr(src).domain, node=ns)
+    elif cmds[1] == "you":
+      res = await disco_item(XB.local_jid.domain, node=ns)
+    else:
+      res = await disco_item(cmds[1], node=ns)
+    if res:
+      res = res.items
     return res
   cmd_funs["discoi"] = _
   cmd_for_admin.add('discoi')
