@@ -3252,7 +3252,7 @@ async def parse_tg_out_msg(event):
           await UB.send_message('me', "not fount input entity")
 
   #  res = await run_cmd(text, CHAT_ID, "G me")
-  res = await run_cmd(text, log_group_private, "G me")
+  res = await run_cmd(text, log_group_private, f"**G {MY_NAME}:**")
   if res is True:
     return
   if res:
