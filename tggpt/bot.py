@@ -2390,7 +2390,7 @@ async def mt2tg(msg):
       if await send1(text2, m, nick=rname) is False:
         return
 
-    res = await run_cmd(text, gateway, name)
+    res = await run_cmd(text, gateway, name, textq=text0)
     if res is True:
       return
     if res:
