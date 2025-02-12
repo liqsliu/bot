@@ -2751,20 +2751,20 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
   if path:
     res = await upload(path)
 
+      #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
     url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
     async def mymv(path, url, src=None):
       shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
       res = await run_my_bash(shell_cmd, shell=False)
       info(res)
-      #  if src:
-      #    await send(url, src)
-      #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
+      if src:
+        await send(url, src)
     if res:
       #  await send(f"{res}\n{path}", src)
       #  await send(f"{res}", src)
       info(f"use xmpp server: {res}")
       asyncio.create_task(mymv(path, url, src))
-      res += f"\n{url}"
+      #  res += f"\n{url}"
       return res
     else:
       warn(f"xmpp server is not ok: {res}")
