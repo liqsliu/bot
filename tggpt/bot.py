@@ -2749,7 +2749,6 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
         t.cancel()
 
   if path:
-    path = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
     res = await upload(path)
     if res:
       #  await send(f"{res}\n{path}", src)
@@ -2758,6 +2757,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     res = await run_my_bash(shell_cmd, shell=False)
     info(res)
     #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
+    path = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
     return path
   else:
     #  res = f"{res} 下载失败: {path}"
@@ -6117,7 +6117,7 @@ async def xmppbot():
   if UPLOAD_MAX == 0:
     warn(f"没找到文件大小限制：{myjid}")
 
-  await upload()
+  #  await upload()
 
 @exceptions_handler
 async def xmppbot2():
