@@ -1618,7 +1618,7 @@ async def backup(path, src=None):
 
 
 
-async def get_title(url, src, down=False):
+async def get_title(url, src=none, down=False):
   shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
   shell_cmd.append(url)
   if down:
@@ -3270,7 +3270,8 @@ async def parse_tg_out_msg(event):
   if res is True:
     return
   if res:
-    await UB.send_message(CHAT_ID, res)
+    #  await UB.send_message(CHAT_ID, res)
+    sendme(res)
 
 
 #  @UB.on(events.NewMessage(incoming=True))
@@ -5659,7 +5660,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         return res
       if not res:
         if len(urls) == 1:
-          res="%s" % await get_title(url, src)
+          res="%s" % await get_title(url)
           break
         res="[ %s urls ]" % len(urls)
       res+="\n\n> %s\n%s" % (url, await get_title(url, src))
