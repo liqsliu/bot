@@ -3354,14 +3354,16 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
     return False
 
   p = Path(file_path)
+  file_path = Path(file_path)
   if not p.is_file():
     err(f"仅支持文件: {file_path}")
     return
   #  httpupload = client.summon(aioxmpp.httpupload.Service)
   #  filename = file_path.split("/")[-1]
   filename = p.name
+  length = os.path.getsize(file_path)
   print(XB,UPLOAD, filename, os.path.getsize(file_path), mimetypes.guess_type(file_path)[0])
-  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, os.path.getsize(file_path), mimetypes.guess_type(file_path)[0])
+  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, length, mimetypes.guess_type(file_path)[0])
   #  slot = await XB.send(aioxmpp.IQ(
   #      type_=aioxmpp.IQType.GET,
   #      to=UPLOAD,
@@ -3374,9 +3376,9 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
 
   # 流式上传需要手动设置Length
   headers = slot.put.headers.copy()
-  headers["Content-Length"] = str(os.path.getsize(file_path))
+  headers["Content-Length"] = str(length)
 
-  dbg(slot.put.headers)
+  info(slot.put.headers)
   dbg(slot.get.url)
 
   async with aiofiles.open(file_path, "rb") as file:
