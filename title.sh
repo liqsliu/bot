@@ -89,7 +89,7 @@ MAX_TIMEOUT=16
     #     fi
     #   done
     # fi
-    #
+    # grep -i "$mime_type" /etc/mime.types | awk '{for(i=2;i<=NF;i++) print $i}'
   mime_type=$ft
   # 定义 MIME 类型到扩展名的映射
   case "$mime_type" in
