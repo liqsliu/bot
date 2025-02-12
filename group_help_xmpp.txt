@@ -8,6 +8,9 @@ xmpp:wtfipfs@chat.yax.im?join
 xmpp:wtfipfs@conference.xmpp.jp?join
 xmpp:wtfipfs@conference.jabb3r.de?join
 
+群组管理: xmpp:liqsliu@conversations.im?omemo-sid-1591830723=7ddacf77707b78fcd888f897423c04c7cc749ebadf28f5054286e7c1aedf7f04
+bot:  xmpp:wtfipfs@pimux.de (私聊消息会被转发给管理，不要开启加密，bot不支持)
+
 目前有个xmppbot在管理监视群组: 检测到刷屏会撤销其发言权并尝试撤回消息，不过检测很保守，禁言时间也不会很长，普通用户应该感觉不到影响
 
 分群/避难区(由于主群是公开群，难免会有机器人账号发送垃圾信息甚至进行消息轰炸，故特设此群。新人不能发言，我看到新人会手动给发言权): xmpp:wtfipfs@salas.suchat.org?join
