@@ -1622,7 +1622,7 @@ async def get_title(url, src, down=False):
   shell_cmd.append(url)
   if down:
     shell_cmd.append("%s" % (2**20*1000))
-  r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False)
+  r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=600)
   if r == 0:
     s = out.splitlines()
     path = s[-1]
