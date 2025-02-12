@@ -3297,7 +3297,7 @@ async def disco_info(jid, node=None, client=None):
   #  jid = test_group.rsplit('@', 1)[1]
   dc = client.summon(aioxmpp.DiscoClient)
   #  res = await dc.query_info(JID.fromstr(jid))
-  res = await dc.query_info(jid, node)
+  res = await dc.query_info(jid, node=node)
   pprint(res)
   print(jid, res.to_dict())
   return res
@@ -3311,7 +3311,7 @@ async def disco_item(jid, node=None, client=None):
   #  jid = test_group.rsplit('@', 1)[1]
   dc = client.summon(aioxmpp.DiscoClient)
   #  res = await dc.query_info(JID.fromstr(jid))
-  res = await dc.query_items(jid, node)
+  res = await dc.query_items(jid, node=node)
   pprint(res)
   print(jid, res.to_dict())
   return res
@@ -6116,7 +6116,7 @@ async def amain():
 
       logger.info(f"初始化完成")
       send_log(f"启动成功，用时: {int(time.time()-start_time)}s")
-      await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
+      #  await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
 
       await UB.run_until_disconnected()
 
