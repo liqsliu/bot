@@ -3412,6 +3412,8 @@ async def parse_tg_out_msg(event):
                   try:
                     if tmsg.photo:
                       res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
+                    elif tmsg.video:
+                      res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text)
                     elif tmsg.document:
                       res = await UB.send_file(chat_id, file=tmsg.document, caption=tmsg.text)
                     else:
@@ -4862,6 +4864,11 @@ async def add_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"download file by url\n.{cmds[0]} $url [raw/curl] [direct]"
+    try:
+      if src == log_group_private:
+        res = await UB.send_file(CHAT_ID, file=cmds[1])
+    except Exception as e:
+      warn(f"通过tg远程下载失败: {e=}")
     opts = cmds[2:4]
     while True:
       if len(opts) < 2:
