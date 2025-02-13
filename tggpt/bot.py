@@ -3455,9 +3455,9 @@ async def parse_tg_out_msg(event):
                       # AttributeError("'PhotoSize' object has no attribute 'location'")
                       file = utils.pack_bot_file_id(tmsg.file)
                       if file is None:
-                        file = utils.pack_bot_file_id(tmsg.document)
-                      if file is None:
                         file = utils.pack_bot_file_id(tmsg.photo)
+                      if file is None:
+                        file = utils.pack_bot_file_id(tmsg.document)
                       if file is None:
                         file = utils.pack_bot_file_id(tmsg.media)
                       if file is None:
@@ -3465,6 +3465,7 @@ async def parse_tg_out_msg(event):
                         return
                     except AttributeError as e:
                       err(f"fixme: {e=}")
+                      src = log_group_private
                       path = await download_media(tmsg, src=log_group_private, max_wait_time=1800)
                       await send("下载完成，正在上传到xmpp...", src, correct=True)
                       url = await upload(path)
