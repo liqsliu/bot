@@ -3479,8 +3479,8 @@ async def parse_tg_out_msg(event):
                           url = t.result()
                           if url:
                            info(url)
-                            await asyncio.sleep(2)
-                            res = await UB.send_file(chat_id, file=url, caption=url)
+                           await asyncio.sleep(2)
+                           res = await UB.send_file(chat_id, file=url, caption=url)
                       return
 
                     res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
