@@ -3569,8 +3569,6 @@ async def parse_tg_out_msg(event):
                   except Exception as e:
                     err(f"{e=} {url}")
 
-
-
                   t = asyncio.create_task(backup(path))
                   try:
                     if res is None:
