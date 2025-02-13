@@ -3397,9 +3397,16 @@ async def parse_tg_out_msg(event):
           ss = url.split('/')
           if len(ss) > 4:
             ids = int(ss[-1])
-            msg = await UB.get_messages(peer, ids=ids)
-            if msg:
-              await _sendme(msg.stringify(), chat_id)
+            tmsg = await UB.get_messages(peer, ids=ids)
+            if tmsg:
+              if cmds[-1] == "raw":
+                await _sendme(tmsg.stringify(), chat_id)
+              elif tmsg.file:
+                res = await UB.send_message(chat_id, tmsg.text, file=tmsg.file)
+              elif tmsg.text:
+                res = await UB.send_message(chat_id, tmsg.text)
+              else:
+                await _sendme(tmsg.stringify(), chat_id)
             else:
               await _sendme(f"error id: {ids}\nres: {msg}", chat_id)
           return
