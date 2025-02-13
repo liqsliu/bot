@@ -3417,7 +3417,7 @@ async def parse_tg_out_msg(event):
                       file = utils.pack_bot_file_id(tmsg.media)
                       res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
                 else:
-                  res = await UB.send_file(chat_id, file=tmsg.file)
+                  res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text)
               elif tmsg.text:
                 res = await UB.send_message(chat_id, tmsg.text)
               else:
