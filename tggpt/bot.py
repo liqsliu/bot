@@ -3488,7 +3488,7 @@ async def parse_tg_out_msg(event):
                         if opts == 3:
                           h = await UB.upload_file(path)
 
-                          length = os.path.getsize(file_path)
+                          length = os.path.getsize(path)
                           if length > 5000000:
                             last_time = [time.time(), 0]
                             def callback(current, total):
