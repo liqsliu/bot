@@ -3450,6 +3450,14 @@ async def parse_tg_out_msg(event):
                       file = utils.pack_bot_file_id(tmsg.file)
                       if file is None:
                         file = utils.pack_bot_file_id(tmsg.document)
+                      if file is None:
+                        file = utils.pack_bot_file_id(tmsg.photo)
+                      if file is None:
+                        file = utils.pack_bot_file_id(tmsg.media)
+                      if file is None:
+                        err(f"wtf: {tmsg.stringify()}")
+                        return
+
                     res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
                   except Exception as e:
                     err(f"fixme: {e=}")
