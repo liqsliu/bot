@@ -3421,6 +3421,17 @@ async def parse_tg_out_msg(event):
       cmds = get_cmd(text)
       url = cmds[1]
       if url:
+        if url == "h":
+          sendme("msg url raw/xmpp/vps/direct", chat_id)
+          return
+        opts = 0
+        if len(cmds) == 3:
+          if cmds[2] == "xmpp":
+            opts = 1
+          elif cmds[2] == "vps":
+            opts = 2
+          elif cmds[2] == "direct":
+            opts = 3
         peer = await get_entity(url)
         if peer:
           #  await _sendme(peer.stringify(), chat_id)
@@ -3474,13 +3485,17 @@ async def parse_tg_out_msg(event):
                       src = log_group_private
                       path = await download_media(tmsg, src=log_group_private, max_wait_time=600)
                       if path:
-                        await send("下载完成，正在上传到xmpp...", src, correct=True)
+                        if opts == 3:
+                          h = await UB.upload_file(path)
+                          res = await UB.send_file(chat_id, file=h, caption=cmds[2] , force_document=True)
                         url = None
-                        try:
-                          url = await upload(path)
-                          info(url)
-                        except Exception as e:
-                          err(f"上传失败 {e=}")
+                        if opts == 0 or opts == 1:
+                          await send("下载完成，正在上传到xmpp...", src, correct=True)
+                          try:
+                            url = await upload(path)
+                            info(url)
+                          except Exception as e:
+                            err(f"上传失败 {e=}")
                         t = asyncio.create_task(backup(path))
                         try:
                           if url:
@@ -3491,8 +3506,9 @@ async def parse_tg_out_msg(event):
                               url = t.result()
                               if url:
                                info(url)
-                               await asyncio.sleep(2)
-                               res = await UB.send_file(chat_id, file=url, caption=url)
+                              if opts == 0 or opts == 2:
+                                 await asyncio.sleep(2)
+                                 res = await UB.send_file(chat_id, file=url, caption=url)
                         except rpcerrorlist.WebpageCurlFailedError as e:
                           err(f"文件url有问题: {e=} {url}")
                         except rpcerrorlist.WebpageMediaEmptyError as e:
