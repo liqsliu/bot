@@ -3417,7 +3417,7 @@ async def parse_tg_out_msg(event):
       if url:
         peer = await get_entity(url)
         if peer:
-          await _sendme(peer.stringify(), chat_id)
+          #  await _sendme(peer.stringify(), chat_id)
           ss = url.split('/')
           if len(ss) > 4:
             ids = int(ss[-1])
@@ -3467,16 +3467,18 @@ async def parse_tg_out_msg(event):
                       err(f"fixme: {e=}")
                       src = log_group_private
                       path = await download_media(tmsg, src=log_group_private, max_wait_time=1800)
-                      await send("下载完成，正在上传到xmpp...", src, correct=True)
-                      url = await upload(path)
-                      t = asyncio.create_task(backup(path))
-                      res = await UB.send_file(chat_id, file=url, caption=url)
-                      await asyncio.sleep(2)
-                      await t
-                      if t.done():
-                        url = t.result()
+                      if path:
+                        await send("下载完成，正在上传到xmpp...", src, correct=True)
+                        url = await upload(path)
+                        t = asyncio.create_task(backup(path))
                         if url:
                           res = await UB.send_file(chat_id, file=url, caption=url)
+                        await asyncio.sleep(2)
+                        await t
+                        if t.done():
+                          url = t.result()
+                          if url:
+                            res = await UB.send_file(chat_id, file=url, caption=url)
                       return
 
                     res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
