@@ -2868,9 +2868,9 @@ def parse_tg_url(url, wtf=1):
     if url.startswith("c/"):
       url = url[2:]
     if url:
-      peer = url.rsplit('/',1)[0]
+      peer = url.split('/',1)[0]
       if '/' in url:
-        ids = url.rsplit('/')[-1]
+        ids = url.rsplit('/', 1)[-1]
     #    if url:
     #      peer = url.rsplit('/',1)[0]
     #      if '/' in url:
