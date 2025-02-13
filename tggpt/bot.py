@@ -2710,6 +2710,46 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
 #      print("me: %s" % text)
 
 
+async def upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_memory=False, max_wait_time=download_media_time_max):
+  if path is None:
+    err(f"need file path: {path}")
+    return
+  h = await UB.upload_file(path)
+  length = os.path.getsize(path)
+  if length > 5000000:
+    last_time = [time.time(), 0]
+    def callback(current, total):
+      last_time[1] = current
+      if len(last_time) == 2:
+        last_time.append(total)
+        asyncio.create_task(send("开始下载", src))
+    async def update_tmp_msg():
+      while True:
+        await asyncio.sleep(interval)
+        if len(last_time) == 2:
+          await send("准备中", src, correct=True)
+          if time.time() - last_time[0] > 15:
+            await send("准备超时，可能网络过慢或者文件太小", src, correct=True)
+            break
+        else:
+          current = last_time[1]
+          total = last_time[2]
+          if current == total:
+            break
+          await send("-{:.0f}K".format((total-current)/1024), src)
+        if time.time() - last_time[0] > download_media_time_max:
+          await send("超时", src, correct=True)
+          break
+    if src:
+      t = asyncio.create_task(update_tmp_msg())
+    res = await UB.send_file(chat_id, file=h, caption=caption , force_document=True, progress_callback=callback)
+  else:
+    res = await UB.send_file(chat_id, file=h, caption=caption , force_document=True)
+
+  return res
+
+
+
 
 #  last_time = {}
 
@@ -3457,6 +3497,7 @@ async def parse_tg_out_msg(event):
                   file = tmsg.file
                 info(f"file type: {type(file)}")
 
+                res = None
                 #  if tmsg.text:
                 # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
                 # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.pack_bot_file_id
@@ -3480,45 +3521,17 @@ async def parse_tg_out_msg(event):
                       if file is None:
                         err(f"wtf: {tmsg.stringify()}")
                         return
+                      res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
                     except AttributeError as e:
                       err(f"fixme: {e=}")
+                    if res is None or opts > 0:
                       src = log_group_private
                       path = await download_media(tmsg, src=log_group_private, max_wait_time=600)
                       if path:
                         if opts == 3:
-                          h = await UB.upload_file(path)
-
-                          length = os.path.getsize(path)
-                          if length > 5000000:
-                            last_time = [time.time(), 0]
-                            def callback(current, total):
-                              last_time[1] = current
-                              if len(last_time) == 2:
-                                last_time.append(total)
-                                asyncio.create_task(send("开始下载", src))
-                            async def update_tmp_msg():
-                              while True:
-                                await asyncio.sleep(interval)
-                                if len(last_time) == 2:
-                                  await send("准备中", src, correct=True)
-                                  if time.time() - last_time[0] > 15:
-                                    await send("准备超时，可能网络过慢或者文件太小", src, correct=True)
-                                    break
-                                else:
-                                  current = last_time[1]
-                                  total = last_time[2]
-                                  if current == total:
-                                    break
-                                  await send("-{:.0f}K".format((total-current)/1024), src)
-                                if time.time() - last_time[0] > download_media_time_max:
-                                  await send("超时", src, correct=True)
-                                  break
-                            if src:
-                              t = asyncio.create_task(update_tmp_msg())
-                          else:
-                            callback = None
-
-                          res = await UB.send_file(chat_id, file=h, caption=cmds[1] , force_document=True, progress_callback=callback)
+                          res = await upload_media(path, src, chat_id=chat_id, caption=cmds[1])
+                          if res:
+                            return
                         url = None
                         if opts == 0 or opts == 1:
                           await send("下载完成，正在上传到xmpp...", src, correct=True)
@@ -3546,9 +3559,7 @@ async def parse_tg_out_msg(event):
                           err(f"文件url有问题: {e=} {url}")
                         except Exception as e:
                           err(f"{e=} {url}")
-                      return
 
-                    res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
                   except Exception as e:
                     err(f"fixme: {e=}")
               elif tmsg.text:
