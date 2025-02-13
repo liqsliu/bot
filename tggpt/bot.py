@@ -253,8 +253,9 @@ def generand(N=4, M=None, *, no_uppercase=False):
 
 
 async def split_long_text(text, msg_max_length=500):
-  if len(text.encode()) / msg_max_length > 5:
-    return [await pastebin(text)]
+  if len(text.encode()) / msg_max_length > 3:
+    url =await pastebin(text)
+    return [f"文本过长，请打开链接查看: {url}"]
   texts = []
   if len(text.encode()) > msg_max_length:
     ls = text.splitlines()
