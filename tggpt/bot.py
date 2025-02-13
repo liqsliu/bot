@@ -3248,17 +3248,24 @@ async def parse_tg_out_msg(event):
   if text.startswith("$"):
     if text == "$get id":
       await UB.send_message('me', f"{event.chat_id}")
-      return
-    if text == "$get event":
+    elif text == "$get event":
       await UB.send_message('me', f"{event.stringify()}")
-      return
-    if text == "$get msg":
+    elif text == "$get msg":
       await UB.send_message('me', f"{msg.stringify()}")
-      return
+    return
 
-  if chat_id == MY_ID:
+  if chat_id == MY_ID or chat_id == CHAT_ID:
     if not text:
       return
+    #  res = await run_cmd(text, CHAT_ID, "G me")
+    res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
+    if res is True:
+      return
+    if res:
+      #  await UB.send_message(CHAT_ID, res)
+      sendme(res)
+      return
+
     if text == 'id':
       await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
       return
@@ -3285,15 +3292,6 @@ async def parse_tg_out_msg(event):
         else:
           await UB.send_message('me', "not fount input entity")
 
-
-  if chat_id == MY_ID or chat_id == CHAT_ID:
-    #  res = await run_cmd(text, CHAT_ID, "G me")
-    res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
-    if res is True:
-      return
-    if res:
-      #  await UB.send_message(CHAT_ID, res)
-      sendme(res)
 
 
 #  @UB.on(events.NewMessage(incoming=True))
