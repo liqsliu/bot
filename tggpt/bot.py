@@ -3469,15 +3469,15 @@ async def parse_tg_out_msg(event):
       url = cmds[1]
       if url:
         if url == "h":
-          await _sendme("msg url raw/xmpp/vps/direct", chat_id)
+          await _sendme("msg url raw/xmpp/direct/vps", chat_id)
           return
         opts = 0
         if len(cmds) == 3:
-          if cmds[2] == "xmpp":
+          if cmds[2] == "direct":
             opts = 1
-          elif cmds[2] == "vps":
+          elif cmds[2] == "xmpp":
             opts = 2
-          elif cmds[2] == "direct":
+          elif cmds[2] == "vps":
             opts = 3
         peer = await get_entity(url)
         if peer:
@@ -3510,6 +3510,8 @@ async def parse_tg_out_msg(event):
                 # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.pack_bot_file_id
                 try:
                   res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+                  if opts == 1:
+                    return
                 except rpcerrorlist.ChatForwardsRestrictedError as e:
                   info(f"fixme: {e=}")
                   try:
@@ -3529,56 +3531,66 @@ async def parse_tg_out_msg(event):
                         err(f"wtf: {tmsg.stringify()}")
                         return
                       res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+                      if opts == 1:
+                        return
                     except AttributeError as e:
                       err(f"fixme: {e=}")
                   except Exception as e:
                     err(f"fixme: {e=}")
                     
-                if res is None or opts > 0:
-                  src = log_group_private
-                  path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
-                  if path:
-                    if opts == 3:
-                      res = await tg_upload_media(path, src, chat_id=chat_id, caption=cmds[1])
-                      if res:
-                        return
-                    url = None
-                    if opts == 0 or opts == 1:
-                      await send("下载完成，正在上传到xmpp...", src, correct=True)
-                      try:
-                        url = await upload(path)
-                        info(url)
-                      except Exception as e:
-                        err(f"上传失败 {e=}")
-                    t = asyncio.create_task(backup(path))
-                    try:
-                      if url:
-                        res = await UB.send_file(chat_id, file=url, caption=url)
-                    except rpcerrorlist.WebpageCurlFailedError as e:
-                      err(f"文件url有问题: {e=} {url}")
-                    except rpcerrorlist.WebpageMediaEmptyError as e:
-                      err(f"文件url有问题: {e=} {url}")
-                    except Exception as e:
-                      err(f"{e=} {url}")
+                #  if res is None or opts > 0:
+                src = log_group_private
+                path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
+                if path:
 
+                  if opts < 2:
+                    res = await tg_upload_media(path, src, chat_id=chat_id, caption=cmds[1])
+                    if res:
+                      if opts == 1:
+                        return
+
+                  url = None
+                  if opts < 3:
+                    await send("下载完成，正在上传到xmpp...", src, correct=True)
                     try:
-                      if res is None:
-                        await t
-                        if t.done():
-                          url = t.result()
-                          if url:
-                           info(url)
-                          if opts == 0 or opts == 2:
-                             await asyncio.sleep(2)
-                             res = await UB.send_file(chat_id, file=url, caption=url)
-                    except rpcerrorlist.WebpageCurlFailedError as e:
-                      err(f"文件url有问题: {e=} {url}")
-                    except rpcerrorlist.WebpageMediaEmptyError as e:
-                      err(f"文件url有问题: {e=} {url}")
+                      url = await upload(path)
+                      info(url)
                     except Exception as e:
-                      err(f"{e=} {url}")
+                      err(f"上传失败 {e=}")
+                  try:
+                    if url:
+                      res = await UB.send_file(chat_id, file=url, caption=url)
+                      if opts == 2:
+                        return
+                  except rpcerrorlist.WebpageCurlFailedError as e:
+                    err(f"文件url有问题: {e=} {url}")
+                  except rpcerrorlist.WebpageMediaEmptyError as e:
+                    err(f"文件url有问题: {e=} {url}")
+                  except Exception as e:
+                    err(f"{e=} {url}")
+
+
+
+                  t = asyncio.create_task(backup(path))
+                  try:
                     if res is None:
-                      res = await tg_upload_media(path, src, chat_id=chat_id, caption=cmds[1])
+                      await t
+                      if t.done():
+                        url = t.result()
+                        if url:
+                         info(url)
+                        #  if opts == 0 or opts == 2 or (opts > 0 and res is None):
+                        if opts < 3:
+                           await asyncio.sleep(2)
+                           res = await UB.send_file(chat_id, file=url, caption=url)
+                          if opts == 2:
+                            return
+                  except rpcerrorlist.WebpageCurlFailedError as e:
+                    err(f"文件url有问题: {e=} {url}")
+                  except rpcerrorlist.WebpageMediaEmptyError as e:
+                    err(f"文件url有问题: {e=} {url}")
+                  except Exception as e:
+                    err(f"{e=} {url}")
 
               elif tmsg.text:
                 res = await UB.send_message(chat_id, tmsg.text)
