@@ -2168,9 +2168,9 @@ async def send1(text, jid=None, *args, **kwargs):
 def sendme(text):
   asyncio.create_task(_sendme(text))
 
-async def _sendme(text):
+async def _sendme(text, chat_id=CHAT_ID):
   for text in split_long_text(text, MAX_MSG_BYTES_TG):
-    await UB.send_message(CHAT_ID, text)
+    await UB.send_message(chat_id, text)
   return True
   chat = await get_entity(CHAT_ID, True)
   await UB.send_message(chat, text)
@@ -3247,11 +3247,12 @@ async def parse_tg_out_msg(event):
   info(f"tg out msg: {chat_id}: {text}")
   if text.startswith("$"):
     if text == "$get id":
-      await UB.send_message('me', f"{event.chat_id}")
+      #  await UB.send_message('me', f"{event.chat_id}")
+      sendme(f"{event.chat_id}")
     elif text == "$get event":
-      await UB.send_message('me', f"{event.stringify()}")
+      sendme(f"{event.stringify()}")
     elif text == "$get msg":
-      await UB.send_message('me', f"{msg.stringify()}")
+      sendme(f"{msg.stringify()}")
     return
 
   if chat_id == MY_ID or chat_id == CHAT_ID:
@@ -3263,11 +3264,12 @@ async def parse_tg_out_msg(event):
       return
     if res:
       #  await UB.send_message(CHAT_ID, res)
-      sendme(res)
+      await _sendme(res, chat_id)
       return
 
     if text == 'id':
-      await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
+      #  await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
+      await UB.send_message(chat_id, f"id @name https://t.me/name\nchat_id: {chat_id}")
       return
     if text.startswith("id "):
       url = text.split(' ')[1]
@@ -3276,21 +3278,21 @@ async def parse_tg_out_msg(event):
       elif url.startswith("@"):
         username = url[1:]
       else:
-        await UB.send_message('me', "error url")
+        await UB.send_message(chat_id, "error url")
         return
 
       e = await UB.get_entity(username)
       if e:
-        await UB.send_message('me', f"{e.stringify()}")
-        await UB.send_message('me', "peer id: %s" % await UB.get_peer_id(e))
+        await UB.send_message(chat_id, f"{e.stringify()}")
+        await UB.send_message(chat_id, "peer id: %s" % await UB.get_peer_id(e))
       else:
-        await UB.send_message('me', "not fount entity")
+        await UB.send_message(chat_id, "not fount entity")
         e = await UB.get_input_entity(username)
         if e:
-          await UB.send_message('me', f"{e.stringify()}")
-          await UB.send_message('me', "peer id: %s" % await UB.get_peer_id(e))
+          await UB.send_message(chat_id, f"{e.stringify()}")
+          await UB.send_message(chat_id, "peer id: %s" % await UB.get_peer_id(e))
         else:
-          await UB.send_message('me', "not fount input entity")
+          await UB.send_message(chat_id, "not fount input entity")
 
 
 
