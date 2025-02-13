@@ -2865,6 +2865,10 @@ def get_buttons(bs):
 def parse_tg_url(url, wtf=1):
   peer = None
   ids = None
+  url.rstrip("?single")
+  if "?comment=" in url:
+    #需要先获取频道绑定的群，然后再在群里根据消息id找，麻烦，先不搞
+    url = url.split("?comment")[0]
   if url.startswith("https://t.me/"):
     url = url[13:]
     if url.startswith("c/"):
