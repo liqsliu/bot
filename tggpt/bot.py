@@ -369,6 +369,7 @@ mt_send_lock = asyncio.Lock()
 mt_send_lock2 = asyncio.Lock()
 downlaod_lock = asyncio.Lock()
 bash_lock = asyncio.Lock()
+tg_send_lock = asyncio.Lock()
 
 rss_lock = asyncio.Lock()
 
@@ -2178,10 +2179,13 @@ async def send1(text, jid=None, *args, **kwargs):
 def sendme(text):
   asyncio.create_task(_sendme(text))
 
+
+
 async def _sendme(text, chat_id=CHAT_ID):
-  for text in await split_long_text(text, MAX_MSG_BYTES_TG):
-    await UB.send_message(chat_id, text)
-    await asyncio.sleep(len(text.encode())/MAX_MSG_BYTES_TG/10+0.2)
+  async with tg_send_lock:
+    for t in await split_long_text(text, MAX_MSG_BYTES_TG):
+      await UB.send_message(chat_id, t)
+      await asyncio.sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2)
   return True
   chat = await get_entity(CHAT_ID, True)
   await UB.send_message(chat, text)
