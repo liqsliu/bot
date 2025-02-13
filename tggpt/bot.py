@@ -3422,7 +3422,7 @@ async def parse_tg_out_msg(event):
       url = cmds[1]
       if url:
         if url == "h":
-          sendme("msg url raw/xmpp/vps/direct", chat_id)
+          await _sendme("msg url raw/xmpp/vps/direct", chat_id)
           return
         opts = 0
         if len(cmds) == 3:
