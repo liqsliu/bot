@@ -2179,7 +2179,7 @@ async def _sendme(text, chat_id=CHAT_ID):
 async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kwargs):
   if name:
     text = f"{name}{text}"
-  sendme(text)
+  #  sendme(text)
   logger.info(f"send group msg: {jid} {text}")
   if jid is None:
     jid = log_group_private
