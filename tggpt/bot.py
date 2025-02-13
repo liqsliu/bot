@@ -3571,18 +3571,17 @@ async def parse_tg_out_msg(event):
 
                   t = asyncio.create_task(backup(path))
                   try:
-                    if res is None:
-                      await t
-                      if t.done():
-                        url = t.result()
-                        if url:
-                         info(url)
-                        #  if opts == 0 or opts == 2 or (opts > 0 and res is None):
-                        if opts < 3:
-                           await asyncio.sleep(2)
-                           res = await UB.send_file(chat_id, file=url, caption=url)
-                          if opts == 2:
-                            return
+                    await t
+                    if t.done():
+                      url = t.result()
+                      if url:
+                       info(url)
+                      #  if opts == 0 or opts == 2 or (opts > 0 and res is None):
+                      if opts < 3:
+                         await asyncio.sleep(2)
+                         res = await UB.send_file(chat_id, file=url, caption=url)
+                         if opts == 2:
+                          return
                   except rpcerrorlist.WebpageCurlFailedError as e:
                     err(f"文件url有问题: {e=} {url}")
                   except rpcerrorlist.WebpageMediaEmptyError as e:
