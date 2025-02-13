@@ -2820,7 +2820,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
         t.cancel()
 
   if path:
-    await send("下载完成，正在上传到xmpp...", src, correct=True)
+    return path
     res = await upload(path)
 
       #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
@@ -2849,8 +2849,6 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     if src:
       await send(res, src)
     warn(res)
-
-
 
 def get_buttons(bs):
   tmp = []
@@ -3145,7 +3143,22 @@ async def parse_tg_msg(event):
         info(f"download... {text}")
         path = await download_media(msg, src)
         if path is not None:
-          res = f"{mtmsgs[qid][0]}{path}\n{text}"
+          await send("下载完成，正在上传到xmpp...", src, correct=True)
+          url = await upload(path)
+          t = asyncio.create_task(backup(path))
+          await t
+          url2 = None
+          if t.done():
+            url2 = t.result()
+          if url and url2:
+            res = f"{mtmsgs[qid][0]}{url}\n\n{url2}\n\n{text}"
+            #  res = f"{url}\n\n{res}"
+          else:
+            if url:
+              res = f"{mtmsgs[qid][0]}{url}\n{text}"
+            else:
+              res = f"{mtmsgs[qid][0]}{url2}\n{text}"
+
           if msg.buttons:
             for i in get_buttons(msg.buttons):
               #  if isinstance(i, KeyboardButtonUrl):
