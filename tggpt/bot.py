@@ -252,7 +252,9 @@ def generand(N=4, M=None, *, no_uppercase=False):
   return ''.join(random.choice(l) for x in range(N))
 
 
-def split_long_text(text, msg_max_length=500):
+async def split_long_text(text, msg_max_length=500):
+  if len(text.encode()) / msg_max_length > 5:
+    return [await pastebin(text)]
   texts = []
   if len(text.encode()) > msg_max_length:
     ls = text.splitlines()
@@ -496,6 +498,8 @@ def _exceptions_handler(e, *args, **kwargs):
     else:
       pass
   except UnicodeDecodeError:
+    pass
+  except rpcerrorlist.FloodWaitError:
     pass
   except Exception:
     pass
@@ -1930,7 +1934,7 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
       if jid == log_group_private:
         sendme(text)
       msgs = []
-      for text in split_long_text(text, MAX_MSG_BYTES):
+      for text in await split_long_text(text, MAX_MSG_BYTES):
         if msgs:
           msg = aioxmpp.Message(
               to=msg.to,
@@ -2096,7 +2100,7 @@ async def send1(text, jid=None, *args, **kwargs):
       #  if gpm and '/' not in jid:
       #    err(f"无法群私聊，地址错误: {jid}")
       #    return False
-    texts = split_long_text(text, 4096)
+    texts = await split_long_text(text, 4096)
     #  for i in texts:
     if jid in my_groups:
       msg = aioxmpp.Message(
@@ -2175,8 +2179,9 @@ def sendme(text):
   asyncio.create_task(_sendme(text))
 
 async def _sendme(text, chat_id=CHAT_ID):
-  for text in split_long_text(text, MAX_MSG_BYTES_TG):
+  for text in await split_long_text(text, MAX_MSG_BYTES_TG):
     await UB.send_message(chat_id, text)
+    await asyncio.sleep(len(text.encode())/MAX_MSG_BYTES_TG/10+0.2)
   return True
   chat = await get_entity(CHAT_ID, True)
   await UB.send_message(chat, text)
@@ -2674,7 +2679,7 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
       await write_file(text, fn, "w")
       need_delete = True
 
-    for i in split_long_text(text):
+    for i in await split_long_text(text):
       #  if await send(i, *args, **kwargs) is not True:
       if await mt_send(i, gateway=gateway, name=name, *args, **kwargs) is not True:
         break
@@ -5028,14 +5033,17 @@ async def add_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"download file by url\n.{cmds[0]} $url [raw/curl/tg] [direct]"
-    try:
-      #  if src == log_group_private:
-      if len(cmds) == 3:
-        if cmds[2] == "tg":
-          res = await UB.send_file(CHAT_ID, file=cmds[1], caption=cmds[1])
-          return "sent in tg"
-    except Exception as e:
-      warn(f"通过tg远程下载失败: {e=}")
+    if len(cmds) == 3:
+      if cmds[2] == "tg":
+        try:
+          #  if src == log_group_private:
+          if len(cmds) == 3:
+            if cmds[2] == "tg":
+              res = await UB.send_file(CHAT_ID, file=cmds[1], caption=cmds[1])
+              return "sent in tg"
+        except Exception as e:
+          warn(f"通过tg远程下载失败: {e=}")
+          return "failed"
     opts = cmds[2:4]
     while True:
       if len(opts) < 2:
