@@ -4866,7 +4866,7 @@ async def add_cmd():
       return f"download file by url\n.{cmds[0]} $url [raw/curl] [direct]"
     try:
       if src == log_group_private:
-        res = await UB.send_file(CHAT_ID, file=cmds[1])
+        res = await UB.send_file(CHAT_ID, file=cmds[1], caption=cmds[1])
     except Exception as e:
       warn(f"通过tg远程下载失败: {e=}")
     opts = cmds[2:4]
