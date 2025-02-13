@@ -3443,7 +3443,13 @@ async def parse_tg_out_msg(event):
                 except rpcerrorlist.ChatForwardsRestrictedError as e:
                   info(f"fixme: {e=}")
                   try:
-                    file = utils.pack_bot_file_id(file)
+                    try:
+                      file = utils.pack_bot_file_id(file)
+                    except AttributeError as e:
+                      # AttributeError("'PhotoSize' object has no attribute 'location'")
+                      file = utils.pack_bot_file_id(tmsg.file)
+                      if file is None:
+                        file = utils.pack_bot_file_id(tmsg.document)
                     res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
                   except Exception as e:
                     err(f"fixme: {e=}")
