@@ -12,7 +12,7 @@ from . import debug, WORK_DIR, PARENT_DIR, LOG_FILE, get_my_key, HOME, LOGGER
 
 #  from tg.telegram import DOWNLOAD_PATH
 from telethon.tl.types import KeyboardButton, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat
-from telethon import events
+from telethon import events, utils
 
 #  import aioxmpp
 from aioxmpp import stream, ibr, protocol, node, dispatcher, connector, JID, im, errors, MessageType, PresenceType, misc, chatstates
@@ -3403,7 +3403,15 @@ async def parse_tg_out_msg(event):
                 await _sendme(tmsg.stringify(), chat_id)
               elif tmsg.file:
                 if tmsg.text:
-                  res = await UB.send_file(chat_id, file=tmsg.file, caption=tmsg.text)
+                  # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
+                  # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.pack_bot_file_id
+                  try:
+                    file = utils.pack_bot_file_id(tmsg.file)
+                    res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+                  except Exception as e:
+                    info(f"fixme: {e=}")
+                    file = utils.pack_bot_file_id(tmsg.media)
+                    res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
                 else:
                   res = await UB.send_file(chat_id, file=tmsg.file)
               elif tmsg.text:
