@@ -2727,7 +2727,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
         logger.info(f"ignore button: {i}")
   #  await mt_send(f"{res} 下载中...", gateway=gateway)
   #  res = f"{res} 下载中..."
-  if src:
+  if src and res:
     await send(res, src, xmpp_only=True, correct=True)
   #  last_time[src] = time.time()
   last_time = [time.time(), 0]
