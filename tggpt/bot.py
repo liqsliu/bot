@@ -2934,6 +2934,7 @@ async def get_entity(chat_id, id_only=True):
     if peer:
       entity = None
       info(f"search inputpeer: {peer}")
+
       try:
         peer = await UB.get_input_entity(peer)
         if id_only:
@@ -2942,7 +2943,8 @@ async def get_entity(chat_id, id_only=True):
         err(f"E: {e=}, not found input entity: {peer}")
         return
       except ValueError as e:
-        pass
+        warn(f"not found input entity: {peer}")
+
       info(f"search peer: {peer}")
       try:
         entity = await UB.get_entity(peer)
@@ -2950,7 +2952,7 @@ async def get_entity(chat_id, id_only=True):
         err(f"E: {e=}, not found entity: {peer}")
         return
       except ValueError as e:
-        info(f"not found entity: {peer}")
+        warn(f"not found entity: {peer}")
       return entity
   except Exception as e:
     err(f"E: {e=}")
