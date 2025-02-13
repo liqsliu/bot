@@ -2728,7 +2728,7 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
       last_time[1] = sent
       if len(last_time) == 2:
         last_time.append(total)
-        asyncio.create_task(send("开始下载", src))
+        asyncio.create_task(send("开始上传: {:.1f}MB".format(total/1024/1024), src))
     async def update_tmp_msg():
       while True:
         await asyncio.sleep(interval)
@@ -2742,14 +2742,17 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
           total = last_time[2]
           if current == total:
             break
-          await send("{:.0f}K".format((total-current)/1024), src)
+          await send("{:.1f}M".format((total-current)/1024/1024), src)
         if time.time() - last_time[0] > download_media_time_max:
           await send("超时", src, correct=True)
           break
     if src:
       t = asyncio.create_task(update_tmp_msg())
   h = await UB.upload_file(path, progress_callback=cb)
-  res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document, supports_streaming=supports_streaming)
+  try:
+    res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document, supports_streaming=supports_streaming)
+  except Exception as e:
+    res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document)
   return res
 
 
@@ -2817,7 +2820,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
           break
         #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
         #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
-        await send("-{:.0f}K".format((total-current)/1024), src)
+        await send("-{:.1f}M".format((total-current)/1024/1024), src)
         last_time[0] = time.time()
         #  last_current = current
 
