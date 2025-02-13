@@ -2714,11 +2714,16 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
   if path is None:
     err(f"need file path: {path}")
     return
+  if path.endswith(".mp4"):
+    force_document = False
+  else:
+    force_document = True
+  cb = None
   h = await UB.upload_file(path)
   length = os.path.getsize(path)
   if length > 5000000:
     last_time = [time.time(), 0]
-    def callback(sent, total):
+    def cb(sent, total):
       last_time[1] = sent
       if len(last_time) == 2:
         last_time.append(total)
@@ -2742,10 +2747,7 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
           break
     if src:
       t = asyncio.create_task(update_tmp_msg())
-    res = await UB.send_file(chat_id, file=h, caption=caption , force_document=True, progress_callback=callback)
-  else:
-    res = await UB.send_file(chat_id, file=h, caption=caption , force_document=True)
-
+  res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document, progress_callback=cb)
   return res
 
 
