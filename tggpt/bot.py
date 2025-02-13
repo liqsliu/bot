@@ -3365,7 +3365,7 @@ async def parse_tg_out_msg(event):
           ss = url.split('/')
           if len(ss) > 4:
             ids = int(ss[-1])
-            msg = await UB.get_message(peer, ids=ids)
+            msg = await UB.get_messages(peer, ids=ids)
             if msg:
               await _sendme(msg.stringify(), chat_id)
             else:
