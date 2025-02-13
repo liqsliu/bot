@@ -2867,16 +2867,25 @@ def parse_tg_url(url, wtf=1):
     url = url[13:]
     if url.startswith("c/"):
       url = url[2:]
-      if url:
-        peer = url.rsplit('/',1)[0]
-        if '/' in url:
-          ids = url.rsplit('/',1)[1]
-    elif url:
+    if url:
       peer = url.rsplit('/',1)[0]
       if '/' in url:
-        ids = url.rsplit('/',1)[1]
-        if '/' in ids:
-          ids = ids.rsplit('/',1)[1]
+        ids = url.rsplit('/')[-1]
+    #    if url:
+    #      peer = url.rsplit('/',1)[0]
+    #      if '/' in url:
+    #        ids = url.rsplit('/')[-1]
+    #      #    ids = url.rsplit('/',1)[1]
+    #      #    if '/' in ids:
+    #      #      err(f"fixme: tg url 格式错误")
+    #  elif url:
+    #    peer = url.rsplit('/',1)[0]
+    #    #  url = url.rsplit('/',1)[1]
+    #    if '/' in url:
+    #      ids = url.rsplit('/')[-1]
+    #    #    ids = url.rsplit('/',1)[1]
+    #    #    if '/' in ids:
+    #    #      ids = ids.rsplit('/',1)[1]
   if peer:
     #  if peer[0] != "-":
     if peer.isnumeric():
@@ -2924,16 +2933,24 @@ async def get_entity(chat_id, id_only=True):
       return False
     if peer:
       entity = None
+      info(f"search inputpeer: {peer}")
       try:
         peer = await UB.get_input_entity(peer)
         if id_only:
           return peer
       except TypeError as e:
-        err(f"E: {e=}")
+        err(f"E: {e=}, not found input entity: {peer}")
         return
       except ValueError as e:
         pass
-      entity = await UB.get_entity(peer)
+      info(f"search peer: {peer}")
+      try:
+        entity = await UB.get_entity(peer)
+      except TypeError as e:
+        err(f"E: {e=}, not found entity: {peer}")
+        return
+      except ValueError as e:
+        info(f"not found entity: {peer}")
       return entity
   except Exception as e:
     err(f"E: {e=}")
