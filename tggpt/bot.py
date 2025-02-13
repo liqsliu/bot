@@ -2927,6 +2927,10 @@ async def get_entity(chat_id, id_only=True):
         pass
       elif url.startswith("@"):
         peer = url[1:]
+      elif url.isnumeric():
+        peer = int(url)
+      elif url.startswith("-") and  url[1:].isnumeric():
+        peer = int(url)
       else:
         peer = url
     else:
