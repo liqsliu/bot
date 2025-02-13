@@ -3482,6 +3482,8 @@ async def parse_tg_out_msg(event):
                       return
 
                     res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+                  except rpcerrorlist.WebpageCurlFailedError as e:
+                    err(f"文件url有问题: {e=} {url}")
                   except Exception as e:
                     err(f"fixme: {e=}")
               elif tmsg.text:
