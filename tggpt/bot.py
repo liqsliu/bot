@@ -2786,7 +2786,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     return path
 
 
-  path = None
+  file_path = None
   try:
     if src:
       t = asyncio.create_task(update_tmp_msg())
@@ -2801,7 +2801,7 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
       #      res = f"下载取消: {res}"
       #      break
       if t1.done():
-        path = t1.result()
+        file_path = t1.result()
         if path is None:
           res = f"下载失败(下载速度太慢): {res}"
         break
@@ -2817,10 +2817,12 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
   except Exception as e:
     err(f"下载失败 {e=}")
   finally:
-    if path is None:
-      err(f"下载失败 path is None")
+    if file_path is None:
+      err(f"下载失败 file_path is None")
     else:
-      info(f"下载完成：{res} {path}")
+      if not file_path.startswith("/"):
+        file_path = path + file_path
+      info(f"下载完成：{res} {file_path}")
     if not t1.done():
       t1.cancel()
       #  return
@@ -2828,8 +2830,8 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
       if not t.done():
         t.cancel()
 
-  if path:
-    return path
+  if file_path:
+    return file_path
     res = await upload(path)
 
       #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
@@ -3470,7 +3472,7 @@ async def parse_tg_out_msg(event):
                     except AttributeError as e:
                       err(f"fixme: {e=}")
                       src = log_group_private
-                      path = await download_media(tmsg, src=log_group_private, max_wait_time=1800)
+                      path = await download_media(tmsg, src=log_group_private, max_wait_time=600)
                       if path:
                         await send("下载完成，正在上传到xmpp...", src, correct=True)
                         url = await upload(path)
