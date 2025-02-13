@@ -1618,7 +1618,7 @@ async def backup(path, src=None):
   shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
   res = await run_my_bash(shell_cmd, shell=False)
   if res:
-    info(res)
+    info(f"backup res: {res}")
     if src:
       await send(url, src)
   return url
@@ -3475,19 +3475,24 @@ async def parse_tg_out_msg(event):
                       path = await download_media(tmsg, src=log_group_private, max_wait_time=600)
                       if path:
                         await send("下载完成，正在上传到xmpp...", src, correct=True)
-                        url = await upload(path)
-                        info(url)
+                        url = None
+                        try:
+                          url = await upload(path)
+                          info(url)
+                        except Exception as e:
+                          err(f"上传失败 {e=}")
                         t = asyncio.create_task(backup(path))
                         try:
                           if url:
                             res = await UB.send_file(chat_id, file=url, caption=url)
-                          await t
-                          if t.done():
-                            url = t.result()
-                            if url:
-                             info(url)
-                             await asyncio.sleep(2)
-                             res = await UB.send_file(chat_id, file=url, caption=url)
+                          else:
+                            await t
+                            if t.done():
+                              url = t.result()
+                              if url:
+                               info(url)
+                               await asyncio.sleep(2)
+                               res = await UB.send_file(chat_id, file=url, caption=url)
                         except rpcerrorlist.WebpageCurlFailedError as e:
                           err(f"文件url有问题: {e=} {url}")
                         except rpcerrorlist.WebpageMediaEmptyError as e:
