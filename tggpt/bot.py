@@ -115,7 +115,7 @@ class NoParsingFilter(logging.Filter):
 
 
 interval = 5
-download_time_max = 300
+download_media_time_max = 300
 
 wtf_time = 5
 wtf_time_max = 1800
@@ -2710,7 +2710,7 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
 
 #  last_time = {}
 
-async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=False):
+async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=False, max_wait_time=download_media_time_max):
 #  await client.download_media(message, progress_callback=callback)
   #  async with downlaod_lock:
   if msg.file and msg.file.name:
@@ -2778,12 +2778,13 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
 
   async def _download_media(msg, path):
     try:
-      path = await asyncio.wait_for(msg.download_media(path, progress_callback=download_media_callback), timeout=download_time_max)
+      path = await asyncio.wait_for(msg.download_media(path, progress_callback=download_media_callback), timeout=max_wait_time)
     except TimeoutError as e:
       path = None
     return path
 
 
+  path = None
   try:
     if src:
       t = asyncio.create_task(update_tmp_msg())
@@ -2804,14 +2805,18 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
         break
       if len(last_time) == 2:
         #  if time.time() - now > 60:
-        if time.time() - now > download_time_max:
+        if time.time() - now > max_wait_time:
           t1.cancel()
           path = None
           res = f"下载失败(等待超时): {res}"
           break
         else:
           info(f"等待上游下载完成：{res}")
+  except Exception as e:
+    err(f"下载失败 {e=}")
   finally:
+    if path is None:
+      err(f"下载失败 path is None")
     if not t1.done():
       t1.cancel()
       #  return
@@ -3443,25 +3448,37 @@ async def parse_tg_out_msg(event):
                 except rpcerrorlist.ChatForwardsRestrictedError as e:
                   info(f"fixme: {e=}")
                   try:
+                    file = utils.pack_bot_file_id(file)
+                  except AttributeError as e:
+                    err(f"fixme: {e=} {type(file)}")
                     try:
-                      file = utils.pack_bot_file_id(file)
-                    except AttributeError as e:
-                      warn(f"{e=} {type(file)}")
                       # AttributeError("'PhotoSize' object has no attribute 'location'")
                       file = utils.pack_bot_file_id(tmsg.file)
                       if file is None:
                         file = utils.pack_bot_file_id(tmsg.document)
                       if file is None:
-                        file = utils.pack_bot_file_id(tmsg.media)
-                      if file is None:
                         file = utils.pack_bot_file_id(tmsg.photo)
+                      if file is None:
+                        file = utils.pack_bot_file_id(tmsg.media)
                       if file is None:
                         err(f"wtf: {tmsg.stringify()}")
                         return
+                    except AttributeError as e:
+                      err(f"fixme: {e=}")
+                      path = await download_media(tmsg, src=log_group_private, max_wait_time=1800)
+                      await send("下载完成，正在上传到xmpp...", src, correct=True)
+                      url = await upload(path)
+                      t = asyncio.create_task(backup(path))
+                      res = await UB.send_file(chat_id, file=url, caption=url)
+                      await asyncio.sleep(2)
+                      await t
+                      if t.done():
+                        url = t.result()
+                        if url:
+                          res = await UB.send_file(chat_id, file=url, caption=url)
+                      return
 
                     res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
-                  except AttributeError as e:
-                    err(f"fixme: {e=} {type(file)}")
                   except Exception as e:
                     err(f"fixme: {e=}")
               elif tmsg.text:
