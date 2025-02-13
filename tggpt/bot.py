@@ -3406,12 +3406,16 @@ async def parse_tg_out_msg(event):
                   # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
                   # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.pack_bot_file_id
                   try:
-                    file = utils.pack_bot_file_id(tmsg.file)
-                    res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+                    res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text)
                   except Exception as e:
                     info(f"fixme: {e=}")
-                    file = utils.pack_bot_file_id(tmsg.media)
-                    res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+                    try:
+                      file = utils.pack_bot_file_id(tmsg.file)
+                      res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+                    except Exception as e:
+                      info(f"fixme: {e=}")
+                      file = utils.pack_bot_file_id(tmsg.media)
+                      res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
                 else:
                   res = await UB.send_file(chat_id, file=tmsg.file)
               elif tmsg.text:
