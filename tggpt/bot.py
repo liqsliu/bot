@@ -3421,14 +3421,19 @@ async def parse_tg_out_msg(event):
               if cmds[-1] == "raw":
                 await _sendme(tmsg.stringify(), chat_id)
               elif tmsg.file:
-                if tmsg.photo:
-                  file = tmsg.photo
-                elif tmsg.document:
+                if tmsg.document:
+                  info("use document")
                   file = tmsg.document
                 elif tmsg.video:
+                  info("use video")
                   file = tmsg.video
+                elif tmsg.photo:
+                  info("use photo")
+                  file = tmsg.photo
                 else:
+                  info("use file")
                   file = tmsg.file
+                info(f"file type: {type(file)}")
 
                 #  if tmsg.text:
                 # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
