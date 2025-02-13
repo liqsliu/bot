@@ -3554,7 +3554,15 @@ async def parse_tg_out_msg(event):
                     try:
                       if url:
                         res = await UB.send_file(chat_id, file=url, caption=url)
-                      else:
+                    except rpcerrorlist.WebpageCurlFailedError as e:
+                      err(f"文件url有问题: {e=} {url}")
+                    except rpcerrorlist.WebpageMediaEmptyError as e:
+                      err(f"文件url有问题: {e=} {url}")
+                    except Exception as e:
+                      err(f"{e=} {url}")
+
+                    try:
+                      if res is None:
                         await t
                         if t.done():
                           url = t.result()
@@ -3569,6 +3577,8 @@ async def parse_tg_out_msg(event):
                       err(f"文件url有问题: {e=} {url}")
                     except Exception as e:
                       err(f"{e=} {url}")
+                    if res is None:
+                      res = await tg_upload_media(path, src, chat_id=chat_id, caption=cmds[1])
 
               elif tmsg.text:
                 res = await UB.send_message(chat_id, tmsg.text)
