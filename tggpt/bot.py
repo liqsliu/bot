@@ -5,6 +5,7 @@
 
 #  from . import *  # noqa: F403
 #  from enum import auto
+from typing import Type
 from . import debug, WORK_DIR, PARENT_DIR, LOG_FILE, get_my_key, HOME, LOGGER
 
 
@@ -2858,7 +2859,40 @@ def get_buttons(bs):
       tmp.append(i)
   return tmp
 
-async def get_entity(chat_id, id_only=False):
+
+def parse_tg_url(url, wtf=1):
+  peer = None
+  ids = None
+  if url.startswith("https://t.me/"):
+    url = url[13:]
+    if url.startswith("c/"):
+      url = url[2:]
+      if url:
+        peer = url.rsplit('/',1)[0]
+        if '/' in url:
+          ids = url.rsplit('/',1)[1]
+    elif url:
+      peer = url.rsplit('/',1)[0]
+      if '/' in url:
+        ids = url.rsplit('/',1)[1]
+        if '/' in ids:
+          ids = ids.rsplit('/',1)[1]
+  if peer:
+    #  if peer[0] != "-":
+    if peer.isnumeric():
+      if wtf == 1:
+        # channel or super group
+        peer = f"-100{peer}"
+        peer = int(peer)
+      elif wtf == 2:
+        peer = f"-{peer}"
+        peer = int(peer)
+  if ids:
+    ids = int(ids)
+  return peer, ids
+
+
+async def get_entity(chat_id, id_only=True):
   #  if isinstance(peer, PeerUser):
   #    #  logger.info(f"PeerUser: {peer}")
   #    peer = await UB.get_input_entity(peer)
@@ -2879,8 +2913,9 @@ async def get_entity(chat_id, id_only=False):
       if id_only:
         return peer
     elif type(chat_id) is str:
-      if url.startswith("https://t.me/"):
-        peer = url.rsplit('/',1)[1]
+      peer, _ = parse_tg_url(url)
+      if peer:
+        pass
       elif url.startswith("@"):
         peer = url[1:]
       else:
@@ -2888,15 +2923,21 @@ async def get_entity(chat_id, id_only=False):
     else:
       return False
     if peer:
-      if id_only:
-        entity = await UB.get_input_entity(peer)
-      else:
-        entity = await UB.get_entity(peer)
-      if entity:
-        return entity
+      entity = None
+      try:
+        peer = await UB.get_input_entity(peer)
+        if id_only:
+          return peer
+      except TypeError as e:
+        err(f"E: {e=}")
+        return
+      except ValueError as e:
+        pass
+      entity = await UB.get_entity(peer)
+      return entity
   except Exception as e:
     err(f"E: {e=}")
-    return False
+    return
   raise ValueError(f"无法获取chat信息: {chat_id} {peer}")
 
 
@@ -3253,9 +3294,33 @@ async def parse_tg_out_msg(event):
       sendme(f"{event.stringify()}")
     elif text == "$get msg":
       sendme(f"{msg.stringify()}")
+    elif text == "$get chat":
+      e = await event.get_chat()
+      sendme(f"{e.stringify()}")
+    elif text == "$get reply":
+      if event.is_reply:
+        sendme(event.reply_to.stringify())
+        e = await msg.get_reply_message()
+        sendme(f"{e.stringify()}")
+      else:
+        sendme(f"not a reply: {msg.stringify()}")
+    elif text == "$get sender":
+      if event.is_reply:
+        e = await msg.get_reply_message()
+        e = await e.get_sender()
+        sendme(f"{e.stringify()}")
+      else:
+        sendme(f"not a reply: {msg.stringify()}")
     return
 
   if chat_id == MY_ID or chat_id == CHAT_ID:
+    if chat_id == CHAT_ID:
+      if event.fwd_from:
+        sendme(event.fwd_from.stringify())
+        return
+      #  elif event.is_reply:
+      #    sendme(event.reply_to.stringify())
+      #    return
     if not text:
       return
     #  res = await run_cmd(text, CHAT_ID, "G me")
@@ -3272,27 +3337,44 @@ async def parse_tg_out_msg(event):
       await UB.send_message(chat_id, f"id @name https://t.me/name\nchat_id: {chat_id}")
       return
     if text.startswith("id "):
-      url = text.split(' ')[1]
-      if url.startswith("https://t.me/"):
-        username = url.split('/')[3]
-      elif url.startswith("@"):
-        username = url[1:]
-      else:
-        await UB.send_message(chat_id, "error url")
-        return
+      #  url = text.split(' ')[1]
+      #  if url.startswith("https://t.me/"):
+      #    username = url.split('/')[3]
+      #  elif url.startswith("@"):
+      #    username = url[1:]
+      #  else:
+      #    await UB.send_message(chat_id, "error url")
+      #    return
+      #
+      #  e = await UB.get_entity(username)
 
-      e = await UB.get_entity(username)
+      url = text.split(' ')[1]
+      e = await get_entity(url, False)
       if e:
         await UB.send_message(chat_id, f"{e.stringify()}")
         await UB.send_message(chat_id, "peer id: %s" % await UB.get_peer_id(e))
       else:
         await UB.send_message(chat_id, "not fount entity")
-        e = await UB.get_input_entity(username)
-        if e:
-          await UB.send_message(chat_id, f"{e.stringify()}")
-          await UB.send_message(chat_id, "peer id: %s" % await UB.get_peer_id(e))
+    elif text.startswith("msg "):
+      cmds = get_cmd(text)
+      url = cmds[1]
+      if url:
+        peer = await get_entity(url)
+        if peer:
+          await _sendme(peer.stringify(), chat_id)
+          ss = url.split('/')
+          if len(ss) > 4:
+            ids = int(ss[-1])
+            msg = await UB.get_message(peer, ids=ids)
+            if msg:
+              await _sendme(msg.stringify(), chat_id)
+            else:
+              await _sendme(f"error id: {ids}\nres: {msg}", chat_id)
+          return
         else:
-          await UB.send_message(chat_id, "not fount input entity")
+          await _sendme(f"error url: {url}\nres: {peer}", chat_id)
+          return
+      await _sendme("error", chat_id)
 
 
 
