@@ -3470,14 +3470,16 @@ async def parse_tg_out_msg(event):
                       if path:
                         await send("下载完成，正在上传到xmpp...", src, correct=True)
                         url = await upload(path)
+                        info(url)
                         t = asyncio.create_task(backup(path))
                         if url:
                           res = await UB.send_file(chat_id, file=url, caption=url)
-                        await asyncio.sleep(2)
                         await t
                         if t.done():
                           url = t.result()
                           if url:
+                           info(url)
+                            await asyncio.sleep(2)
                             res = await UB.send_file(chat_id, file=url, caption=url)
                       return
 
