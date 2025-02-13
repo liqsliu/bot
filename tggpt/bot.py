@@ -3441,7 +3441,7 @@ async def parse_tg_out_msg(event):
                     file = utils.pack_bot_file_id(file)
                     res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
                   except Exception as e:
-                    warn(f"fixme: {e=}")
+                    err(f"fixme: {e=}")
               elif tmsg.text:
                 res = await UB.send_message(chat_id, tmsg.text)
               else:
