@@ -5027,10 +5027,13 @@ async def add_cmd():
 
   async def _(cmds, src):
     if len(cmds) == 1:
-      return f"download file by url\n.{cmds[0]} $url [raw/curl] [direct]"
+      return f"download file by url\n.{cmds[0]} $url [raw/curl/tg] [direct]"
     try:
-      if src == log_group_private:
-        res = await UB.send_file(CHAT_ID, file=cmds[1], caption=cmds[1])
+      #  if src == log_group_private:
+      if len(cmds) == 3:
+        if cmds[2] == "tg":
+          res = await UB.send_file(CHAT_ID, file=cmds[1], caption=cmds[1])
+          return "sent in tg"
     except Exception as e:
       warn(f"通过tg远程下载失败: {e=}")
     opts = cmds[2:4]
