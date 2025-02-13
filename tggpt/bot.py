@@ -3487,7 +3487,31 @@ async def parse_tg_out_msg(event):
                       if path:
                         if opts == 3:
                           h = await UB.upload_file(path)
-                          res = await UB.send_file(chat_id, file=h, caption=cmds[2] , force_document=True)
+
+                          last_time = [time.time(), 0]
+                          def callback(current, total):
+                            last_time[1] = current
+                            if len(last_time) == 2:
+                              last_time.append(total)
+                              asyncio.create_task(send("开始下载", src))
+                          async def update_tmp_msg():
+                            while True:
+                              await asyncio.sleep(interval)
+                              if len(last_time) == 2:
+                                await send("准备中", src, correct=True)
+                              else:
+                                current = last_time[1]
+                                total = last_time[2]
+                                if current == total:
+                                  break
+                                await send("-{:.0f}K".format((total-current)/1024), src)
+                                if time.time() - last_time[0] > download_media_time_max:
+                                  await send("超时", src, correct=True)
+                                  break
+                          if src:
+                            t = asyncio.create_task(update_tmp_msg())
+
+                          res = await UB.send_file(chat_id, file=h, caption=cmds[2] , force_document=True, progress_callback=callback)
                         url = None
                         if opts == 0 or opts == 1:
                           await send("下载完成，正在上传到xmpp...", src, correct=True)
