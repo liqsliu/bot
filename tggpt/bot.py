@@ -1612,12 +1612,15 @@ async def save_data():
 #    return res
 
 async def backup(path, src=None):
+  info(f"backup: {path}")
   url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
+  info(f"url: {url}")
   shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
   res = await run_my_bash(shell_cmd, shell=False)
-  info(res)
-  if src:
-    await send(url, src)
+  if res:
+    info(res)
+    if src:
+      await send(url, src)
   return url
 
 
@@ -2767,7 +2770,6 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
         current = last_time[1]
         total = last_time[2]
         if current == total:
-          info(f"下载完成：{res}")
           break
         #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
         #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
@@ -2817,6 +2819,8 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
   finally:
     if path is None:
       err(f"下载失败 path is None")
+    else:
+      info(f"下载完成：{res} {path}")
     if not t1.done():
       t1.cancel()
       #  return
