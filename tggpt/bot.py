@@ -3408,28 +3408,27 @@ async def parse_tg_out_msg(event):
               if cmds[-1] == "raw":
                 await _sendme(tmsg.stringify(), chat_id)
               elif tmsg.file:
+                if tmsg.photo:
+                  file = tmsg.photo
+                elif tmsg.document:
+                  file = tmsg.document
+                elif tmsg.video:
+                  file = tmsg.video
+                else:
+                  file = tmsg.file
 
+                #  if tmsg.text:
+                # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
+                # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.pack_bot_file_id
                 try:
-                  #  if tmsg.text:
-                  # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
-                  # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.pack_bot_file_id
-                  try:
-                    if tmsg.photo:
-                      res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
-                    elif tmsg.video:
-                      res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text)
-                    elif tmsg.document:
-                      res = await UB.send_file(chat_id, file=tmsg.document, caption=tmsg.text)
-                    else:
-                      res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text)
-                  except Exception as e:
-                    info(f"fixme: {e=}")
-                    #  file = utils.pack_bot_file_id(tmsg.file)
-                    #  file = utils.pack_bot_file_id(tmsg.media)
-                    file = utils.pack_bot_file_id(tmsg.document)
-                    res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+                  res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
                 except rpcerrorlist.ChatForwardsRestrictedError as e:
-                  warn(f"{e=}")
+                  info(f"fixme: {e=}")
+                  try:
+                    file = utils.pack_bot_file_id(file)
+                    res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+                  except Exception as e:
+                    warn(f"fixme: {e=}")
               elif tmsg.text:
                 res = await UB.send_message(chat_id, tmsg.text)
               else:
