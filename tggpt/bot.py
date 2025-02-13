@@ -23,8 +23,8 @@ import aiofiles, aioxmpp, aiohttp
 import zstandard
 
 #  from  urltitle.urltitle import URLTitleError
-from urltitle import URLTitleReader
-from urltitle import config as urltitle_config
+#  from urltitle import URLTitleReader
+#  from urltitle import config as urltitle_config
 
 from aiohttp import FormData
 from aiohttp.client_exceptions import ClientPayloadError
@@ -1557,27 +1557,27 @@ async def save_data():
 
 
 
-urltitle_config.REQUEST_TIMEOUT = 8
-urltitle_config.MAX_REQUEST_ATTEMPTS = 2
+#  urltitle_config.REQUEST_TIMEOUT = 8
+#  urltitle_config.MAX_REQUEST_ATTEMPTS = 2
 
 
 #  urltitle_config.DEFAULT_REQUEST_SIZE = 1024 ** 2
-urltitle_config.DEFAULT_REQUEST_SIZE = 1024 ** 2 * 16
+#  urltitle_config.DEFAULT_REQUEST_SIZE = 1024 ** 2 * 16
 
 #  MiB = 1024 ** 2
 #  urltitle_config.MAX_REQUEST_SIZES = {"html": MiB, "ipynb": 8 * MiB, "pdf": 8 * MiB}  # Title observed toward the bottom.
 #  #  print(urltitle_config)
 #  #  print(urltitle_config.MAX_REQUEST_SIZES)
-urltitle_config.MAX_REQUEST_SIZES.update({ 'html': 1024 ** 2 * 16 })
+#  urltitle_config.MAX_REQUEST_SIZES.update({ 'html': 1024 ** 2 * 16 })
 
 # Titles for HTML content
-reader = URLTitleReader(verify_ssl=True)
+#  reader = URLTitleReader(verify_ssl=True)
 
-EXTRA_HEADERS = {
-    #  "Accept": "*/*",
-    #  "Accept-Language": "en-US,en;q=0.5",
-    "Accept-Language": "zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6",
-}
+#  EXTRA_HEADERS = {
+#      #  "Accept": "*/*",
+#      #  "Accept-Language": "en-US,en;q=0.5",
+#      "Accept-Language": "zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6",
+#  }
 
 #  async def get_title(url):
 #    try:
@@ -1618,11 +1618,21 @@ async def backup(path, src=None):
 
 
 
-async def get_title(url, src=None, down=False):
+async def get_title(url, src=None, opts=[]):
   shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
   shell_cmd.append(url)
-  if down:
-    shell_cmd.append("%s" % (2**20*1000))
+  #  while opts:
+  #    shell_cmd.append(opts.pop(0))
+  shell_cmd.extend(opts)
+  #  if down:
+  #    #  shell_cmd.append("%s" % (2**20*1000))
+  #    while True:
+  #      if len(shell_cmd) < 5:
+  #        shell_cmd.append("")
+  #      else:
+  #        break
+  #    shell_cmd.append("down")
+  if len(shell_cmd) == 6:
     max_time = 600
   else:
     max_time = 60
@@ -4706,12 +4716,25 @@ async def add_cmd():
 
   async def _(cmds, src):
     if len(cmds) == 1:
-      return f"download file by url\n.{cmds[0]} $url"
-    res = await get_title(cmds[1], src, True)
+      return f"download file by url\n.{cmds[0]} $url [raw/curl] [direct]"
+    opts = cmds[2:4]
+    while True:
+      if len(opts) < 2:
+        opts.append("")
+      else:
+        break
+    opts.append("down")
+    res = await get_title(cmds[1], src, opts=opts)
     return f"{res}"
   cmd_funs["down"] = _
   cmd_for_admin.add('down')
 
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
+    res = await get_title(cmds[1], src=src, opts=cmds[2:4])
+    return f"{res}"
+  cmd_funs["tl"] = _
 
   async def _(cmds, src):
     if len(cmds) == 1:

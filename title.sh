@@ -11,19 +11,19 @@ LA='Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6'
 
 
 
-if [[ -z "$2" ]]; then
-
 # https://stackoverflow.com/questions/20317945/limit-size-wget-can-download/20318140#20318140
-ulimit -f 204800
-MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-100000000}
-MAX_TIMEOUT=16
 
-else
-
+if [[ "$4" == "down" ]]; then
   # 暂时忽略自定义大小
 ulimit -f 2048000
 MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-1000000000}
 MAX_TIMEOUT=300
+
+else
+ulimit -f 204800
+MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-100000000}
+MAX_TIMEOUT=16
+
 
 fi
 
@@ -48,7 +48,7 @@ fi
 
 
 
-  if [[ "$2" == direct ]]; then
+  if [[ "$3" == direct ]]; then
     unset http_proxy
     unset https_proxy
     # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
@@ -58,6 +58,8 @@ fi
   else
     export http_proxy="http://127.0.0.1:6080"
     export https_proxy="http://127.0.0.1:6080"
+  fi
+
     if [[ "$2" == curl ]]; then
       # curl -s -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || {
         curl -v -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || exit $?
@@ -74,7 +76,6 @@ fi
         wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
       # }
     fi
-  fi
 
 
 
