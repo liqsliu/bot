@@ -111,16 +111,6 @@ class NoParsingFilter(logging.Filter):
     return True
 
 
-
-gpt_bot = int(get_my_key("TELEGRAM_GPT_ID"))
-gpt_bot_name = 'littleb_gptBOT'
-
-#  rss_id = int(get_my_key("TELEGRAM_RSS_ID"))
-rss_bot = 284403259
-music_bot = 1404457467
-music_bot_name = 'Music163bot'
-
-
 interval = 5
 download_time_max = 300
 
@@ -307,9 +297,20 @@ def split_long_text(text, msg_max_length=500):
 
 #  api_id = int(get_my_key("TELEGRAM_API_ID"))
 
-
-
 MY_ID = int(get_my_key("TELEGRAM_MY_ID"))
+
+CHAT_ID = int(get_my_key("TELEGRAM_GROUP_LIQS"))
+#  GROUP_ID = int(get_my_key("TELEGRAM_GROUP_WTFIPFS"))
+
+#  gpt_bot = int(get_my_key("TELEGRAM_GPT_ID"))
+gpt_bot = 6226014461
+gpt_bot_name = 'littleb_gptBOT'
+
+#  rss_id = int(get_my_key("TELEGRAM_RSS_ID"))
+rss_bot = 284403259
+music_bot = 1404457467
+music_bot_name = 'Music163bot'
+
 
 
 MAX_MSG_BYTES = 8000
@@ -3284,13 +3285,15 @@ async def parse_tg_out_msg(event):
         else:
           await UB.send_message('me', "not fount input entity")
 
-  #  res = await run_cmd(text, CHAT_ID, "G me")
-  res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
-  if res is True:
-    return
-  if res:
-    #  await UB.send_message(CHAT_ID, res)
-    sendme(res)
+
+  if chat_id == MY_ID or chat_id == CHAT_ID:
+    #  res = await run_cmd(text, CHAT_ID, "G me")
+    res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
+    if res is True:
+      return
+    if res:
+      #  await UB.send_message(CHAT_ID, res)
+      sendme(res)
 
 
 #  @UB.on(events.NewMessage(incoming=True))
@@ -6335,8 +6338,7 @@ async def amain():
     # with UB:
     #  loop.run_until_complete(run())
 
-    global MY_NAME, MY_ID, CHAT_ID
-    CHAT_ID = int(get_my_key("TELEGRAM_GROUP_LIQS"))
+    global MY_NAME, MY_ID
     #  await UB.start()
     async with UB:
       me = await UB.get_me()
