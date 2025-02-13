@@ -3402,7 +3402,10 @@ async def parse_tg_out_msg(event):
               if cmds[-1] == "raw":
                 await _sendme(tmsg.stringify(), chat_id)
               elif tmsg.file:
-                res = await UB.send_message(chat_id, tmsg.text, file=tmsg.file)
+                if tmsg.text:
+                  res = await UB.send_file(chat_id, file=tmsg.file, caption=tmsg.text)
+                else:
+                  res = await UB.send_file(chat_id, file=tmsg.file)
               elif tmsg.text:
                 res = await UB.send_message(chat_id, tmsg.text)
               else:
