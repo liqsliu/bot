@@ -3476,22 +3476,25 @@ async def parse_tg_out_msg(event):
                         url = await upload(path)
                         info(url)
                         t = asyncio.create_task(backup(path))
-                        if url:
-                          res = await UB.send_file(chat_id, file=url, caption=url)
-                        await t
-                        if t.done():
-                          url = t.result()
+                        try:
                           if url:
-                           info(url)
-                           await asyncio.sleep(2)
-                           res = await UB.send_file(chat_id, file=url, caption=url)
+                            res = await UB.send_file(chat_id, file=url, caption=url)
+                          await t
+                          if t.done():
+                            url = t.result()
+                            if url:
+                             info(url)
+                             await asyncio.sleep(2)
+                             res = await UB.send_file(chat_id, file=url, caption=url)
+                        except rpcerrorlist.WebpageCurlFailedError as e:
+                          err(f"文件url有问题: {e=} {url}")
+                        except rpcerrorlist.WebpageMediaEmptyError as e:
+                          err(f"文件url有问题: {e=} {url}")
+                        except Exception as e:
+                          err(f"{e=} {url}")
                       return
 
                     res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
-                  except rpcerrorlist.WebpageCurlFailedError as e:
-                    err(f"文件url有问题: {e=} {url}")
-                  except rpcerrorlist.WebpageMediaEmptyError as e:
-                    err(f"文件url有问题: {e=} {url}")
                   except Exception as e:
                     err(f"fixme: {e=}")
               elif tmsg.text:
