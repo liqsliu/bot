@@ -2710,7 +2710,7 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
 #      print("me: %s" % text)
 
 
-async def upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_memory=False, max_wait_time=download_media_time_max):
+async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_memory=False, max_wait_time=download_media_time_max):
   if path is None:
     err(f"need file path: {path}")
     return
@@ -2718,8 +2718,8 @@ async def upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_me
   length = os.path.getsize(path)
   if length > 5000000:
     last_time = [time.time(), 0]
-    def callback(current, total):
-      last_time[1] = current
+    def callback(sent, total):
+      last_time[1] = sent
       if len(last_time) == 2:
         last_time.append(total)
         asyncio.create_task(send("开始下载", src))
@@ -2736,7 +2736,7 @@ async def upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_me
           total = last_time[2]
           if current == total:
             break
-          await send("-{:.0f}K".format((total-current)/1024), src)
+          await send("{:.0f}K".format((total-current)/1024), src)
         if time.time() - last_time[0] > download_media_time_max:
           await send("超时", src, correct=True)
           break
@@ -2753,7 +2753,7 @@ async def upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_me
 
 #  last_time = {}
 
-async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=False, max_wait_time=download_media_time_max):
+async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=False, max_wait_time=download_media_time_max):
 #  await client.download_media(message, progress_callback=callback)
   #  async with downlaod_lock:
   if msg.file and msg.file.name:
@@ -3075,7 +3075,7 @@ async def print_tg_msg(event, to_xmpp=False):
   else:
     res = None
   if False and msg.file:
-    path = await download_media(msg)
+    path = await tg_download_media(msg)
     if path is not None:
       if res:
         res += "\n--\nfile: %s" % path
@@ -3192,7 +3192,7 @@ async def parse_tg_msg(event):
         music_bot_state[src] = 2
       elif msg.file:
         info(f"download... {text}")
-        path = await download_media(msg, src)
+        path = await tg_download_media(msg, src)
         if path is not None:
           await send("下载完成，正在上传到xmpp...", src, correct=True)
           url = await upload(path)
@@ -3287,7 +3287,7 @@ async def parse_tg_msg(event):
           now = msg.date.timestamp()
 
           if msg.file:
-            path = await download_media(msg)
+            path = await tg_download_media(msg)
             if path is not None:
               if text:
                 text = f"{text} file: {path}"
@@ -3529,10 +3529,10 @@ async def parse_tg_out_msg(event):
                     
                 if res is None or opts > 0:
                   src = log_group_private
-                  path = await download_media(tmsg, src=log_group_private, max_wait_time=600)
+                  path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
                   if path:
                     if opts == 3:
-                      res = await upload_media(path, src, chat_id=chat_id, caption=cmds[1])
+                      res = await tg_upload_media(path, src, chat_id=chat_id, caption=cmds[1])
                       if res:
                         return
                     url = None
