@@ -2792,12 +2792,12 @@ async def download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=Fals
     now = time.time()
     while True:
       await asyncio.sleep(interval+1)
-      if src:
-        if src not in music_bot_state or music_bot_state[src] < 3:
-          info(f"下载中止：{res}")
-          path = None
-          res = f"下载取消: {res}"
-          break
+      #  if src:
+      #    if src not in music_bot_state or music_bot_state[src] < 3:
+      #      info(f"下载中止：{res}")
+      #      path = None
+      #      res = f"下载取消: {res}"
+      #      break
       if t1.done():
         path = t1.result()
         if path is None:
