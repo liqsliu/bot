@@ -3460,8 +3460,9 @@ async def parse_tg_out_msg(event):
     elif text == "$get file":
       e = await msg.get_reply_message()
       tmsg = e
-      if tmsg.file:
-        file = tmsg.file
+      if tmsg.media:
+        file = tmsg.media
+        sendme(f"type: {type(file)}")
         res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
         if tmsg.video:
           res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
@@ -3478,8 +3479,9 @@ async def parse_tg_out_msg(event):
       if event.fwd_from:
         sendme(event.fwd_from.stringify())
         tmsg = event
-        if tmsg.media:
-          file = tmsg.media
+        if tmsg.document:
+          file = tmsg.document
+          sendme(f"type: {type(file)}")
           res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
           if tmsg.video:
             res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
