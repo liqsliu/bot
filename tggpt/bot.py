@@ -3843,7 +3843,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
             asyncio.create_task(send("开始上传: {:.1f}MB".format(total/1024/1024), src))
           #  res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
           async with session.put(slot.put.url, data=chunk, headers=headers) as res:
-            if resp.status != 200:
+            if res.status != 200:
               err(f"上传失败，返回状态：{res=} {slot.put.url=} {await res.text()}")
               return
             info(f"res: {res}\nslot: {slot}")
