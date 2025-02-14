@@ -3800,10 +3800,10 @@ async def run_run(coro, need_main=False):
     fu.set_result(result)
   def cb(fu2):
     if fu2.done():
-      print("确实结束了")
+      #  print("确实结束了")
       asyncio.run_coroutine_threadsafe(cb2(fu, fu2.result()), oloop)
     else:
-      print("wtf, 还没结束")
+      print("wtffffffffffffffffffffffffffffffffff, 还没结束")
       asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
   fu2.add_done_callback(cb)
   return await fu
@@ -3910,13 +3910,13 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         if now == length:
           info(f"end: {now}")
           return
-        info(f"当前位置: {now}")
+        info(f"当前 {fp.name} {now}")
         #  await asyncio.sleep(interval/2)
         i += 1
         if i < interval:
           continue
         i = 0
-        info("剩余 {:.1f}M".format((length-now)/1024/1024))
+        info("剩余 {fp.name} {:.1f}M".format((length-now)/1024/1024))
         if src:
           await send("{:.1f}M".format((length-now)/1024/1024), src)
         if time.time() - start_time > download_media_time_max:
