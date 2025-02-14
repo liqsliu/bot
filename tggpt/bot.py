@@ -3531,9 +3531,9 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if r:
           info(f"转换失败 {path} {r}")
         else:
-          path = path[:-4]+".webp"
           shell_cmd = ["rm", path]
           r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
+          path = path[:-4]+".webp"
           if r:
             info(f"删除失败 {path} {r}")
           else:
