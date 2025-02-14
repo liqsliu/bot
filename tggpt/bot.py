@@ -4649,6 +4649,9 @@ async def xmpp_msg(msg):
       reply.body[None] = "pong"
       await send(reply)
       return
+    if msg.type_ == MessageType.ERROR:
+      sendme("未知来源的消息(wtf) %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), f"{msg.from_=}", msg.to, msg.body))
+      return
     await send(f"暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
     #  chat = await get_entity(CHAT_ID, True)
     #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
