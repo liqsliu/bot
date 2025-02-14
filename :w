@@ -3778,11 +3778,10 @@ def run_run_loop():
 async def run_run(coro):
   fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
   fu = asyncio.Future()
-  async def cb2(fu):
-    fu.set_result(0)
   def cb():
-    asyncio.run_coroutine_threadsafe(cb2(fu), loop)
-  fu2.add_done_callback(cb)
+    fu.set_result(0)
+    fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
+  fu2.add_done_callback(cb())
 
   return await fu
 
