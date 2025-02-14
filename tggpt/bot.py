@@ -3725,8 +3725,8 @@ async def disco_info(jid, node=None, client=None):
   #  res = await dc.query_info(JID.fromstr(jid))
   try:
     res = await dc.query_info(jid, node=node, timeout=5)
-    pprint(res)
-    print(jid, res.to_dict())
+    #  pprint(res)
+    #  print(jid, res.to_dict())
     return res
   except TimeoutError as e:
     warn(f"失败(超时)：{jid}, {e=}")
@@ -3749,9 +3749,9 @@ async def disco_item(jid=None, node=None, client=None):
   #  res = await dc.query_info(JID.fromstr(jid))
   try:
     res = await dc.query_items(jid, node=node, timeout=5)
-    pprint(res)
-    for i in res.items:
-      print(i.name, i.node, i.jid)
+    #  pprint(res)
+    #  for i in res.items:
+    #    print(i.name, i.node, i.jid)
     return res
   except TimeoutError as e:
     warn(f"失败(超时)：{jid}, {e=}")
@@ -6491,7 +6491,7 @@ async def join(jid=None, nick=None, client=None):
             room.on_muc_role_request.connect(on_muc_role_request)
             room.on_nick_changed.connect(on_nick_changed)
 
-            jids = users[J]
+            jids = users[jid]
             if myjid in jids:
               j = jids(myjid)
               j[0] = nick
