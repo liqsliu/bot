@@ -6491,14 +6491,14 @@ async def join(jid=None, nick=None, client=None):
             room.on_muc_role_request.connect(on_muc_role_request)
             room.on_nick_changed.connect(on_nick_changed)
 
-            #  jids = users[jid]
-            #  if myjid in jids:
-            #    j = jids[myjid]
+            jids = users[jid]
+            if myjid in jids:
+              j = jids[myjid]
             #    j[0] = nick
-            #  else:
-            #    j = [nick]
-            #    jids[myjid] = j
-            set_default_value(m=room.me)
+            else:
+              j = []
+              jids[myjid] = j
+            set_default_value(j, m=room.me)
 
             return room
           else:
