@@ -3802,9 +3802,8 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   #  ))
 
   headers = slot.put.headers.copy()
-  dbg(slot.get.url)
 
-  chunk_size = 1024 * 1024
+  chunk_size = 512 * 1024
   if length / chunk_size > 2:
     headers['Transfer-Encoding'] = 'chunked'
     last_time = [time.time(), 0]
@@ -3836,12 +3835,12 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
               last_time.append(total)
               asyncio.create_task(send("开始分块上传: {:.1f}MB".format(total/1024/1024), src))
             #  res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
-            #  headers["Content-Length"] = str(length)
-            headers["Content-Length"] = str(len(chunk))
+            headers["Content-Length"] = str(length)
+            #  headers["Content-Length"] = str(len(chunk))
             info("headers: %s" % headers)
             async with session.put(slot.put.url, data=chunk, headers=headers) as res:
               if res.status != 200 and res.status != 200:
-                err(f"分块上传失败，返回状态：{res=} {slot.put.url=} {await res.text()}")
+                err(f"分块上传失败，返回状态：{res=} {slot.put.url=} {res.headers=} {await res.text()}")
                 return
               info(f"res: {res}\nslot: {slot}")
               info(await res.text())
