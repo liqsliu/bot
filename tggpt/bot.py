@@ -1630,7 +1630,7 @@ async def backup(path, src=None, delete=False):
   url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
   info(f"url: {url}")
   #  shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
-  if del:
+  if delete:
     shell_cmd=["rm", path]
   else:
     shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
