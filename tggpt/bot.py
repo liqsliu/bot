@@ -3512,19 +3512,19 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         #  shell_cmd = ["lottie_convert.py", path, fp.parent / f"{filename[:-4]}.webp"]
         #  shell_cmd = ["lottie_convert.py", path, f"{HOME}/t/{filename[:-4]}.webp"]
         #  shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", path, f"{fp.parent.as_posix()}/{filename[:-4]}.webp"]
-        #  shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", path, f"{fp.parent.as_posix()}/{filename[:-4]}.webp"]
-        shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", "-h"]
+        shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", path, f"{fp.parent.as_posix()}/{filename[:-4]}.webp"]
+        #  shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", "-h"]
         #  shell_cmd = ["cd", fp.parent.as_posix(), ";" , f"lottie_convert.py", filename, f"{filename[:-4]}.webp"]
         #  shell_cmd = ["cd", fp.parent.as_posix(), ";" , f"echo", filename, f"{filename[:-4]}.webp"]
         #  r, o, e = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=get_timeout(length)*3+30)
-        r, o, e = await my_popen(shell_cmd, shell=False, combine=False, max_time=get_timeout(length)*3+30)
-        if r == 0:
-          info(f"转换tgs文件成功: {path} {r=} {o=} {e=}")
-          #  path = path[:-4]+".webp"
-        else:
-          warn(f"转换tgs文件失败: {path} {r=} {o=} {e=}")
-        #  r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
-        #  info(f"{r=}")
+        #  r, o, e = await my_popen(shell_cmd, shell=False, combine=False, max_time=get_timeout(length)*3+30)
+        #  if r == 0:
+        #    info(f"转换tgs文件成功: {path} {r=} {o=} {e=}")
+        #    #  path = path[:-4]+".webp"
+        #  else:
+        #    warn(f"转换tgs文件失败: {path} {r=} {o=} {e=}")
+        r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
+        info(f"{r=}")
 
       if opts == 2 or res is None:
         try:
