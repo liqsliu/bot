@@ -3948,7 +3948,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   else:
     fp = file_path
   if not fp.is_file():
-    err(f"仅支持文件: {file_path}")
+    err(f"文件路径错误: {file_path}")
     return
   #  httpupload = client.summon(aioxmpp.httpupload.Service)
   #  filename = file_path.split("/")[-1]
