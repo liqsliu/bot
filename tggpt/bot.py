@@ -2000,9 +2000,15 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
         warn(f"send msg: res is not coroutine: {res=} {client=} {room=} {msg=}")
       return False
 
+async def send(*args, **kwargs):
+  coro = send_t(*args, **kwargs)
+  return await run_run(coro, need_main=True)
+  #  if threading.current_thread() is loop2_thread:
+    #  asyncio.run_coroutine_threadsafe(coro, loop)
+
 
 @exceptions_handler
-async def send(text, jid=None, *args, **kwargs):
+async def send_t(text, jid=None, *args, **kwargs):
   muc = None
   if 'name' in kwargs:
     name = kwargs["name"]
@@ -3775,22 +3781,39 @@ def run_run_loop():
   loop2.run_forever()  # 启动事件循环
 
 
-async def run_run(coro):
-  fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
-  #  fu = asyncio.Future()
-  #  async def cb2(fu):
-  #    fu.set_result(0)
-  #  def cb():
-  #    asyncio.run_coroutine_threadsafe(cb2(fu), loop)
-  #  fu2.add_done_callback(cb)
-  #
-  #  return await fu
-  while True:
-    await asyncio.sleep(1)
+async def run_run(coro, need_main=False):
+  if need_main:
+    if threading.current_thread() is loop2_thread:
+      fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+      oloop = loop2
+    else:
+      return await coro
+  else:
+    if threading.current_thread() is loop2_thread:
+      return await coro
+    else:
+      fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
+      oloop = loop
+
+  fu = asyncio.Future()
+  async def cb2(fu):
+    fu.set_result(0)
+  def cb(fu2):
     if fu2.done():
-      break
-    info(f"wait for result of fu: {coro}")
-  return fu2.result()
+      print("确实结束了")
+    asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
+  fu2.add_done_callback(cb)
+  return await fu
+
+
+
+
+  #  while True:
+  #    await asyncio.sleep(1)
+  #    if fu2.done():
+  #      break
+  #    info(f"wait for result of fu: {coro}")
+  #  return fu2.result()
 
 
 
@@ -3920,7 +3943,8 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         timeout = upload_media_time_max
       elif timeout < 15:
         timeout = 15
-      async def coro(slot, fp, timeout, headers):
+      #  async def coro(slot, fp, timeout, headers):
+      async def coro():
         async with aiofiles.open(fp, "rb") as file:
           file.read = d(file.read)
           file.readline = d(file.readline)
@@ -3928,10 +3952,12 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
           #  await asyncio.sleep(5)
           res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
           #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
-          coro = _sendme("测试进程间通信 res: {}".format(res))
-          fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+          #  coro = _sendme("测试进程间通信 res: {}".format(res))
+          #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+          send("测试进程间通信 res: {}".format(res))
           return res
-      res = await run_run(coro(slot, fp, timeout, headers))
+      #  res = await run_run(coro(slot, fp, timeout, headers))
+      res = await run_run(coro())
       info(f"res: {res}\nslot: {slot}")
 
     except Exception as e:
