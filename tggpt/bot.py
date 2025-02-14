@@ -115,7 +115,7 @@ class NoParsingFilter(logging.Filter):
 
 
 interval = 5
-download_media_time_max = 300
+download_media_time_max = 60
 upload_media_time_max = 900
 
 wtf_time = 5
@@ -765,6 +765,7 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
   if url == pb_list["fars"][0]:
     if not url.startswith("https://fars.ee/"):
       res = await pastebin(data=data, filename=filename, extra=extra, use="0x0", **kwargs)
+      warn(f"fallback 0x0: {res}")
   return res
 
 def raise_error(error: str):
@@ -2775,15 +2776,34 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
 
 
 
+def get_timeout(size):
+  #  timeout = size/1024/1024*1.5 + 15
+  #  timeout = 11720/73-14553000/5329/(size/1024/1024+1250/73)
+  #  if timeout > upload_media_time_max:
+  #    timeout = upload_media_time_max
+  #  elif timeout < 10:
+  #    timeout = 10
+  timeout = 247080/233-10768058155008000/54289/(size+43751833600/233)
+  return timeout
+
+
 #  last_time = {}
 
 async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=False, max_wait_time=download_media_time_max):
 #  await client.download_media(message, progress_callback=callback)
   #  async with downlaod_lock:
-  if msg.file and msg.file.name:
-    res = f"{msg.file.name}"
+  if msg.file:
+    if msg.file.name:
+      res = f"{msg.file.name}"
+    else:
+      res = ''
+    size = msg.file.size
+    timeout = get_timeout(size)
+    if max_wait_time > timeout:
+      timeout = max_wait_time
   else:
-    res = ''
+    err(f"no file: {msg}")
+    return
   if msg.buttons:
     logger.info(msg.buttons)
     for i in get_buttons(msg.buttons):
@@ -2844,7 +2864,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
 
   async def _download_media(msg, path):
     try:
-      path = await asyncio.wait_for(msg.download_media(path, progress_callback=download_media_callback), timeout=max_wait_time)
+      path = await asyncio.wait_for(msg.download_media(path, progress_callback=download_media_callback), timeout=timeout)
     except TimeoutError as e:
       path = None
     return path
@@ -2871,7 +2891,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
         break
       if len(last_time) == 2:
         #  if time.time() - now > 60:
-        if time.time() - now > max_wait_time:
+        if time.time() - now > timeout:
           t1.cancel()
           path = None
           res = f"下载失败(等待超时): {res}"
@@ -3783,13 +3803,16 @@ def run_run_loop():
 
 async def run_run(coro, need_main=False):
   if need_main:
-    if threading.current_thread() is loop2_thread:
+    # threading.main_thread()
+    #  if threading.current_thread() is loop2_thread:
+    if loop2_thread.native_id == threading.get_native_id():
       fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
       oloop = loop2
     else:
       return await coro
   else:
-    if threading.current_thread() is loop2_thread:
+    #  if threading.current_thread() is loop2_thread:
+    if loop2_thread.native_id == threading.get_native_id():
       return await coro
     else:
       fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
@@ -3938,11 +3961,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     #      return await func(*args, **kwargs)
     #    return wrapper
 
-    timeout = length/1024/1024*1.5
-    if timeout > upload_media_time_max:
-      timeout = upload_media_time_max
-    elif timeout < 15:
-      timeout = 15
+    timeout = get_timeout(length)
     async with aiofiles.open(fp, "rb") as file:
       t = asyncio.create_task(update_tmp_msg(file))
       try:
