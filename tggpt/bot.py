@@ -3801,61 +3801,66 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   #      )
   #  ))
 
-  # 流式上传需要手动设置Length
   headers = slot.put.headers.copy()
-  headers["Content-Length"] = str(length)
-  headers['Transfer-Encoding'] = 'chunked'
-
   info(slot.put.headers)
   dbg(slot.get.url)
 
   chunk_size = 1024 * 1024
-  last_time = [time.time(), 0]
-  total = length
-  async def update_tmp_msg():
-    while True:
-      await asyncio.sleep(interval/2)
-      if len(last_time) == 2:
-        await send("准备中", src, correct=True)
-        if time.time() - last_time[0] > 15:
-          await send("准备超时，可能网络过慢或者文件太小", src, correct=True)
+  if length / chunk_size > 2:
+    headers['Transfer-Encoding'] = 'chunked'
+    last_time = [time.time(), 0]
+    total = length
+    async def update_tmp_msg():
+      while True:
+        await asyncio.sleep(interval/2)
+        if len(last_time) == 2:
+          await send("准备中", src, correct=True)
+          if time.time() - last_time[0] > 15:
+            await send("准备超时，可能网络过慢或者文件太小", src, correct=True)
+            break
+        else:
+          current = last_time[1]
+          total = last_time[2]
+          if current == total:
+            break
+          await send("{:.1f}M".format((total-current)/1024/1024), src)
+        if time.time() - last_time[0] > download_media_time_max:
+          await send("超时", src, correct=True)
           break
-      else:
-        current = last_time[1]
-        total = last_time[2]
-        if current == total:
-          break
-        await send("{:.1f}M".format((total-current)/1024/1024), src)
-      if time.time() - last_time[0] > download_media_time_max:
-        await send("超时", src, correct=True)
-        break
-
-
-  if src:
-    t = asyncio.create_task(update_tmp_msg())
-  try:
-    async with aiohttp.ClientSession() as session:
-      async with aiofiles.open(fp, "rb") as file:
-        #  res = await http(slot.put.url, method="PUT", headers=headers, data=file)
-        while chunk := await file.read(chunk_size):
-          if len(last_time) == 2:
-            last_time.append(total)
-            asyncio.create_task(send("开始上传: {:.1f}MB".format(total/1024/1024), src))
-          #  res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
-          async with session.put(slot.put.url, data=chunk, headers=headers) as res:
-            if res.status != 200 and res.status != 200:
-              err(f"上传失败，返回状态：{res=} {slot.put.url=} {await res.text()}")
-              return
-            info(f"res: {res}\nslot: {slot}")
-            info(await res.text())
-          last_time[1] += chunk_size
-  except Exception as e:
-    err(f"上传失败：{e=} {slot.put.url=}")
-    return
-  finally:
     if src:
-      if not t.done():
-        t.cancel()
+      t = asyncio.create_task(update_tmp_msg())
+    try:
+      async with aiohttp.ClientSession() as session:
+        async with aiofiles.open(fp, "rb") as file:
+          while chunk := await file.read(chunk_size):
+            if len(last_time) == 2:
+              last_time.append(total)
+              asyncio.create_task(send("开始上传: {:.1f}MB".format(total/1024/1024), src))
+            #  res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
+            async with session.put(slot.put.url, data=chunk, headers=headers) as res:
+              if res.status != 200 and res.status != 200:
+                err(f"上传失败，返回状态：{res=} {slot.put.url=} {await res.text()}")
+                return
+              info(f"res: {res}\nslot: {slot}")
+              info(await res.text())
+            last_time[1] += chunk_size
+    except Exception as e:
+      err(f"上传失败：{e=} {slot.put.url=}")
+      return
+    finally:
+      if src:
+        if not t.done():
+          t.cancel()
+  else:
+    # 流式上传需要手动设置Length
+    headers["Content-Length"] = str(length)
+    try:
+      async with aiofiles.open(fp, "rb") as file:
+        res = await http(slot.put.url, method="PUT", headers=headers, data=file)
+        info(f"res: {res}\nslot: {slot}")
+    except Exception as e:
+      err(f"上传失败：{e=} {slot.put.url=}")
+      return
   dbg(slot.put.headers)
   info(slot.get.url)
   return slot.get.url
