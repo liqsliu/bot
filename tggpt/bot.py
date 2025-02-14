@@ -714,54 +714,57 @@ def decompress(data):
 
 
 pb_list = {
-        "anon": ["https://api.anonfiles.com/upload", "file"],
-        "0x0": ["https://0x0.st/", "file"],
-        "fars": ["https://fars.ee/?u=1", "c"]
-        }
+    "anon": ["https://api.anonfiles.com/upload", "file"],
+    "0x0": ["https://0x0.st/", "file"],
+    "fars": ["https://fars.ee/?u=1", "c"]
+    }
 #async def pastebin(data="test", filename=None, url="https://fars.ee/?u=1", fieldname="c", extra={}, **kwargs):
 @exceptions_handler
 async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname="c", extra={}, ce=None, use=None, **kwargs):
-    if not data:
-        return
-    if use:
-        if use not in pb_list:
-            use = "fars"
-        url = pb_list[use][0]
-        fieldname = pb_list[use][1]
-    if not ce:
-        if url == pb_list["fars"][0]:
-            ce = "br"
+  if not data:
+    return
+  if use:
+    if use not in pb_list:
+      use = "fars"
+    url = pb_list[use][0]
+    fieldname = pb_list[use][1]
+  if not ce:
+    if url == pb_list["fars"][0]:
+      ce = "br"
 
-    headers = {}
-    #  if type(data) == str:
-    if isinstance(data, str):
-#    data = {"content": data}
-#        data = zlib.compress(data)
-#        headers = {'Content-Encoding': 'deflate'}
-#        data = gzip.compress(data.encode())
-#        headers = {'Content-Encoding': 'gzip'}
-        if ce:
-            data = compress(data.encode(), ce)
-            headers = {'Content-Encoding': ce}
-        data = {fieldname: data}
-        data.update(extra)
-    elif isinstance(data, bytes) or type(data) == BufferedReader or type(data) == TextIOWrapper or type(data) == BytesIO:
-        if filename:
-            data = file_for_post(data, filename=filename, fieldname=fieldname, **extra)
-        else:
-            data = {fieldname: data}
-            data.update(extra)
-    elif isinstance(data, dict):
-        pass
-#    elif type(data) == aiohttp.formdata.FormData:
-    elif type(data) == FormData:
-        pass
+  headers = {}
+  #  if type(data) == str:
+  if isinstance(data, str):
+#  data = {"content": data}
+#    data = zlib.compress(data)
+#    headers = {'Content-Encoding': 'deflate'}
+#    data = gzip.compress(data.encode())
+#    headers = {'Content-Encoding': 'gzip'}
+    if ce:
+      data = compress(data.encode(), ce)
+      headers = {'Content-Encoding': ce}
+    data = {fieldname: data}
+    data.update(extra)
+  elif isinstance(data, bytes) or type(data) == BufferedReader or type(data) == TextIOWrapper or type(data) == BytesIO:
+    if filename:
+      data = file_for_post(data, filename=filename, fieldname=fieldname, **extra)
     else:
-        return
-
-    res = await http(url=url, method="POST", data=data, headers=headers,  **kwargs)
-#        res = res + "." + filename.split(".")[-1]
-    return res.strip()
+      data = {fieldname: data}
+      data.update(extra)
+  elif isinstance(data, dict):
+    pass
+#  elif type(data) == aiohttp.formdata.FormData:
+  elif type(data) == FormData:
+    pass
+  else:
+    return
+  res = await http(url=url, method="POST", data=data, headers=headers,  **kwargs)
+#    res = res + "." + filename.split(".")[-1]
+  res = res.strip()
+  if url == pb_list["fars"][0]:
+    if not url.startswith("https://fars.ee/"):
+      res = await pastebin(data=data, filename=filename, extra=extra, use="0x0", **kwargs)
+  return res
 
 def raise_error(error: str):
     error = "-" * 24 + f"\nerror:\n" + "-" * 24 + f"\n{error}" + "-" * 24
@@ -2264,7 +2267,8 @@ async def mt_read():
               # # print(buffer)
               # await send_mt_msg_to_queue(buffer, queue)
               #  await mt2tg(line)
-              asyncio.create_task(mt2tg(line))
+              #  asyncio.create_task(mt2tg(line))
+              asyncio.create_task(parse_mt(line))
               line = b""
 
     except ClientPayloadError:
@@ -2292,7 +2296,7 @@ async def mt_read():
 
 
 @exceptions_handler
-async def mt2tg(msg):
+async def parse_mt(msg):
   '''
   #       Data sent: 'GET /api/stream HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n'
   #      Data received: 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nDate: Wed, 19 Jan 2022 02:03:29 GMT\r\nTransfer-Encoding: chunked\r\n\r\nd5\r\n{"text":"","channel":"","username":"","userid":"","avatar":"","account":"","event":"api_connected","protocol":"","gateway":"","parent_id":"","timestamp":"2022-01-19T10:03:29.666861315+08:00","id":"","Extra":null}\n\r\n'
@@ -2344,7 +2348,8 @@ async def mt2tg(msg):
     logger.debug("original msg of mt_read: %s" % msgd)
     # file
     #,"id":"","Extra":{"file":[{"Name":"proxy-image.jpg","Data":"/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAA ... 6P9ZgOT6tI33Ff5p/MAOfNnzPzQAN4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAGQAAYAkAAGTGAAAAAAAAwsAAHLAAAK//9k=","Comment":"","URL":"https://liuu.tk/ddb833ad/proxy_image.jpg","Size":0,"Avatar":false,"SHA":"ddb833ad"}]}}\n\r\n'
-    for file in msgd["Extra"]["file"]:
+    files = msgd["Extra"]["file"]
+    for file in fs:
       if text:
         if text == file["Name"]:
           text = ""
@@ -2353,6 +2358,16 @@ async def mt2tg(msg):
       if file["Comment"]:
         text += file["Comment"]
         text += " "
+        #  if text:
+        #  else:
+        #    text = file["Comment"]
+        #    text += " "
+      else:
+        if text:
+          pass
+        elif len(files) == 1:
+          text = "{}".format(file["URL"])
+          break
       text += "[{}]({})".format(file["Name"], file["URL"])
     msgd.pop("Extra")
     logger.warning("removed file info from mt api(saved)")
@@ -2499,8 +2514,6 @@ async def clear_history(src=None):
 
 @exceptions_handler
 async def http(url, method="GET", return_headers=False, *args, **kwargs):
-  #  await init_aiohttp_session()
-
   if "headers" in kwargs:
     headers = kwargs["headers"]
   else:
@@ -2512,113 +2525,100 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
       })
   if "User-agent" not in headers:
     headers.update({'User-agent': UA})
-
+  res = None
+  data = None
+  html = None
+  #  await init_aiohttp_session()
   async with aiohttp.ClientSession() as session:
     try:
       res = await session.request(url=url, method=method, *args, **kwargs)
     except asyncio.TimeoutError as e:
       #  raise
-      info(f"{e=}")
-      pass
-    async with res:
-      info(f"http status: {res.status} {res.reason} url: {res.url}")
-      # print("All:", res)
-  #    res.raise_for_status()
-      if res.status == 304:
-        logger.warning(f"W: http status: {res.status} {res.reason} {res.url=}")
-        logger.warning("ignore: {}".format(await res.text()))
-        if return_headers:
-          return None, res.headers
-        else:
-          return
-      if res.status != 200 and res.status != 201:
-  #      logger.error(res)
-  #      put(str(res))
-        #  html = f"E: error http status: {res.status} {res.reason} url: {res.url} headers: {res.headers}"
-        html = f"E: error http status: {res.status} {res.reason} url: {res.url}"
-        if return_headers:
-          return html, res.headers
-        else:
-          return html
-      # print(type(res))
-      # print("Status:", res.status)
-      # print("Content-type:", res.headers['content-type'])
-      # print("Content-Encoding:", res.headers['Content-Encoding'])
-      # print('Content-Length:', res.headers['Content-Length'])
-      # print('Content-Length:', res.headers['Content-Length'])
-        # print(res)
-        # print("q: ", res.request_info)
-        # print("a: ",  res.headers)
-
+      err(f"{e=} {url=}")
+    except Exception as e:
+      err(f"{e=} {url=}")
+    else:
       try:
-        data = None
-        html = None
-        length =  0
-        if 'Content-Length' in res.headers:
-          length = int(res.headers['Content-Length'])
-        #  if 'Content-Length' in res.headers and int(res.headers['Content-Length']) > HTTP_RES_MAX_BYTES:
-        if length > HTTP_RES_MAX_BYTES:
-          warn(f"skip: too big({length}): {url}")
-        elif 'Transfer-Encoding' in res.headers and res.headers['Transfer-Encoding'] == "chunked":
+        async with res:
+          info(f"http status: {res.status} {res.reason} url: {res.url}")
+      #    res.raise_for_status()
+          if res.status == 304:
+            text = await res.text()
+            warn(f"W: http status: {res.status} {res.reason} {res.headers=} {res.url=} >> ignore: {text}")
+          elif res.status != 200 and res.status != 201:
+            text = await res.text()
+            html = f"E: error http status: {res.status} {res.reason} headers: {res.headers} url: {res.url} res: {text}"
+            err(html)
+          else:
+            # print(type(res))
+            # print("Status:", res.status)
+            # print("Content-type:", res.headers['content-type'])
+            # print("Content-Encoding:", res.headers['Content-Encoding'])
+            # print('Content-Length:', res.headers['Content-Length'])
+              # print(res)
+              # print("q: ", res.request_info)
+              # print("a: ",  res.headers)
+            length =  0
+            if 'Content-Length' in res.headers:
+              length = int(res.headers['Content-Length'])
+            #  if 'Content-Length' in res.headers and int(res.headers['Content-Length']) > HTTP_RES_MAX_BYTES:
+            if length > HTTP_RES_MAX_BYTES:
+              err(f"文件过大，终止下载({length}): {url}")
+            elif 'Transfer-Encoding' in res.headers and res.headers['Transfer-Encoding'] == "chunked":
+              #  async for data in res.content.iter_chunked(HTTP_RES_MAX_BYTES):
+              #    break
+              data = b""
+              async for tmp, _ in res.content.iter_chunks():
+                data += tmp
+                if len(data) > HTTP_FILE_MAX_BYTES:
+                  break
+                info(f"http downlod({length})... {len(tmp)} > {len(data)}")
+            else:
+              info(f"http downlod({length})...")
+            # if res.headers['content-type'] == "text/plain; charset=utf-8":
+              #  data = await res.read()
+              data = await res.content.read(HTTP_FILE_MAX_BYTES)
+      except ClientPayloadError as e:
+        err(f"http connect error: {e=} {url=}")
+      except Exception as e:
+        err(f"http connect error: {e=} {url=}")
 
-          #  async for data in res.content.iter_chunked(HTTP_RES_MAX_BYTES):
-          #    break
-          data = b""
-          async for tmp, _ in res.content.iter_chunks():
-            data += tmp
-            if len(data) > HTTP_FILE_MAX_BYTES:
-              break
-            info(f"http downlod({length})... {len(tmp)} > {len(data)}")
-        else:
-          info(f"http downlod({length})...")
-        # if res.headers['content-type'] == "text/plain; charset=utf-8":
-          #  data = await res.read()
-          data = await res.content.read(HTTP_FILE_MAX_BYTES)
-
-        if data is not None:
-          try:
-            if "Content-Encoding" in res.headers:
-              if res.headers['Content-Encoding'] == "gzip":
-                logger.info("use gzip")
-                data = gzip.decompress(data)
-              elif res.headers['Content-Encoding'] == "deflate":
-                logger.info("use zlib")
-                data = zlib.decompress(data)
-              elif res.headers['Content-Encoding'] == "br":
-                logger.info("use br")
-                data = brotli.decompress(data)
-              elif res.headers['Content-Encoding']:
-                err("url: {}\nunknown encoding: {}".format(url, res.headers['Content-Encoding']))
-                #  return data
-          except Exception as e:
-            warn(f"解压时出现错误: {e=}")
-
+      if data:
+        try:
+          if "Content-Encoding" in res.headers:
+            if res.headers['Content-Encoding'] == "gzip":
+              logger.info("use gzip")
+              data = gzip.decompress(data)
+            elif res.headers['Content-Encoding'] == "deflate":
+              logger.info("use zlib")
+              data = zlib.decompress(data)
+            elif res.headers['Content-Encoding'] == "br":
+              logger.info("use br")
+              data = brotli.decompress(data)
+            elif res.headers['Content-Encoding']:
+              err("url: {}\nunknown encoding: {}".format(url, res.headers['Content-Encoding']))
+              #  return data
+        except Exception as e:
+          warn(f"解压时出现错误: {e=}")
+        try:
           # if "text/plain" in res.headers['content-type']:
           if "text" in res.headers['content-type']:
             # return await res.text()
             html = data.decode(errors='ignore')
           else:
-            # html = data.decode(errors='ignore')
             #  html = data.decode()
             html = data
-      except ClientPayloadError as e:
-        try:
-          if "data" in locals():
-            html = data.decode(errors='ignore')
-          else:
-            html = None
+          info(f"http res: {html} url: {url}")
         except UnicodeDecodeError as e:
-          html = None
-      except UnicodeDecodeError as e:
-        print("res.headers: ",  res.headers)
-        print(f"res data: {data[:64]} 64/{len(data)}")
-        logger.warning(f"decode failed: {url}\nerror: {e}")
-        #  put(f"decode failed: {url}")
-        html = data
-      if return_headers:
-        return html, res.headers
-      else:
-        return html
+          warn(f"{e=} res data: {data[:64]} 64/{len(data)}")
+          html = data
+  if return_headers:
+    if res:
+      return html, res.headers
+    else:
+      return html, None
+  else:
+    return html
 
 async def mt_send(*args, **kwargs):
   asyncio.create_task(_mt_send(*args, **kwargs))
@@ -3766,7 +3766,7 @@ async def get_server_name(jid):
 
 
 
-async def upload(file_path=f"{HOME}/t/1.jpg"):
+async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   if UPLOAD is None:
     err(f"服务器不支持文件上传: {myjid}")
     return False
@@ -3804,16 +3804,55 @@ async def upload(file_path=f"{HOME}/t/1.jpg"):
   # 流式上传需要手动设置Length
   headers = slot.put.headers.copy()
   headers["Content-Length"] = str(length)
+  headers['Transfer-Encoding'] = 'chunked'
 
   info(slot.put.headers)
   dbg(slot.get.url)
 
-  async with aiofiles.open(fp, "rb") as file:
-    res = await http(slot.put.url, method="PUT", headers=headers, data=file)
-    info(f"res: {res}\nslot: {slot}")
-    dbg(slot.put.headers)
-    info(slot.get.url)
-    return slot.get.url
+  chunk_size = 1024 * 1024
+  last_time = [time.time(), 0]
+  total = length
+  async def update_tmp_msg():
+    while True:
+      await asyncio.sleep(interval/2)
+      if len(last_time) == 2:
+        await send("准备中", src, correct=True)
+        if time.time() - last_time[0] > 15:
+          await send("准备超时，可能网络过慢或者文件太小", src, correct=True)
+          break
+      else:
+        current = last_time[1]
+        total = last_time[2]
+        if current == total:
+          break
+        await send("{:.1f}M".format((total-current)/1024/1024), src)
+      if time.time() - last_time[0] > download_media_time_max:
+        await send("超时", src, correct=True)
+        break
+
+
+  if src:
+    t = asyncio.create_task(update_tmp_msg())
+  try:
+    async with aiofiles.open(fp, "rb") as file:
+      #  res = await http(slot.put.url, method="PUT", headers=headers, data=file)
+      while chunk := file.read(chunk_size):
+        if len(last_time) == 2:
+          last_time.append(total)
+          asyncio.create_task(send("开始上传: {:.1f}MB".format(total/1024/1024), src))
+        res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
+        info(f"res: {res}\nslot: {slot}")
+        last_time[1] += chunk_size
+  except Exception as e:
+    err(f"上传失败：{e=} {slot.put.url=}")
+    return
+  finally:
+    if src:
+      if not t.done():
+        t.cancel()
+  dbg(slot.put.headers)
+  info(slot.get.url)
+  return slot.get.url
 
 
 
