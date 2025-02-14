@@ -3803,7 +3803,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
 
   headers = slot.put.headers.copy()
 
-  chunk_size = 512 * 1024
+  chunk_size = 1024 * 1024
   if length / chunk_size > 2:
   #  if False:
     #  async with aiofiles.open(fp, "rb") as file:
@@ -3814,8 +3814,14 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     #  headers['Transfer-Encoding'] = 'chunked'
     last_time = [time.time(), 0]
     total = length
-    async def update_tmp_msg():
+    async def update_tmp_msg(file):
       while True:
+        await asyncio.sleep(1)
+        info(f"当前位置: {await file.tell()}")
+        if time.time() - last_time[0] > 15:
+          await send("超时", src, correct=True)
+          break
+        continue
         await asyncio.sleep(interval/2)
         if len(last_time) == 2:
           await send("准备中", src, correct=True)
@@ -3831,8 +3837,6 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         if time.time() - last_time[0] > download_media_time_max:
           await send("超时", src, correct=True)
           break
-    if src:
-      t = asyncio.create_task(update_tmp_msg())
     try:
       #  async with aiohttp.ClientSession() as session:
       #    async with aiofiles.open(fp, "rb") as file:
@@ -3851,27 +3855,29 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       #          info(f"res: {res}\nslot: {slot}")
       #          info(await res.text())
       #        last_time[1] += chunk_size
-      #  def d(func):
-      #    @wraps(func)
-      #    async def wrapper(*args, **kwargs):
-      #      data = await func(*args, **kwargs)
-      #      print(f"read: {len(data)}")
-      #      return data
-      #    return wrapper
-
-      class MyFiles:
-        def __init__(self, file_obj):
-          self._file = file_obj
-
-        async def read(self, *args, **kwargs):
-          data = await self._file.read(*args, **kwargs)
-          print(f"read: {len(data)}")
+      def d(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+          data = await func(*args, **kwargs)
+          print(f"正在分块read: {len(data)}")
           return data
+        return wrapper
+
+      def dc(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+          data = await func(*args, **kwargs)
+          print(f"正在关闭: {len(data)}")
+          return data
+        return wrapper
+
 
       headers["Content-Length"] = str(length)
       async with aiofiles.open(fp, "rb") as file:
-        file = MyFiles(file)
-        #  file.read = d(file.read)
+        if src:
+          t = asyncio.create_task(update_tmp_msg(file))
+        file.read = d(file.read)
+        file.close = dc(file.close)
         res = await http(slot.put.url, method="PUT", headers=headers, data=file)
         info(f"res: {res}\nslot: {slot}")
 
