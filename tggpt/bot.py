@@ -3925,6 +3925,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
           await asyncio.sleep(5)
           res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
           #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
+          return res
       res = await run_run(coro(slot, fp, timeout, headers))
       info(f"res: {res}\nslot: {slot}")
 
