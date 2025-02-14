@@ -116,6 +116,7 @@ class NoParsingFilter(logging.Filter):
 
 interval = 5
 download_media_time_max = 300
+upload_media_time_max = 900
 
 wtf_time = 5
 wtf_time_max = 1800
@@ -2534,9 +2535,9 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
       res = await session.request(url=url, method=method, *args, **kwargs)
     except asyncio.TimeoutError as e:
       #  raise
-      err(f"{e=} {url=}")
+      err(f"请求超时 {e=} {url=}")
     except Exception as e:
-      err(f"{e=} {url=}")
+      err(f"请求失败 {e=} {url=}")
     else:
       try:
         async with res:
@@ -2579,7 +2580,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               #  data = await res.read()
               data = await res.content.read(HTTP_FILE_MAX_BYTES)
       except ClientPayloadError as e:
-        err(f"http connect error: {e=} {url=}")
+        err(f"读取失败: {e=} {url=}")
       except Exception as e:
         err(f"http connect error: {e=} {url=}")
 
@@ -3884,7 +3885,10 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         t = asyncio.create_task(update_tmp_msg(file))
         file.read = d(file.read)
         file.close = dc(file.close)
-        res = await http(slot.put.url, method="PUT", headers=headers, data=file)
+        timeout = length/1024/1024*1.5
+        if timeout > upload_media_time_max:
+          timeout = upload_media_time_max
+        res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
         if not t.done():
           t.cancel()
         info(f"res: {res}\nslot: {slot}")
@@ -3902,7 +3906,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     info("headers: %s" % headers)
     try:
       async with aiofiles.open(fp, "rb") as file:
-        res = await http(slot.put.url, method="PUT", headers=headers, data=file)
+        res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=15)
         info(f"res: {res}\nslot: {slot}")
     except Exception as e:
       err(f"上传失败：{e=} {slot.put.url=}")
