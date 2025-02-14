@@ -3851,17 +3851,27 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       #          info(f"res: {res}\nslot: {slot}")
       #          info(await res.text())
       #        last_time[1] += chunk_size
-      def d(func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-          data = await func(*args, **kwargs)
+      #  def d(func):
+      #    @wraps(func)
+      #    async def wrapper(*args, **kwargs):
+      #      data = await func(*args, **kwargs)
+      #      print(f"read: {len(data)}")
+      #      return data
+      #    return wrapper
+
+      class MyFiles:
+        def __init__(self, file_obj):
+          self._file = file_obj
+
+        async def read(self, *args, **kwargs):
+          data = await self._file.read(*args, **kwargs)
           print(f"read: {len(data)}")
           return data
-        return wrapper
 
       headers["Content-Length"] = str(length)
       async with aiofiles.open(fp, "rb") as file:
-        file.read = d(file.read)
+        file = MyFiles(file)
+        #  file.read = d(file.read)
         res = await http(slot.put.url, method="PUT", headers=headers, data=file)
         info(f"res: {res}\nslot: {slot}")
 
