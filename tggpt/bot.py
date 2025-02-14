@@ -3805,6 +3805,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
 
   chunk_size = 1024 * 1024
   if length / chunk_size > 2:
+    info(f"文件过大，开启进度显示: {length} > {chunk_size}")
   #  if False:
     #  async with aiofiles.open(fp, "rb") as file:
     #    data = await file.read()
@@ -3874,6 +3875,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       headers["Content-Length"] = str(length)
       async with aiofiles.open(fp, "rb") as file:
         if src:
+          info("开启进度刷新")
           t = asyncio.create_task(update_tmp_msg(file))
         file.read = d(file.read)
         file.close = dc(file.close)
