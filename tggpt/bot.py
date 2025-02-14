@@ -3804,8 +3804,14 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   headers = slot.put.headers.copy()
 
   chunk_size = 512 * 1024
-  #  if length / chunk_size > 2:
-  if False:
+  if length / chunk_size > 2:
+  #  if False:
+    async with aiofiles.open(fp, "rb") as file:
+      data = await file.read()
+    res = await http(slot.put.url, method="PUT", headers=headers, data=data, chunked=chunk_size)
+    info(f"res: {res}\nslot: {slot}")
+    info(await res.text())
+    return slot.get.url
     headers['Transfer-Encoding'] = 'chunked'
     last_time = [time.time(), 0]
     total = length
@@ -3859,8 +3865,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     info("headers: %s" % headers)
     try:
       async with aiofiles.open(fp, "rb") as file:
-        #  res = await http(slot.put.url, method="PUT", headers=headers, data=file)
-        res = await http(slot.put.url, method="PUT", headers=headers, data=file, chunked=chunk_size)
+        res = await http(slot.put.url, method="PUT", headers=headers, data=file)
         info(f"res: {res}\nslot: {slot}")
     except Exception as e:
       err(f"上传失败：{e=} {slot.put.url=}")
