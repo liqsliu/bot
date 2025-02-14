@@ -3806,11 +3806,11 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   chunk_size = 512 * 1024
   if length / chunk_size > 2:
   #  if False:
-    async with aiofiles.open(fp, "rb") as file:
-      data = await file.read()
-    res = await http(slot.put.url, method="PUT", headers=headers, data=data, chunked=chunk_size)
-    info(f"res: {res}\nslot: {slot}")
-    return slot.get.url
+    #  async with aiofiles.open(fp, "rb") as file:
+    #    data = await file.read()
+    #  res = await http(slot.put.url, method="PUT", headers=headers, data=data, chunked=chunk_size)
+    #  info(f"res: {res}\nslot: {slot}")
+    #  return slot.get.url
     headers['Transfer-Encoding'] = 'chunked'
     last_time = [time.time(), 0]
     total = length
@@ -3844,7 +3844,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
             #  headers["Content-Length"] = str(length)
             #  headers["Content-Length"] = str(len(chunk))
             info("headers: %s" % headers)
-            async with session.put(slot.put.url, data=chunk, headers=headers) as res:
+            async with session.put(slot.put.url, data=chunk, headers=headers, chunked=chunk_size) as res:
               if res.status != 200 and res.status != 200:
                 err(f"分块上传失败，返回状态：{res=} {slot.put.url=} {res.headers=} {await res.text()}")
                 return
