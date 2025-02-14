@@ -3777,14 +3777,21 @@ def run_run_loop():
 
 async def run_run(coro):
   fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
-  fu = asyncio.Future()
-  async def cb2(fu):
-    fu.set_result(0)
-  def cb():
-    asyncio.run_coroutine_threadsafe(cb2(fu), loop)
-  fu2.add_done_callback(cb)
+  #  fu = asyncio.Future()
+  #  async def cb2(fu):
+  #    fu.set_result(0)
+  #  def cb():
+  #    asyncio.run_coroutine_threadsafe(cb2(fu), loop)
+  #  fu2.add_done_callback(cb)
+  #
+  #  return await fu
+  while True:
+    await asyncio.sleep(1)
+    if fu2.done():
+      break
+    info(f"wait for result of fu: {coro}")
+  return fu2.result()
 
-  return await fu
 
 
 
@@ -3887,7 +3894,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         @wraps(func)
         async def wrapper(*args, **kwargs):
           data = await func(*args, **kwargs)
-          print(f"正在读取分块read: {len(data)}")
+          print(f"正在读取: {len(data)}")
           return data
         return wrapper
 
@@ -3906,6 +3913,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
           await send("开始上传 {:.1f}M".format(length/1024/1024), src)
         t = asyncio.create_task(update_tmp_msg(file))
         file.read = d(file.read)
+        file.readline = d(file.readline)
         file.close = dc(file.close)
         timeout = length/1024/1024*1.5
         if timeout > upload_media_time_max:
@@ -6729,6 +6737,8 @@ async def xmppbot2():
 
 
 async def init():
+  global loop
+  loop = asyncio.get_event_loop()
   global loop2_thread, loop2
   loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
   loop2_thread.start()
@@ -6762,8 +6772,6 @@ async def init():
   print(f"SH_PATH: {SH_PATH}")
   print(f"DOMAIN: {DOMAIN}")
 
-  global loop
-  loop = asyncio.get_event_loop()
   return True
 
 
