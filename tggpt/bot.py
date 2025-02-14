@@ -3818,21 +3818,21 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     i = 0
     async def update_tmp_msg(file):
       while True:
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(1)
         if file.closed:
           info(f"文件已关闭: {file.name}")
           return
-        i += 0.5
         try:
           now = await file.tell()
         except ValueError as e:
           info(f"文件已关闭: {file.name}")
         if now == length:
           info(f"end: {now}")
-          break
+          return
         info(f"当前位置: {now}")
         #  await asyncio.sleep(interval/2)
-        if i < interval/2:
+        i += 1
+        if i < interval:
           continue
         i = 0
         info("剩余 {:.1f}M".format((length-now)/1024/1024))
