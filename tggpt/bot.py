@@ -3931,12 +3931,12 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         return data
       return wrapper
 
-    def dc(func):
-      @wraps(func)
-      async def wrapper(*args, **kwargs):
-        print(f"正在关闭")
-        return await func(*args, **kwargs)
-      return wrapper
+    #  def dc(func):
+    #    @wraps(func)
+    #    async def wrapper(*args, **kwargs):
+    #      print(f"正在关闭")
+    #      return await func(*args, **kwargs)
+    #    return wrapper
 
     timeout = length/1024/1024*1.5
     if timeout > upload_media_time_max:
@@ -3946,9 +3946,9 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     async with aiofiles.open(fp, "rb") as file:
       t = asyncio.create_task(update_tmp_msg(file))
       try:
-        file.read = d(file.read)
-        file.readline = d(file.readline)
-        file.close = dc(file.close)
+        #  file.read = d(file.read)
+        #  file.close = dc(file.close)
+        #  file.readline = d(file.readline)
         #  await asyncio.sleep(5)
         res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
         #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
