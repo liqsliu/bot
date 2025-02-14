@@ -3802,7 +3802,6 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   #  ))
 
   headers = slot.put.headers.copy()
-  info(slot.put.headers)
   dbg(slot.get.url)
 
   chunk_size = 1024 * 1024
@@ -3837,6 +3836,9 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
               last_time.append(total)
               asyncio.create_task(send("开始分块上传: {:.1f}MB".format(total/1024/1024), src))
             #  res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
+            #  headers["Content-Length"] = str(length)
+            headers["Content-Length"] = str(len(chunk))
+            info("headers: %s" % headers)
             async with session.put(slot.put.url, data=chunk, headers=headers) as res:
               if res.status != 200 and res.status != 200:
                 err(f"分块上传失败，返回状态：{res=} {slot.put.url=} {await res.text()}")
@@ -3854,6 +3856,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   else:
     # 流式上传需要手动设置Length
     headers["Content-Length"] = str(length)
+    info("headers: %s" % headers)
     try:
       async with aiofiles.open(fp, "rb") as file:
         res = await http(slot.put.url, method="PUT", headers=headers, data=file)
