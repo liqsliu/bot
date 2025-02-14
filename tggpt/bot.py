@@ -3457,12 +3457,32 @@ async def parse_tg_out_msg(event):
         sendme(f"{e.stringify()}")
       else:
         sendme(f"not a reply: {msg.stringify()}")
+    elif text == "$get file":
+      e = await msg.get_reply_message()
+      tmsg = e
+      if tmsg.document:
+        file = tmsg.document
+        res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+        if event.video:
+          res = await UB.send_file(chat_id, file=file, caption=tmsg.text, supports_streaming=True)
+        elif event.photo:
+          res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+      else:
+        sendme(f"no file: {e.stringify()}")
     return
 
   if chat_id == MY_ID or chat_id == CHAT_ID:
     if chat_id == CHAT_ID:
       if event.fwd_from:
         sendme(event.fwd_from.stringify())
+        tmsg = event
+        if tmsg.file:
+          file = tmsg.document
+          res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+          if event.video:
+            res = await UB.send_file(chat_id, file=file, caption=tmsg.text, supports_streaming=True)
+          elif event.photo:
+            res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
         return
       #  elif event.is_reply:
       #    sendme(event.reply_to.stringify())
