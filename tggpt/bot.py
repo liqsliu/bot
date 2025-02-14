@@ -6726,7 +6726,7 @@ async def init():
   loop_thread = threading.Thread(target=run_run_loop, daemon=True)
   loop_thread.start()
   while True:
-    if loop2.is_running():
+    if "loop2" in globals() and loop2.is_running():
       info("子线程事件循环正在运行")
       break
     else:
