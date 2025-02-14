@@ -3836,7 +3836,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   try:
     async with aiofiles.open(fp, "rb") as file:
       #  res = await http(slot.put.url, method="PUT", headers=headers, data=file)
-      while chunk := file.read(chunk_size):
+      while chunk := await file.read(chunk_size):
         if len(last_time) == 2:
           last_time.append(total)
           asyncio.create_task(send("开始上传: {:.1f}MB".format(total/1024/1024), src))
