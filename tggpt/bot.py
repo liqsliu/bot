@@ -3471,17 +3471,22 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         return
     except rpcerrorlist.ChatForwardsRestrictedError as e:
       info(f"fixme: {e=}")
+    except AttributeError as e:
+      info(f"fixme: {e=}")
+
+    if res is None:
+      file = None
       try:
-        file = utils.pack_bot_file_id(file)
+        file = utils.pack_bot_file_id(tmsg.file)
       except AttributeError as e:
         err(f"fixme: {e=} {type(file)}")
         try:
           # AttributeError("'PhotoSize' object has no attribute 'location'")
-          file = utils.pack_bot_file_id(tmsg.file)
-          if file is None:
-            file = utils.pack_bot_file_id(tmsg.photo)
+          #  file = utils.pack_bot_file_id(tmsg.file)
           if file is None:
             file = utils.pack_bot_file_id(tmsg.document)
+          if file is None:
+            file = utils.pack_bot_file_id(tmsg.photo)
           if file is None:
             file = utils.pack_bot_file_id(tmsg.media)
           if file is None:
@@ -3510,6 +3515,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if url:
           await _sendme(url, chat_id)
 
+      res = None
       url = None
       if opts < 4:
         await send("下载完成，正在上传到xmpp...", src, correct=True)
@@ -3545,6 +3551,16 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         err(f"文件url有问题: {e=} {url}")
       except Exception as e:
         err(f"{e=} {url}")
+
+      if res is None and opts != 2:
+        try:
+          res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
+          if opts == 2:
+            return
+        except Exception as e:
+          err(f"上传失败 {e=}")
+
+
 
   elif tmsg.text:
     res = await UB.send_message(chat_id, tmsg.text)
