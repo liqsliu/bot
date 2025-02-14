@@ -3533,14 +3533,14 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         else:
           shell_cmd = ["rm", path]
           r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
-          path = path[:-4]+".webp"
           if r:
             info(f"删除失败 {path} {r}")
           else:
             info(f"删除成功 {path}")
+          path = path[:-4]+".webp"
 
 
-      if opts == 2 or res is None:
+      if opts == 2 or res is None or opts == 0:
         try:
           res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
           if opts == 2:
