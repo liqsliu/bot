@@ -3511,7 +3511,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         #  shell_cmd = ["lottie_convert.py", path, f"{HOME}/t/{filename[:-4]}.webp"]
         #  shell_cmd = ["lottie_convert.py", path, (h.parent / f"{filename[:-4]}.webp").as_posix()]
         shell_cmd = ["lottie_convert.py", path, fp.parent / f"{filename[:-4]}.webp"]
-        r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=max_time)
+        r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=get_timeout(length))
         if r == 0:
           path = path[:-4]+".webp"
         else:
