@@ -3767,6 +3767,20 @@ async def get_server_name(jid):
 
 
 
+def run_run_loop():
+  global loop2
+  loop2 = asyncio.new_event_loop()  # 创建新的事件循环
+  asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
+  loop2.run_forever()  # 启动事件循环
+
+
+def run_run(coro):
+  fu = asyncio.run_coroutine_threadsafe(coro, loop2)
+  return await fu
+
+
+
+
 async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   if UPLOAD is None:
     err(f"服务器不支持文件上传: {myjid}")
@@ -3889,7 +3903,8 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         if timeout > upload_media_time_max:
           timeout = upload_media_time_max
         await asyncio.sleep(5)
-        res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
+        #  res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
+        res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
         if not t.done():
           t.cancel()
         info(f"res: {res}\nslot: {slot}")
@@ -6706,6 +6721,8 @@ async def xmppbot2():
 
 
 async def init():
+  global loop_thread
+  loop_thread = threading.Thread(target=run_run_loop, daemon=True)
   #  LOGGER.addFilter(NoParsingFilter())
   # https://stackoverflow.com/questions/17275334/what-is-a-correct-way-to-filter-different-loggers-using-python-logging
   for handler in logging.root.handlers:
