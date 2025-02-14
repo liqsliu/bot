@@ -3601,6 +3601,7 @@ async def parse_tg_out_msg(event):
       if event.fwd_from:
         sendme(event.fwd_from.stringify())
         tmsg = event
+        cmds = get_cmd(text)
         opts = None
         if len(cmds) == 3:
           opts = cmds[2]
