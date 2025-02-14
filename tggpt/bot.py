@@ -3768,6 +3768,7 @@ async def get_server_name(jid):
 
 
 def run_run_loop():
+  info("独立线程...")
   global loop2
   loop2 = asyncio.new_event_loop()  # 创建新的事件循环
   asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
@@ -6723,6 +6724,13 @@ async def xmppbot2():
 async def init():
   global loop_thread
   loop_thread = threading.Thread(target=run_run_loop, daemon=True)
+  while True:
+    if loop2.is_running():
+      info("子线程事件循环正在运行")
+      break
+    else:
+      info("等待子线程事件循环运行")
+      await asyncio.sleep(2)
   #  LOGGER.addFilter(NoParsingFilter())
   # https://stackoverflow.com/questions/17275334/what-is-a-correct-way-to-filter-different-loggers-using-python-logging
   for handler in logging.root.handlers:
