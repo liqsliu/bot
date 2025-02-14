@@ -11,7 +11,7 @@ from . import debug, WORK_DIR, PARENT_DIR, LOG_FILE, get_my_key, HOME, LOGGER
 
 
 #  from tg.telegram import DOWNLOAD_PATH
-from telethon.tl.types import KeyboardButton, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat
+from telethon.tl.types import KeyboardButton, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument
 from telethon import events, utils
 import telethon.errors
 from telethon.errors import rpcerrorlist
@@ -3424,6 +3424,135 @@ async def parse_tg_msg(event):
   #    print("W: skip: got a msg without reply: is_reply: %s\nmsg: %s" % (msg.is_reply, msg.stringify()))
   #    return
 
+async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
+  if opts == "fast":
+    opts = 1
+  elif opts == "direct":
+    opts = 2
+  elif opts == "xmpp":
+    opts = 3
+  elif opts == "vps":
+    opts = 4
+  elif opts == "raw":
+    opts = 9
+
+  if opts == 9:
+    await _sendme(tmsg.stringify(), chat_id)
+  elif tmsg.file:
+    file = tmsg.file
+    await _sendme(f"file: {type(file)} {file.name} {file.size}", chat_id)
+    res = None
+    #  if tmsg.text:
+    # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
+    # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.pack_bot_file_id
+    try:
+      if tmsg.document:
+        info("use document")
+        file = tmsg.document
+      elif tmsg.video:
+        info("use video")
+        file = tmsg.video
+      elif tmsg.photo:
+        info("use photo")
+        file = tmsg.photo
+      else:
+        info("use file")
+        file = tmsg.file
+      info(f"file type: {type(file)}")
+      res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+      if tmsg.video:
+        res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
+      elif tmsg.photo:
+        res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
+      elif tmsg.media:
+        res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
+
+      if opts == 1:
+        return
+    except rpcerrorlist.ChatForwardsRestrictedError as e:
+      info(f"fixme: {e=}")
+      try:
+        file = utils.pack_bot_file_id(file)
+      except AttributeError as e:
+        err(f"fixme: {e=} {type(file)}")
+        try:
+          # AttributeError("'PhotoSize' object has no attribute 'location'")
+          file = utils.pack_bot_file_id(tmsg.file)
+          if file is None:
+            file = utils.pack_bot_file_id(tmsg.photo)
+          if file is None:
+            file = utils.pack_bot_file_id(tmsg.document)
+          if file is None:
+            file = utils.pack_bot_file_id(tmsg.media)
+          if file is None:
+            err(f"wtf: {tmsg.stringify()}")
+            return
+          res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+          if opts == 1:
+            return
+        except AttributeError as e:
+          err(f"fixme: {e=}")
+      except Exception as e:
+        err(f"fixme: {e=}")
+        
+    src = log_group_private
+    path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
+    if path:
+
+      if opts == 2 or res is None:
+        try:
+          res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
+          if opts == 2:
+            return
+        except Exception as e:
+          err(f"上传失败 {e=}")
+      else:
+        if url:
+          await _sendme(url, chat_id)
+
+      url = None
+      if opts < 4:
+        await send("下载完成，正在上传到xmpp...", src, correct=True)
+        try:
+          url = await upload(path)
+          info(url)
+        except Exception as e:
+          err(f"上传失败 {e=}")
+      try:
+        if url:
+          res = await UB.send_file(chat_id, file=url, caption=url)
+          if opts == 3:
+            return
+      except rpcerrorlist.WebpageCurlFailedError as e:
+        err(f"文件url有问题: {e=} {url}")
+      except rpcerrorlist.WebpageMediaEmptyError as e:
+        err(f"文件url有问题: {e=} {url}")
+      except Exception as e:
+        err(f"{e=} {url}")
+
+      t = asyncio.create_task(backup(path))
+      try:
+        await t
+        if t.done():
+          url = t.result()
+          if url:
+           info(url)
+           await asyncio.sleep(2)
+           res = await UB.send_file(chat_id, file=url, caption=url)
+      except rpcerrorlist.WebpageCurlFailedError as e:
+        err(f"文件url有问题: {e=} {url}")
+      except rpcerrorlist.WebpageMediaEmptyError as e:
+        err(f"文件url有问题: {e=} {url}")
+      except Exception as e:
+        err(f"{e=} {url}")
+
+  elif tmsg.text:
+    res = await UB.send_message(chat_id, tmsg.text)
+  else:
+    await _sendme(tmsg.stringify(), chat_id)
+
+
+
 
 @exceptions_handler
 async def parse_tg_out_msg(event):
@@ -3433,6 +3562,7 @@ async def parse_tg_out_msg(event):
   chat_id = event.chat_id
   info(f"tg out msg: {chat_id}: {text}")
   if text.startswith("$"):
+    cmds = get_cmd(text)
     if text == "$get id":
       #  await UB.send_message('me', f"{event.chat_id}")
       sendme(f"{event.chat_id}")
@@ -3460,18 +3590,10 @@ async def parse_tg_out_msg(event):
     elif text == "$get file":
       e = await msg.get_reply_message()
       tmsg = e
-      if tmsg.media:
-        file = tmsg.media
-        sendme(f"type: {type(file)}")
-        res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
-        if tmsg.video:
-          res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
-        elif tmsg.photo:
-          res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
-        elif tmsg.media:
-          res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text)
-      else:
-        sendme(f"no file: {e.stringify()}")
+      opts = None
+      if len(cmds) == 3:
+        opts = cmds[2]
+      await save_tg_msg(tmsg, chat_id, opts)
     return
 
   if chat_id == MY_ID or chat_id == CHAT_ID:
@@ -3479,16 +3601,14 @@ async def parse_tg_out_msg(event):
       if event.fwd_from:
         sendme(event.fwd_from.stringify())
         tmsg = event
+        opts = None
+        if len(cmds) == 3:
+          opts = cmds[2]
+        await save_tg_msg(tmsg, chat_id, opts)
         if tmsg.document:
           file = tmsg.document
           sendme(f"type: {type(file)}")
-          res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
-          if tmsg.video:
-            res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
-          elif tmsg.photo:
-            res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
-          elif tmsg.media:
-            res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text)
+          #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
         return
       #  elif event.is_reply:
       #    sendme(event.reply_to.stringify())
@@ -3535,15 +3655,6 @@ async def parse_tg_out_msg(event):
           await _sendme("msg url raw/fast/xmpp/direct/vps", chat_id)
           return
         opts = 0
-        if len(cmds) == 3:
-          if cmds[2] == "fast":
-            opts = 1
-          elif cmds[2] == "direct":
-            opts = 2
-          elif cmds[2] == "xmpp":
-            opts = 3
-          elif cmds[2] == "vps":
-            opts = 4
         peer = await get_entity(url)
         if peer:
           #  await _sendme(peer.stringify(), chat_id)
@@ -3552,111 +3663,10 @@ async def parse_tg_out_msg(event):
             ids = int(ss[-1])
             tmsg = await UB.get_messages(peer, ids=ids)
             if tmsg:
-              if cmds[-1] == "raw":
-                await _sendme(tmsg.stringify(), chat_id)
-              elif tmsg.file:
-                if tmsg.document:
-                  info("use document")
-                  file = tmsg.document
-                elif tmsg.video:
-                  info("use video")
-                  file = tmsg.video
-                elif tmsg.photo:
-                  info("use photo")
-                  file = tmsg.photo
-                else:
-                  info("use file")
-                  file = tmsg.file
-                info(f"file type: {type(file)}")
-
-                res = None
-                #  if tmsg.text:
-                # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
-                # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.pack_bot_file_id
-                try:
-                  res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
-                  if opts == 1:
-                    return
-                except rpcerrorlist.ChatForwardsRestrictedError as e:
-                  info(f"fixme: {e=}")
-                  try:
-                    file = utils.pack_bot_file_id(file)
-                  except AttributeError as e:
-                    err(f"fixme: {e=} {type(file)}")
-                    try:
-                      # AttributeError("'PhotoSize' object has no attribute 'location'")
-                      file = utils.pack_bot_file_id(tmsg.file)
-                      if file is None:
-                        file = utils.pack_bot_file_id(tmsg.photo)
-                      if file is None:
-                        file = utils.pack_bot_file_id(tmsg.document)
-                      if file is None:
-                        file = utils.pack_bot_file_id(tmsg.media)
-                      if file is None:
-                        err(f"wtf: {tmsg.stringify()}")
-                        return
-                      res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
-                      if opts == 1:
-                        return
-                    except AttributeError as e:
-                      err(f"fixme: {e=}")
-                  except Exception as e:
-                    err(f"fixme: {e=}")
-                    
-                src = log_group_private
-                path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
-                if path:
-
-                  if opts == 2 or res is None:
-                    try:
-                      res = await tg_upload_media(path, src, chat_id=chat_id, caption=cmds[1])
-                      if opts == 2:
-                        return
-                    except Exception as e:
-                      err(f"上传失败 {e=}")
-                  else:
-                    await _sendme(cmds[1], chat_id)
-
-                  url = None
-                  if opts < 4:
-                    await send("下载完成，正在上传到xmpp...", src, correct=True)
-                    try:
-                      url = await upload(path)
-                      info(url)
-                    except Exception as e:
-                      err(f"上传失败 {e=}")
-                  try:
-                    if url:
-                      res = await UB.send_file(chat_id, file=url, caption=url)
-                      if opts == 3:
-                        return
-                  except rpcerrorlist.WebpageCurlFailedError as e:
-                    err(f"文件url有问题: {e=} {url}")
-                  except rpcerrorlist.WebpageMediaEmptyError as e:
-                    err(f"文件url有问题: {e=} {url}")
-                  except Exception as e:
-                    err(f"{e=} {url}")
-
-                  t = asyncio.create_task(backup(path))
-                  try:
-                    await t
-                    if t.done():
-                      url = t.result()
-                      if url:
-                       info(url)
-                       await asyncio.sleep(2)
-                       res = await UB.send_file(chat_id, file=url, caption=url)
-                  except rpcerrorlist.WebpageCurlFailedError as e:
-                    err(f"文件url有问题: {e=} {url}")
-                  except rpcerrorlist.WebpageMediaEmptyError as e:
-                    err(f"文件url有问题: {e=} {url}")
-                  except Exception as e:
-                    err(f"{e=} {url}")
-
-              elif tmsg.text:
-                res = await UB.send_message(chat_id, tmsg.text)
-              else:
-                await _sendme(tmsg.stringify(), chat_id)
+              opts = None
+              if len(cmds) == 3:
+                opts = cmds[2]
+              await save_tg_msg(tmsg, chat_id, opts, url)
             else:
               await _sendme(f"error id: {ids}\nres: {msg}", chat_id)
           return
