@@ -6484,10 +6484,22 @@ async def join(jid=None, nick=None, client=None):
 
             await fut
             logger.info(f"进群成功: {myid} {jid}")
+
+
           if room is not None:
             rooms[jid] = room
             room.on_muc_role_request.connect(on_muc_role_request)
             room.on_nick_changed.connect(on_nick_changed)
+
+            jids = users[J]
+            if myjid in jids:
+              j = jids(myjid)
+              j[0] = nick
+            else:
+              jids[myjid] = [nick]
+              j = jids(myjid)
+            set_default_value(j, room.me)
+
             return room
           else:
             warn(f"failed to join: room is None {jid}")
