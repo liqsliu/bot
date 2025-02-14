@@ -3590,7 +3590,7 @@ async def parse_tg_out_msg(event):
     elif text == "$get file":
       e = await msg.get_reply_message()
       tmsg = e
-      opts = None
+      opts = 0
       if len(cmds) == 3:
         opts = cmds[2]
       await save_tg_msg(tmsg, chat_id, opts)
@@ -3602,7 +3602,7 @@ async def parse_tg_out_msg(event):
         sendme(event.fwd_from.stringify())
         tmsg = event
         cmds = get_cmd(text)
-        opts = None
+        opts = 0
         if len(cmds) == 3:
           opts = cmds[2]
         await save_tg_msg(tmsg, chat_id, opts)
