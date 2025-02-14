@@ -1658,7 +1658,7 @@ async def get_title(url, src=None, opts=[]):
     if len(s) > 1:
       path = s[-1]
       if os.path.exists(path):
-        url = await upload(path)
+        url = await upload(path, src)
         asyncio.create_task(backup(path, url))
         if url:
           s[-1] = f"\n- {url}"
