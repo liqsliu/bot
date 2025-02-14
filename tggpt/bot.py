@@ -3813,30 +3813,32 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     #  info(f"res: {res}\nslot: {slot}")
     #  return slot.get.url
     #  headers['Transfer-Encoding'] = 'chunked'
-    last_time = [time.time(), 0]
+    start_time = time.time()
     total = length
+    i = 0
     async def update_tmp_msg(file):
       while True:
         await asyncio.sleep(1)
-        info(f"当前位置: {await file.tell()}")
-        if time.time() - last_time[0] > 15:
-          await send("超时", src, correct=True)
+        if file.closed:
+          info(f"文件已关闭: {file.name}")
+          return
+        i += 1
+        try:
+          now = await file.tell()
+        except ValueError as e:
+          info(f"文件已关闭: {file.name}")
+        info(f"当前位置: {now}")
+        #  await asyncio.sleep(interval/2)
+        if i < interval/2:
+          continue
+        i = 0
+        if current == total:
           break
-        continue
-        await asyncio.sleep(interval/2)
-        if len(last_time) == 2:
-          await send("准备中", src, correct=True)
-          if time.time() - last_time[0] > 15:
-            await send("准备超时，可能网络过慢或者文件太小", src, correct=True)
-            break
-        else:
-          current = last_time[1]
-          total = last_time[2]
-          if current == total:
-            break
-          await send("{:.1f}M".format((total-current)/1024/1024), src)
-        if time.time() - last_time[0] > download_media_time_max:
-          await send("超时", src, correct=True)
+        if src:
+          await send("{:.1f}M".format((length-now)/1024/1024), src)
+        if time.time() - start_time > download_media_time_max:
+          if src:
+            await send("超时", src, correct=True)
           break
     try:
       #  async with aiohttp.ClientSession() as session:
@@ -3860,7 +3862,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         @wraps(func)
         async def wrapper(*args, **kwargs):
           data = await func(*args, **kwargs)
-          print(f"正在分块read: {len(data)}")
+          print(f"正在读取分块read: {len(data)}")
           return data
         return wrapper
 
@@ -3875,8 +3877,8 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       headers["Content-Length"] = str(length)
       async with aiofiles.open(fp, "rb") as file:
         if src:
-          info("开启进度刷新")
-          t = asyncio.create_task(update_tmp_msg(file))
+          info("开启进度刷新消息")
+        t = asyncio.create_task(update_tmp_msg(file))
         file.read = d(file.read)
         file.close = dc(file.close)
         res = await http(slot.put.url, method="PUT", headers=headers, data=file)
@@ -6125,7 +6127,8 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           res="%s" % await get_title(url)
           break
         res="[ %s urls ]" % len(urls)
-      res+="\n\n> %s\n%s" % (url, await get_title(url, src))
+      #  res+="\n\n> %s\n%s" % (url, await get_title(url, src))
+      res+="\n\n> %s\n%s" % (url, await get_title(url))
 
     if res:
       res = f"{name}{res}"
