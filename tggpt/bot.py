@@ -3460,13 +3460,15 @@ async def parse_tg_out_msg(event):
     elif text == "$get file":
       e = await msg.get_reply_message()
       tmsg = e
-      if tmsg.document:
-        file = tmsg.document
+      if tmsg.file:
+        file = tmsg.file
         res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
-        if event.video:
-          res = await UB.send_file(chat_id, file=file, caption=tmsg.text, supports_streaming=True)
-        elif event.photo:
-          res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+        if tmsg.video:
+          res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
+        elif tmsg.photo:
+          res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
+        elif tmsg.media:
+          res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text)
       else:
         sendme(f"no file: {e.stringify()}")
     return
@@ -3476,13 +3478,15 @@ async def parse_tg_out_msg(event):
       if event.fwd_from:
         sendme(event.fwd_from.stringify())
         tmsg = event
-        if tmsg.file:
-          file = tmsg.document
+        if tmsg.media:
+          file = tmsg.media
           res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
-          if event.video:
-            res = await UB.send_file(chat_id, file=file, caption=tmsg.text, supports_streaming=True)
-          elif event.photo:
-            res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+          if tmsg.video:
+            res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
+          elif tmsg.photo:
+            res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
+          elif tmsg.media:
+            res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text)
         return
       #  elif event.is_reply:
       #    sendme(event.reply_to.stringify())
