@@ -3811,7 +3811,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     #  res = await http(slot.put.url, method="PUT", headers=headers, data=data, chunked=chunk_size)
     #  info(f"res: {res}\nslot: {slot}")
     #  return slot.get.url
-    headers['Transfer-Encoding'] = 'chunked'
+    #  headers['Transfer-Encoding'] = 'chunked'
     last_time = [time.time(), 0]
     total = length
     async def update_tmp_msg():
