@@ -3913,20 +3913,20 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         #  t = asyncio.create_task(update_tmp_msg(file))
         #  if not t.done():
         #    t.cancel()
-        #  info(f"res: {res}\nslot: {slot}")
 
-      async def coro(slot):
+      timeout = length/1024/1024*1.5
+      async def coro(slot, fp, timeout, headers):
         async with aiofiles.open(fp, "rb") as file:
           file.read = d(file.read)
           file.readline = d(file.readline)
           file.close = dc(file.close)
-          timeout = length/1024/1024*1.5
           if timeout > upload_media_time_max:
             timeout = upload_media_time_max
           await asyncio.sleep(5)
           res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
           #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
-        res = await run_run(coro(slot))
+      res = await run_run(coro(slot, fp, timeout, headers))
+      info(f"res: {res}\nslot: {slot}")
 
     except Exception as e:
       err(f"分块上传失败：{e=} {slot.put.url=}")
