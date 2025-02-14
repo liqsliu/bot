@@ -6496,8 +6496,8 @@ async def join(jid=None, nick=None, client=None):
               j = jids(myjid)
               j[0] = nick
             else:
-              jids[myjid] = [nick]
-              j = jids(myjid)
+              j = [nick]
+              jids[myjid] = j
             set_default_value(j, room.me)
 
             return room
@@ -6552,11 +6552,11 @@ async def join(jid=None, nick=None, client=None):
             logger.info(f"进群失败(无权限): {myid} {jid} {e=}")
             return False
         except Exception as e:
-          logger.info(f"进群失败: {myid} {jid} {e=}")
+          err(f"进群失败: {myid} {jid} {e=}")
           return False
         sum_try += 1
         if sum_try > 3:
-          logger.info(f"进群失败(重试次数达到最大值): {myid} {jid}")
+          warn(f"进群失败(重试次数达到最大值): {myid} {jid}")
           return False
         await asyncio.sleep(0.1)
 
