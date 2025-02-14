@@ -3888,6 +3888,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         timeout = length/1024/1024*1.5
         if timeout > upload_media_time_max:
           timeout = upload_media_time_max
+        await asyncio.sleep(5)
         res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
         if not t.done():
           t.cancel()
