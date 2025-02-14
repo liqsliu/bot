@@ -1625,17 +1625,23 @@ async def save_data():
 #      warn(res)
 #    return res
 
-async def backup(path, src=None):
+async def backup(path, src=None, delete=False):
   info(f"backup: {path}")
   url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
   info(f"url: {url}")
-  shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
+  #  shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
+  if del:
+    shell_cmd=["rm", path]
+  else:
+    shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
   res = await run_my_bash(shell_cmd, shell=False)
   if res:
     info(f"backup res: {res}")
     if src:
       await send(url, src)
   return url
+
+
 
 
 
@@ -2828,7 +2834,10 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     last_time[1] = current
     if len(last_time) == 2:
       last_time.append(total)
-      asyncio.create_task(send("开始下载：{} {:.1f}MB".format(res, total/1024/1024), src))
+      if total > 512*1024:
+        asyncio.create_task(send("开始下载：{} {:.1f}MB".format(res, total/1024/1024), src))
+      else:
+        asyncio.create_task(send("开始下载：{} {:.1f}KB".format(res, total/1024), src))
     #  print('Downloaded', current, 'out of', total,
     #    'bytes: {:.2%}'.format(current / total))
     #  if time.time() - last_time[src] > interval:
@@ -3539,65 +3548,70 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             info(f"删除成功 {path}")
           path = path[:-4]+".webp"
 
-
-      if opts == 2 or res is None or opts == 0:
-        try:
-          res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
-          if opts == 2:
-            t = asyncio.create_task(backup(path))
-            return
-        except Exception as e:
-          err(f"上传失败 {e=}")
-      else:
-        if url:
-          await _sendme(url, chat_id)
-
-      res = None
-      url = None
-      if opts < 4:
-        await send("下载完成，正在上传到xmpp...", src, correct=True)
-        try:
-          url = await upload(path)
-          info(url)
-        except Exception as e:
-          err(f"上传失败 {e=}")
-      try:
-        if url:
-          res = await UB.send_file(chat_id, file=url, caption=url)
-          if opts == 3:
-            t = asyncio.create_task(backup(path))
-            return
-      except rpcerrorlist.WebpageCurlFailedError as e:
-        err(f"文件url有问题: {e=} {url}")
-      except rpcerrorlist.WebpageMediaEmptyError as e:
-        err(f"文件url有问题: {e=} {url}")
-      except Exception as e:
-        err(f"{e=} {url}")
-
       t = asyncio.create_task(backup(path))
       try:
+
+        if opts == 2 or res is None or opts == 0:
+          try:
+            res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
+            if opts == 2:
+              return
+          except Exception as e:
+            err(f"上传失败 {e=}")
+        else:
+          if url:
+            await _sendme(url, chat_id)
+
+        res = None
+        url = None
+        if opts < 4:
+          await send("下载完成，正在上传到xmpp...", src, correct=True)
+          try:
+            url = await upload(path)
+            info(url)
+          except Exception as e:
+            err(f"上传失败 {e=}")
+        try:
+          if url:
+            res = await UB.send_file(chat_id, file=url, caption=url)
+            if opts == 3:
+              return
+        except rpcerrorlist.WebpageCurlFailedError as e:
+          err(f"文件url有问题: {e=} {url}")
+        except rpcerrorlist.WebpageMediaEmptyError as e:
+          err(f"文件url有问题: {e=} {url}")
+        except Exception as e:
+          err(f"{e=} {url}")
+
+        try:
+          await t
+          if t.done():
+            url = t.result()
+            if url:
+             info(url)
+             await asyncio.sleep(2)
+             res = await UB.send_file(chat_id, file=url, caption=url)
+        except rpcerrorlist.WebpageCurlFailedError as e:
+          err(f"文件url有问题: {e=} {url}")
+        except rpcerrorlist.WebpageMediaEmptyError as e:
+          err(f"文件url有问题: {e=} {url}")
+        except Exception as e:
+          err(f"{e=} {url}")
+
+        if res is None and opts != 2:
+          try:
+            res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
+          except Exception as e:
+            err(f"上传失败 {e=}")
+
+      finally:
         await t
         if t.done():
-          url = t.result()
-          if url:
-           info(url)
-           await asyncio.sleep(2)
-           res = await UB.send_file(chat_id, file=url, caption=url)
-      except rpcerrorlist.WebpageCurlFailedError as e:
-        err(f"文件url有问题: {e=} {url}")
-      except rpcerrorlist.WebpageMediaEmptyError as e:
-        err(f"文件url有问题: {e=} {url}")
-      except Exception as e:
-        err(f"{e=} {url}")
-
-      #  if res is None and opts != 2:
-      #    try:
-      #      res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
-      #      if opts == 2:
-      #        return
-      #    except Exception as e:
-      #      err(f"上传失败 {e=}")
-
+          pass
+        else:
+          err(f"backup failed: {path}")
+          await asyncio.sleep(60)
+        asyncio.create_task(backup(path, delete=True))
 
 
   elif tmsg.text:
