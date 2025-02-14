@@ -6729,8 +6729,7 @@ async def xmppbot2():
 
 
 async def init():
-  global loop2_thread, loop2, loop
-  loop = asyncio.get_running_loop()
+  global loop2_thread, loop2
   loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
   loop2_thread.start()
   while True:
