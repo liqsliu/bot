@@ -3505,15 +3505,15 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     if path:
       if path.endswith(".tgs"):
         info("found tgs file")
-        fp = Path(file_path)
+        fp = Path(path)
         filename = fp.name
         length = os.path.getsize(fp)
-        shell_cmd = ["lottie_convert.py", path, f"{SH_PATH}/{fp.name[:-4]}.webp"]
+        shell_cmd = ["lottie_convert.py", path, f"{SH_PATH}/{filename[:-4]}.webp"]
         r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=max_time)
         if r == 0:
           path = path[:-4]+".webp"
         else:
-          warn(f"转换tgs文件失败: {path}")
+          warn(f"转换tgs文件失败: {path} {r=} {out=} {err=}")
 
       if opts == 2 or res is None:
         try:
@@ -3590,37 +3590,38 @@ async def parse_tg_out_msg(event):
   info(f"tg out msg: {chat_id}: {text}")
   if text.startswith("$"):
     cmds = get_cmd(text)
-    if text == "$get id":
-      #  await UB.send_message('me', f"{event.chat_id}")
-      sendme(f"{event.chat_id}")
-    elif text == "$get event":
-      sendme(f"{event.stringify()}")
-    elif text == "$get msg":
-      sendme(f"{msg.stringify()}")
-    elif text == "$get chat":
-      e = await event.get_chat()
-      sendme(f"{e.stringify()}")
-    elif text == "$get reply":
-      if event.is_reply:
-        sendme(event.reply_to.stringify())
-        e = await msg.get_reply_message()
+    if cmds[1] == "$get":
+      if cmds[2] == "id":
+        #  await UB.send_message('me', f"{event.chat_id}")
+        sendme(f"{event.chat_id}")
+      elif cmds[2] == "event":
+        sendme(f"{event.stringify()}")
+      elif cmds[2] == "msg":
+        sendme(f"{msg.stringify()}")
+      elif cmds[2] == "chat":
+        e = await event.get_chat()
         sendme(f"{e.stringify()}")
-      else:
-        sendme(f"not a reply: {msg.stringify()}")
-    elif text == "$get sender":
-      if event.is_reply:
+      elif cmds[2] == "reply":
+        if event.is_reply:
+          sendme(event.reply_to.stringify())
+          e = await msg.get_reply_message()
+          sendme(f"{e.stringify()}")
+        else:
+          sendme(f"not a reply: {msg.stringify()}")
+      elif cmds[2] == "sender":
+        if event.is_reply:
+          e = await msg.get_reply_message()
+          e = await e.get_sender()
+          sendme(f"{e.stringify()}")
+        else:
+          sendme(f"not a reply: {msg.stringify()}")
+      elif cmds[2] == "file":
         e = await msg.get_reply_message()
-        e = await e.get_sender()
-        sendme(f"{e.stringify()}")
-      else:
-        sendme(f"not a reply: {msg.stringify()}")
-    elif text == "$get file":
-      e = await msg.get_reply_message()
-      tmsg = e
-      opts = 0
-      if len(cmds) == 3:
-        opts = cmds[2]
-      await save_tg_msg(tmsg, chat_id, opts)
+        tmsg = e
+        opts = 0
+        if len(cmds) == 3:
+          opts = cmds[2]
+        await save_tg_msg(tmsg, chat_id, opts)
     return
 
   if chat_id == MY_ID or chat_id == CHAT_ID:
