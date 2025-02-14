@@ -3834,15 +3834,21 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   if src:
     t = asyncio.create_task(update_tmp_msg())
   try:
-    async with aiofiles.open(fp, "rb") as file:
-      #  res = await http(slot.put.url, method="PUT", headers=headers, data=file)
-      while chunk := await file.read(chunk_size):
-        if len(last_time) == 2:
-          last_time.append(total)
-          asyncio.create_task(send("开始上传: {:.1f}MB".format(total/1024/1024), src))
-        res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
-        info(f"res: {res}\nslot: {slot}")
-        last_time[1] += chunk_size
+    async with aiohttp.ClientSession() as session:
+      async with aiofiles.open(fp, "rb") as file:
+        #  res = await http(slot.put.url, method="PUT", headers=headers, data=file)
+        while chunk := await file.read(chunk_size):
+          if len(last_time) == 2:
+            last_time.append(total)
+            asyncio.create_task(send("开始上传: {:.1f}MB".format(total/1024/1024), src))
+          #  res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
+          async with session.put(slot.put.url, data=chunk, headers=headers) as res:
+            if resp.status != 200:
+              err(f"上传失败，返回状态：{res=} {slot.put.url=} {await res.text()}")
+              return
+            info(f"res: {res}\nslot: {slot}")
+            info(await res.text())
+          last_time[1] += chunk_size
   except Exception as e:
     err(f"上传失败：{e=} {slot.put.url=}")
     return
