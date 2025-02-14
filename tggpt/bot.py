@@ -3504,11 +3504,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
     if path:
       if path.endswith(".tgs"):
-        info("found tgs file")
+        info(f"found tgs file: {path}")
         fp = Path(path)
         filename = fp.name
         length = os.path.getsize(fp)
-        shell_cmd = ["lottie_convert.py", path, f"{HOME}/t/{filename[:-4]}.webp"]
+        #  shell_cmd = ["lottie_convert.py", path, f"{HOME}/t/{filename[:-4]}.webp"]
+        #  shell_cmd = ["lottie_convert.py", path, (h.parent / f"{filename[:-4]}.webp").as_posix()]
+        shell_cmd = ["lottie_convert.py", path, h.parent / f"{filename[:-4]}.webp"]
         r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=max_time)
         if r == 0:
           path = path[:-4]+".webp"
