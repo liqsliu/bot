@@ -3916,13 +3916,15 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         #    t.cancel()
 
       timeout = length/1024/1024*1.5
+      if timeout > upload_media_time_max:
+        timeout = upload_media_time_max
+      elif timeout < 15:
+        timeout = 15
       async def coro(slot, fp, timeout, headers):
         async with aiofiles.open(fp, "rb") as file:
           file.read = d(file.read)
           file.readline = d(file.readline)
           file.close = dc(file.close)
-          if timeout > upload_media_time_max:
-            timeout = upload_media_time_max
           #  await asyncio.sleep(5)
           res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
           #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
