@@ -3835,17 +3835,17 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
           while chunk := await file.read(chunk_size):
             if len(last_time) == 2:
               last_time.append(total)
-              asyncio.create_task(send("开始上传: {:.1f}MB".format(total/1024/1024), src))
+              asyncio.create_task(send("开始分块上传: {:.1f}MB".format(total/1024/1024), src))
             #  res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
             async with session.put(slot.put.url, data=chunk, headers=headers) as res:
               if res.status != 200 and res.status != 200:
-                err(f"上传失败，返回状态：{res=} {slot.put.url=} {await res.text()}")
+                err(f"分块上传失败，返回状态：{res=} {slot.put.url=} {await res.text()}")
                 return
               info(f"res: {res}\nslot: {slot}")
               info(await res.text())
             last_time[1] += chunk_size
     except Exception as e:
-      err(f"上传失败：{e=} {slot.put.url=}")
+      err(f"分块上传失败：{e=} {slot.put.url=}")
       return
     finally:
       if src:
@@ -6491,14 +6491,14 @@ async def join(jid=None, nick=None, client=None):
             room.on_muc_role_request.connect(on_muc_role_request)
             room.on_nick_changed.connect(on_nick_changed)
 
-            jids = users[jid]
-            if myjid in jids:
-              j = jids[myjid]
-              j[0] = nick
-            else:
-              j = [nick]
-              jids[myjid] = j
-            set_default_value(j, room.me)
+            #  jids = users[jid]
+            #  if myjid in jids:
+            #    j = jids[myjid]
+            #    j[0] = nick
+            #  else:
+            #    j = [nick]
+            #    jids[myjid] = j
+            set_default_value(m=room.me)
 
             return room
           else:
