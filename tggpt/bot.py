@@ -3512,8 +3512,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         #  shell_cmd = ["lottie_convert.py", path, fp.parent / f"{filename[:-4]}.webp"]
         #  shell_cmd = ["lottie_convert.py", path, f"{HOME}/t/{filename[:-4]}.webp"]
         #  shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", path, f"{fp.parent.as_posix()}/{filename[:-4]}.webp"]
-        #  shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", "-h"]
-        shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", path, f"{fp.parent.as_posix()}/{filename[:-4]}.webp"]
+        #  shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", path, f"{fp.parent.as_posix()}/{filename[:-4]}.webp"]
+        shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", "-h"]
         #  shell_cmd = ["cd", fp.parent.as_posix(), ";" , f"lottie_convert.py", filename, f"{filename[:-4]}.webp"]
         #  shell_cmd = ["cd", fp.parent.as_posix(), ";" , f"echo", filename, f"{filename[:-4]}.webp"]
         r, o, e = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=get_timeout(length)*3)
@@ -3528,6 +3528,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         try:
           res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
           if opts == 2:
+            t = asyncio.create_task(backup(path))
             return
         except Exception as e:
           err(f"上传失败 {e=}")
@@ -3548,6 +3549,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if url:
           res = await UB.send_file(chat_id, file=url, caption=url)
           if opts == 3:
+            t = asyncio.create_task(backup(path))
             return
       except rpcerrorlist.WebpageCurlFailedError as e:
         err(f"文件url有问题: {e=} {url}")
@@ -3572,13 +3574,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       except Exception as e:
         err(f"{e=} {url}")
 
-      if res is None and opts != 2:
-        try:
-          res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
-          if opts == 2:
-            return
-        except Exception as e:
-          err(f"上传失败 {e=}")
+      #  if res is None and opts != 2:
+      #    try:
+      #      res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
+      #      if opts == 2:
+      #        return
+      #    except Exception as e:
+      #      err(f"上传失败 {e=}")
 
 
 
