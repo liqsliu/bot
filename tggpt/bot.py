@@ -6493,7 +6493,7 @@ async def join(jid=None, nick=None, client=None):
 
             jids = users[jid]
             if myjid in jids:
-              j = jids(myjid)
+              j = jids[myjid]
               j[0] = nick
             else:
               j = [nick]
