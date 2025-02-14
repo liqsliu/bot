@@ -2570,7 +2570,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               length = int(res.headers['Content-Length'])
             #  if 'Content-Length' in res.headers and int(res.headers['Content-Length']) > HTTP_RES_MAX_BYTES:
             if length > HTTP_RES_MAX_BYTES:
-              err(f"文件过大，终止下载({length}): {url}")
+              err(f"文件过大，终止下载: ({length}) {url}")
             elif 'Transfer-Encoding' in res.headers and res.headers['Transfer-Encoding'] == "chunked":
               #  async for data in res.content.iter_chunked(HTTP_RES_MAX_BYTES):
               #    break
@@ -2579,9 +2579,9 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
                 data += tmp
                 if len(data) > HTTP_FILE_MAX_BYTES:
                   break
-                info(f"http downlod({length})... {len(tmp)} > {len(data)}")
+                info(f"http downlod ok: ({length}) | {len(tmp)} > {len(data)}")
             else:
-              info(f"http downlod({length})...")
+              info(f"http downlod ok: ({length})")
             # if res.headers['content-type'] == "text/plain; charset=utf-8":
               #  data = await res.read()
               data = await res.content.read(HTTP_FILE_MAX_BYTES)
@@ -3862,18 +3862,42 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   chunk_size = 1024 * 1024
   #  if length / chunk_size > 2:
   #    info(f"文件过大，开启进度显示: {length} > {chunk_size}")
-  if True:
   #  if False:
-    #  async with aiofiles.open(fp, "rb") as file:
-    #    data = await file.read()
-    #  res = await http(slot.put.url, method="PUT", headers=headers, data=data, chunked=chunk_size)
-    #  info(f"res: {res}\nslot: {slot}")
-    #  return slot.get.url
-    #  headers['Transfer-Encoding'] = 'chunked'
-    start_time = time.time()
-    total = length
-    i = 0
+  #  async with aiofiles.open(fp, "rb") as file:
+  #    data = await file.read()
+  #  res = await http(slot.put.url, method="PUT", headers=headers, data=data, chunked=chunk_size)
+  #  info(f"res: {res}\nslot: {slot}")
+  #  return slot.get.url
+  #  headers['Transfer-Encoding'] = 'chunked'
+    #  async with aiohttp.ClientSession() as session:
+    #    async with aiofiles.open(fp, "rb") as file:
+    #      while chunk := await file.read(chunk_size):
+    #        if len(last_time) == 2:
+    #          last_time.append(total)
+    #          asyncio.create_task(send("开始分块上传: {:.1f}MB".format(total/1024/1024), src))
+    #        #  res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
+    #        #  headers["Content-Length"] = str(length)
+    #        #  headers["Content-Length"] = str(len(chunk))
+    #        info("headers: %s" % headers)
+    #        async with session.put(slot.put.url, data=chunk, headers=headers, chunked=chunk_size) as res:
+    #          if res.status != 200 and res.status != 200:
+    #            err(f"分块上传失败，返回状态：{res=} {slot.put.url=} {res.headers=} {await res.text()}")
+    #            return
+    #          info(f"res: {res}\nslot: {slot}")
+    #          info(await res.text())
+    #        last_time[1] += chunk_size
+
+
+  headers["Content-Length"] = str(length)
+  if src:
+    info("开启进度刷新消息")
+    await send("开始上传 {:.1f}M".format(length/1024/1024), src)
+
+    #  async def coro(slot, fp, timeout, headers):
+  async def coro():
     async def update_tmp_msg(file):
+      i = 0
+      start_time = time.time()
       while True:
         await asyncio.sleep(1)
         if file.closed:
@@ -3899,88 +3923,60 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
           if src:
             await send("超时", src, correct=True)
           break
-    try:
-      #  async with aiohttp.ClientSession() as session:
-      #    async with aiofiles.open(fp, "rb") as file:
-      #      while chunk := await file.read(chunk_size):
-      #        if len(last_time) == 2:
-      #          last_time.append(total)
-      #          asyncio.create_task(send("开始分块上传: {:.1f}MB".format(total/1024/1024), src))
-      #        #  res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
-      #        #  headers["Content-Length"] = str(length)
-      #        #  headers["Content-Length"] = str(len(chunk))
-      #        info("headers: %s" % headers)
-      #        async with session.put(slot.put.url, data=chunk, headers=headers, chunked=chunk_size) as res:
-      #          if res.status != 200 and res.status != 200:
-      #            err(f"分块上传失败，返回状态：{res=} {slot.put.url=} {res.headers=} {await res.text()}")
-      #            return
-      #          info(f"res: {res}\nslot: {slot}")
-      #          info(await res.text())
-      #        last_time[1] += chunk_size
-      def d(func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-          data = await func(*args, **kwargs)
-          print(f"{len(data)}")
-          return data
-        return wrapper
+    def d(func):
+      @wraps(func)
+      async def wrapper(*args, **kwargs):
+        data = await func(*args, **kwargs)
+        print(f"{len(data)}")
+        return data
+      return wrapper
 
-      def dc(func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-          print(f"正在关闭")
-          return await func(*args, **kwargs)
-        return wrapper
+    def dc(func):
+      @wraps(func)
+      async def wrapper(*args, **kwargs):
+        print(f"正在关闭")
+        return await func(*args, **kwargs)
+      return wrapper
 
+    timeout = length/1024/1024*1.5
+    if timeout > upload_media_time_max:
+      timeout = upload_media_time_max
+    elif timeout < 15:
+      timeout = 15
+    async with aiofiles.open(fp, "rb") as file:
+      t = asyncio.create_task(update_tmp_msg(file))
+      try:
+        file.read = d(file.read)
+        file.readline = d(file.readline)
+        file.close = dc(file.close)
+        #  await asyncio.sleep(5)
+        res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
+        #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
+        #  coro = _sendme("测试进程间通信 res: {}".format(res))
+        #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+        #  await send("测试进程间通信 res: {}".format(res))
+        return res
+      except Exception as e:
+        err(f"分块上传失败：{e=} {slot.put.url=}")
+        return
+      finally:
+        if not t.done():
+          t.cancel()
+  #  res = await run_run(coro(slot, fp, timeout, headers))
+  res = await run_run(coro())
+  info(f"res: {res}\nslot: {slot}")
 
-      headers["Content-Length"] = str(length)
-      if src:
-        info("开启进度刷新消息")
-        await send("开始上传 {:.1f}M".format(length/1024/1024), src)
-        #  t = asyncio.create_task(update_tmp_msg(file))
-        #  if not t.done():
-        #    t.cancel()
-
-      timeout = length/1024/1024*1.5
-      if timeout > upload_media_time_max:
-        timeout = upload_media_time_max
-      elif timeout < 15:
-        timeout = 15
-      #  async def coro(slot, fp, timeout, headers):
-      async def coro():
-        async with aiofiles.open(fp, "rb") as file:
-          file.read = d(file.read)
-          file.readline = d(file.readline)
-          file.close = dc(file.close)
-          #  await asyncio.sleep(5)
-          res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
-          #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
-          #  coro = _sendme("测试进程间通信 res: {}".format(res))
-          #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
-          await send("测试进程间通信 res: {}".format(res))
-          return res
-      #  res = await run_run(coro(slot, fp, timeout, headers))
-      res = await run_run(coro())
-      info(f"res: {res}\nslot: {slot}")
-
-    except Exception as e:
-      err(f"分块上传失败：{e=} {slot.put.url=}")
-      return
-    #  finally:
-    #    if src:
-    #      if not t.done():
-    #        t.cancel()
-  else:
-    # 流式上传需要手动设置Length
-    headers["Content-Length"] = str(length)
-    info("headers: %s" % headers)
-    try:
-      async with aiofiles.open(fp, "rb") as file:
-        res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=15)
-        info(f"res: {res}\nslot: {slot}")
-    except Exception as e:
-      err(f"上传失败：{e=} {slot.put.url=}")
-      return
+  #  else:
+  #    # 流式上传需要手动设置Length
+  #    headers["Content-Length"] = str(length)
+  #    info("headers: %s" % headers)
+  #    try:
+  #      async with aiofiles.open(fp, "rb") as file:
+  #        res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=15)
+  #        info(f"res: {res}\nslot: {slot}")
+  #    except Exception as e:
+  #      err(f"上传失败：{e=} {slot.put.url=}")
+  #      return
   dbg(slot.put.headers)
   info(slot.get.url)
   return slot.get.url
