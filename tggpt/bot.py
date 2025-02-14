@@ -3835,7 +3835,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
               last_time.append(total)
               asyncio.create_task(send("开始分块上传: {:.1f}MB".format(total/1024/1024), src))
             #  res = await http(slot.put.url, method="PUT", headers=headers, data=chunk)
-            headers["Content-Length"] = str(length)
+            #  headers["Content-Length"] = str(length)
             #  headers["Content-Length"] = str(len(chunk))
             info("headers: %s" % headers)
             async with session.put(slot.put.url, data=chunk, headers=headers) as res:
