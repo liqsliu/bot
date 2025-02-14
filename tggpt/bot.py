@@ -3810,7 +3810,6 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       data = await file.read()
     res = await http(slot.put.url, method="PUT", headers=headers, data=data, chunked=chunk_size)
     info(f"res: {res}\nslot: {slot}")
-    info(await res.text())
     return slot.get.url
     headers['Transfer-Encoding'] = 'chunked'
     last_time = [time.time(), 0]
