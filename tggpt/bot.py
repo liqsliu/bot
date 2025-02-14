@@ -3796,12 +3796,15 @@ async def run_run(coro, need_main=False):
       oloop = loop
 
   fu = asyncio.Future()
-  async def cb2(fu):
-    fu.set_result(0)
+  async def cb2(fu, result=0):
+    fu.set_result(result)
   def cb(fu2):
     if fu2.done():
       print("确实结束了")
-    asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
+      asyncio.run_coroutine_threadsafe(cb2(fu, fu2.result()), oloop)
+    else:
+      print("wtf, 还没结束")
+      asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
   fu2.add_done_callback(cb)
   return await fu
 
