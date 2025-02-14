@@ -3503,6 +3503,17 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     src = log_group_private
     path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
     if path:
+      if path.endswith(".tgs"):
+        info("found tgs file")
+        fp = Path(file_path)
+        filename = fp.name
+        length = os.path.getsize(fp)
+        shell_cmd = ["lottie_convert.py", path, f"{SH_PATH}/{fp.name[:-4]}.webp"]
+        r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=max_time)
+        if r == 0:
+          path = path[:-4]+".webp"
+        else:
+          warn(f"转换tgs文件失败: {path}")
 
       if opts == 2 or res is None:
         try:
