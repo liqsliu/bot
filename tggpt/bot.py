@@ -3482,23 +3482,26 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       if opts == 1:
         return
     except rpcerrorlist.ChatForwardsRestrictedError as e:
-      info(f"fixme: {e=}")
+      err(f"fixme: {e=} {file=}")
     except AttributeError as e:
-      info(f"fixme: {e=}")
+      err(f"fixme: {e=} {file=}")
 
     if res is None:
       file = None
       try:
-        file = utils.pack_bot_file_id(tmsg.file)
+        if tmsg.file:
+          file = utils.pack_bot_file_id(tmsg.file)
+        else:
+          file = utils.pack_bot_file_id(tmsg.document)
       except AttributeError as e:
         err(f"fixme: {e=} {type(file)}")
         try:
           # AttributeError("'PhotoSize' object has no attribute 'location'")
           #  file = utils.pack_bot_file_id(tmsg.file)
           if file is None:
-            file = utils.pack_bot_file_id(tmsg.document)
-          if file is None:
             file = utils.pack_bot_file_id(tmsg.photo)
+          if file is None:
+            file = utils.pack_bot_file_id(tmsg.document)
           if file is None:
             file = utils.pack_bot_file_id(tmsg.media)
           if file is None:
@@ -3733,7 +3736,7 @@ async def parse_tg_out_msg(event):
             ids = int(ss[-1])
             tmsg = await UB.get_messages(peer, ids=ids)
             if tmsg:
-              opts = None
+              opts = 0
               if len(cmds) == 3:
                 opts = cmds[2]
               await save_tg_msg(tmsg, chat_id, opts, url)
