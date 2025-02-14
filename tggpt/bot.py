@@ -3926,7 +3926,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
           #  await asyncio.sleep(5)
           res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
           #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
-          coro = sendme("测试进程间通信 res: {}".format(res))
+          coro = _sendme("测试进程间通信 res: {}".format(res))
           fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
           return res
       res = await run_run(coro(slot, fp, timeout, headers))
