@@ -3774,7 +3774,7 @@ def run_run_loop():
   loop2.run_forever()  # 启动事件循环
 
 
-def run_run(coro):
+async def run_run(coro):
   fu = asyncio.run_coroutine_threadsafe(coro, loop2)
   return await fu
 
