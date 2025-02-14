@@ -3818,22 +3818,24 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     i = 0
     async def update_tmp_msg(file):
       while True:
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.5)
         if file.closed:
           info(f"文件已关闭: {file.name}")
           return
-        i += 1
+        i += 0.5
         try:
           now = await file.tell()
         except ValueError as e:
           info(f"文件已关闭: {file.name}")
+        if now == length:
+          info(f"end: {now}")
+          break
         info(f"当前位置: {now}")
         #  await asyncio.sleep(interval/2)
         if i < interval/2:
           continue
         i = 0
-        if current == total:
-          break
+        info("剩余 {:.1f}M".format((length-now)/1024/1024))
         if src:
           await send("{:.1f}M".format((length-now)/1024/1024), src)
         if time.time() - start_time > download_media_time_max:
@@ -3878,10 +3880,13 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       async with aiofiles.open(fp, "rb") as file:
         if src:
           info("开启进度刷新消息")
+          await send("开始上传 {:.1f}M".format(length/1024/1024), src)
         t = asyncio.create_task(update_tmp_msg(file))
         file.read = d(file.read)
         file.close = dc(file.close)
         res = await http(slot.put.url, method="PUT", headers=headers, data=file)
+        if not t.done():
+          t.cancel()
         info(f"res: {res}\nslot: {slot}")
 
     except Exception as e:
