@@ -3854,11 +3854,12 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
           t.cancel()
   else:
     # 流式上传需要手动设置Length
-    headers["Content-Length"] = str(length)
+    #  headers["Content-Length"] = str(length)
     info("headers: %s" % headers)
     try:
       async with aiofiles.open(fp, "rb") as file:
-        res = await http(slot.put.url, method="PUT", headers=headers, data=file)
+        #  res = await http(slot.put.url, method="PUT", headers=headers, data=file)
+        res = await http(slot.put.url, method="PUT", headers=headers, data=file, chunked=chunk_size)
         info(f"res: {res}\nslot: {slot}")
     except Exception as e:
       err(f"上传失败：{e=} {slot.put.url=}")
