@@ -3866,9 +3866,8 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       def dc(func):
         @wraps(func)
         async def wrapper(*args, **kwargs):
-          data = await func(*args, **kwargs)
-          print(f"正在关闭: {len(data)}")
-          return data
+          print(f"正在关闭")
+          return await func(*args, **kwargs)
         return wrapper
 
 
