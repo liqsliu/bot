@@ -3804,7 +3804,8 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   headers = slot.put.headers.copy()
 
   chunk_size = 512 * 1024
-  if length / chunk_size > 2:
+  #  if length / chunk_size > 2:
+  if False:
     headers['Transfer-Encoding'] = 'chunked'
     last_time = [time.time(), 0]
     total = length
