@@ -1192,7 +1192,7 @@ async def my_popen(cmd,
         break
 
     try:
-      res, errs = p.communicate(timeout=5)
+      res, errs = p.communicate(timeout=3)
     except subprocess.TimeoutExpired as e:
       logger.error("timeout")
       res = e.stdout
@@ -1262,8 +1262,9 @@ async def run_my_bash(cmd, shell=True, max_time=120):
   except subprocess.TimeoutExpired as e:
     res = e.stdout
     errs = e.stderr
-  if not res:
-    res = "null"
+  info("%s\n==\nE: %s\n%s" % (res, p.returncode, errs))
+  #  if not res:
+  #    res = None
   #  res = str(res)
   if p.returncode:
     #  res = res + "\n==\nE: " + str(p.returncode)
@@ -1271,6 +1272,8 @@ async def run_my_bash(cmd, shell=True, max_time=120):
     if errs:
       res = res + "\n" + errs
     #await msg.delete()
+  else:
+    return
   if len(res) > MAX_MSG_BYTES:
     res = await pastebin(res)
   return res
@@ -3525,6 +3528,17 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         #    warn(f"转换tgs文件失败: {path} {r=} {o=} {e=}")
         r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
         info(f"{r=}")
+        if r:
+          info(f"转换失败 {path} {r}")
+        else:
+          path = path[:-4]+".webp"
+          shell_cmd = ["rm", path]
+          r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
+          if r:
+            info(f"删除失败 {path} {r}")
+          else:
+            info(f"删除成功 {path}")
+
 
       if opts == 2 or res is None:
         try:
