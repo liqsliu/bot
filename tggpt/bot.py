@@ -2950,6 +2950,8 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
       if src:
         t = asyncio.create_task(update_tmp_msg())
     h = await UB.upload_file(path, progress_callback=cb)
+  else:
+    h = path
   try:
     res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document, supports_streaming=supports_streaming)
   except Exception as e:
