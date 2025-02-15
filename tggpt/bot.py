@@ -1062,181 +1062,181 @@ def format_byte(num):
 
 
 
-async def update_stdouterr(data):
-  while data[2].poll() == None:
-    try:
-      data[0], data[1] = data[2].communicate(timeout=2)
-    except subprocess.TimeoutExpired as e:
-      if e.stdout:
-        data[0] = e.stdout.decode("utf-8")
-      if e.stderr:
-        data[1] = e.stderr.decode("utf-8")
-    await asyncio.sleep(1)
-
-
-async def update_stdout(data):
-  while True:
-    print(1)
-    await asyncio.sleep(3)
-    tmp = await data[2].stdout.readline()
-    if tmp:
-      data[0] = data[0] + tmp.decode("utf-8")
-    else:
-      break
-  logger.info(11)
-
-
-async def update_stderr(data):
-  while True:
-    print(2)
-    await asyncio.sleep(2.5)
-    tmp = await data[2].stderr.readline()
-    if tmp:
-      data[1] = data[1] + tmp.decode("utf-8")
-    else:
-      break
-  logger.info(22)
-
-
-async def my_popen(cmd,
-           shell=True,
-           max_time=60,
-           client=None,
-           src=None,
-           combine=True,
-           return_msg=False,
-           executable='/bin/bash',
-           **args):
-  
-  async with bash_lock:
-    #  logger.info(cmd)
-    #    args=shlex.split(message.text.split(' ',1)[1])
-
-    #    p=subprocess.Popen(message.text.split(' '))
-    #    p=subprocess.Popen(message.text.split(' ')[1:],universal_newlines=True,bufsize=1,text=True,stdout=PIPE, stderr=PIPE, shell=True)
-    #    p=subprocess.Popen(shlex.split(message.text.split(' ',1)[1]),text=True,stdout=PIPE, stderr=PIPE, shell=True)
-
-    #    p=subprocess.Popen(args,text=True,stdout=PIPE, stderr=PIPE, shell=True)
-    #    p=Popen(args,text=True,universal_newlines=True,bufsize=1,stdout=PIPE, stderr=PIPE)
-    #    p=Popen(args,text=True,stdout=PIPE, stderr=PIPE)
-    #    p=await asyncio.create_subprocess_shell(message.text.split(' ',1)[1],stdout=PIPE, stderr=PIPE)#limit=None
-    #    p=Popen(args,stdout=PIPE, stderr=PIPE,bufsize=8000000)
-    #    p=Popen(args,stdout=PIPE, stderr=PIPE,text=True,encoding="utf-8",errors="ignore")
-    #  p=Popen(cmd,shell=shell,stdout=PIPE, stderr=PIPE,text=True,encoding="utf-8",errors="ignore")
-    p = Popen(cmd,
-          shell=shell,
-          stdout=PIPE,
-          stderr=PIPE,
-          text=True,
-          encoding="utf-8",
-          errors="ignore",
-          executable=executable)
-
-    start_time = time.time()
-    res = ""
-    errs = ""
-    data = ["", "", p]
-    asyncio.create_task(update_stdouterr(data))
-    await asyncio.sleep(1)
-    logger.info(f"popen cmd: {p.args}")
-    if type(cmd) == list:
-      if len(cmd) == 6 and "bcmd.sh" in cmd[1]:
-        cmd_str = cmd[4]
-      else:
-        cmd_str = " ".join(cmd)
-    else:
-      cmd_str = cmd
-    if len(str(cmd_str)) > 512:
-      cmd_str = "%s..." % cmd_str[:512]
-    tmp_last = None
-    while True:
-      #  if p.poll() == None and p.returncode == None:
-      if p.poll() == None:
-        pass
-      else:
-        break
-      #  await asyncio.sleep(0.5)
-      res = data[0]
-      errs = data[1]
-
-      #  if msg:
-      #    if tmp != msg.text:
-      if src:
-        if res:
-          if len(res) > 512:
-            res = "%s..." % res[:512]
-        else:
-          res = '...'
-        #  tmp = "...\n" + res + "\n==\nE: \n" + errs
-        tmp = "正在执行(%ss): %s\n%s\nE: ?\n%s" % (int(time.time()-start_time), cmd_str, res, errs)
-        tmp = tmp.strip()
-        if tmp != tmp_last:
-          try:
-            tmp = re.sub(shell_color_re,  "", tmp)
-            logger.info(f"临时输出: {tmp}")
-            #  msg = await cmd_answer(tmp, client, msg, **args)
-            #  logger.info(f"临时输出: {tmp}")
-            await send(tmp, src, xmpp_only=True, correct=True)
-            tmp_last = tmp
-          except Exception as e:
-            #  logger.error(f"can not send tmp: {e=}")
-            #  msg = await client.send_message(MY_ID, tmp)
-            warn(f"无法发送临时输出: {tmp} {e=}")
-      await asyncio.sleep(interval)
-      if time.time() - start_time > max_time:
-        p.kill()
-        res = "my_popen: timeout, killed, cmd: {}\nres: {}".format(cmd, res)
-        warn(res)
-        if src:
-          await send(f"E: killed(timeout): {cmd_str}", src)
-        #  await cmd_answer(res, client, msg)
-        #  logger.info(f"最终输出: {res}")
-        break
-
-    try:
-      res, errs = p.communicate(timeout=3)
-    except subprocess.TimeoutExpired as e:
-      logger.error("timeout")
-      res = e.stdout
-      if res:
-        res = res.decode("utf-8")
-      errs = e.stderr
-      if errs:
-        errs = errs.decode("utf-8")
-
-    logger.info(f"popen exit: {p.returncode} {res=} {errs=}")
-    if res:
-      res = res.strip()
-    if errs:
-      errs = errs.strip()
-    #  if res:
-    #    if isinstance(res, bytes):
-    #      res = res.decode("utf-8")
-    #  if errs:
-    #    if isinstance(errs, bytes):
-    #      errs = errs.decode("utf-8")
-    #  if not res:
-    #    return False
-
-    #  if msg:
-    #    #  msg = await cmd_answer(res, client, msg, **args)
-    #    logger.info(f"发送: {res}")
-    #    if return_msg:
-    #      return msg
-    if combine:
-      if errs:
-        res = "%s\n--\nE: %s\n%s" % (res, p.returncode, errs)
-      elif p.returncode:
-        res = "%s\n--\nE: %s" % (res, p.returncode)
-      if res:
-        if len(res) > MAX_MSG_BYTES:
-          res = await pastebin(res)
-        return res
-      else:
-        return
-        return "None"
-    else:
-      return p.returncode, res, errs
+#  async def update_stdouterr(data):
+#    while data[2].poll() == None:
+#      try:
+#        data[0], data[1] = data[2].communicate(timeout=2)
+#      except subprocess.TimeoutExpired as e:
+#        if e.stdout:
+#          data[0] = e.stdout.decode("utf-8")
+#        if e.stderr:
+#          data[1] = e.stderr.decode("utf-8")
+#      await asyncio.sleep(1)
+#
+#
+#  async def update_stdout(data):
+#    while True:
+#      print(1)
+#      await asyncio.sleep(3)
+#      tmp = await data[2].stdout.readline()
+#      if tmp:
+#        data[0] = data[0] + tmp.decode("utf-8")
+#      else:
+#        break
+#    logger.info(11)
+#
+#
+#  async def update_stderr(data):
+#    while True:
+#      print(2)
+#      await asyncio.sleep(2.5)
+#      tmp = await data[2].stderr.readline()
+#      if tmp:
+#        data[1] = data[1] + tmp.decode("utf-8")
+#      else:
+#        break
+#    logger.info(22)
+#
+#
+#  async def my_popen(cmd,
+#             shell=True,
+#             max_time=60,
+#             client=None,
+#             src=None,
+#             combine=True,
+#             return_msg=False,
+#             executable='/bin/bash',
+#             **args):
+#
+#    async with bash_lock:
+#      #  logger.info(cmd)
+#      #    args=shlex.split(message.text.split(' ',1)[1])
+#
+#      #    p=subprocess.Popen(message.text.split(' '))
+#      #    p=subprocess.Popen(message.text.split(' ')[1:],universal_newlines=True,bufsize=1,text=True,stdout=PIPE, stderr=PIPE, shell=True)
+#      #    p=subprocess.Popen(shlex.split(message.text.split(' ',1)[1]),text=True,stdout=PIPE, stderr=PIPE, shell=True)
+#
+#      #    p=subprocess.Popen(args,text=True,stdout=PIPE, stderr=PIPE, shell=True)
+#      #    p=Popen(args,text=True,universal_newlines=True,bufsize=1,stdout=PIPE, stderr=PIPE)
+#      #    p=Popen(args,text=True,stdout=PIPE, stderr=PIPE)
+#      #    p=await asyncio.create_subprocess_shell(message.text.split(' ',1)[1],stdout=PIPE, stderr=PIPE)#limit=None
+#      #    p=Popen(args,stdout=PIPE, stderr=PIPE,bufsize=8000000)
+#      #    p=Popen(args,stdout=PIPE, stderr=PIPE,text=True,encoding="utf-8",errors="ignore")
+#      #  p=Popen(cmd,shell=shell,stdout=PIPE, stderr=PIPE,text=True,encoding="utf-8",errors="ignore")
+#      p = Popen(cmd,
+#            shell=shell,
+#            stdout=PIPE,
+#            stderr=PIPE,
+#            text=True,
+#            encoding="utf-8",
+#            errors="ignore",
+#            executable=executable)
+#
+#      start_time = time.time()
+#      res = ""
+#      errs = ""
+#      data = ["", "", p]
+#      asyncio.create_task(update_stdouterr(data))
+#      await asyncio.sleep(1)
+#      logger.info(f"popen cmd: {p.args}")
+#      if type(cmd) == list:
+#        if len(cmd) == 6 and "bcmd.sh" in cmd[1]:
+#          cmd_str = cmd[4]
+#        else:
+#          cmd_str = " ".join(cmd)
+#      else:
+#        cmd_str = cmd
+#      if len(str(cmd_str)) > 512:
+#        cmd_str = "%s..." % cmd_str[:512]
+#      tmp_last = None
+#      while True:
+#        #  if p.poll() == None and p.returncode == None:
+#        if p.poll() == None:
+#          pass
+#        else:
+#          break
+#        #  await asyncio.sleep(0.5)
+#        res = data[0]
+#        errs = data[1]
+#
+#        #  if msg:
+#        #    if tmp != msg.text:
+#        if src:
+#          if res:
+#            if len(res) > 512:
+#              res = "%s..." % res[:512]
+#          else:
+#            res = '...'
+#          #  tmp = "...\n" + res + "\n==\nE: \n" + errs
+#          tmp = "正在执行(%ss): %s\n%s\nE: ?\n%s" % (int(time.time()-start_time), cmd_str, res, errs)
+#          tmp = tmp.strip()
+#          if tmp != tmp_last:
+#            try:
+#              tmp = re.sub(shell_color_re,  "", tmp)
+#              logger.info(f"临时输出: {tmp}")
+#              #  msg = await cmd_answer(tmp, client, msg, **args)
+#              #  logger.info(f"临时输出: {tmp}")
+#              await send(tmp, src, xmpp_only=True, correct=True)
+#              tmp_last = tmp
+#            except Exception as e:
+#              #  logger.error(f"can not send tmp: {e=}")
+#              #  msg = await client.send_message(MY_ID, tmp)
+#              warn(f"无法发送临时输出: {tmp} {e=}")
+#        await asyncio.sleep(interval)
+#        if time.time() - start_time > max_time:
+#          p.kill()
+#          res = "my_popen: timeout, killed, cmd: {}\nres: {}".format(cmd, res)
+#          warn(res)
+#          if src:
+#            await send(f"E: killed(timeout): {cmd_str}", src)
+#          #  await cmd_answer(res, client, msg)
+#          #  logger.info(f"最终输出: {res}")
+#          break
+#
+#      try:
+#        res, errs = p.communicate(timeout=3)
+#      except subprocess.TimeoutExpired as e:
+#        logger.error("timeout")
+#        res = e.stdout
+#        if res:
+#          res = res.decode("utf-8")
+#        errs = e.stderr
+#        if errs:
+#          errs = errs.decode("utf-8")
+#
+#      logger.info(f"popen exit: {p.returncode} {res=} {errs=}")
+#      if res:
+#        res = res.strip()
+#      if errs:
+#        errs = errs.strip()
+#      #  if res:
+#      #    if isinstance(res, bytes):
+#      #      res = res.decode("utf-8")
+#      #  if errs:
+#      #    if isinstance(errs, bytes):
+#      #      errs = errs.decode("utf-8")
+#      #  if not res:
+#      #    return False
+#
+#      #  if msg:
+#      #    #  msg = await cmd_answer(res, client, msg, **args)
+#      #    logger.info(f"发送: {res}")
+#      #    if return_msg:
+#      #      return msg
+#      if combine:
+#        if errs:
+#          res = "%s\n--\nE: %s\n%s" % (res, p.returncode, errs)
+#        elif p.returncode:
+#          res = "%s\n--\nE: %s" % (res, p.returncode)
+#        if res:
+#          if len(res) > MAX_MSG_BYTES:
+#            res = await pastebin(res)
+#          return res
+#        else:
+#          return
+#          return "None"
+#      else:
+#        return p.returncode, res, errs
 
 
 
@@ -1399,12 +1399,14 @@ async def my_exec(cmd, src=None, client=None, **args):
   #  p=Popen("my_exec.py "+message.text.split(' ',1)[1],shell=True,stdout=PIPE, stderr=PIPE,text=True,encoding="utf-8",errors="ignore")
   #  await my_popen(["python3", "my_exec.py", cmd], shell=False, msg=msg)
   #  await my_popen([ SH_PATH + "/my_exec.py", cmd], shell=False, msg=msg, executable="/usr/bin/python3")
-  res = await my_popen(cmd,
-             shell=True,
-             client=client,
-             src=src,
-             executable="/usr/bin/python3",
-             **args)
+  #  res = await my_popen(cmd,
+  #             shell=True,
+  #             client=client,
+  #             src=src,
+  #             executable="/usr/bin/python3",
+  #             **args)
+  res = await my_subprocess_shell(cmd, src=src)
+  res = format_out_of_shell(res)
   return res
 
 
