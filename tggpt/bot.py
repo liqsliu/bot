@@ -1406,7 +1406,7 @@ async def my_exec(cmd, src=None, client=None, **args):
   #             executable="/usr/bin/python3",
   #             **args)
   cmd = ["python3", "-c", " ".join(cmd)]
-  res = await my_subprocess_exec(cmd, src=src)
+  res = await my_subprocess_exec(*cmd, src=src)
   res = format_out_of_shell(res)
   return res
 
