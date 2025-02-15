@@ -1342,6 +1342,8 @@ async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
     
 
 def format_out_of_shell(res):
+  if res[0] == 0 and res[2] is None:
+    return res[1]
   return "%s\n--\nE: %s\n%s" % (res[1],res[0], res[2])
 
 
