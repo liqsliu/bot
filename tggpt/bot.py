@@ -1312,7 +1312,8 @@ async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
     e = e.decode("utf-8", errors="ignore")
   else:
     e = None
-  print(o, e)
+  #  print(o, e)
+  info("res: %s\n--\nE: %s\n%s" % (o, p.returncode, e))
   return p.returncode, o, e
     
 
@@ -1724,7 +1725,8 @@ async def backup(path, src=None, delete=False):
     shell_cmd=["rm", path]
   else:
     shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
-  res = await run_my_bash(shell_cmd, shell=False)
+  #  res = await run_my_bash(shell_cmd, shell=False)
+  res = await my_subprocess_exec(*shell_cmd)
   if res:
     info(f"backup res: {res}")
     if src:
@@ -1733,7 +1735,7 @@ async def backup(path, src=None, delete=False):
 
 
 
-async def get_title_test(url, src=None, opts=[]):
+async def get_title(url, src=None, opts=[]):
   shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
   shell_cmd.append(url)
   #  while opts:
@@ -1757,8 +1759,8 @@ async def get_title_test(url, src=None, opts=[]):
     if len(s) > 1:
       path = s[-1]
       if os.path.exists(path):
-        url = await upload(path, src)
         t = asyncio.create_task(backup(path))
+        url = await upload(path, src)
         await t
         asyncio.create_task(backup(path, delete=True))
         if url:
@@ -1777,47 +1779,47 @@ async def get_title_test(url, src=None, opts=[]):
 
 
 
-async def get_title(url, src=None, opts=[]):
-  shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
-  shell_cmd.append(url)
-  #  while opts:
-  #    shell_cmd.append(opts.pop(0))
-  shell_cmd.extend(opts)
-  #  if down:
-  #    #  shell_cmd.append("%s" % (2**20*1000))
-  #    while True:
-  #      if len(shell_cmd) < 5:
-  #        shell_cmd.append("")
-  #      else:
-  #        break
-  #    shell_cmd.append("down")
-  if len(shell_cmd) == 6:
-    max_time = 600
-  else:
-    max_time = 60
-  r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=max_time)
-  if r == 0:
-    s = out.splitlines()
-    if len(s) > 1:
-      path = s[-1]
-      if os.path.exists(path):
-        url = await upload(path, src)
-        t = asyncio.create_task(backup(path))
-        await t
-        asyncio.create_task(backup(path, delete=True))
-        if url:
-          s[-1] = f"\n- {url}"
-        else:
-          s.pop(-1)
-      else:
-        s.pop(-1)
-      return "\n".join(s)
-    else:
-      return out
-  else:
-    #  if err:
-    warn("%s\n--\nE: %s\n%s" % (out, r, err))
-    return "%s\n--\nE: %s\n%s" % (out, r, err)
+#  async def get_title(url, src=None, opts=[]):
+#    shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
+#    shell_cmd.append(url)
+#    #  while opts:
+#    #    shell_cmd.append(opts.pop(0))
+#    shell_cmd.extend(opts)
+#    #  if down:
+#    #    #  shell_cmd.append("%s" % (2**20*1000))
+#    #    while True:
+#    #      if len(shell_cmd) < 5:
+#    #        shell_cmd.append("")
+#    #      else:
+#    #        break
+#    #    shell_cmd.append("down")
+#    if len(shell_cmd) == 6:
+#      max_time = 600
+#    else:
+#      max_time = 60
+#    r, out, err = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=max_time)
+#    if r == 0:
+#      s = out.splitlines()
+#      if len(s) > 1:
+#        path = s[-1]
+#        if os.path.exists(path):
+#          url = await upload(path, src)
+#          t = asyncio.create_task(backup(path))
+#          await t
+#          asyncio.create_task(backup(path, delete=True))
+#          if url:
+#            s[-1] = f"\n- {url}"
+#          else:
+#            s.pop(-1)
+#        else:
+#          s.pop(-1)
+#        return "\n".join(s)
+#      else:
+#        return out
+#    else:
+#      #  if err:
+#      warn("%s\n--\nE: %s\n%s" % (out, r, err))
+#      return "%s\n--\nE: %s\n%s" % (out, r, err)
 
 
 
@@ -3697,18 +3699,20 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         #    #  path = path[:-4]+".webp"
         #  else:
         #    warn(f"转换tgs文件失败: {path} {r=} {o=} {e=}")
-        r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
+        #  r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
+        r, _, _ = await my_subprocess_exec(*shell_cmd, max_time=get_timeout(length)*3+30)
         info(f"{r=}")
-        if r:
-          info(f"转换失败 {path} {r}")
-        else:
-          shell_cmd = ["rm", path]
-          r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
-          if r:
-            info(f"删除失败 {path} {r}")
-          else:
-            info(f"删除成功 {path}")
+        if r == 0:
+          #  shell_cmd = ["rm", path]
+          #  r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
+          asyncio.create_task(backup(path, delete=True))
+          #  if r:
+          #    info(f"删除失败 {path} {r}")
+          #  else:
+          #    info(f"删除成功 {path}")
           path = path[:-4]+".webp"
+        else:
+          info(f"转换失败 {path} {r}")
 
       t = asyncio.create_task(backup(path))
       try:
