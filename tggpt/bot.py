@@ -5346,12 +5346,16 @@ async def add_cmd():
 
   async def _(cmds, src):
     if len(cmds) == 1:
-      return f"download file by url\n.{cmds[0]} $url [raw/curl/tg/clear] [direct]"
+      return f"download file by url\n.{cmds[0]} $url [raw/curl/tg/clear[2]] [direct]"
     if cmds[1] == "clear":
-      tg_download_tasks.clear()
+      if src in tg_download_tasks:
+        tg_download_tasks.remove(src)
+      if src in music_bot_state:
+        music_bot_state.pop(src)
       return "ok"
     elif cmds[1] == "clear2":
       tg_download_tasks.clear()
+      music_bot_state.clear()
       await asyncio.sleep(interval+1)
       tg_download_tasks.clear()
       return "ok"
