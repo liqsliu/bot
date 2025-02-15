@@ -1246,7 +1246,7 @@ async def my_subprocess_shell(cmd, max_time=run_shell_timx_max, src=None):
 
 
 
-def wrap_read(func, src, ress, default=b""):
+def wrap_read(func, src, default=b""):
   ress = [start_time, default]
   @wraps(func)
   async def wrapper(*args, **kwargs):
