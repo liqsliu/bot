@@ -2882,11 +2882,11 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     return path
 
 
-  file_path = None
+  path = None
   try:
     if src:
       t = asyncio.create_task(update_tmp_msg())
-    t1 = asyncio.create_task(_download_media(msg, path))
+    t1 = asyncio.create_task(_download_media(msg, file_path))
     now = time.time()
     while True:
       await asyncio.sleep(interval+1)
@@ -2898,7 +2898,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
       #      break
       if t1.done():
         file_path = t1.result()
-        if path is None:
+        if file_path is None:
           res = f"下载失败(下载速度太慢): {res}"
         break
       if len(last_time) == 2:
