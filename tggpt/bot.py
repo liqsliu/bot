@@ -1479,10 +1479,13 @@ async def send_cmd_to_bash(gateway, name, text):
   #  res = await my_popen(shell_cmd, shell=False, src=gateway)
   r, o, e = await my_subprocess_exec(*shell_cmd, src=gateway)
   if r == 0:
-    return re.sub(shell_color_re,  "", o)
+    if o:
+      return re.sub(shell_color_re,  "", o)
+    else:
+      return o
   else:
   #  logger.info(res)
-    return res
+    return format_out_of_shell((r, o, e))
 
 #  @exceptions_handler
 #  async def send2mt(client, message):
