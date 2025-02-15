@@ -1246,8 +1246,7 @@ async def my_subprocess_shell(cmd, max_time=run_shell_timx_max, src=None):
 
 
 
-def wrap_read(func, src, default=b""):
-  ress = [start_time, default]
+def wrap_read(func, src, ress, default=b""):
   @wraps(func)
   async def wrapper(*args, **kwargs):
     data = await func(*args, **kwargs)
@@ -1270,11 +1269,10 @@ def wrap_read(func, src, default=b""):
 async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
   p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   start_time = time.time()
-
-
-  p.stdout.read = wrap_read( p.stdout.read, src)
+  ress = [start_time, b""]
+  p.stdout.read = wrap_read( p.stdout.read, src, ress)
   #  ress = [start_time, b""]
-  p.stderr.read = wrap_read( p.stderr.read, src)
+  p.stderr.read = wrap_read( p.stderr.read, src, ress)
   #  tmp = await p.communicate()
   t = asyncio.create_task( p.communicate() )
   o = ""
