@@ -2884,11 +2884,11 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
   if path is None:
     err(f"need file path: {path}")
     return
-  if type(file_path) is str:
-    fp = Path(file_path)
+  if type(path) is str:
+    fp = Path(path)
     #  file_path = Path(file_path)
   else:
-    fp = file_path
+    fp = path
   if path.endswith(".mp4"):
     force_document = False
     supports_streaming = True
@@ -5582,8 +5582,7 @@ async def add_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
-    #  res = await get_title(cmds[1], src=src, opts=cmds[2:4])
-    res = await get_title_test(cmds[1], src=src, opts=cmds[2:4])
+    res = await get_title(cmds[1], src=src, opts=cmds[2:4])
     return f"{res}"
   cmd_funs["tl"] = _
 
