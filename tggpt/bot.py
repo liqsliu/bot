@@ -1246,28 +1246,35 @@ async def my_subprocess_shell(cmd, max_time=run_shell_timx_max, src=None):
 
 
 
-def wrap_read(func, src, ress):
+def wrap_read(func, src, ress, default=b""):
+  ress = [start_time, default]
   @wraps(func)
   async def wrapper(*args, **kwargs):
     data = await func(*args, **kwargs)
     now = time.time()
-    if now - ress[1] > interval:
-      ress[1] = now
+    if now - ress[0] > interval:
+      ress[0] = now
       #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
-      ress[0] += data
+      ress[1] += data
       if src:
-        asyncio.create_task( send(ress[0], src) )
-    print(f"{len(data)}")
+        asyncio.create_task( send(ress[1].decode("utf-8", errors="ignore"), src) )
+      ress[1] = default
+    else:
+      ress[1] += data
+    #  print(f"{len(data)}")
     return data
   return wrapper
+
 
 
 async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
   p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   start_time = time.time()
-  ress = [b"", start_time]
-  p.stdout.read = wrap_read( p.stdout.read, src, ress)
-  p.stderr.read = wrap_read( p.stderr.read, src, ress )
+
+
+  p.stdout.read = wrap_read( p.stdout.read, src)
+  #  ress = [start_time, b""]
+  p.stderr.read = wrap_read( p.stderr.read, src)
   #  tmp = await p.communicate()
   t = asyncio.create_task( p.communicate() )
   o = ""
