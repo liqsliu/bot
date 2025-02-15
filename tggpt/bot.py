@@ -4077,7 +4077,6 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       while True:
         await asyncio.sleep(1)
         print("上传线程没卡住")
-        continue
         if file.closed:
           info(f"文件已关闭: {file.name}")
           return
