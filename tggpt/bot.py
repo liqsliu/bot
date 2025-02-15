@@ -41,6 +41,7 @@ from aiohttp.client_exceptions import ClientPayloadError, ClientConnectorError
 from inspect import isawaitable, currentframe
 
 from functools import wraps
+from functools import partial
 import pickle
 from pathlib import Path
 
@@ -1237,6 +1238,11 @@ async def my_popen(cmd,
       return p.returncode, res, errs
 
 
+
+
+
+
+
 async def run_my_bash(cmd, shell=True, max_time=120):
   p = Popen(cmd,
         shell=shell,
@@ -1279,6 +1285,8 @@ async def run_my_bash(cmd, shell=True, max_time=120):
   return res
 
 
+
+
 async def my_exec(cmd, src=None, client=None, **args):
   #  exec(cmd) #return always is None
   #  p=Popen("my_exec.py "+message.text.split(' ',1)[1],shell=True,stdout=PIPE, stderr=PIPE,text=True,encoding="utf-8",errors="ignore")
@@ -1300,6 +1308,8 @@ async def my_eval(cmd):
   return res
 
 async def send_cmd_to_bash(gateway, name, text):
+  # for msg for mt api
+
   #  if not text:
   #    logger.warning("skip bash cmd, text is empty: {}".format(msg))
   #    return
@@ -3683,6 +3693,7 @@ async def parse_tg_out_msg(event):
         await save_tg_msg(tmsg, chat_id, opts)
     return
 
+  #  if chat_id == MY_ID or chat_id == CHAT_ID:
   if chat_id == MY_ID or chat_id == CHAT_ID:
     if chat_id == CHAT_ID:
       if event.fwd_from:
@@ -3703,14 +3714,16 @@ async def parse_tg_out_msg(event):
       #    return
     if not text:
       return
+
     #  res = await run_cmd(text, CHAT_ID, "G me")
-    res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
-    if res is True:
-      return
-    if res:
-      #  await UB.send_message(CHAT_ID, res)
-      await _sendme(res, chat_id)
-      return
+    if chat_id == CHAT_ID:
+      res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
+      if res is True:
+        return
+      if res:
+        #  await UB.send_message(CHAT_ID, res)
+        await _sendme(res, chat_id)
+        return
 
     if text == 'id':
       #  await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
@@ -3918,29 +3931,44 @@ async def get_server_name(jid):
 
 
 def run_run_loop():
-  info("独立线程...")
+  info("独立线程，启动...")
   global loop2
   loop2 = asyncio.new_event_loop()  # 创建新的事件循环
   asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
   loop2.run_forever()  # 启动事件循环
 
+def in_main_thread():
+  if loop2_thread.native_id == threading.get_native_id():
+    return False
+  return True
+
+def run_cb_in_main(cb, *args, **kwargs):
+  if in_main_thread():
+    return cb(*args, **kwargs)
+  loop.call_soon_threadsafe(partial(cb, *args, **kwargs))
+
+def run_cb_in_thread(cb, *args, **kwargs):
+  if in_main_thread():
+    loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
+  return cb(*args, **kwargs)
 
 async def run_run(coro, need_main=False):
   if need_main:
     # threading.main_thread()
     #  if threading.current_thread() is loop2_thread:
-    if loop2_thread.native_id == threading.get_native_id():
+      #  if asyncio.iscoroutine():
+    if in_main_thread:
+      return await coro
+    else:
       fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
       oloop = loop2
-    else:
-      return await coro
   else:
     #  if threading.current_thread() is loop2_thread:
-    if loop2_thread.native_id == threading.get_native_id():
-      return await coro
-    else:
+    if in_main_thread:
       fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
       oloop = loop
+    else:
+      return await coro
 
   fu = asyncio.Future()
   async def cb2(fu, result=0):
@@ -3968,8 +3996,9 @@ async def run_run(coro, need_main=False):
 
 
 
-
 async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
+  # fixme: 整个函数可以放到副线程运行
+
   if UPLOAD is None:
     err(f"服务器不支持文件上传: {myjid}")
     return False
@@ -4047,6 +4076,8 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       start_time = time.time()
       while True:
         await asyncio.sleep(1)
+        print("上传线程没卡住")
+        continue
         if file.closed:
           info(f"文件已关闭: {file.name}")
           return
