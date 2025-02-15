@@ -2952,6 +2952,8 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
     h = await UB.upload_file(path, progress_callback=cb)
   else:
     h = path
+    if h.endswith(".webp"):
+      UB.send_message(chat_id, h)
   try:
     res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document, supports_streaming=supports_streaming)
   except Exception as e:
