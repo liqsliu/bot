@@ -2817,7 +2817,1250 @@ async def _mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
 #      async with aiofiles.open(f"{SH_PATH}/{fn}", mode='w') as file:
 #        await file.write(text)
 #      #  os.system(f"{SH_PATH}/sm4gpt.sh {fn} {gateway}")
-#      return await asyncio.
+#      return await asyncio.to_thread(os.system, f"{SH_PATH}/sm4gpt.sh {fn} {gateway}")
+
+async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, **kwargs):
+  if not isinstance(text, str):
+    text = "%s" % text
+  info(f"send to mt: {gateway} {text}")
+  async with mt_send_lock:
+    need_delete = False
+    if os.path.exists(f"{SH_PATH}"):
+      fn = f"{SH_PATH}/SM_LOCK_{gateway}"
+      for _ in range(5):
+        if os.path.exists(fn):
+          logger.info(f"busy: {gateway} {fn}")
+          await asyncio.sleep(2)
+        else:
+          break
+
+      await write_file(text, fn, "w")
+      need_delete = True
+
+    for i in await split_long_text(text):
+      #  if await send(i, *args, **kwargs) is not True:
+      if await mt_send(i, gateway=gateway, name=name, *args, **kwargs) is not True:
+        break
+      #  await mt_send(res, gateway=gateway, name="")
+      name = ""
+    if need_delete:
+      os.remove(fn)
+
+  return True
+
+
+
+
+
+#  @exceptions_handler
+#  @UB.on(events.NewMessage(outgoing=True))
+#  async def my_event_handler(event):
+#    #  if 'hello' in event.raw_text:
+#    #    await event.reply('hi!')
+#    #  if 'new_chat' in event.raw_text:
+#    #    print(event.stringify())
+#    msg = event.message
+#    text = msg.raw_text
+#    if event.chat_id != gpt_bot:
+#      if debug:
+#        print("<%s %s" % (event.chat_id, text))
+#      return
+#    if event.chat_id != gpt_bot:
+#      if debug:
+#        print(">%s %s" % (event.chat_id, text))
+#      return
+#    if text:
+#      print("me: %s" % text)
+
+
+async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_memory=False, max_wait_time=download_media_time_max):
+  if path is None:
+    err(f"need file path: {path}")
+    return
+  if type(file_path) is str:
+    fp = Path(file_path)
+    #  file_path = Path(file_path)
+  else:
+    fp = file_path
+  if path.endswith(".mp4"):
+    force_document = False
+    supports_streaming = True
+  else:
+    force_document = True
+    supports_streaming = False
+  cb = None
+  length = os.path.getsize(path)
+  if length > 5000000:
+    last_time = [time.time(), 0]
+    def cb(sent, total):
+      last_time[1] = sent
+      if len(last_time) == 2:
+        last_time.append(total)
+        asyncio.create_task(send("开始上传: {:.1f}MB {}".format(total/1024/1024, fp.name), src))
+    async def update_tmp_msg():
+      while True:
+        await asyncio.sleep(interval)
+        if len(last_time) == 2:
+          await send("准备中", src, correct=True)
+          if time.time() - last_time[0] > 15:
+            await send("准备超时，可能网络过慢或者文件太小", src, correct=True)
+            break
+        else:
+          current = last_time[1]
+          total = last_time[2]
+          if current == total:
+            break
+          await send("{:.1f}M".format((total-current)/1024/1024), src)
+        if time.time() - last_time[0] > download_media_time_max:
+          await send("超时", src, correct=True)
+          break
+    if src:
+      t = asyncio.create_task(update_tmp_msg())
+  h = await UB.upload_file(path, progress_callback=cb)
+  try:
+    res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document, supports_streaming=supports_streaming)
+  except Exception as e:
+    res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document)
+  return res
+
+
+
+
+def get_timeout(size):
+  #  timeout = size/1024/1024*1.5 + 15
+  #  timeout = 11720/73-14553000/5329/(size/1024/1024+1250/73)
+  #  if timeout > upload_media_time_max:
+  #    timeout = upload_media_time_max
+  #  elif timeout < 10:
+  #    timeout = 10
+  timeout = 247080/233-10768058155008000/54289/(size+43751833600/233)
+  return timeout
+
+
+#  last_time = {}
+
+tg_download_tasks = set()
+
+async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=False, max_wait_time=download_media_time_max):
+#  await client.download_media(message, progress_callback=callback)
+  #  async with downlaod_lock:
+  if msg.file:
+    if msg.file.name:
+      res = f"{msg.file.name}"
+    else:
+      res = ''
+    size = msg.file.size
+    timeout = get_timeout(size)
+    if max_wait_time > timeout:
+      timeout = max_wait_time
+  else:
+    err(f"no file: {msg}")
+    return
+  if msg.buttons:
+    logger.info(msg.buttons)
+    for i in get_buttons(msg.buttons):
+      if isinstance(i.button, KeyboardButtonUrl):
+        logger.info(f"add url from: {i}")
+        res += f" {i.url}"
+      else:
+        logger.info(f"ignore button: {i}")
+  #  await mt_send(f"{res} 下载中...", gateway=gateway)
+  #  res = f"{res} 下载中..."
+  if src and res:
+    await send(res, src, xmpp_only=True, correct=True)
+  #  last_time[src] = time.time()
+  last_time = [time.time(), 0]
+
+  # Printing download progress
+  def download_media_callback(current, total):
+    #  last_time[0] = time.time()
+    last_time[1] = current
+    if len(last_time) == 2:
+      last_time.append(total)
+      if total > 512*1024:
+        asyncio.create_task(send("开始下载{:.1f}M {}".format(total/1024/1024, res), src))
+      else:
+        asyncio.create_task(send("开始下载 {:.1f}KB {}".format(total/1024, res), src))
+    #  print('Downloaded', current, 'out of', total,
+    #    'bytes: {:.2%}'.format(current / total))
+    #  if time.time() - last_time[src] > interval:
+    #  if time.time() - last_time[0] > interval:
+    #    #  await mt_send("{:.2%} %s/%s".format(current / total, current, total), gateway=gateway)
+    #    #  asyncio.create_task(mt_send("{:.2%} {}/{} bytes".format(current / total, current, total), gateway=gateway))
+    #    asyncio.create_task(send("{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(res, current / total, current/1024/1024, total/1024/1024, (current-last_time[1])/(time.time()-last_time[0])/1024/1024), src, correct=True))
+    #    #  last_time[src] = time.time()
+
+  async def update_tmp_msg():
+    start_time = last_time[0]
+    last_current = 0
+    while True:
+      await asyncio.sleep(interval)
+      now = time.time()-start_time
+      #  if music_bot_state[src] != 3:
+      #    await send("取消：{}".format(now, res), src, correct=True)
+      #    break
+      if len(last_time) == 2:
+        #  if now > 60:
+        #    await send(f"等待超时: {res}", src, xmpp_only=True, correct=True)
+        #    break
+        #  await send("准备中({:.0f}s)：{}".format(now, res), src, xmpp_only=True, correct=True)
+        await send("准备中({:.0f}s)：{}".format(now, res), src, correct=True)
+      else:
+        current = last_time[1]
+        total = last_time[2]
+        if current == total:
+          break
+        #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
+        #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
+        await send("-{:.1f}M".format((total-current)/1024/1024), src)
+        last_time[0] = time.time()
+        #  last_current = current
+
+
+  async def _download_media(msg, path):
+    try:
+      return await asyncio.wait_for(msg.download_media(path, progress_callback=download_media_callback), timeout=timeout)
+    except TimeoutError as e:
+      err(f"下载失败(超时): {e=}")
+
+
+  file_path = None
+  try:
+    if src:
+      while src in tg_download_tasks:
+        await send("下载任务排队中 {}".format(res), src, correct=True)
+        await asyncio.sleep(interval)
+      tg_download_tasks.add(src)
+      t = asyncio.create_task(update_tmp_msg())
+    t1 = asyncio.create_task(_download_media(msg, path))
+    now = time.time()
+    while True:
+      await asyncio.sleep(interval)
+      if t1.done():
+        file_path = t1.result()
+        if file_path is None:
+          res = f"下载失败(下载速度太慢): {res}"
+        break
+      if len(last_time) == 2 and time.time() - now > timeout/3:
+          t1.cancel()
+          file_path = None
+          res = f"下载失败(等待超时): {res}"
+          return res
+        #  else:
+        #    info(f"等待上游下载完成：{res}")
+      elif time.time() - now > timeout:
+        t1.cancel()
+        file_path = None
+        res = f"下载失败(超时): {res}"
+        return res
+      if src:
+        if src in tg_download_tasks:
+          continue
+        #  if src not in music_bot_state or music_bot_state[src] < 3:
+        if src in music_bot_state and music_bot_state[src] > 2:
+          continue
+        info(f"下载中止：{res}")
+        path = None
+        return f"下载取消: {res}"
+  except Exception as e:
+    err(f"下载失败 {e=}")
+  finally:
+    if file_path is None:
+      err(f"下载失败 got file_path is None")
+    else:
+      if not file_path.startswith("/"):
+        file_path = path + file_path
+      info(f"下载完成：{res} {file_path}")
+    if not t1.done():
+      t1.cancel()
+    if src:
+      if not t.done():
+        t.cancel()
+      if src in tg_download_tasks:
+        tg_download_tasks.remove(src)
+
+  if file_path:
+    return file_path
+    res = await upload(path)
+
+      #  path = "https://%s/%s" % (DOMAIN, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
+    t = asyncio.create_task(backup(path))
+    await t
+    if t.done():
+      url = t.result()
+    else:
+      url = None
+    if res:
+      #  await send(f"{res}\n{path}", src)
+      #  await send(f"{res}", src)
+      info(f"xmpp server is ok: {res}")
+
+      #  asyncio.create_task(backup(path, src))
+
+      if url:
+        res += f"\n\n{url}"
+
+      return res
+    else:
+      warn(f"xmpp server is not ok: {res}")
+      return url
+  else:
+    #  res = f"{res} 下载失败: {path}"
+    if src:
+      await send(res, src)
+    warn(res)
+
+def get_buttons(bs):
+  tmp = []
+  for i in bs:
+    if type(i) is list:
+      tmp += i
+    else:
+      tmp.append(i)
+  return tmp
+
+
+def parse_tg_url(url, wtf=1):
+  peer = None
+  ids = None
+  url.rstrip("?single")
+  if "?comment=" in url:
+    #需要先获取频道绑定的群，然后再在群里根据消息id找，麻烦，先不搞
+    url = url.split("?comment")[0]
+  if url.startswith("https://t.me/"):
+    url = url[13:]
+    if url.startswith("c/"):
+      url = url[2:]
+    if url:
+      peer = url.split('/',1)[0]
+      if '/' in url:
+        ids = url.rsplit('/', 1)[-1]
+    #    if url:
+    #      peer = url.rsplit('/',1)[0]
+    #      if '/' in url:
+    #        ids = url.rsplit('/')[-1]
+    #      #    ids = url.rsplit('/',1)[1]
+    #      #    if '/' in ids:
+    #      #      err(f"fixme: tg url 格式错误")
+    #  elif url:
+    #    peer = url.rsplit('/',1)[0]
+    #    #  url = url.rsplit('/',1)[1]
+    #    if '/' in url:
+    #      ids = url.rsplit('/')[-1]
+    #    #    ids = url.rsplit('/',1)[1]
+    #    #    if '/' in ids:
+    #    #      ids = ids.rsplit('/',1)[1]
+  if peer:
+    #  if peer[0] != "-":
+    if peer.isnumeric():
+      if wtf == 1:
+        # channel or super group
+        peer = f"-100{peer}"
+        peer = int(peer)
+      elif wtf == 2:
+        peer = f"-{peer}"
+        peer = int(peer)
+  if ids:
+    ids = int(ids)
+  return peer, ids
+
+
+async def get_entity(chat_id, id_only=True):
+  #  if isinstance(peer, PeerUser):
+  #    #  logger.info(f"PeerUser: {peer}")
+  #    peer = await UB.get_input_entity(peer)
+  #  elif isinstance(peer, PeerChat):
+  #    #  logger.info(f"PeerChat: {peer}")
+  #    peer = await UB.get_input_entity(peer)
+  #  elif isinstance(peer, PeerChannel):
+  #    #  logger.info(f"PeerChannel: {peer}")
+  #    peer = await UB.get_input_entity(peer)
+  #  elif isinstance(peer, str):
+  #    peer = await UB.get_input_entity(peer)
+  #  else:
+  try:
+    url = chat_id
+    #  chat_id = get_addr(chat_id)
+    if type(chat_id) is int:
+      peer = await UB.get_input_entity(chat_id)
+      if id_only:
+        return peer
+    elif type(chat_id) is str:
+      peer, _ = parse_tg_url(url)
+      if peer:
+        pass
+      elif url.startswith("@"):
+        peer = url[1:]
+      elif url.isnumeric():
+        peer = int(url)
+      elif url.startswith("-") and  url[1:].isnumeric():
+        peer = int(url)
+      else:
+        peer = url
+    else:
+      return False
+    if peer:
+      entity = None
+      info(f"search inputpeer: {peer}")
+      try:
+        peer = await UB.get_input_entity(peer)
+        if id_only:
+          return peer
+      except TypeError as e:
+        err(f"E: {e=}, not found input entity: {peer}")
+        return
+      except ValueError as e:
+        info(f"search inputpeer(use get_peer_id): {peer}")
+        try:
+          peer = await UB.get_peer_id(peer)
+          peer = await UB.get_input_entity(peer)
+          if id_only:
+            return peer
+        except TypeError as e:
+          err(f"E: {e=}, not found input entity(use get_peer_id): {peer}")
+          return
+        except ValueError as e:
+          warn(f"not found input entity: {peer}")
+
+      info(f"search peer: {peer}")
+      try:
+        entity = await UB.get_entity(peer)
+      except TypeError as e:
+        err(f"E: {e=}, not found entity: {peer}")
+        return
+      except ValueError as e:
+        warn(f"not found entity: {peer}")
+      return entity
+  except Exception as e:
+    err(f"E: {e=}")
+    return
+  raise ValueError(f"无法获取chat信息: {chat_id} {peer}")
+
+
+
+async def print_tg_msg(event, to_xmpp=False):
+  msg = event.message
+  res = ''
+  nick= "G None"
+  if event.is_private:
+    delay = None
+    res += "@"
+    #  peer = await get_entity(event.chat_id)
+    peer = await event.get_chat()
+    if peer is not None:
+      res += " [%s %s]" % (peer.first_name, peer.last_name)
+      nick = "G [%s %s]" % (peer.first_name, peer.last_name)
+  else:
+    if event.is_group:
+      delay = 2
+      res += "+"
+    else:
+      delay = 5
+      #  if event.is_channel:
+      res += "#"
+
+    #  peer = await get_entity(event.chat_id)
+    peer = await event.get_chat()
+    if peer is not None:
+      res += " %s" % peer.title
+      nick = "G %s" % peer.title
+    if event.from_id:
+      #  peer = await get_entity(event.from_id)
+      peer = await event.get_sender()
+      if peer is not None:
+        if isinstance(peer, User):
+          res += " [%s %s]" % (peer.first_name, peer.last_name)
+          nick = "G [%s %s]" % (peer.first_name, peer.last_name)
+        else:
+        #  if isinstance(peer, Channel):
+          res += " %s" % peer.title
+  #  res2 = None
+  res1 = res
+  if msg.text:
+    #  if not event.is_private:
+    #    res2 = f"{res}: {msg.text}"
+    #  res += ": %s" % msg.text.splitlines()[0][:64]
+    res = msg.text
+  else:
+    res = None
+  if False and msg.file:
+    path = await tg_download_media(msg)
+    if path is not None:
+      if res:
+        res += "\n--\nfile: %s" % path
+        #  text = f"{text} file: {path}"
+      else:
+        res = "file: %s" % path
+        #  text = f"file: {path}"
+        #  await send(text, jid=jid)
+        #  return
+
+    #  res += " %s" % msg.file
+    #  if msg.file.name:
+    #    res += " %s" % msg.file.name
+    #    if res2:
+    #      res2 += "\n%s" % msg.file.name
+  #  if res2:
+  #    #  await send(res2, jid=log_group, name="", nick=nick, delay=1)
+  #    await send(res2, name="", nick=nick, delay=1)
+  #  if not event.is_private:
+  print(f"{res1}: {res[:64]}")
+  #    return None, nick, delay
+  return res, nick, delay
+
+
+
+music_bot_state = {}
+
+
+@exceptions_handler
+async def parse_tg_msg(event):
+  msg = event.message
+  chat_id = event.chat_id
+  
+  #  if event.chat_id not in id2gateway:
+  #    #  print("W: skip: got a unknown: chat_id: %s\nmsg: %s" % (event.chat_id, msg.stringify()))
+  #    return
+  #  if event.chat_id in id2gateway:
+  #  if chat_id == gpt_bot:
+  #    pass
+
+  if chat_id == music_bot:
+    #  print("I: music bot: chat_id: %s\nmsg: %s" % (event.chat_id, msg.stringify()))
+    if msg.is_reply:
+      pass
+    else:
+      return
+    #  try:
+    qid=msg.reply_to_msg_id
+    if qid not in gid_src:
+      logger.error(f"E: not found src for {qid=}, {gid_src=} {msg.text=}")
+      return
+    text = msg.text
+    if not text:
+      print(f"W: skip msg without text in chat with gpt bot, wtf: {msg.stringify()}")
+      return
+    
+    if text == '搜索中...':
+      #         message='搜索中...',
+      logger.info(text)
+      return
+
+    if text == '正在获取歌曲信息...':
+      #         message='正在获取歌曲信息...',
+      logger.info(text)
+      return
+
+    src = gid_src[qid]
+
+    if text == '等待下载中...':
+      #   message='等待下载中...',
+      #  logger.info(text)
+      await send(text, src, correct=True)
+      return
+    if text.endswith('正在发送中...'):
+      # message='大熊猫\n专辑: 火火兔儿歌\nflac 14.87MB\n命中缓存, 正在发送中...',
+      #  logger.info(text)
+      await send(text, src, correct=True)
+      return
+    if '中...' in text:
+      #         message='搜索中...',
+      #  warn(f"已忽略疑似临时消息: {text}", False)
+      await send(text, src, correct=True)
+      return
+
+    mtmsgs = mtmsgsg[src]
+
+    if music_bot_state[src] == 1:
+      logger.info(msg.buttons)
+      #  logger.info(f"找到了几个音乐:{len(msg.buttons)} {msg.text}")
+
+      music_bot_state[src] += 1
+
+      #  logger.info(f"{mtmsgs[qid]}搜索结果(回复序号)\n{text}")
+      res = f"{mtmsgs[qid][0]}搜索结果(回复序号)\n{text}"
+      #  await mt_send_for_long_text(res, src)
+      await send(res, src)
+
+      gid_src[msg.id] = src
+
+      mtmsgs[qid].append(msg.buttons)
+      mtmsgs[msg.id] = mtmsgs[qid]
+
+      gid_src.pop(qid)
+      mtmsgs.pop(qid)
+
+    elif music_bot_state[src] == 2:
+      warn(f"不应该出现: music bot: {gid_src=} {music_bot_state[src]}\nmsg:\n{msg.stringify()}")
+      gid_src.pop(qid)
+      mtmsgs.pop(qid)
+      return
+    elif music_bot_state[src] == 3:
+      if '发送失败' in text:
+        await send(text, src)
+        music_bot_state[src] = 2
+      elif msg.file:
+        info(f"download... {text}")
+        path = await tg_download_media(msg, src)
+        if path is not None:
+          t = asyncio.create_task(backup(path))
+          await send("下载完成，正在上传到xmpp...", src, correct=True)
+          url = await upload(path)
+          await t
+          url2 = None
+          if t.done():
+            url2 = t.result()
+          t = asyncio.create_task(backup(path, delete=True))
+          if url and url2:
+            res = f"{mtmsgs[qid][0]}{url}\n\n{url2}\n\n{text}"
+            #  res = f"{url}\n\n{res}"
+          else:
+            if url:
+              res = f"{mtmsgs[qid][0]}{url}\n{text}"
+            else:
+              res = f"{mtmsgs[qid][0]}{url2}\n{text}"
+
+          if msg.buttons:
+            for i in get_buttons(msg.buttons):
+              #  if isinstance(i, KeyboardButtonUrl):
+              if isinstance(i.button, KeyboardButtonUrl):
+                res += f"\n原始链接: {i.url}"
+          #  await mt_send_for_long_text(res, gateway)
+          await send(res, src)
+        if src in music_bot_state and music_bot_state[src] == 3:
+          music_bot_state[src] = 2
+      else:
+        await send(text, src, correct=True)
+        music_bot_state[src] = 2
+    else:
+      warn(f"未知状态，已忽略: music bot: {gid_src=} {music_bot_state[src]}\nmsg:\n{msg.stringify()}")
+      return
+
+
+    #  except Exception as e:
+    #    err(f"fixme: music bot: {gid_src=} {e=} line: {e.__traceback__.tb_lineno}")
+
+    return
+
+  #  elif event.chat_id == rss_bot:
+  #    async with rss_lock:
+  #      #  await mt_send(msg.text, "C rss2tg_bot", id2gateway[rss_bot])
+  #      #  await mt_send_for_long_text(msg.text, id2gateway[rss_bot])
+  #      await send(msg.text, rss_group, name="")
+  #      await asyncio.sleep(5)
+  #    return
+  #  elif event.chat_id in bridges:
+  #    await send(msg.text, bridges[event.chat_id], name="")
+  #    await asyncio.sleep(5)
+  #    return
+    #  print("N: skip: %s != %s" % (event.chat_id, gpt_bot))
+  else:
+    #  print("W: skip unknown chat_id: %s %s" % (event.chat_id, msg.text[:64]))
+    if chat_id in bridges:
+      target = bridges[chat_id]
+      if type(target) is dict:
+        gid = msg.id
+        jid = None
+        #  res, nick, delay = await print_tg_msg(event)
+        #  if gid-1 in target or gid > mid_max:
+        if len(target) == 0:
+          return
+        #  elif len(target) == 1:
+        else:
+          for mid, jid in target.items():
+            break
+        #  else:
+        #    mid_min = min(target.keys())
+        #    if msg.edit_date is None:
+        #      mid_max = max(target.keys())
+        #      if gid-1 > mid_max:
+        #        target.pop(mid_min)
+        #        mid_max = max(target.keys())
+        #    jid = target[gid_min]
+        #    mid = gid_min
+          #  if msg.edit_date is None:
+          #    target[gid] = target[gid-1]
+          #    target.pop(gid-1)
+          #  await send(msg.text, jid=target[gid-1], name=f"**{nick}:** ", nick=nick, correct=True)
+
+        if jid is not None:
+          text = msg.text
+          if jid not in mtmsgsg:
+            warn(f"{jid} not in {mtmsgsg}")
+            return
+          mtmsgs = mtmsgsg[jid]
+          if mid not in mtmsgs:
+            warn(f"{mid} not in {mtmsgs}")
+            return
+          l = mtmsgs[mid]
+          text = f"{l[0]}{text}"
+          now = msg.date.timestamp()
+
+          if msg.file:
+            path = await tg_download_media(msg)
+            if path is not None:
+              if text:
+                text = f"{text} file: {path}"
+              else:
+                text = f"file: {path}"
+                await send(text, jid=jid)
+                return
+
+          #  if msg.edit_date is None:
+          if len(l) == 1:
+            #  if type(l[0]) is str:
+            #  l[0] = now
+            l.append(now)
+            l.append(gid)
+            await send(text, jid=jid, correct=True)
+          elif jid in bot_groups:
+            l[1] = now
+            l.append(gid)
+            await send(text, jid=jid, correct=True)
+          else:
+            if now > l[1]:
+              l[1] = now
+              l.append(gid)
+            await asyncio.sleep(5)
+            if mid in mtmsgsg[jid] and now == l[1]:
+              await send(text, jid=jid)
+            else:
+              info(f"忽略旧的临时消息: {text[:64]}")
+        else:
+          info(f"skip msg: {gid} {target} {msg.stringify()}")
+
+      else:
+        #  if msg.text:
+        res, nick, delay = await print_tg_msg(event)
+        #  logger.info(f"转发桥接消息: {chat_id} -> {bridges[chat_id]}: {msg.text[:64]}")
+        if res:
+          logger.info(f"转发桥接消息: {chat_id} -> {bridges[chat_id]}: {res[:16]}")
+          #  await send(msg.text, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
+          await send(res, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
+
+      #  elif event.is_private:
+      #    pass
+    #  else:
+    #    res, nick, delay = await print_tg_msg(event)
+    #    if res:
+    #      #  await send(res, jid=log_group, name="", nick=nick, delay=delay)
+    #      await send(res, jid=log_group, name="", delay=delay)
+
+    return
+
+  #  if msg.is_reply:
+  #    qid=msg.reply_to_msg_id
+  #    print(f"tg msg id: {msg.id=} {event.id=} {qid=}")
+  #    if qid not in gid_src:
+  #      logger.error(f"E: not found src for {qid=}, {gid_src=} {msg.text=}")
+  #      return
+  #    #  await queues[gid_src[qid]].put( (id(msg), qid, msg) )
+  #    #  await queues[gid_src[qid]].put( (msg.date, qid, msg) )
+  #    #  await queues[gid_src[qid]].put( (msg.id, "test") )
+  #    #  await queues[gid_src[qid]].put( (id(msg), qid, msg) )
+  #    if msg.file:
+  #      return
+  #    text = msg.text
+  #    if not text:
+  #      print(f"W: skip msg without text in chat with gpt bot, wtf: {msg.stringify()}")
+  #      return
+  #    print(f"tg msg: {text}: {msg.id=} {event.id=} {qid=} {gid_src=} {mtmsgsg=}")
+  #    l = text.splitlines()
+  #    if l[-1] in loadings:
+  #      return
+  #    elif len(l) > 1 and f"{l[-2]}\n{l[-1]}" in loadings:
+  #      return
+  #    else:
+  #      src = gid_src[qid]
+  #      mtmsgs = mtmsgsg[src]
+  #      res = f"{mtmsgs[qid][0]}{text}"
+  #      #  await mt_send_for_long_text(res, src)
+  #      await send(res, src)
+  #      gid_src.pop(qid)
+  #      mtmsgs.pop(qid)
+  #
+  #    #  except Exception as e:
+  #    #    err(f"fixme: {qid=} {gid_src=} {queues=} {e=} line: {e.__traceback__.tb_lineno}")
+  #      #  raise e
+  #    return
+  #    await queues[gid_src[qid]].put( (msg.id, msg, qid) )
+  #    return
+  #
+  #  else:
+  #    print("W: skip: got a msg without reply: is_reply: %s\nmsg: %s" % (msg.is_reply, msg.stringify()))
+  #    return
+
+async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
+  if opts == "fast":
+    opts = 1
+  elif opts == "direct":
+    opts = 2
+  elif opts == "xmpp":
+    opts = 3
+  elif opts == "vps":
+    opts = 4
+  elif opts == "raw":
+    opts = 9
+
+  if opts == 9:
+    await _sendme(tmsg.stringify(), chat_id)
+  elif tmsg.file:
+    file = tmsg.file
+    await _sendme(f"file: {type(file)} {file.name} {file.size}", chat_id)
+    res = None
+    #  if tmsg.text:
+    # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
+    # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.pack_bot_file_id
+    try:
+      if tmsg.document:
+        info("use document")
+        file = tmsg.document
+      elif tmsg.video:
+        info("use video")
+        file = tmsg.video
+      elif tmsg.photo:
+        info("use photo")
+        file = tmsg.photo
+      else:
+        info("use file")
+        file = tmsg.file
+      info(f"file type: {type(file)}")
+      res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+      if tmsg.video:
+        res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
+      elif tmsg.photo:
+        res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
+      elif tmsg.media:
+        res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
+
+      if opts == 1:
+        return
+    except rpcerrorlist.ChatForwardsRestrictedError as e:
+      err(f"fixme: {e=} {file=}")
+    except AttributeError as e:
+      err(f"fixme: {e=} {file=}")
+
+    if res is None:
+      file = None
+      try:
+        if tmsg.file:
+          file = utils.pack_bot_file_id(tmsg.file)
+        else:
+          file = utils.pack_bot_file_id(tmsg.document)
+      except AttributeError as e:
+        err(f"fixme: {e=} {type(file)}")
+        try:
+          # AttributeError("'PhotoSize' object has no attribute 'location'")
+          #  file = utils.pack_bot_file_id(tmsg.file)
+          if file is None:
+            file = utils.pack_bot_file_id(tmsg.photo)
+          if file is None:
+            file = utils.pack_bot_file_id(tmsg.document)
+          if file is None:
+            file = utils.pack_bot_file_id(tmsg.media)
+          if file is None:
+            err(f"wtf: {tmsg.stringify()}")
+            return
+          res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+          if opts == 1:
+            return
+        except AttributeError as e:
+          err(f"fixme: {e=}")
+      except Exception as e:
+        err(f"fixme: {e=}")
+        
+    src = log_group_private
+    path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
+    if path:
+      if path.endswith(".tgs"):
+        info(f"found tgs file: {path}")
+        fp = Path(path)
+        filename = fp.name
+        length = os.path.getsize(fp)
+        #  shell_cmd = ["lottie_convert.py", path, (fp.parent / f"{filename[:-4]}.webp").as_posix()]
+        #  shell_cmd = ["lottie_convert.py", path, fp.parent / f"{filename[:-4]}.webp"]
+        #  shell_cmd = ["lottie_convert.py", path, f"{HOME}/t/{filename[:-4]}.webp"]
+        #  shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", path, f"{fp.parent.as_posix()}/{filename[:-4]}.webp"]
+        shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", path, f"{fp.parent.as_posix()}/{filename[:-4]}.webp"]
+        #  shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", "-h"]
+        #  shell_cmd = ["cd", fp.parent.as_posix(), ";" , f"lottie_convert.py", filename, f"{filename[:-4]}.webp"]
+        #  shell_cmd = ["cd", fp.parent.as_posix(), ";" , f"echo", filename, f"{filename[:-4]}.webp"]
+        #  r, o, e = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=get_timeout(length)*3+30)
+        #  r, o, e = await my_popen(shell_cmd, shell=False, combine=False, max_time=get_timeout(length)*3+30)
+        #  if r == 0:
+        #    info(f"转换tgs文件成功: {path} {r=} {o=} {e=}")
+        #    #  path = path[:-4]+".webp"
+        #  else:
+        #    warn(f"转换tgs文件失败: {path} {r=} {o=} {e=}")
+        r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
+        info(f"{r=}")
+        if r:
+          info(f"转换失败 {path} {r}")
+        else:
+          shell_cmd = ["rm", path]
+          r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
+          if r:
+            info(f"删除失败 {path} {r}")
+          else:
+            info(f"删除成功 {path}")
+          path = path[:-4]+".webp"
+
+      t = asyncio.create_task(backup(path))
+      try:
+
+        if opts == 2 or res is None or opts == 0:
+          try:
+            res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
+            if opts == 2:
+              return
+          except Exception as e:
+            err(f"上传失败 {e=}")
+        else:
+          if url:
+            await _sendme(url, chat_id)
+
+        res = None
+        url = None
+        if opts < 4:
+          await send("下载完成，正在上传到xmpp...", src, correct=True)
+          try:
+            url = await upload(path)
+            info(url)
+          except Exception as e:
+            err(f"上传失败 {e=}")
+        try:
+          if url:
+            res = await UB.send_file(chat_id, file=url, caption=url)
+            if opts == 3:
+              return
+        except rpcerrorlist.WebpageCurlFailedError as e:
+          err(f"文件url有问题: {e=} {url}")
+        except rpcerrorlist.WebpageMediaEmptyError as e:
+          err(f"文件url有问题: {e=} {url}")
+        except Exception as e:
+          err(f"{e=} {url}")
+
+        try:
+          await t
+          if t.done():
+            url = t.result()
+            if url:
+             info(url)
+             await asyncio.sleep(2)
+             res = await UB.send_file(chat_id, file=url, caption=url)
+        except rpcerrorlist.WebpageCurlFailedError as e:
+          err(f"文件url有问题: {e=} {url}")
+        except rpcerrorlist.WebpageMediaEmptyError as e:
+          err(f"文件url有问题: {e=} {url}")
+        except Exception as e:
+          err(f"{e=} {url}")
+
+        if res is None and opts != 2:
+          try:
+            res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
+          except Exception as e:
+            err(f"上传失败 {e=}")
+
+      finally:
+        await t
+        if t.done():
+          pass
+        else:
+          err(f"backup failed: {path}")
+          await asyncio.sleep(60)
+        asyncio.create_task(backup(path, delete=True))
+
+
+  elif tmsg.text:
+    res = await UB.send_message(chat_id, tmsg.text)
+  else:
+    await _sendme(tmsg.stringify(), chat_id)
+
+
+
+
+@exceptions_handler
+async def parse_tg_out_msg(event):
+  #  info(event.stringify())
+  msg = event.message
+  text = msg.text
+  chat_id = event.chat_id
+  info(f"tg out msg: {chat_id}: {text}")
+  if text.startswith("$"):
+    cmds = get_cmd(text)
+    if cmds[1] == "$get":
+      if cmds[2] == "id":
+        #  await UB.send_message('me', f"{event.chat_id}")
+        sendme(f"{event.chat_id}")
+      elif cmds[2] == "event":
+        sendme(f"{event.stringify()}")
+      elif cmds[2] == "msg":
+        sendme(f"{msg.stringify()}")
+      elif cmds[2] == "chat":
+        e = await event.get_chat()
+        sendme(f"{e.stringify()}")
+      elif cmds[2] == "reply":
+        if event.is_reply:
+          sendme(event.reply_to.stringify())
+          e = await msg.get_reply_message()
+          sendme(f"{e.stringify()}")
+        else:
+          sendme(f"not a reply: {msg.stringify()}")
+      elif cmds[2] == "sender":
+        if event.is_reply:
+          e = await msg.get_reply_message()
+          e = await e.get_sender()
+          sendme(f"{e.stringify()}")
+        else:
+          sendme(f"not a reply: {msg.stringify()}")
+      elif cmds[2] == "file":
+        e = await msg.get_reply_message()
+        tmsg = e
+        opts = 0
+        if len(cmds) == 3:
+          opts = cmds[2]
+        await save_tg_msg(tmsg, chat_id, opts)
+    return
+
+  #  if chat_id == MY_ID or chat_id == CHAT_ID:
+  if chat_id == MY_ID or chat_id == CHAT_ID:
+    if chat_id == CHAT_ID:
+      if event.fwd_from:
+        sendme(event.fwd_from.stringify())
+        tmsg = event
+        cmds = get_cmd(text)
+        opts = 0
+        if len(cmds) == 3:
+          opts = cmds[2]
+        await save_tg_msg(tmsg, chat_id, opts)
+        if tmsg.document:
+          file = tmsg.document
+          sendme(f"type: {type(file)}")
+          #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+        return
+      #  elif event.is_reply:
+      #    sendme(event.reply_to.stringify())
+      #    return
+    if not text:
+      return
+
+    #  res = await run_cmd(text, CHAT_ID, "G me")
+    if chat_id == CHAT_ID:
+      res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
+      if res is True:
+        return
+      if res:
+        #  await UB.send_message(CHAT_ID, res)
+        await _sendme(res, chat_id)
+        return
+
+    if text == 'id':
+      #  await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
+      await UB.send_message(chat_id, f"id @name https://t.me/name\nchat_id: {chat_id}")
+      return
+    if text.startswith("id "):
+      #  url = text.split(' ')[1]
+      #  if url.startswith("https://t.me/"):
+      #    username = url.split('/')[3]
+      #  elif url.startswith("@"):
+      #    username = url[1:]
+      #  else:
+      #    await UB.send_message(chat_id, "error url")
+      #    return
+      #
+      #  e = await UB.get_entity(username)
+
+      url = text.split(' ')[1]
+      e = await get_entity(url, False)
+      if e:
+        await UB.send_message(chat_id, f"{e.stringify()}")
+        await UB.send_message(chat_id, "peer id: %s" % await UB.get_peer_id(e))
+      else:
+        await UB.send_message(chat_id, "not fount entity")
+    elif text.startswith("msg "):
+      cmds = get_cmd(text)
+      url = cmds[1]
+      if url:
+        if url == "h":
+          await _sendme("msg url raw/fast/xmpp/direct/vps", chat_id)
+          return
+        opts = 0
+        peer = await get_entity(url)
+        if peer:
+          #  await _sendme(peer.stringify(), chat_id)
+          ss = url.split('/')
+          if len(ss) > 4:
+            ids = int(ss[-1])
+            tmsg = await UB.get_messages(peer, ids=ids)
+            if tmsg:
+              opts = 0
+              if len(cmds) == 3:
+                opts = cmds[2]
+              await save_tg_msg(tmsg, chat_id, opts, url)
+            else:
+              await _sendme(f"error id: {ids}\nres: {msg}", chat_id)
+          return
+        else:
+          await _sendme(f"error url: {url}\nres: {peer}", chat_id)
+          return
+      await _sendme("error", chat_id)
+
+
+
+#  @UB.on(events.NewMessage(incoming=True))
+#  @UB.on(events.MessageEdited(incoming=True))
+#  @exceptions_handler
+#  async def read_res(event):
+#
+#    if not allright.is_set():
+#      return
+#    #  if event.chat_id in id2gateway:
+#    if event.chat_id == gpt_bot:
+#      pass
+#    elif event.chat_id == rss_bot:
+#      msg = event.message
+#      await mt_send(msg.text, id2gateway[rss_bot], "rss2tg_bot")
+#      return
+#      #  print("N: skip: %s != %s" % (event.chat_id, gpt_bot))
+#    else:
+#      return
+#    #  if not allright.is_set():
+#    #    print("W: skiped the msg because of reset is waiting")
+#    #    return
+#    #  elif event.chat_id not in gid_src:
+#    #    logger.error(f"E: not found gateway for {event.chat_id}, {gid_src=}")
+#    #    return
+#    msg = event.message
+#
+#    if msg.is_reply:
+#      qid=msg.reply_to_msg_id
+#      print(f"msg id: {msg.id=} {event.id=} {qid=} {gid_src=} {mtmsgsg=}")
+#      if qid not in gid_src:
+#        logger.error(f"E: not found gateway for {qid=}, {gid_src=} {msg.text=}")
+#        return
+#      try:
+#        #  await queues[gid_src[qid]].put( (id(msg), qid, msg) )
+#        #  await queues[gid_src[qid]].put( (msg.date, qid, msg) )
+#        await queues[gid_src[qid]].put( (id(msg), qid, msg) )
+#        #  await queues[gid_src[qid]].put( (msg.id, "test") )
+#      except Exception as e:
+#        logger.info(f"E: fixme: {qid=} {gid_src=} {queues=} {e=}")
+#        #  raise e
+#      return
+#      await queues[gid_src[qid]].put( (msg.id, msg, qid) )
+#      return
+
+
+
+async def my_event_handler(event):
+  #  if 'hello' in event.raw_text:
+  #    await event.reply('hi!')
+  #  if 'new_chat' in event.raw_text:
+  #    print(event.stringify())
+  await read_res(event)
+
+
+#  @exceptions_handler
+#  @UB.on(events.MessageEdited(incoming=True))
+#  async def my_event_handler(event):
+#    #  if 'hello' in event.raw_text:
+#    #    await event.reply('hi!')
+#    #  if 'new_chat' in event.raw_text:
+#    #    print(event.stringify())
+#
+#    await read_res(event)
+
+def get_jid(i, full=False):
+  if full:
+    if i.resource:
+      return f"{i.localpart}@{i.domain}/{i.resource}"
+    else:
+      return f"{i.localpart}@{i.domain}"
+  else:
+    return f"{i.localpart}@{i.domain}"
+
+async def stop(client=None):
+  if client is None:
+    if 'XB' in globals():
+      client = XB
+    else:
+      return
+  jid = get_jid(client.local_jid)
+  if client.running:
+    logger.info(f"开始断开账户: {jid}")
+    client.stop()
+    while True:
+      if client.running:
+        logger.info(f"等待断开账户: {jid}")
+        await asyncio.sleep(0.5)
+      else:
+        logger.info(f"已断开: {jid}")
+        break
+  else:
+    logger.info(f"已离线: {jid}")
+
+
+
+async def disco_info(jid, node=None, client=None):
+  if client is None:
+    client = XB
+  if jid is None:
+    jid = XB.local_jid
+  elif isinstance(jid, JID):
+    pass
+  else:
+    jid = JID.fromstr(jid)
+  #  for i in my_groups:
+  #    jid = i
+  #    break
+  #  jid = test_group.rsplit('@', 1)[1]
+  dc = client.summon(aioxmpp.DiscoClient)
+  #  res = await dc.query_info(JID.fromstr(jid))
+  try:
+    res = await dc.query_info(jid, node=node, timeout=5)
+    #  pprint(res)
+    #  print(jid, res.to_dict())
+    return res
+  except TimeoutError as e:
+    warn(f"失败(超时)：{jid}, {e=}")
+    #  res = "失败(超时)"
+
+async def disco_item(jid=None, node=None, client=None):
+  if client is None:
+    client = XB
+  if jid is None:
+    jid = JID.fromstr(XB.local_jid.domain)
+  elif isinstance(jid, JID):
+    pass
+  else:
+    jid = JID.fromstr(jid)
+  #  for i in my_groups:
+  #    jid = i
+  #    break
+  #  jid = test_group.rsplit('@', 1)[1]
+  dc = client.summon(aioxmpp.DiscoClient)
+  #  res = await dc.query_info(JID.fromstr(jid))
+  try:
+    res = await dc.query_items(jid, node=node, timeout=5)
+    #  pprint(res)
+    #  for i in res.items:
+    #    print(i.name, i.node, i.jid)
+    return res
+  except TimeoutError as e:
+    warn(f"失败(超时)：{jid}, {e=}")
+
+
+async def get_server_name(jid):
+  await asyncio.sleep(0.5)
+  res = await disco_info(jid)
+  if res:
+    if res.identities:
+      return res.identities[0]
+
+
+
+
+
 def run_run_loop():
   info("独立线程，启动...")
   global loop2
