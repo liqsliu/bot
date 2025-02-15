@@ -1246,7 +1246,7 @@ async def my_subprocess_shell(cmd, max_time=run_shell_timx_max, src=None):
 
 
 
-def wrap_read(func, src, ress, default=b""):
+def wrap_read(func, src, ress):
   @wraps(func)
   async def wrapper(*args, **kwargs):
     data = await func(*args, **kwargs)
@@ -1257,7 +1257,7 @@ def wrap_read(func, src, ress, default=b""):
       ress[1] += data
       if src:
         asyncio.create_task( send(ress[1].decode("utf-8", errors="ignore"), src) )
-      ress[1] = default
+      ress[1] = b""
     else:
       ress[1] += data
     #  print(f"{len(data)}")
