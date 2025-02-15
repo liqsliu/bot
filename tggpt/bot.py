@@ -2798,6 +2798,8 @@ def get_timeout(size):
 
 #  last_time = {}
 
+tg_download_tasks = set()
+
 async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=False, max_wait_time=download_media_time_max):
 #  await client.download_media(message, progress_callback=callback)
   #  async with downlaod_lock:
@@ -2876,55 +2878,65 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
 
   async def _download_media(msg, path):
     try:
-      path = await asyncio.wait_for(msg.download_media(path, progress_callback=download_media_callback), timeout=timeout)
+      return await asyncio.wait_for(msg.download_media(path, progress_callback=download_media_callback), timeout=timeout)
     except TimeoutError as e:
-      path = None
-    return path
+      err(f"下载失败(超时): {e=}")
 
 
-  path = None
+  file_path = None
   try:
     if src:
+      while src in tg_download_tasks:
+        await send("下载任务排队中 {}".format(res), src, correct=True)
+        await asyncio.sleep(interval)
+      tg_download_tasks.add(src)
       t = asyncio.create_task(update_tmp_msg())
-    t1 = asyncio.create_task(_download_media(msg, file_path))
+    t1 = asyncio.create_task(_download_media(msg, path))
     now = time.time()
     while True:
-      await asyncio.sleep(interval+1)
-      #  if src:
-      #    if src not in music_bot_state or music_bot_state[src] < 3:
-      #      info(f"下载中止：{res}")
-      #      path = None
-      #      res = f"下载取消: {res}"
-      #      break
+      await asyncio.sleep(interval)
       if t1.done():
         file_path = t1.result()
         if file_path is None:
           res = f"下载失败(下载速度太慢): {res}"
         break
-      if len(last_time) == 2:
-        #  if time.time() - now > 60:
-        if time.time() - now > timeout:
+      if len(last_time) == 2 and time.time() - now > timeout/3:
           t1.cancel()
-          path = None
+          file_path = None
           res = f"下载失败(等待超时): {res}"
-          break
-        else:
-          info(f"等待上游下载完成：{res}")
+          return res
+        #  else:
+        #    info(f"等待上游下载完成：{res}")
+      elif time.time() - now > timeout:
+        t1.cancel()
+        file_path = None
+        res = f"下载失败(超时): {res}"
+        return res
+      if src:
+        if src in tg_download_tasks:
+          continue
+        #  if src not in music_bot_state or music_bot_state[src] < 3:
+        if src in music_bot_state and music_bot_state[src] > 2:
+          continue
+        info(f"下载中止：{res}")
+        path = None
+        return f"下载取消: {res}"
   except Exception as e:
     err(f"下载失败 {e=}")
   finally:
     if file_path is None:
-      err(f"下载失败 file_path is None")
+      err(f"下载失败 got file_path is None")
     else:
       if not file_path.startswith("/"):
         file_path = path + file_path
       info(f"下载完成：{res} {file_path}")
     if not t1.done():
       t1.cancel()
-      #  return
     if src:
       if not t.done():
         t.cancel()
+      if src in tg_download_tasks:
+        tg_download_tasks.remove(src)
 
   if file_path:
     return file_path
@@ -5334,7 +5346,15 @@ async def add_cmd():
 
   async def _(cmds, src):
     if len(cmds) == 1:
-      return f"download file by url\n.{cmds[0]} $url [raw/curl/tg] [direct]"
+      return f"download file by url\n.{cmds[0]} $url [raw/curl/tg/clear] [direct]"
+    if cmds[1] == "clear":
+      tg_download_tasks.clear()
+      return "ok"
+    elif cmds[1] == "clear2":
+      tg_download_tasks.clear()
+      await asyncio.sleep(interval+1)
+      tg_download_tasks.clear()
+      return "ok"
     if len(cmds) == 3:
       if cmds[2] == "tg":
         try:
