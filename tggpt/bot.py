@@ -1670,7 +1670,9 @@ async def get_title(url, src=None, opts=[]):
       path = s[-1]
       if os.path.exists(path):
         url = await upload(path, src)
-        asyncio.create_task(backup(path, url))
+        t = asyncio.create_task(backup(path))
+        await t
+        asyncio.create_task(backup(path, delete=True))
         if url:
           s[-1] = f"\n- {url}"
         else:
@@ -3262,13 +3264,14 @@ async def parse_tg_msg(event):
         info(f"download... {text}")
         path = await tg_download_media(msg, src)
         if path is not None:
+          t = asyncio.create_task(backup(path))
           await send("下载完成，正在上传到xmpp...", src, correct=True)
           url = await upload(path)
-          t = asyncio.create_task(backup(path))
           await t
           url2 = None
           if t.done():
             url2 = t.result()
+          t = asyncio.create_task(backup(path, delete=True))
           if url and url2:
             res = f"{mtmsgs[qid][0]}{url}\n\n{url2}\n\n{text}"
             #  res = f"{url}\n\n{res}"
