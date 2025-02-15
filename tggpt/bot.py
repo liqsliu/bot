@@ -1253,7 +1253,8 @@ async def my_subprocess_shell(cmd, max_time=run_shell_timx_max, src=None):
 def wrap_read(func, src, ress):
   @wraps(func)
   async def wrapper(*args, **kwargs):
-    ress[1] += await func(*args, **kwargs)
+    data = await func(*args, **kwargs)
+    ress[1] += data
     now = time.time()
     if now - ress[0] > interval/2:
       ress[0] = now
