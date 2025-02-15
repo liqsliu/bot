@@ -6132,6 +6132,8 @@ async def run_cmd(*args, **kwargs):
   return res
 
 async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
+  if text == "ping":
+    return "pong"
   if text[0:1] == ".":
     if text[1:2] == " ":
       return
