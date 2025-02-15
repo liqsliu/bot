@@ -2753,6 +2753,11 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
   if path is None:
     err(f"need file path: {path}")
     return
+  if type(file_path) is str:
+    fp = Path(file_path)
+    #  file_path = Path(file_path)
+  else:
+    fp = file_path
   if path.endswith(".mp4"):
     force_document = False
     supports_streaming = True
@@ -2767,7 +2772,7 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
       last_time[1] = sent
       if len(last_time) == 2:
         last_time.append(total)
-        asyncio.create_task(send("开始上传: {:.1f}MB".format(total/1024/1024), src))
+        asyncio.create_task(send("开始上传: {:.1f}MB {}".format(total/1024/1024, fp.name), src))
     async def update_tmp_msg():
       while True:
         await asyncio.sleep(interval)
@@ -2849,9 +2854,9 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     if len(last_time) == 2:
       last_time.append(total)
       if total > 512*1024:
-        asyncio.create_task(send("开始下载：{} {:.1f}MB".format(res, total/1024/1024), src))
+        asyncio.create_task(send("开始下载{:.1f}M {}".format(total/1024/1024, res), src))
       else:
-        asyncio.create_task(send("开始下载：{} {:.1f}KB".format(res, total/1024), src))
+        asyncio.create_task(send("开始下载 {:.1f}KB {}".format(total/1024, res), src))
     #  print('Downloaded', current, 'out of', total,
     #    'bytes: {:.2%}'.format(current / total))
     #  if time.time() - last_time[src] > interval:
@@ -4067,7 +4072,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   headers["Content-Length"] = str(length)
   if src:
     info("开启进度刷新消息")
-    await send("开始上传 {:.1f}M".format(length/1024/1024), src)
+    await send("开始上传 {:.1f}M {}".format(length/1024/1024, filename), src)
 
     #  async def coro(slot, fp, timeout, headers):
   #  async def coro():
@@ -4118,7 +4123,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         asyncio.create_task(_sendme("{:.1f}M".format((length-ress[0])/1024/1024)))
       else:
         ress[0] += len(data)
-      print(f"{len(data)}")
+      #  print(f"{len(data)}")
       return data
     return wrapper
 
