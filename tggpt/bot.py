@@ -2909,46 +2909,47 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
   if path is None:
     err(f"need file path: {path}")
     return
-  if type(path) is str:
-    fp = Path(path)
-    #  file_path = Path(file_path)
-  else:
-    fp = path
   if path.endswith(".mp4"):
     force_document = False
     supports_streaming = True
   else:
     force_document = True
     supports_streaming = False
-  cb = None
-  length = os.path.getsize(path)
-  if length > 5000000:
-    last_time = [time.time(), 0]
-    def cb(sent, total):
-      last_time[1] = sent
-      if len(last_time) == 2:
-        last_time.append(total)
-        asyncio.create_task(send("开始上传: {:.1f}MB {}".format(total/1024/1024, fp.name), src))
-    async def update_tmp_msg():
-      while True:
-        await asyncio.sleep(interval)
+  if not path.startswith("https://"):
+    if type(path) is str:
+      fp = Path(path)
+      #  file_path = Path(file_path)
+    else:
+      fp = path
+    cb = None
+    length = os.path.getsize(path)
+    if length > 5000000:
+      last_time = [time.time(), 0]
+      def cb(sent, total):
+        last_time[1] = sent
         if len(last_time) == 2:
-          await send("准备中", src, correct=True)
-          if time.time() - last_time[0] > 15:
-            await send("准备超时，可能网络过慢或者文件太小", src, correct=True)
+          last_time.append(total)
+          asyncio.create_task(send("开始上传: {:.1f}MB {}".format(total/1024/1024, fp.name), src))
+      async def update_tmp_msg():
+        while True:
+          await asyncio.sleep(interval)
+          if len(last_time) == 2:
+            await send("准备中", src, correct=True)
+            if time.time() - last_time[0] > 15:
+              await send("准备超时，可能网络过慢或者文件太小", src, correct=True)
+              break
+          else:
+            current = last_time[1]
+            total = last_time[2]
+            if current == total:
+              break
+            await send("{:.1f}M".format((total-current)/1024/1024), src)
+          if time.time() - last_time[0] > download_media_time_max:
+            await send("超时", src, correct=True)
             break
-        else:
-          current = last_time[1]
-          total = last_time[2]
-          if current == total:
-            break
-          await send("{:.1f}M".format((total-current)/1024/1024), src)
-        if time.time() - last_time[0] > download_media_time_max:
-          await send("超时", src, correct=True)
-          break
-    if src:
-      t = asyncio.create_task(update_tmp_msg())
-  h = await UB.upload_file(path, progress_callback=cb)
+      if src:
+        t = asyncio.create_task(update_tmp_msg())
+    h = await UB.upload_file(path, progress_callback=cb)
   try:
     res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document, supports_streaming=supports_streaming)
   except Exception as e:
@@ -3764,7 +3765,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             err(f"上传失败 {e=}")
         try:
           if url:
-            res = await UB.send_file(chat_id, file=url, caption=url)
+            #  res = await UB.send_file(chat_id, file=url, caption=url)
+            res = await tg_upload_media(url, src, chat_id=chat_id, caption=url)
             if opts == 3:
               return
         except rpcerrorlist.WebpageCurlFailedError as e:
