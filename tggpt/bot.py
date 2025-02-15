@@ -1447,11 +1447,13 @@ async def send_cmd_to_bash(gateway, name, text):
   #  await run_my_bash(shell_cmd, shell=False)
   #  await my_popen(shell_cmd, shell=False)
   #  await my_popen(" ".join(shell_cmd))
-  res = await my_popen(shell_cmd, shell=False, src=gateway)
-  if res:
-    return re.sub(shell_color_re,  "", res)
+  #  res = await my_popen(shell_cmd, shell=False, src=gateway)
+  r, o, e = await my_subprocess_exec(*shell_cmd, src=gateway)
+  if r == 0:
+    return re.sub(shell_color_re,  "", o)
+  else:
   #  logger.info(res)
-  return res
+    return res
 
 #  @exceptions_handler
 #  async def send2mt(client, message):
@@ -1717,22 +1719,22 @@ async def save_data():
 #    return res
 
 async def backup(path, src=None, delete=False):
-  info(f"backup: {path}")
   url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
   info(f"url: {url}")
   #  shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
   if delete:
+    info(f"delete: {path}")
     shell_cmd=["rm", path]
   else:
+    info(f"backup: {path}")
     shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
   #  res = await run_my_bash(shell_cmd, shell=False)
   res = await my_subprocess_exec(*shell_cmd)
   if res:
-    info(f"backup res: {res}")
+    info(f"res: {res} {path}")
     if src:
       await send(url, src)
   return url
-
 
 
 async def get_title(url, src=None, opts=[]):
@@ -3701,7 +3703,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         #    warn(f"转换tgs文件失败: {path} {r=} {o=} {e=}")
         #  r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
         r, _, _ = await my_subprocess_exec(*shell_cmd, max_time=get_timeout(length)*3+30)
-        info(f"{r=}")
+        #  info(f"{r=}")
         if r == 0:
           #  shell_cmd = ["rm", path]
           #  r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
