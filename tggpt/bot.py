@@ -4021,7 +4021,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       return False
   else:
     warn(f"unknown file size limit: {UPLOAD}")
-  print(XB,UPLOAD, filename, os.path.getsize(fp), mimetypes.guess_type(fp)[0], file_path)
+  print("upload to xmpp: ", XB,UPLOAD, filename, os.path.getsize(fp), mimetypes.guess_type(fp)[0], file_path)
   slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, length, mimetypes.guess_type(fp)[0])
   #  slot = await XB.send(aioxmpp.IQ(
   #      type_=aioxmpp.IQType.GET,
@@ -4035,7 +4035,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
 
   headers = slot.put.headers.copy()
 
-  chunk_size = 1024 * 1024
+  #  chunk_size = 1024 * 1024
   #  if length / chunk_size > 2:
   #    info(f"文件过大，开启进度显示: {length} > {chunk_size}")
   #  if False:
@@ -4070,78 +4070,87 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     await send("开始上传 {:.1f}M".format(length/1024/1024), src)
 
     #  async def coro(slot, fp, timeout, headers):
-  async def coro():
-    async def update_tmp_msg2():
-      while True:
-        await asyncio.sleep(1)
-        print("上传线程没卡住")
-    async def update_tmp_msg(file):
-      i = 0
-      start_time = time.time()
-      asyncio.create_task(update_tmp_msg2())
-      while True:
-        await asyncio.sleep(1)
-        if file.closed:
-          info(f"文件已关闭: {file.name}")
-          return
-        try:
-          now = await file.tell()
-        except ValueError as e:
-          info(f"文件已关闭: {file.name}")
-          break
-        if now == length:
-          info(f"end: {now}")
-          return
-        info(f"当前 {fp.name} {now}")
-        #  await asyncio.sleep(interval/2)
-        i += 1
-        if i < interval:
-          continue
-        i = 0
-        info("剩余 {fp.name} {:.1f}M".format((length-now)/1024/1024))
-        if src:
-          await send("{:.1f}M".format((length-now)/1024/1024), src)
-        if time.time() - start_time > download_media_time_max:
-          if src:
-            await send("超时", src, correct=True)
-          break
-    def d(func):
-      @wraps(func)
-      async def wrapper(*args, **kwargs):
-        data = await func(*args, **kwargs)
-        print(f"{len(data)}")
-        return data
-      return wrapper
+  #  async def coro():
+    #  async def update_tmp_msg2():
+    #    while True:
+    #      await asyncio.sleep(1)
+    #      print("上传线程没卡住")
+    #  async def update_tmp_msg(file):
+    #    #  asyncio.create_task(update_tmp_msg2())
+    #    i = 0
+    #    start_time = time.time()
+    #    while True:
+    #      await asyncio.sleep(1)
+    #      if file.closed:
+    #        info(f"文件已关闭: {file.name}")
+    #        return
+    #      try:
+    #        now = await file.tell()
+    #      except ValueError as e:
+    #        info(f"文件已关闭: {file.name}")
+    #        break
+    #      if now == length:
+    #        info(f"end: {now}")
+    #        return
+    #      info(f"当前 {fp.name} {now}")
+    #      #  await asyncio.sleep(interval/2)
+    #      i += 1
+    #      if i < interval:
+    #        continue
+    #      i = 0
+    #      info("剩余 {fp.name} {:.1f}M".format((length-now)/1024/1024))
+    #      if src:
+    #        await send("{:.1f}M".format((length-now)/1024/1024), src)
+    #      if time.time() - start_time > download_media_time_max:
+    #        if src:
+    #          await send("超时", src, correct=True)
+    #        break
+  start_time = time.time()
+  ress = [0, start_time]
+  def d(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+      data = await func(*args, **kwargs)
+      now = time.time()
+      if now - ress[1] > interval:
+        ress[1] = now
+        ress[0] += len(data)
+        asyncio.create_task(_sendme("{:.1f}M".format((length-ress[0])/1024/1024)))
+      else:
+        ress[0] += len(data)
+      print(f"{len(data)}")
+      return data
+    return wrapper
 
-    #  def dc(func):
-    #    @wraps(func)
-    #    async def wrapper(*args, **kwargs):
-    #      print(f"正在关闭")
-    #      return await func(*args, **kwargs)
-    #    return wrapper
+  #  def dc(func):
+  #    @wraps(func)
+  #    async def wrapper(*args, **kwargs):
+  #      print(f"正在关闭")
+  #      return await func(*args, **kwargs)
+  #    return wrapper
 
-    timeout = get_timeout(length)
-    async with aiofiles.open(fp, "rb") as file:
-      t = asyncio.create_task(update_tmp_msg(file))
-      try:
-        #  file.read = d(file.read)
-        #  file.close = dc(file.close)
-        #  file.readline = d(file.readline)
-        #  await asyncio.sleep(5)
-        res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
-        #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
-        #  coro = _sendme("测试进程间通信 res: {}".format(res))
-        #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
-        #  await send("测试进程间通信 res: {}".format(res))
-        return res
-      except Exception as e:
-        err(f"分块上传失败：{e=} {slot.put.url=}")
-        return
-      finally:
-        if not t.done():
-          t.cancel()
+  timeout = get_timeout(length)
+  async with aiofiles.open(fp, "rb") as file:
+    #  t = asyncio.create_task(update_tmp_msg(file))
+    try:
+      #  file.read = d(file.read)
+      #  file.close = dc(file.close)
+      file.readline = d(file.readline)
+      #  await asyncio.sleep(5)
+      res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
+      #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
+      #  coro = _sendme("测试进程间通信 res: {}".format(res))
+      #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+      #  await send("测试进程间通信 res: {}".format(res))
+      #  return res
+    except Exception as e:
+      err(f"分块上传失败：{e=} {slot.put.url=}")
+      return
+    #  finally:
+    #    if not t.done():
+    #      t.cancel()
   #  res = await run_run(coro(slot, fp, timeout, headers))
-  res = await run_run(coro())
+  #  res = await run_run(coro())
   info(f"res: {res}\nslot: {slot}")
 
   #  else:
