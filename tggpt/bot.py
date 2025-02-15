@@ -2184,14 +2184,14 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
       return False
 
 
-async def send(*args, **kwargs):
-  return await run_run(send_t(*args, **kwargs), need_main=True)
-  #  if threading.current_thread() is loop2_thread:
-    #  asyncio.run_coroutine_threadsafe(coro, loop)
+#  async def send(*args, **kwargs):
+#    return await run_run(send_t(*args, **kwargs), need_main=True)
+#    #  if threading.current_thread() is loop2_thread:
+#      #  asyncio.run_coroutine_threadsafe(coro, loop)
 
 
 @exceptions_handler
-async def send_t(text, jid=None, *args, **kwargs):
+async def send(text, jid=None, *args, **kwargs):
   if type(jid) is int:
     if jid == CHAT_ID:
       await _sendme(text)
@@ -4107,68 +4107,68 @@ async def get_server_name(jid):
 
 
 
-def run_run_loop():
-  info("独立线程，启动...")
-  global loop2
-  loop2 = asyncio.new_event_loop()  # 创建新的事件循环
-  asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
-  loop2.run_forever()  # 启动事件循环
-
-def in_main_thread():
-  if loop2_thread.native_id == threading.get_native_id():
-    return False
-  # fixme: 有可能第三个线程
-  return True
-
-def run_cb_in_main(cb, *args, **kwargs):
-  # fixme: 不支持多线程
-  if in_main_thread():
-    return cb(*args, **kwargs)
-  loop.call_soon_threadsafe(partial(cb, *args, **kwargs))
-
-def run_cb_in_thread(cb, *args, **kwargs):
-  # fixme: 不支持多线程
-  if in_main_thread():
-    loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
-  return cb(*args, **kwargs)
-
-#  async def run_run(coro, *args, **kwargs, need_main=False):
-async def run_run(coro, need_main=False):
-  if need_main:
-    #  if threading.current_thread() is loop2_thread:
-      #  if asyncio.iscoroutine():
-    if in_main_thread:
-      if main_thread.native_id != threading.get_native_id():
-        fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
-        return
-      else:
-        return await coro
-    else:
-      fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
-      oloop = loop2
-  else:
-    #  if threading.current_thread() is loop2_thread:
-    if in_main_thread:
-      if main_thread.native_id != threading.get_native_id():
-        return await coro
-      else:
-        fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
-        oloop = loop
-    else:
-      return await coro
-
-  fu = asyncio.Future()
-  async def cb2(fu, result=0):
-    fu.set_result(result)
-  def cb(fu2):
-    if fu2.done():
-      #  print("确实结束了")
-      asyncio.run_coroutine_threadsafe(cb2(fu, fu2.result()), oloop)
-    else:
-      print("wtffffffffffffffffffffffffffffffffff, 还没结束")
-      asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
-  fu2.add_done_callback(cb)
-  return await fu
+#  def run_run_loop():
+#    info("独立线程，启动...")
+#    global loop2
+#    loop2 = asyncio.new_event_loop()  # 创建新的事件循环
+#    asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
+#    loop2.run_forever()  # 启动事件循环
+#
+#  def in_main_thread():
+#    if loop2_thread.native_id == threading.get_native_id():
+#      return False
+#    # fixme: 有可能第三个线程
+#    return True
+#
+#  def run_cb_in_main(cb, *args, **kwargs):
+#    # fixme: 不支持多线程
+#    if in_main_thread():
+#      return cb(*args, **kwargs)
+#    loop.call_soon_threadsafe(partial(cb, *args, **kwargs))
+#
+#  def run_cb_in_thread(cb, *args, **kwargs):
+#    # fixme: 不支持多线程
+#    if in_main_thread():
+#      loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
+#    return cb(*args, **kwargs)
+#
+#  #  async def run_run(coro, *args, **kwargs, need_main=False):
+#  async def run_run(coro, need_main=False):
+#    if need_main:
+#      #  if threading.current_thread() is loop2_thread:
+#        #  if asyncio.iscoroutine():
+#      if in_main_thread:
+#        if main_thread.native_id != threading.get_native_id():
+#          fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+#          return
+#        else:
+#          return await coro
+#      else:
+#        fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+#        oloop = loop2
+#    else:
+#      #  if threading.current_thread() is loop2_thread:
+#      if in_main_thread:
+#        if main_thread.native_id != threading.get_native_id():
+#          return await coro
+#        else:
+#          fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
+#          oloop = loop
+#      else:
+#        return await coro
+#
+#    fu = asyncio.Future()
+#    async def cb2(fu, result=0):
+#      fu.set_result(result)
+#    def cb(fu2):
+#      if fu2.done():
+#        #  print("确实结束了")
+#        asyncio.run_coroutine_threadsafe(cb2(fu, fu2.result()), oloop)
+#      else:
+#        print("wtffffffffffffffffffffffffffffffffff, 还没结束")
+#        asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
+#    fu2.add_done_callback(cb)
+#    return await fu
 
 
 
@@ -7162,17 +7162,20 @@ async def xmppbot2():
 async def init():
   global loop
   loop = asyncio.get_event_loop()
-  global loop2_thread, loop2, main_thread
-  loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
-  loop2_thread.start()
-  main_thread =  threading.main_thread()
-  while True:
-    if "loop2" in globals() and loop2.is_running():
-      info("子线程事件循环正在运行")
-      break
-    else:
-      info("等待子线程事件循环启动")
-      await asyncio.sleep(2)
+
+  #  global loop2_thread, loop2, main_thread
+  #  loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
+  #  loop2_thread.start()
+  #  main_thread =  threading.main_thread()
+  #  while True:
+  #    if "loop2" in globals() and loop2.is_running():
+  #      info("子线程事件循环正在运行")
+  #      break
+  #    else:
+  #      info("等待子线程事件循环启动")
+  #      await asyncio.sleep(2)
+  #
+
   #  LOGGER.addFilter(NoParsingFilter())
   # https://stackoverflow.com/questions/17275334/what-is-a-correct-way-to-filter-different-loggers-using-python-logging
   for handler in logging.root.handlers:
