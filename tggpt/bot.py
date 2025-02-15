@@ -2993,14 +2993,6 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   else:
     err(f"no file: {msg}")
     return
-  if msg.buttons:
-    logger.info(msg.buttons)
-    for i in get_buttons(msg.buttons):
-      if isinstance(i.button, KeyboardButtonUrl):
-        logger.info(f"add url from: {i}")
-        res += f" {i.url}"
-      else:
-        logger.info(f"ignore button: {i}")
   #  await mt_send(f"{res} 下载中...", gateway=gateway)
   #  res = f"{res} 下载中..."
   if src and res:
@@ -3015,7 +3007,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     if len(last_time) == 2:
       last_time.append(total)
       if total > 512*1024:
-        asyncio.create_task(send("开始下载{:.1f}M {}".format(total/1024/1024, res), src))
+        asyncio.create_task(send("开始下载 {:.1f}M {}".format(total/1024/1024, res), src))
       else:
         asyncio.create_task(send("开始下载 {:.1f}KB {}".format(total/1024, res), src))
     #  print('Downloaded', current, 'out of', total,
@@ -3049,7 +3041,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
           break
         #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
         #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
-        await send("-{:.1f}M".format((total-current)/1024/1024), src)
+        await send("{:.1f}M".format((total-current)/1024/1024), src)
         last_time[0] = time.time()
         #  last_current = current
 
@@ -3437,7 +3429,19 @@ async def parse_tg_msg(event):
         await send(text, src)
         music_bot_state[src] = 2
       elif msg.file:
-        info(f"download... {text}")
+        res = ""
+        if msg.file.name:
+          res = f"{msg.file.name}"
+        if msg.buttons:
+          logger.info(msg.buttons)
+          for i in get_buttons(msg.buttons):
+            if isinstance(i.button, KeyboardButtonUrl):
+              logger.info(f"add url from: {i} {i.url}")
+              res += f" {i.url}"
+              break
+            else:
+              logger.info(f"ignore button: {i}")
+        info(f"download... {text} {res}")
         path = await tg_download_media(msg, src)
         if path is not None:
           t = asyncio.create_task(backup(path))
