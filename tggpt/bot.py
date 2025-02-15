@@ -1243,6 +1243,30 @@ async def my_popen(cmd,
 
 async def my_subprocess_shell(cmd, max_time=run_shell_timx_max, src=None):
   p = await asyncio.create_subprocess_shell(cmd, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  start_time = time.time()
+  ress = [start_time, b""]
+  p.stdout.read = wrap_read( p.stdout.read, src, ress)
+  p.stderr.read = wrap_read( p.stderr.read, src, ress)
+  t = asyncio.create_task( p.communicate() )
+  o = ""
+  e = ""
+  while time.time() - ress[0] < max_time and time.time() - start_time < max_time*10:
+    try:
+      ts = asyncio.shield(t)
+      o, e = await asyncio.wait_for( ts, interval)
+      break
+    except TimeoutError:
+      info(f"waiting: {args}")
+  if o:
+    o = o.decode("utf-8", errors="ignore")
+  else:
+    o = None
+  if e:
+    e = e.decode("utf-8", errors="ignore")
+  else:
+    e = None
+  info(format_out_of_shell((o, p.returncode, e)))
+  return p.returncode, o, e
 
 
 
@@ -1256,7 +1280,7 @@ def wrap_read(func, src, ress):
       #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
       ress[1] += data
       if src:
-        asyncio.create_task( send(ress[1].decode("utf-8", errors="ignore"), src) )
+        asyncio.create_task(send( "执行中: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, correct=True) )
       ress[1] = b""
     else:
       ress[1] += data
@@ -1313,10 +1337,12 @@ async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
   else:
     e = None
   #  print(o, e)
-  info("res: %s\n--\nE: %s\n%s" % (o, p.returncode, e))
+  info(format_out_of_shell((o, p.returncode, e)))
   return p.returncode, o, e
     
 
+def format_out_of_shell(res):
+  return "%s\n--\nE: %s\n%s" % (res[1],res[0], res[2])
 
 
 
@@ -1324,47 +1350,47 @@ async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
 
 
 
-async def run_my_bash(cmd, shell=True, max_time=120):
-  p = Popen(cmd,
-        shell=shell,
-        stdout=PIPE,
-        stderr=PIPE,
-        text=True,
-        encoding="utf-8",
-        errors="ignore")
-
-  start_time = time.time()
-  res = ""
-  errs = ""
-  await asyncio.sleep(0.5)
-  if p.poll() == None and p.returncode == None:
-    while p.poll() == None and p.returncode == None:
-      if time.time() - start_time > max_time:
-        p.kill()
-        break
-      await asyncio.sleep(1)
-
-  try:
-    res, errs = p.communicate(timeout=3)
-  except subprocess.TimeoutExpired as e:
-    res = e.stdout
-    errs = e.stderr
-  info("%s\n==\nE: %s\n%s" % (res, p.returncode, errs))
-  #  if not res:
-  #    res = None
-  #  res = str(res)
-  if p.returncode:
-    #  res = res + "\n==\nE: " + str(p.returncode)
-    res = "%s\n==\nE: %s" % (res, p.returncode)
-    if errs:
-      res = res + "\n" + errs
-    #await msg.delete()
-  else:
-    return
-  if len(res) > MAX_MSG_BYTES:
-    res = await pastebin(res)
-  return res
-
+#  async def run_my_bash(cmd, shell=True, max_time=120):
+#    p = Popen(cmd,
+#          shell=shell,
+#          stdout=PIPE,
+#          stderr=PIPE,
+#          text=True,
+#          encoding="utf-8",
+#          errors="ignore")
+#
+#    start_time = time.time()
+#    res = ""
+#    errs = ""
+#    await asyncio.sleep(0.5)
+#    if p.poll() == None and p.returncode == None:
+#      while p.poll() == None and p.returncode == None:
+#        if time.time() - start_time > max_time:
+#          p.kill()
+#          break
+#        await asyncio.sleep(1)
+#
+#    try:
+#      res, errs = p.communicate(timeout=3)
+#    except subprocess.TimeoutExpired as e:
+#      res = e.stdout
+#      errs = e.stderr
+#    info("%s\n==\nE: %s\n%s" % (res, p.returncode, errs))
+#    #  if not res:
+#    #    res = None
+#    #  res = str(res)
+#    if p.returncode:
+#      #  res = res + "\n==\nE: " + str(p.returncode)
+#      res = "%s\n==\nE: %s" % (res, p.returncode)
+#      if errs:
+#        res = res + "\n" + errs
+#      #await msg.delete()
+#    else:
+#      return
+#    if len(res) > MAX_MSG_BYTES:
+#      res = await pastebin(res)
+#    return res
+#
 
 
 
@@ -1375,7 +1401,7 @@ async def my_exec(cmd, src=None, client=None, **args):
   #  await my_popen([ SH_PATH + "/my_exec.py", cmd], shell=False, msg=msg, executable="/usr/bin/python3")
   res = await my_popen(cmd,
              shell=True,
-             client=client, 
+             client=client,
              src=src,
              executable="/usr/bin/python3",
              **args)
@@ -5594,8 +5620,9 @@ async def add_cmd():
     #  cmds[0] = "bash"
     cmds.pop(0)
     #  res = await my_popen(cmds)
-    res = await my_popen(' '.join(cmds), src=src, shell=True)
-    return f"{res}"
+    #  res = await my_popen(' '.join(cmds), src=src, shell=True)
+    res = await my_subprocess_shell(' '.join(cmds), src=src)
+    return format_out_of_shell(res)
   cmd_funs["sh"] = _
   cmd_for_admin.add('sh')
 
@@ -7176,7 +7203,8 @@ async def amain():
       if sys.argv[1].isnumeric():
         pass
       elif sys.argv[1] == 'cmd':
-        res = await my_popen(' '.join(sys.argv[2:]))
+        #  res = await my_popen(' '.join(sys.argv[2:]))
+        res = await my_subprocess_shell(' '.join(sys.argv[2:]))
         print(res)
       elif sys.argv[1] == 'cmd2':
         res = await send_cmd_to_bash("gateway1", "X test", ' '.join(sys.argv[2:]))
