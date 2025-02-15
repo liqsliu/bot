@@ -1239,59 +1239,33 @@ def format_byte(num):
 #        return p.returncode, res, errs
 
 
+async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
+  p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  return await def my_subprocess(p, max_time=max_time, src=src)
 
 
 async def my_subprocess_shell(cmd, max_time=run_shell_timx_max, src=None):
   p = await asyncio.create_subprocess_shell(cmd, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  start_time = time.time()
-  ress = [start_time, b""]
-  p.stdout.read = wrap_read( p.stdout.read, src, ress)
-  p.stderr.read = wrap_read( p.stderr.read, src, ress)
-  t = asyncio.create_task( p.communicate() )
-  o = ""
-  e = ""
-  while time.time() - ress[0] < max_time and time.time() - start_time < max_time*10:
-    try:
-      ts = asyncio.shield(t)
-      o, e = await asyncio.wait_for( ts, interval)
-      break
-    except TimeoutError:
-      info(f"waiting: {args}")
-  if o:
-    o = o.decode("utf-8", errors="ignore")
-  else:
-    o = None
-  if e:
-    e = e.decode("utf-8", errors="ignore")
-  else:
-    e = None
-  info(format_out_of_shell((o, p.returncode, e)))
-  return p.returncode, o, e
-
+  return await def my_subprocess(p, max_time=max_time, src=src)
 
 
 def wrap_read(func, src, ress):
   @wraps(func)
   async def wrapper(*args, **kwargs):
-    data = await func(*args, **kwargs)
+    ress[1] += await func(*args, **kwargs)
     now = time.time()
     if now - ress[0] > interval/2:
       ress[0] = now
       #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
-      ress[1] += data
       if src:
         asyncio.create_task(send( "执行中: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, correct=True) )
       ress[1] = b""
-    else:
-      ress[1] += data
     #  print(f"{len(data)}")
     return data
   return wrapper
 
 
-
-async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
-  p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
   start_time = time.time()
   ress = [start_time, b""]
   p.stdout.read = wrap_read( p.stdout.read, src, ress)
@@ -1299,16 +1273,16 @@ async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
   p.stderr.read = wrap_read( p.stderr.read, src, ress)
   #  tmp = await p.communicate()
   t = asyncio.create_task( p.communicate() )
-  o = ""
-  e = ""
-  while time.time() - ress[0] < max_time and time.time() - start_time < max_time*10:
+  o = None
+  e = None
+  while True:
     #  await asyncio.sleep(interval)
     #  if t.done():
     #    o, e = t.result()
     #    break
     try:
       ts = asyncio.shield(t)
-      o, e = await asyncio.wait_for( ts, interval)
+      o, e = await asyncio.wait_for(ts, interval)
       break
     #  start_timme = loop.time()
     #  async with asyncio.timeout(max_time) as cm:
@@ -1327,17 +1301,25 @@ async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
     #        break
     except TimeoutError:
       #  warn(f"timeout: {args}")
-      info(f"waiting: {args}")
+      info(f"执行中: {p} {o=} {e=}")
+    if time.time() - ress[0] < max_time and time.time() - start_time < max_time*10:
+      pass
+    elif p.returncode is None:
+      p.terminate()
+      warn(f"执行超时，尝试停止: {p} {o=} {e=}")
+      if p.returncode is None:
+        warn(f"强制停止: {p} {o=} {e=}")
+        p.kill()
+      if p.returncode is None:
+        err(f"强制停止失败: {p} {o=} {e=}")
+      else:
+        err(f"已停止: {p} {o=} {e=} {p.returncode=}")
   if o:
     o = o.decode("utf-8", errors="ignore")
-  else:
-    o = None
   if e:
     e = e.decode("utf-8", errors="ignore")
-  else:
-    e = None
   #  print(o, e)
-  info(format_out_of_shell((o, p.returncode, e)))
+  info(format_out_of_shell((p.returncode, o, e)))
   return p.returncode, o, e
     
 
