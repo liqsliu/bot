@@ -1474,7 +1474,7 @@ async def load_config():
     #  jid = get_my_key("JID")
     #  config['ME'] = jid
 
-    logger.info("loaded config\n%s" % json.dumps(config, indent='  '))
+    #  logger.info("loaded config\n%s" % json.dumps(config, indent='  '))
 
     for i in config:
       if type(config[i]) is list:
@@ -4071,12 +4071,16 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
 
     #  async def coro(slot, fp, timeout, headers):
   async def coro():
-    async def update_tmp_msg(file):
-      i = 0
-      start_time = time.time()
+    async def update_tmp_msg2():
       while True:
         await asyncio.sleep(1)
         print("上传线程没卡住")
+    async def update_tmp_msg(file):
+      i = 0
+      start_time = time.time()
+      asyncio.create_task(update_tmp_msg2())
+      while True:
+        await asyncio.sleep(1)
         if file.closed:
           info(f"文件已关闭: {file.name}")
           return
@@ -4084,6 +4088,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
           now = await file.tell()
         except ValueError as e:
           info(f"文件已关闭: {file.name}")
+          break
         if now == length:
           info(f"end: {now}")
           return
