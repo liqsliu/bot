@@ -1252,7 +1252,7 @@ def wrap_read(func, src, ress, default=b""):
   async def wrapper(*args, **kwargs):
     data = await func(*args, **kwargs)
     now = time.time()
-    if now - ress[0] > interval:
+    if now - ress[0] > interval/2:
       ress[0] = now
       #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
       ress[1] += data
