@@ -1277,7 +1277,7 @@ async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
   t = asyncio.create_task( p.communicate() )
   o = ""
   e = ""
-  while time.time() - ress[1] < max_time and time.time() - start_time < max_time*10:
+  while time.time() - ress[0] < max_time and time.time() - start_time < max_time*10:
     #  await asyncio.sleep(interval)
     #  if t.done():
     #    o, e = t.result()
@@ -4251,19 +4251,19 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     #        if src:
     #          await send("超时", src, correct=True)
     #        break
+  ress = [time.time(), 0]
   def wrap_read(func):
-    ress = [0, time.time()]
     @wraps(func)
     async def wrapper(*args, **kwargs):
       data = await func(*args, **kwargs)
       now = time.time()
-      if now - ress[1] > interval:
-        ress[1] = now
-        ress[0] += len(data)
+      if now - ress[0] > interval:
+        ress[0] = now
+        ress[1] += len(data)
         #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
-        asyncio.create_task( send("{:.1f}M".format((length-ress[0])/1024/1024), src) )
+        asyncio.create_task( send("{:.1f}M".format((length-ress[1])/1024/1024), src) )
       else:
-        ress[0] += len(data)
+        ress[1] += len(data)
       #  print(f"{len(data)}")
       return data
     return wrapper
