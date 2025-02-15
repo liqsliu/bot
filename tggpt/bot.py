@@ -1065,19 +1065,19 @@ def format_byte(num):
 async def update_stdouterr(data):
   while data[2].poll() == None:
     try:
-      data[0], data[1] = data[2].communicate(timeout=0.6)
+      data[0], data[1] = data[2].communicate(timeout=2)
     except subprocess.TimeoutExpired as e:
       if e.stdout:
         data[0] = e.stdout.decode("utf-8")
       if e.stderr:
         data[1] = e.stderr.decode("utf-8")
-    await asyncio.sleep(0.3)
+    await asyncio.sleep(1)
 
 
 async def update_stdout(data):
   while True:
     print(1)
-    await asyncio.sleep(4)
+    await asyncio.sleep(3)
     tmp = await data[2].stdout.readline()
     if tmp:
       data[0] = data[0] + tmp.decode("utf-8")
@@ -1089,7 +1089,7 @@ async def update_stdout(data):
 async def update_stderr(data):
   while True:
     print(2)
-    await asyncio.sleep(2)
+    await asyncio.sleep(2.5)
     tmp = await data[2].stderr.readline()
     if tmp:
       data[1] = data[1] + tmp.decode("utf-8")
@@ -1137,7 +1137,7 @@ async def my_popen(cmd,
     errs = ""
     data = ["", "", p]
     asyncio.create_task(update_stdouterr(data))
-    await asyncio.sleep(2)
+    await asyncio.sleep(1)
     logger.info(f"popen cmd: {p.args}")
     if type(cmd) == list:
       if len(cmd) == 6 and "bcmd.sh" in cmd[1]:
