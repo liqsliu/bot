@@ -1318,8 +1318,12 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
         err(f"已停止: {p} {o=} {e=} {p.returncode=}")
   if o:
     o = o.decode("utf-8", errors="ignore")
+  else:
+    o = None
   if e:
     e = e.decode("utf-8", errors="ignore")
+  else:
+    e = None
   #  print(o, e)
   info(format_out_of_shell((p.returncode, o, e)))
   return p.returncode, o, e
