@@ -2022,15 +2022,21 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
         warn(f"send msg: res is not coroutine: {res=} {client=} {room=} {msg=}")
       return False
 
+
 async def send(*args, **kwargs):
-  coro = send_t(*args, **kwargs)
-  return await run_run(coro, need_main=True)
+  return await run_run(send_t(*args, **kwargs), need_main=True)
   #  if threading.current_thread() is loop2_thread:
     #  asyncio.run_coroutine_threadsafe(coro, loop)
 
 
 @exceptions_handler
 async def send_t(text, jid=None, *args, **kwargs):
+  if type(jid) is int:
+    if jid == CHAT_ID:
+      await _sendme(text)
+      jid = log_group_private
+    else:
+      return await _sendme(text, jid)
   muc = None
   if 'name' in kwargs:
     name = kwargs["name"]
@@ -2209,8 +2215,9 @@ async def send1(text, jid=None, *args, **kwargs):
 #    #  return await client.send(msg)
 #    return await _send(msg, client, gpm=gpm)
 
-def sendme(text):
+def sendme(text, chat_id=CHAT_ID):
   asyncio.create_task(_sendme(text))
+  #  asyncio.create_task(run_run(_sendme(text)))
 
 
 
@@ -4120,7 +4127,8 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       if now - ress[1] > interval:
         ress[1] = now
         ress[0] += len(data)
-        asyncio.create_task(_sendme("{:.1f}M".format((length-ress[0])/1024/1024)))
+        #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
+        asyncio.create_task( send("{:.1f}M".format((length-ress[0])/1024/1024), src) )
       else:
         ress[0] += len(data)
       #  print(f"{len(data)}")
