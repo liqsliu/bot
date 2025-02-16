@@ -2503,7 +2503,7 @@ async def _sendme(text, chat_id=CHAT_ID):
         await UB.send_message(chat_id, t)
       except ValueError as e:
         if e.args[0] == 'Failed to parse message':
-          err(f"发送tg消息失败: {chat_id} {t}")
+          err(f"发送tg消息失败: {chat_id} {type(t)} {t=} {e=}")
           return
         raise
       await asyncio.sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2)
