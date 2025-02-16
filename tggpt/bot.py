@@ -1386,11 +1386,22 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     info("send ok")
     await p.stdin.drain()
     info("wait res...")
-    async def pr(d):
+
+    tmp = ""
+    async def pr(d, tmp):
       d = d.decode("utf-8", errors="ignore")
       d = re.sub(shell_color_re,  "", d)
       info(f"got: {d}")
-      await send(d, src)
+      ds = d.strip()
+      if ds:
+        if tmp:
+          ds = tmp + ds
+          tmp = ""
+        await send(ds, src)
+      else:
+        tmp += d
+      return tmp
+
     try:
       while True:
         #  try:
@@ -1400,18 +1411,18 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         #  except TimeoutError as e:
         if t1.done():
           d = await t1
-          d = d.decode("utf-8", errors="ignore")
           info(f"got stdout: {d}")
-          await send(d, src)
+          tmp = await pr(d, tmp)
           #  o += await t1
           t1 = f1()
           ts[0] = t1
         if t2.done():
           d = await t2
-          d = d.decode("utf-8", errors="ignore")
-          d = re.sub(shell_color_re,  "", d)
           info(f"got stderr: {d}")
-          await send(d, src)
+          tmp = await pr(d, tmp)
+          #  d = d.decode("utf-8", errors="ignore")
+          #  d = re.sub(shell_color_re,  "", d)
+          #  await send(d, src)
           #  e += await t2
           t2 = f2()
           ts[1] = t2
