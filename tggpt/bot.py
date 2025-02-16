@@ -494,9 +494,12 @@ def _exceptions_handler(e, *args, **kwargs):
   #    tb = tb.tb_next
   while True:
     last = tb.tb_next
+    if last.tb_frame.f_code.co_filenaem != os.path.abspath(__file__):
+      break
     if last is None:
       break
     tb = last
+  #  res = f'{tb.tb_frame.f_code.co_name} {tb.tb_frame.f_code.f_lineno} 内部错误 {e=}'
   res = f'{tb.tb_frame.f_code.co_name} {tb.tb_lineno} 内部错误 {e=}'
   try:
     #  res = f'{e=} line: {e.__traceback__.tb_next.tb_next.tb_lineno}'
