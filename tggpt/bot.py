@@ -1258,22 +1258,52 @@ def format_byte(num):
 
 async def init_myshell():
   if "myshell_p" not in globals():
+    info("start my shell...")
     global myshell_p
     myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    info("wait for steam ok...")
+    t1 = asyncio.create_task(p.stdout.read())
+    t2 = asyncio.create_task(p.stderr.read())
+    try:
+      await asyncio.sleep(2)
+      if t1.done() or t2.done():
+        info(f"fixme: 管道无法保持开启")
+        if myshell_p.returncode is None:
+          await stop_sub(myshell_p)
+        return False
+    finally:
+      if not t1.done():
+        t1.cancel()
+      if not t2.done():
+        t2.cancel()
+  if myshell_p.returncode is None:
+    pass
+  else:
+    info(f"fixme: shell is closed")
+  return True
+
+
+
+
+  else:
+    info("use old shell...")
 
 
 async def myshell(cmd, max_time=run_shell_timx_max, src=None):
-  await init_myshell()
+  if await init_myshell():
+    pass
+  else:
+    return
   p = myshell_p
   if myshell_lock.locked():
     warn("myshell is busy: {cmd=}")
     if src:
       await send("前一次任务还没结束", src, correct=True)
   async with myshell_lock:
-    info("send \\n...")
-    p.stdin.write(b"\n")
-    await p.stdin.drain()
-    info("wait for steam...")
+    #  info("send \\n...")
+    #  p.stdin.write(b"\n")
+    #  await p.stdin.drain()
+    info("wait for steam ok...")
     t1 = asyncio.create_task(p.stdout.read())
     t2 = asyncio.create_task(p.stderr.read())
     try:
@@ -1286,7 +1316,10 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         if p.returncode is None:
           await stop_sub(p)
           info("start another shell...")
-          await init_myshell()
+          if await init_myshell():
+            pass
+          else:
+            return
           p = myshell_p
     finally:
       if not t1.done():
