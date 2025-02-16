@@ -386,7 +386,8 @@ UA = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) 
 #  urlre = re.compile(r'(^|\n|\s+)(https?://((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[^\s\\\"\',?!，。？！“”‘’、【】…]+)*/?)')
 urlre = re.compile(r'(^|\n|\s+)(https?://((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|\[[\da-fA-F:]{4,}\])(:\d+)?(/[^\s]+)*/?)')
 url_md_left=re.compile(r'\[[^\]]+\]\([^\)]+')
-shell_color_re=re.compile(r'\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]')
+#  shell_color_re=re.compile(r'\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]')
+shell_color_re=re.compile(r'\x1B|\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,3}))??)?[m|K]')
 
 qre = re.compile(r'^(>( .+)?)$', re.M)
 
