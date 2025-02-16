@@ -166,7 +166,7 @@ def send_log(text):
   #  asyncio.create_task(send(text))
   asyncio.create_task(sendg(text))
 
-def err(text):
+def err(text, no_send=False):
   if type(text) is not str:
     text = f"{text=}"
   #  lineno = currentframe().f_back.f_lineno
@@ -176,10 +176,13 @@ def err(text):
   text = f"E: {lineno}: {text}"
   logger.error(text, exc_info=True, stack_info=True)
   #  raise ValueError
-  send_log(text)
+  if no_send:
+    pass
+  else:
+    send_log(text)
 
 
-def warn(text, more=False):
+def warn(text, more=False, no_send=True):
   if type(text) is not str:
     text = f"{text=}"
   #  lineno = currentframe().f_back.f_lineno
@@ -2202,8 +2205,15 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
         #  dbg(f"client send: {res=}")
         try:
           res2 = await res
+        except ValueError as e:
+          if e.args[0] == 'control characters are not allowed in well-formed XML':
+            #  logger.error(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", exc_info=True, stack_info=True)
+            info(f"发送xmpp消息失败，不支持特殊字符: {e=} {jid=} [msg=] {text=}")
+          else:
+            err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
+          return False
         except Exception as e:
-          err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}")
+          err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
           return False
         if res2 is None:
           dbg(f"send msg: finally: {res=}")
@@ -2219,7 +2229,7 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
           logger.info(f"send msg: finally: {res=} {res2=}")
           return False
       else:
-        warn(f"send msg: res is not coroutine: {res=} {client=} {room=} {msg=}")
+        warn(f"send msg: res is not coroutine: {res=} {client=} {room=} {msg=}", no_send=True)
       return False
 
 
