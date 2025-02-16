@@ -151,6 +151,15 @@ def pprint(e):
     print("  %s: %s: %s" % (i, type(getattr(e, i)), getattr(e, i)))
   print('===')
 
+def get_lineno(tb):
+  lineno = "%s" % tb.f_lineno
+  while tb.f_back is not None:
+    if tb.f_code.co_filename == __file__:
+      lineno += " %s" % tb.f_back.f_lineno
+      tb = tb.f_back
+    else:
+      break
+  return lineno
 
 def info0(s):
   print("%s\r" % s.replace("\n", " "), end='')
@@ -452,15 +461,6 @@ def exceptions_handler(func):
 
 
 
-def get_lineno(tb):
-  lineno = "%s" % tb.f_lineno
-  while tb.f_back is not None:
-    if tb.f_code.co_filename == __file__:
-      lineno += " %s" % tb.f_back.f_lineno
-      tb = tb.f_back
-    else:
-      break
-  return lineno
 
 def _exceptions_handler(e, *args, **kwargs):
   more = True
@@ -1286,7 +1286,9 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None, ext=None):
   #  ress = [start_time, b""]
   p.stderr.read = wrap_read( p.stderr.read, src, ress)
   #  tmp = await p.communicate()
-  t = asyncio.create_task( p.communicate(input=ext.encode()) )
+  if ext:
+    ext = ext.encode()
+  t = asyncio.create_task( p.communicate(input=ext)) )
   o = None
   e = None
   while True:
