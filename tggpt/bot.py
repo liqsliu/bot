@@ -1257,9 +1257,9 @@ def format_byte(num):
 
 
 async def myshell(cmd, max_time=run_shell_timx_max, src=None):
-  #  if "myshell_p" not in globals():
-  global mysshell_p
-  #    myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  if "myshell_p" not in globals():
+    global mysshell_p
+    myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   p = myshell_p
   if myshell_lock.locked():
     warn("myshell is busy: {cmd=}")
@@ -7353,8 +7353,9 @@ async def stop_sub(p):
 
 
 async def after_init():
-  global myshell_p
-  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  info("run after init...")
+  #  global myshell_p
+  #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   #  start_time = time.time()
   #  def wrap_read(func):
   #    k = len(ress)
