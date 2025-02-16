@@ -1268,6 +1268,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     t1 = asyncio.create_task(p.stdout.read())
     t2 = asyncio.create_task(p.stderr.read())
     await asyncio.sleep(0.3)
+    start_time = time.time()
     if t1.done() or t2.done():
       err(f"管道关闭，无法接受返回数据，终止执行 {cmd}")
       return
@@ -1302,6 +1303,9 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         await send(await t2, src)
         #  e += await t2
         t2 = f2()
+      if time.time() - start_time > max_time:
+        await send("结束。", src)
+        break
 
 
 
@@ -2495,7 +2499,13 @@ def sendme(text, chat_id=CHAT_ID):
 async def _sendme(text, chat_id=CHAT_ID):
   async with tg_send_lock:
     for t in await split_long_text(text, MAX_MSG_BYTES_TG):
-      await UB.send_message(chat_id, t)
+      try:
+        await UB.send_message(chat_id, t)
+      except ValueError as e:
+        if e.args[0] == 'Failed to parse message':
+          err(f"发送tg消息失败: {chat_id} {t}")
+          return
+        raise
       await asyncio.sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2)
   return True
   chat = await get_entity(CHAT_ID, True)
