@@ -1384,7 +1384,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     #  cmd = list( x.encode()+b" " for x in cmd )
     info(f"send cmd: {cmd}")
     #  p.stdin.writelines( cmd )
-    p.stdin.writelines( cmd[0].encode() )
+    p.stdin.write( cmd[0].encode() )
     info("send ok")
     await p.stdin.drain()
     info("wait res...")
