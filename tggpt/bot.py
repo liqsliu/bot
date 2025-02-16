@@ -5895,7 +5895,7 @@ async def add_cmd():
         return "failed"
     elif cmds[1] == "fs":
       #  raise OSError("stop by sh3")
-      raise SystemExit("stop by sh3")
+      raise SystemExit("stop by sh3, restart...")
       return "ok"
     cmds.pop(0)
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
@@ -7677,7 +7677,10 @@ def main():
     sys.exit(1)
   except SystemExit as e:
     logger.warning(f"捕获到systemexit: {e=}", exc_info=True, stack_info=True)
-    sys.exit(2)
+    if "restart" in e.args[0]:
+      sys.exit(1)
+    else:
+      sys.exit(2)
   except Exception as e:
     logger.error(f"出现未知异常: 正在停止运行...{e=}", exc_info=True, stack_info=True)
     sys.exit(5)
