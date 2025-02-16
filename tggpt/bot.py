@@ -387,6 +387,7 @@ mt_send_lock2 = asyncio.Lock()
 downlaod_lock = asyncio.Lock()
 bash_lock = asyncio.Lock()
 tg_send_lock = asyncio.Lock()
+myshell_lock = asyncio.Lock()
 
 rss_lock = asyncio.Lock()
 
@@ -1251,35 +1252,91 @@ def format_byte(num):
 #        return p.returncode, res, errs
 
 
+
+async def myshell(cmd, max_time=run_shell_timx_max, src=None):
+  #  if "myshell_p" not in globals():
+  #    global mysshell_p
+  #    myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  p = myshell_p
+  if myshell_lock.locked():
+    warn("myshell is busy: {cmd=}")
+    if src:
+      await send("前一次任务还没结束", src, correct=True)
+  async with myshell_lock:
+    p.stdin.write(b"\n")
+    await p.stdin.drain()
+    t1 = asyncio.create_task(p.stdout.read())
+    t2 = asyncio.create_task(p.stderr.read())
+    await asyncio.sleep(0.3)
+    if t1.done() or t2.done():
+      err(f"管道关闭，无法接受返回数据，终止执行 {cmd}")
+      return
+    t1.cancel()
+    t2.cancel()
+    await asyncio.sleep(0.1)
+    p.stdin.writelines( x+b" " for x in cmd )
+    #  await p.stdin.drain()
+    #  o = b""
+    #  e = b""
+    #  t1 = asyncio.create_task(p.stdout.readline())
+    #  t2 = asyncio.create_task(p.stderr.readline())
+    def f1():
+      return asyncio.create_task(p.stdout.readline())
+    def f2():
+      return asyncio.create_task(p.stderr.readline())
+    t1 = f1()
+    t2 = f2()
+    while True:
+      try:
+        #  for _ in asyncio.as_completed([t1, t2]):
+        #    break
+        await asyncio.wait([t1, t2], timeout=interval, return_when=asyncio.FIRST_COMPLETED)
+      except TimeoutError as e:
+        await send("结束", src)
+        break
+      if t1.done():
+        await send(await t1, src)
+        #  o += await t1
+        t1 = f1()
+      if t2.done():
+        await send(await t2, src)
+        #  e += await t2
+        t2 = f2()
+
+
+
+
+
+
 async def my_sexec(cmds, max_time=run_shell_timx_max, src=None):
   #  p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   p = await asyncio.create_subprocess_exec(*cmds, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   return await my_subprocess(p, max_time=max_time, src=src)
 
 
-async def my_sshell(cmd, max_time=run_shell_timx_max, src=None, ext=None):
-  p = await asyncio.create_subprocess_shell(cmd, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+async def my_sshell(cmd, max_time=run_shell_timx_max, src=None):
+  p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   #  p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  return await my_subprocess(p, max_time=max_time, src=src, ext=ext)
+  return await my_subprocess(p, max_time=max_time, src=src)
 
 
 def wrap_read(func, src, ress):
   @wraps(func)
   async def wrapper(*args, **kwargs):
     data = await func(*args, **kwargs)
-    ress[1] += data
-    now = time.time()
-    if now - ress[0] > interval/2:
-      ress[0] = now
-      #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
-      if src:
-        asyncio.create_task(send( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, correct=True) )
-      ress[1] = b""
-    #  print(f"{len(data)}")
+    if data:
+      ress[1] += data
+      now = time.time()
+      if now - ress[0] > interval/2:
+        ress[0] = now
+        if src:
+          asyncio.create_task(send( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, correct=True) )
+        ress[1] = b""
+      #  print(f"{len(data)}")
     return data
   return wrapper
 
-async def my_subprocess(p, max_time=run_shell_timx_max, src=None, ext=None):
+async def my_subprocess(p, max_time=run_shell_timx_max, src=None:
   start_time = time.time()
   ress = [start_time, b""]
   p.stdout.read = wrap_read( p.stdout.read, src, ress)
@@ -1288,7 +1345,7 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None, ext=None):
   #  tmp = await p.communicate()
   if ext:
     ext = ext.encode()
-  t = asyncio.create_task( p.communicate(input=ext) )
+  t = asyncio.create_task( p.communicate() )
   o = None
   e = None
   while True:
@@ -5718,7 +5775,8 @@ async def add_cmd():
     if len(cmds) == 1:
       return f"bash -i\n.{cmds[0]} $code"
     cmds.pop(0)
-    res = await my_sshell("bash -i -l", ext=' '.join(cmds), src=src)
+    #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
+    res = await mysshell(cmds, src=src)
     return format_out_of_shell(res)
   cmd_funs["sh3"] = _
   cmd_for_admin.add('sh3')
@@ -7256,9 +7314,30 @@ async def xmppbot2():
     await t
 
 
-async def init():
-  global loop
-  loop = asyncio.get_event_loop()
+async def after_init():
+  global myshell_p
+  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  #  start_time = time.time()
+  #  def wrap_read(func):
+  #    k = len(ress)
+  #    @wraps(func)
+  #    async def wrapper(*args, **kwargs):
+  #      data = await func(*args, **kwargs)
+  #      if data and data[-1] == "\n":
+  #        ress[k] += data
+  #        now = time.time()
+  #        if now - ress[0] > interval/2:
+  #          ress[0] = now
+  #          if src:
+  #            asyncio.create_task(send( "执行中，临时输出{k}: \n%s" % ress[k].decode("utf-8", errors="ignore"), src, correct=True) )
+  #          ress[k] = b""
+  #        #  print(f"{len(data)}")
+  #      return data
+  #    return wrapper
+  #  ress = [start_time, b""]
+  #  p.stdout.readline = wrap_read(p.stdout.readline)
+  #  ress.append(b"")
+  #  p.stderr.readline = wrap_read(p.stderr.readline)
 
   #  global loop2_thread, loop2, main_thread
   #  loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
@@ -7271,6 +7350,11 @@ async def init():
   #    else:
   #      info("等待子线程事件循环启动")
   #      await asyncio.sleep(2)
+
+
+async def init():
+  global loop
+  loop = asyncio.get_event_loop()
   #
 
   #  LOGGER.addFilter(NoParsingFilter())
@@ -7391,6 +7475,7 @@ async def amain():
       logger.info(f"初始化完成")
       send_log(f"启动成功，用时: {int(time.time()-start_time)}s")
       #  await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
+      await after_init()
 
       await UB.run_until_disconnected()
 
