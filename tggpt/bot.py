@@ -1271,7 +1271,7 @@ async def init_myshell():
     info("start my shell...")
     global myshell_p
     myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
+    #  loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
     info("wait for steam ok...")
     t1 = asyncio.create_task(myshell_p.stdout.read())
     t2 = asyncio.create_task(myshell_p.stderr.read())
@@ -5872,6 +5872,18 @@ async def add_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"bash -i\n.{cmds[0]} $code"
+    global myshell_p
+    if cmds[1] == "restart":
+      if await stop_sub(myshell_p):
+        myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+        return "ok"
+      else:
+        return "failed"
+    elif cmds[1] == "stop":
+      if await stop_sub(myshell_p):
+        return "ok"
+      else:
+        return "failed"
     cmds.pop(0)
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
     res = await myshell(cmds, src=src)
