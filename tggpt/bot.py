@@ -1273,7 +1273,7 @@ async def init_myshell():
     myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     info("close stdin...")
     myshell_p.stdin.close()
-    await myshell_p.wait_closed()
+    await myshell_p.stdin.wait_closed()
     info("close stdin ok")
     #  loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
     info("wait for steam ok...")
@@ -1396,7 +1396,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         ts[1].cancel()
       info("close stdin...")
       myshell_p.stdin.close()
-      await myshell_p.wait_closed()
+      await myshell_p.stdin.wait_closed()
       info("close stdin ok")
 
 
