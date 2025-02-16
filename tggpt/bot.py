@@ -1391,6 +1391,22 @@ def format_out_of_shell(res):
 #    return res
 #
 
+async def my_py(cmd, src=None, client=None, **args):
+  #  exec(cmd) #return always is None
+  #  p=Popen("my_exec.py "+message.text.split(' ',1)[1],shell=True,stdout=PIPE, stderr=PIPE,text=True,encoding="utf-8",errors="ignore")
+  #  await my_popen(["python3", "my_exec.py", cmd], shell=False, msg=msg)
+  #  await my_popen([ SH_PATH + "/my_exec.py", cmd], shell=False, msg=msg, executable="/usr/bin/python3")
+  #  res = await my_popen(cmd,
+  #             shell=True,
+  #             client=client,
+  #             src=src,
+  #             executable="/usr/bin/python3",
+  #             **args)
+  #  cmd = ["python3", "-c", " ".join(cmd)]
+  cmd = ["python3", "-c", cmd]
+  res = await my_subprocess_exec(*cmd, src=src)
+  res = format_out_of_shell(res)
+  return res
 
 
 async def my_exec(cmd, src=None, client=None, **args):
@@ -1414,7 +1430,7 @@ async def my_exec(cmd, src=None, client=None, **args):
   exec(cmd, globals(), local_vars)
   if "res" in local_vars:
     return local_vars["res"]
-  return res
+  return local_vars
 
 
 async def my_eval(cmd):
@@ -5654,6 +5670,15 @@ async def add_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"python\n.{cmds[0]} $code"
+    cmds.pop(0)
+    res = await my_py(' '.join(cmds), src)
+    return f"{res}"
+  cmd_funs["py"] = _
+  cmd_for_admin.add('py')
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"exec\n.{cmds[0]} $code"
     cmds.pop(0)
     res = await my_exec(' '.join(cmds), src)
     return f"{res}"
