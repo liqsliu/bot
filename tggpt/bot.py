@@ -5894,7 +5894,8 @@ async def add_cmd():
       else:
         return "failed"
     elif cmds[1] == "fs":
-      raise OSError("stop by sh3")
+      #  raise OSError("stop by sh3")
+      raise SystemExit("stop by sh3")
       return "ok"
     cmds.pop(0)
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
