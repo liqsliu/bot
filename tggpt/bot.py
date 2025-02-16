@@ -1291,10 +1291,8 @@ async def init_myshell():
     info("use old shell...")
   else:
     info(f"fixme: shell is closed")
+    return False
   return True
-
-
-
 
 
 
