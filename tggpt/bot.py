@@ -3,15 +3,15 @@
 # -*- coding: UTF-8 -*-
 
 
-
-import signal
-import sys
-
-def handler(signum, frame):
-    print("Caught signal:", signum, frame)
-    sys.exit(0)
-
-signal.signal(signal.SIGINT, handler)
+#
+#  import signal
+#  import sys
+#
+#  def handler(signum, frame):
+#      print("Caught signal:", signum, frame)
+#      sys.exit(0)
+#
+#  signal.signal(signal.SIGINT, handler)
 
 #  from . import *  # noqa: F403
 #  from enum import auto
