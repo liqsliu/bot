@@ -1250,7 +1250,7 @@ def format_byte(num):
 
 async def my_sexec(cmds, max_time=run_shell_timx_max, src=None):
   #  p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  p = await asyncio.create_subprocess_exec(cmds, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  p = await asyncio.create_subprocess_exec(*cmds, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   return await my_subprocess(p, max_time=max_time, src=src)
 
 
