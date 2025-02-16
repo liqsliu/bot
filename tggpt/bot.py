@@ -1277,7 +1277,7 @@ async def init_myshell():
       if not t2.done():
         t2.cancel()
   if myshell_p.returncode is None:
-    pass
+    info("use old shell...")
   else:
     info(f"fixme: shell is closed")
   return True
@@ -1285,8 +1285,6 @@ async def init_myshell():
 
 
 
-  else:
-    info("use old shell...")
 
 
 async def myshell(cmd, max_time=run_shell_timx_max, src=None):
