@@ -1431,10 +1431,14 @@ async def my_exec(cmd, src=None, client=None, **args):
   #  if "res" in local_vars:
   #    return local_vars["res"]
   #  return local_vars
+
+  res = """if "res" in locals():
+  return res"""
   # https://stackoverflow.com/a/53255739
   exec(
     f'async def __ex(): ' +
-    ''.join(f'\n {l}' for l in code.split('\n'))
+    ''.join(f'\n {l}' for l in cmd.split('\n'))
+    ''.join(f'\n {l}' for l in res.split('\n'))
   )
 
   # Get `__ex` from local variables, call it and return the result
