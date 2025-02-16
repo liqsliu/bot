@@ -1346,12 +1346,12 @@ def wrap_read(func, src, ress):
   @wraps(func)
   async def wrapper(*args, **kwargs):
     data = await func(*args, **kwargs)
+    now = time.time()
+    ress[1] += data
     if data:
-      ress[1] += data
-      now = time.time()
       if now - ress[0] > interval/2:
         ress[0] = now
-        if src and res[1].strip():
+        if src and ress[1].strip():
           asyncio.create_task(send( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, correct=True) )
         ress[1] = b""
       #  print(f"{len(data)}")
@@ -1365,8 +1365,6 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
   #  ress = [start_time, b""]
   p.stderr.read = wrap_read( p.stderr.read, src, ress)
   #  tmp = await p.communicate()
-  #  if ext:
-  #    ext = ext.encode()
   t = asyncio.create_task( p.communicate() )
   o = None
   e = None
@@ -1400,7 +1398,7 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
       info(f"执行中: {p} {o=} {e=}")
     now = time.time()
     if now - ress[0] > interval:
-      send( "执行中 %ss" % int(now-start_time), src, correct=True)
+      await send( "执行中 %ss" % int(now-start_time), src, correct=True)
     if now - ress[0] < max_time and now - start_time < max_time*10:
       pass
     elif p.returncode is None:
@@ -1421,7 +1419,7 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
 
 def format_out_of_shell(res):
   if res[0] == 0 and res[2] is None:
-    return res[1]
+    return "%s" % res[1]
   return "%s\n--\nE: %s\n%s" % (res[1],res[0], res[2])
 
 
