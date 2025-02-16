@@ -5776,7 +5776,7 @@ async def add_cmd():
       return f"bash -i\n.{cmds[0]} $code"
     cmds.pop(0)
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
-    res = await mysshell(cmds, src=src)
+    res = await myshell(cmds, src=src)
     return format_out_of_shell(res)
   cmd_funs["sh3"] = _
   cmd_for_admin.add('sh3')
