@@ -726,7 +726,7 @@ pb_list = {
 #async def pastebin(data="test", filename=None, url="https://fars.ee/?u=1", fieldname="c", extra={}, **kwargs):
 @exceptions_handler
 async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname="c", extra={}, ce=None, use=None, **kwargs):
-  use = "0x0"
+  #  use = "0x0"
   if not data:
     return
   if use:
