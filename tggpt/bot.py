@@ -5952,6 +5952,9 @@ async def add_cmd():
       #  raise OSError("stop by sh3")
       raise SystemExit("stop by sh3, restart...")
       return "ok"
+    elif cmds[1] == "kill":
+      myshell_p.kill()
+      return "ok"
     cmds.pop(0)
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
     res = await myshell(cmds, src=src)
