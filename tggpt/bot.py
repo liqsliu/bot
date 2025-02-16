@@ -345,7 +345,8 @@ DATA_PATH=f"{HOME}/xmpp.data"
 #  gpt_chat=None
 
 #  UA = 'Chrome Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) Apple    WebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36'
-UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+#  UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
+UA = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36'
 #  urlre=re.compile(r'((^|https?://|\s+)((([\dA-Za-z0-9.]+-?)+\.)+[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[^/\s]+)*/?)')
 #  urlre=re.compile(r'((https?://)?((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[^/\s]+)*/?)')
 #  urlre=re.compile(r'(^|\n|\s+)((https?://)?((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[^/\s]+)*/?)')
@@ -725,6 +726,7 @@ pb_list = {
 #async def pastebin(data="test", filename=None, url="https://fars.ee/?u=1", fieldname="c", extra={}, **kwargs):
 @exceptions_handler
 async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname="c", extra={}, ce=None, use=None, **kwargs):
+  use = "0x0"
   if not data:
     return
   if use:
@@ -737,6 +739,7 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
       ce = "br"
 
   headers = {}
+  headers.update({'User-agent': ""})
   #  if type(data) == str:
   if isinstance(data, str):
 #  data = {"content": data}
@@ -767,7 +770,11 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
   res = res.strip()
   info(f"pb res: {res_hewders=} {res}")
   if url == pb_list["fars"][0]:
-    if not res.startswith("https://fars.ee/"):
+    if 'Location' in res.headers:
+      return res.headers['Location']
+    if res.startswith("https://fars.ee/"):
+      return res
+    else:
       res = await pastebin(data=data, filename=filename, extra=extra, use="0x0", **kwargs)
       warn(f"fallback 0x0: {res}")
   return res
