@@ -7711,7 +7711,7 @@ def main():
     logger.info("停止原因：用户手动终止")
     sys.exit(1)
   except SystemExit as e:
-    logger.warning(f"捕获到systemexit: {e=}", exc_info=True, stack_info=True)
+    logger.warning(f"捕获到systemexit: {e=} {e.args=}", exc_info=True, stack_info=True)
     if "restart" in e.args[0]:
       sys.exit(1)
     else:
