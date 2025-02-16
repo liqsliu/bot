@@ -1421,7 +1421,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             d = await t1
             try:
               while True:
-                d + = await asyncio.wait_for(p.stdout.readline(), timeout=0.3)
+                d += await asyncio.wait_for(p.stdout.readline(), timeout=0.3)
             except TimeoutError as e:
               info("stdout end")
               pass
@@ -1434,7 +1434,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             d = await t2
             try:
               while True:
-                d + = await asyncio.wait_for(p.stderr.readline(), timeout=0.3)
+                d += await asyncio.wait_for(p.stderr.readline(), timeout=0.3)
             except TimeoutError as e:
               info("stderr end")
             info(f"got stderr: {d}")
