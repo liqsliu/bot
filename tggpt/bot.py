@@ -2713,14 +2713,15 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
   else:
     headers = {}
     kwargs["headers"] = headers
+  if "User-agent" not in headers:
+    #  headers.update({'User-agent': UA})
+    headers.update({'User-agent': "curl/8.12.1"})
+  if "Accept" not in headers:
+    headers.update({'Accept': "application/json,text/x-yaml,text/plain,text/html,*/*"})
   if "Accept-Encoding" not in headers:
     headers.update({
       "Accept-Encoding": "br;q=1.0, gzip;q=0.8, deflate;q=0.5"
       })
-  if "User-agent" not in headers:
-    headers.update({'User-agent': UA})
-  if "Accept" not in headers:
-    headers.update({'Accept': "application/json,text/x-yaml,text/plain,text/html,*/*"})
   res = None
   data = None
   html = None
@@ -2792,7 +2793,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               logger.info("use br")
               data = brotli.decompress(data)
             elif res.headers['Content-Encoding']:
-              err("url: {}\nunknown encoding: {}".format(url, res.headers['Content-Encoding']))
+              err("unknown encoding: {} url: {}\n".format(res.headers['Content-Encoding'], url))
               #  return data
         except Exception as e:
           err(f"解压时出现错误: {e=}")
