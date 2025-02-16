@@ -1334,9 +1334,8 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     #    if not t2.done():
     #      t2.cancel()
     #  await asyncio.sleep(0.1)
-    info("send cmd...")
-    p.stdin.writelines( x.encode()+b" " for x in cmd )
-    #  await p.stdin.drain()
+
+
     #  o = b""
     #  e = b""
     #  t1 = asyncio.create_task(p.stdout.readline())
@@ -1348,6 +1347,12 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     t1 = f1()
     t2 = f2()
     ts = [t1, t2]
+
+    cmd = list( x.encode()+b" " for x in cmd )
+    info(f"send cmd: {cmd}")
+    p.stdin.writelines( cmd )
+    info("send ok")
+    await p.stdin.drain()
     info("wait res...")
     try:
       while True:
