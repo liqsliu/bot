@@ -1307,7 +1307,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
       return asyncio.create_task(p.stderr.readline())
     t1 = f1()
     t2 = f2()
-    rs = [t1, t2]
+    ts = [t1, t2]
     info("wait res...")
     try:
       while True:
