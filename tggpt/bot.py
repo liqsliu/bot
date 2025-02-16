@@ -1307,27 +1307,38 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
       return asyncio.create_task(p.stderr.readline())
     t1 = f1()
     t2 = f2()
+    rs = [t1, t2]
     info("wait res...")
-    while True:
-      try:
-        #  for _ in asyncio.as_completed([t1, t2]):
-        #    break
-        await asyncio.wait([t1, t2], timeout=interval, return_when=asyncio.FIRST_COMPLETED)
-        info("got a line of res")
-      except TimeoutError as e:
-        await send("结束", src)
-        break
-      if t1.done():
-        await send(await t1, src)
-        #  o += await t1
-        t1 = f1()
-      if t2.done():
-        await send(await t2, src)
-        #  e += await t2
-        t2 = f2()
-      if time.time() - start_time > max_time:
-        await send("结束。", src)
-        break
+    try:
+      while True:
+        #  try:
+          #  for _ in asyncio.as_completed([t1, t2]):
+          #    break
+        done, pending = await asyncio.wait(ts, timeout=interval, return_when=asyncio.FIRST_COMPLETED)
+        #  except TimeoutError as e:
+        if t1.done():
+          await send(await t1, src)
+          #  o += await t1
+          t1 = f1()
+          ts[0] = t1
+        if t2.done():
+          await send(await t2, src)
+          #  e += await t2
+          t2 = f2()
+          ts[1] = t2
+        if len(done) == 0:
+          await send("结束", src)
+          break
+        else:
+          info("got a line of res")
+        if time.time() - start_time > max_time:
+          await send("结束。", src)
+          break
+    finally:
+      if not ts[0].done():
+        ts[0].cancel()
+      if not ts[1].done():
+        ts[1].cancel()
 
 
 
