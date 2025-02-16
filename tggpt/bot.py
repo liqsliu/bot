@@ -1405,9 +1405,15 @@ async def my_exec(cmd, src=None, client=None, **args):
   #             executable="/usr/bin/python3",
   #             **args)
   #  cmd = ["python3", "-c", " ".join(cmd)]
-  cmd = ["python3", "-c", cmd]
-  res = await my_subprocess_exec(*cmd, src=src)
-  res = format_out_of_shell(res)
+  #  cmd = ["python3", "-c", cmd]
+  #  res = await my_subprocess_exec(*cmd, src=src)
+  #  res = format_out_of_shell(res)
+  # https://www.runoob.com/python3/python3-func-exec.html
+  local_vars = {}
+  #  await asyncio.to_thread()
+  exec(cmd, globals(), local_vars)
+  if "res" in local_vars:
+    return local_vars["res"]
   return res
 
 
@@ -2714,8 +2720,8 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
     headers = {}
     kwargs["headers"] = headers
   if "User-agent" not in headers:
-    #  headers.update({'User-agent': UA})
-    headers.update({'User-agent': "curl/8.12.1"})
+    #  headers.update({'User-agent': "curl/8.12.1"})
+    headers.update({'User-agent': UA})
   if "Accept" not in headers:
     headers.update({'Accept': "application/json,text/x-yaml,text/plain,text/html,*/*"})
   if "Accept-Encoding" not in headers:
