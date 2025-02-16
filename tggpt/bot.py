@@ -162,14 +162,17 @@ def pprint(e):
   print('===')
 
 def get_lineno(tb):
-  lineno = "%s" % tb.f_lineno
-  while tb.f_back is not None:
-    if tb.f_code.co_filename == __file__:
-      lineno += " %s" % tb.f_back.f_lineno
-      tb = tb.f_back
-    else:
-      break
-  return lineno
+  #  lineno = "%s" % tb.f_lineno
+  #  while tb.f_back is not None:
+  #    if tb.f_code.co_filename == __file__:
+  #      lineno += " %s" % tb.f_back.f_lineno
+  #      tb = tb.f_back
+  #    else:
+  #      break
+  #  return lineno
+  if tb.f_back is not None:
+    tb = tb.f_back
+  return f"{tb.f_lineno} {tb.f_code.co_name}"
 
 def info0(s):
   print("%s\r" % s.replace("\n", " "), end='')
@@ -222,6 +225,8 @@ def info(text):
   tb = sys._getframe()
   lineno = get_lineno(tb)
   text = f"{lineno}: {text}"
+
+  text = f"W: {tb.f_lineno} {tb.f_code.co_name}: {text}"
   logger.info(text)
 
 
@@ -478,11 +483,18 @@ def _exceptions_handler(e, *args, **kwargs):
   #  res = f'内部错误: {e=} line: {e.__traceback__.tb_next.tb_lineno}'
   tb = e.__traceback__
   #  lineno = get_lineno2(tb)
-  lineno = "%s" % tb.tb_lineno
-  while tb.tb_next is not None:
-    lineno += " %s" % tb.tb_next.tb_lineno
-    tb = tb.tb_next
-  res = f'内部错误: {e=} line: {lineno}'
+  #  lineno = "%s" % tb.tb_lineno
+  last = tb
+  #  while tb.tb_next is not None:
+  #    lineno += " %s" % tb.tb_next.tb_lineno
+  #    last_num = tb.tb_next.tb_lineno
+  #    tb = tb.tb_next
+  while True:
+    last = tb.tb_next
+    if last is None:
+      break
+    tb = last
+  res = f'内部错误 {tb.tb_lineno} {tb.tb_frame.f_code.co_name}: {e=}'
   try:
     #  res = f'{e=} line: {e.__traceback__.tb_next.tb_next.tb_lineno}'
     raise e
