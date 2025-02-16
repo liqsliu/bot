@@ -1357,12 +1357,14 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         done, pending = await asyncio.wait(ts, timeout=interval, return_when=asyncio.FIRST_COMPLETED)
         #  except TimeoutError as e:
         if t1.done():
-          await send(await t1, src)
+          d = await t1
+          await send(d.decode("utf-8", errors="ignore"), src)
           #  o += await t1
           t1 = f1()
           ts[0] = t1
         if t2.done():
-          await send(await t2, src)
+          d = await t2
+          await send(d.decode("utf-8", errors="ignore"), src)
           #  e += await t2
           t2 = f2()
           ts[1] = t2
