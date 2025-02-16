@@ -1256,10 +1256,14 @@ def format_byte(num):
 
 
 
-async def myshell(cmd, max_time=run_shell_timx_max, src=None):
+async def init_myshell():
   if "myshell_p" not in globals():
     global mysshell_p
     myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+
+
+async def myshell(cmd, max_time=run_shell_timx_max, src=None):
+  await init_myshell()
   p = myshell_p
   if myshell_lock.locked():
     warn("myshell is busy: {cmd=}")
@@ -1282,7 +1286,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         if p.returncode is None:
           await stop_sub(p)
           info("start another shell...")
-          myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+          await init_myshell()
           p = myshell_p
     finally:
       if not t1.done():
@@ -1332,11 +1336,13 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
 
 async def my_sexec(cmds, max_time=run_shell_timx_max, src=None):
   #  p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  info(f"run shell cmds: {cmds}")
   p = await asyncio.create_subprocess_exec(*cmds, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   return await my_subprocess(p, max_time=max_time, src=src)
 
 
 async def my_sshell(cmd, max_time=run_shell_timx_max, src=None):
+  info(f"run shell cmd: {cmd}")
   p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   #  p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   return await my_subprocess(p, max_time=max_time, src=src)
