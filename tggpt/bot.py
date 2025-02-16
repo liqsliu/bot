@@ -5799,8 +5799,8 @@ async def add_cmd():
       return f"bash -l\n.{cmds[0]} $code"
     #  cmds[0] = "bash"
     cmds.pop(0)
-    cmds.insert(0, "-c")
-    cmds.insert(0, "bash")
+    text = ' '.join(cmds)
+    cmds = ["bash", "-c", text]
     res = await my_sexec(cmds, src=src)
     return format_out_of_shell(res)
   cmd_funs["sh2"] = _
