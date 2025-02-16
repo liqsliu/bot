@@ -130,6 +130,9 @@ download_media_time_max = 60
 upload_media_time_max = 900
 run_shell_timx_max = 60
 
+
+msg_delay_default = 0.4
+
 wtf_time = 5
 wtf_time_max = 1800
 
@@ -172,7 +175,7 @@ def get_lineno(tb):
   #  return lineno
   if tb.f_back is not None:
     tb = tb.f_back
-  return f"{tb.f_lineno} {tb.f_code.co_name}"
+  return f"{tb.f_code.co_name} {tb.f_lineno}"
 
 def info0(s):
   print("%s\r" % s.replace("\n", " "), end='')
@@ -195,7 +198,7 @@ def err(text, no_send=False):
   #  lineno = sys._getframe(1).f_lineno
   tb = sys._getframe()
   lineno = get_lineno(tb)
-  text = f"E: {lineno}: {text}"
+  text = f"{lineno} {text}"
   logger.error(text, exc_info=True, stack_info=True)
   #  raise ValueError
   if no_send:
@@ -211,7 +214,7 @@ def warn(text, more=False, no_send=True):
   #  lineno = sys._getframe(1).f_lineno
   tb = sys._getframe()
   lineno = get_lineno(tb)
-  text = f"W: {lineno}: {text}"
+  text = f"{lineno} {text}"
   if more:
     logger.warning(text, exc_info=True, stack_info=True)
   else:
@@ -225,7 +228,7 @@ def info(text):
   tb = sys._getframe()
   #  text = f"W: {tb.f_lineno} {tb.f_code.co_name}: {text}"
   lineno = get_lineno(tb)
-  text = f"{lineno}: {text}"
+  text = f"{lineno} {text}"
 
   logger.info(text)
 
@@ -237,7 +240,7 @@ def log(text):
   #  lineno = sys._getframe(1).f_lineno
   tb = sys._getframe()
   lineno = get_lineno(tb)
-  text = f"{lineno}: {text}"
+  text = f"{lineno} {text}"
   send_log(text)
   logger.warning(text)
 
@@ -494,7 +497,7 @@ def _exceptions_handler(e, *args, **kwargs):
     if last is None:
       break
     tb = last
-  res = f'内部错误 {tb.tb_lineno} {tb.tb_frame.f_code.co_name}: {e=}'
+  res = f'{tb.tb_frame.f_code.co_name} {tb.tb_lineno} 内部错误 {e=}'
   try:
     #  res = f'{e=} line: {e.__traceback__.tb_next.tb_next.tb_lineno}'
     raise e
@@ -508,9 +511,6 @@ def _exceptions_handler(e, *args, **kwargs):
     pass
   except AttributeError:
     pass
-  except OSError as e:
-    logger.error("出错啦 %s" % res, exc_info=True, stack_info=True)
-    raise
 
   except urllib.error.HTTPError:
     res += ' Data not retrieved because %s\nURL: %s %s' % (e, args, kwargs)
@@ -535,7 +535,17 @@ def _exceptions_handler(e, *args, **kwargs):
   except UnicodeDecodeError:
     pass
   except rpcerrorlist.FloodWaitError:
-    pass
+    info(f"消息发送太快，被服务器当作洪水信息攻击了。")
+    global msg_delay_default
+    msg_delay_default += (300 - msg_delay_default)/2
+    await asyncio.sleep(60)
+    msg_delay_default -= (300 - msg_delay_default)/2
+    if msg_delay_default < 0:
+      msg_delay_default = 0.4
+    return True
+  except OSError as e:
+    logger.error("出错啦 %s" % res, exc_info=True, stack_info=True)
+    raise
   except Exception:
     pass
     #  logger.error(f"W: {repr(e)} line: {e.__traceback__.tb_lineno}", exc_info=True, stack_info=True)
@@ -2337,6 +2347,7 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
       msgs = [msg]
 
     for msg in msgs:
+      await asyncio.sleep(msg_delay_default)
       if text:
         add_id_to_msg(msg, correct)
         msg.xep0085_chatstate = chatstates.ChatState.ACTIVE
@@ -2600,6 +2611,7 @@ async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
   async with tg_send_lock:
     for t in await split_long_text(text, MAX_MSG_BYTES_TG):
       try:
+        await asyncio.sleep(msg_delay_default)
         if omsg is not None:
           msg = await omsg.edit(t)
           omsg = None
