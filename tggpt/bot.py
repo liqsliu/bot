@@ -223,10 +223,10 @@ def info(text):
     text = f"{text=}"
   #  lineno = sys._getframe(1).f_lineno
   tb = sys._getframe()
+  #  text = f"W: {tb.f_lineno} {tb.f_code.co_name}: {text}"
   lineno = get_lineno(tb)
   text = f"{lineno}: {text}"
 
-  text = f"W: {tb.f_lineno} {tb.f_code.co_name}: {text}"
   logger.info(text)
 
 
