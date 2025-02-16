@@ -1336,7 +1336,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     return
   p = myshell_p
   if myshell_lock.locked():
-    warn("myshell is busy: {cmd=}")
+    warn(f"myshell is busy: {cmd=}")
     if src:
       await send("前一次任务还没结束", src, correct=True)
   async with myshell_lock:
@@ -1407,7 +1407,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
       for c in cmd:
         p.stdin.write( c.encode() )
         info("send ok")
-        #  await p.stdin.drain()
+        await p.stdin.drain()
         info("wait res...")
 
 
@@ -1421,7 +1421,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             d = await t1
             try:
               while True:
-                d += await asyncio.wait_for(p.stdout.readline(), timeout=0.3)
+                d += await asyncio.wait_for(p.stdout.readline(), timeout=0.6)
             except TimeoutError as e:
               info("stdout end")
               pass
@@ -1434,7 +1434,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             d = await t2
             try:
               while True:
-                d += await asyncio.wait_for(p.stderr.readline(), timeout=0.3)
+                d += await asyncio.wait_for(p.stderr.readline(), timeout=0.6)
             except TimeoutError as e:
               info("stderr end")
             info(f"got stderr: {d}")
