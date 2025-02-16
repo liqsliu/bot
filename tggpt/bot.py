@@ -17,7 +17,7 @@ import telethon.errors
 from telethon.errors import rpcerrorlist
 
 #  import aioxmpp
-from aioxmpp import stream, ibr, protocol, node, dispatcher, connector, JID, im, errors, MessageType, PresenceType, misc, chatstates
+from aioxmpp import stream, ibr, protocol, node, dispatcher, connector, JID, im, errors, MessageType, PresenceType, chatstates
 
 import aiofiles
 #  from aiofile import async_open
@@ -2364,10 +2364,10 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
 async def send(text, jid=None, *args, **kwargs):
   if type(jid) is int:
     if jid == CHAT_ID:
-      await _sendme(text)
+      await _sendme(text, *args, **kwargs)
       jid = log_group_private
     else:
-      return await _sendme(text, jid)
+      return await _sendme(text, jid, *args, **kwargs)
   muc = None
   if 'name' in kwargs:
     name = kwargs["name"]
@@ -2487,8 +2487,8 @@ async def send1(text, jid=None, *args, **kwargs):
     #  j = get_msg_jid(msg)
     #  if correct:
     #    if j in last_outmsg:
-    #      #  msg.xep0308_replace = misc.Replace(last_outmsg[get_jid(msg.to, True)])
-    #      r = misc.Replace()
+    #      #  msg.xep0308_replace = aioxmpp.misc.Replace(last_outmsg[get_jid(msg.to, True)])
+    #      r = aioxmpp.misc.Replace()
     #      r.id_ = last_outmsg[j]
     #      msg.xep0308_replace = r
     #  else:
@@ -2552,17 +2552,29 @@ def sendme(text, chat_id=CHAT_ID):
 
 
 
-async def _sendme(text, chat_id=CHAT_ID):
+async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
+  if chat_id in last_outmsg:
+    omsg = last_outmsg[chat_id]
+  else:
+    omsg = None
   async with tg_send_lock:
     for t in await split_long_text(text, MAX_MSG_BYTES_TG):
       try:
-        await UB.send_message(chat_id, t)
+        if omsg is not None:
+          msg = await omsg.edit(t)
+          omsg = None
+          last_outmsg.pop(chat_id)
+        else:
+          msg = await UB.send_message(chat_id, t)
       except ValueError as e:
         if e.args[0] == 'Failed to parse message':
           err(f"发送tg消息失败: {chat_id} {type(t)} {t=} {e=}")
           return
         raise
       await asyncio.sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2)
+    if correct:
+      last_outmsg[chat_id] = msg
+
   return True
   chat = await get_entity(CHAT_ID, True)
   await UB.send_message(chat, text)
@@ -4664,6 +4676,11 @@ async def send_typing(muc):
 last_outmsg = {}
 
 def get_msg_jid(msg):
+  #  # for tg
+  #  if hasattr(msg, "id"):
+  #    return msg.chat_id
+
+  # 下面是xmpp用的代码
   J = msg.to
   jid = str(J.bare())
   if jid == myjid:
@@ -4694,7 +4711,7 @@ def clear_msg_jid(msg):
 def add_id_to_msg(msg, correct):
   j = get_msg_jid(msg)
   if j in last_outmsg:
-    r = misc.Replace()
+    r = aioxmpp.misc.Replace()
     r.id_ = last_outmsg[j][1]
     msg.xep0308_replace = r
     if not correct:
@@ -4704,42 +4721,42 @@ def add_id_to_msg(msg, correct):
     last_outmsg[j] = [msg, msg.id_]
 
 
-async def ___add_id_to_msg(msg, correct):
-  j = get_msg_jid(msg)
-  if correct:
-    if j in last_outmsg:
-      #  msg.xep0308_replace = misc.Replace(last_outmsg[get_jid(msg.to, True)])
-      for _ in range(5):
-        if last_outmsg[j][1]:
-          last_outmsg[j][0] = msg
-          r = misc.Replace()
-          r.id_ = last_outmsg[j][1]
-          msg.xep0308_replace = r
-          break
-        else:
-          logger.info("msg id 不可用: {last_outmsg[j][1]}")
-          await asyncio.sleep(1)
-      if last_outmsg[j][1] is None:
-        last_outmsg[j] = [msg, None]
-    else:
-      last_outmsg[j] = [msg, None]
-      logger.info("已添加msg")
-  else:
-      #  last_outmsg.pop(j)
-    if j in last_outmsg:
-      #  msg.xep0308_replace = misc.Replace(last_outmsg[get_jid(msg.to, True)])
-      for _ in range(5):
-        if last_outmsg[j][1]:
-          last_outmsg[j][0] = msg
-          r = misc.Replace()
-          r.id_ = last_outmsg[j][1]
-          msg.xep0308_replace = r
-        else:
-          logger.info("msg id 不可用: {last_outmsg[j][1]}")
-          await asyncio.sleep(1)
-      if last_outmsg[j][1] is None:
-        last_outmsg[j] = [msg, None]
-      last_outmsg[j].append(0)
+#  async def ___add_id_to_msg(msg, correct):
+#    j = get_msg_jid(msg)
+#    if correct:
+#      if j in last_outmsg:
+#        #  msg.xep0308_replace = aioxmpp.misc.Replace(last_outmsg[get_jid(msg.to, True)])
+#        for _ in range(5):
+#          if last_outmsg[j][1]:
+#            last_outmsg[j][0] = msg
+#            r = aioxmpp.misc.Replace()
+#            r.id_ = last_outmsg[j][1]
+#            msg.xep0308_replace = r
+#            break
+#          else:
+#            logger.info("msg id 不可用: {last_outmsg[j][1]}")
+#            await asyncio.sleep(1)
+#        if last_outmsg[j][1] is None:
+#          last_outmsg[j] = [msg, None]
+#      else:
+#        last_outmsg[j] = [msg, None]
+#        logger.info("已添加msg")
+#    else:
+#        #  last_outmsg.pop(j)
+#      if j in last_outmsg:
+#        #  msg.xep0308_replace = aioxmpp.misc.Replace(last_outmsg[get_jid(msg.to, True)])
+#        for _ in range(5):
+#          if last_outmsg[j][1]:
+#            last_outmsg[j][0] = msg
+#            r = aioxmpp.misc.Replace()
+#            r.id_ = last_outmsg[j][1]
+#            msg.xep0308_replace = r
+#          else:
+#            logger.info("msg id 不可用: {last_outmsg[j][1]}")
+#            await asyncio.sleep(1)
+#        if last_outmsg[j][1] is None:
+#          last_outmsg[j] = [msg, None]
+#        last_outmsg[j].append(0)
 
 def get_mucs(muc):
   if muc == "gateway1":
