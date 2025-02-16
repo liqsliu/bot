@@ -1363,13 +1363,17 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         #  except TimeoutError as e:
         if t1.done():
           d = await t1
-          await send(d.decode("utf-8", errors="ignore"), src)
+          d = d.decode("utf-8", errors="ignore")
+          info(f"got stdout: {d}")
+          await send(d, src)
           #  o += await t1
           t1 = f1()
           ts[0] = t1
         if t2.done():
           d = await t2
-          await send(d.decode("utf-8", errors="ignore"), src)
+          d = d.decode("utf-8", errors="ignore")
+          info(f"got stderr: {d}")
+          await send(d, src)
           #  e += await t2
           t2 = f2()
           ts[1] = t2
