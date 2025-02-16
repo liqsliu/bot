@@ -1272,8 +1272,8 @@ async def init_myshell():
     global myshell_p
     myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
     info("wait for steam ok...")
-    t1 = asyncio.create_task(p.stdout.read())
-    t2 = asyncio.create_task(p.stderr.read())
+    t1 = asyncio.create_task(myshell_p.stdout.read())
+    t2 = asyncio.create_task(myshell_p.stderr.read())
     try:
       await asyncio.sleep(2)
       if t1.done() or t2.done():
@@ -1311,30 +1311,30 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     #  info("send \\n...")
     #  p.stdin.write(b"\n")
     #  await p.stdin.drain()
-    info("wait for steam ok...")
-    t1 = asyncio.create_task(p.stdout.read())
-    t2 = asyncio.create_task(p.stderr.read())
-    try:
-      await asyncio.sleep(0.3)
-      start_time = time.time()
-      if t1.done() or t2.done():
-        #  err(f"管道关闭，无法接受返回数据，终止执行 {cmd}")
-        #  return
-        warn(f"管道关闭，无法接受返回数据 now: {cmd}")
-        if p.returncode is None:
-          await stop_sub(p)
-          info("start another shell...")
-          if await init_myshell():
-            pass
-          else:
-            return
-          p = myshell_p
-    finally:
-      if not t1.done():
-        t1.cancel()
-      if not t2.done():
-        t2.cancel()
-    await asyncio.sleep(0.1)
+    #  info("wait for steam ok...")
+    #  t1 = asyncio.create_task(p.stdout.read())
+    #  t2 = asyncio.create_task(p.stderr.read())
+    #  try:
+    #    await asyncio.sleep(0.3)
+    #    start_time = time.time()
+    #    if t1.done() or t2.done():
+    #      #  err(f"管道关闭，无法接受返回数据，终止执行 {cmd}")
+    #      #  return
+    #      warn(f"管道关闭，无法接受返回数据 now: {cmd}")
+    #      if p.returncode is None:
+    #        await stop_sub(p)
+    #        info("start another shell...")
+    #        if await init_myshell():
+    #          pass
+    #        else:
+    #          return
+    #        p = myshell_p
+    #  finally:
+    #    if not t1.done():
+    #      t1.cancel()
+    #    if not t2.done():
+    #      t2.cancel()
+    #  await asyncio.sleep(0.1)
     info("send cmd...")
     p.stdin.writelines( x.encode()+b" " for x in cmd )
     #  await p.stdin.drain()
