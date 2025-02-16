@@ -486,6 +486,9 @@ def _exceptions_handler(e, *args, **kwargs):
     pass
   except AttributeError:
     pass
+  except OSError as e:
+    logger.error(res, exc_info=True, stack_info=True)
+    raise
 
   except urllib.error.HTTPError:
     res += ' Data not retrieved because %s\nURL: %s %s' % (e, args, kwargs)
