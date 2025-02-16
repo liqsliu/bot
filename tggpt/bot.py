@@ -1390,13 +1390,15 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     tmp = ""
     async def pr(d, tmp):
       d = d.decode("utf-8", errors="ignore")
+      info(f"got: {d=}")
       d = re.sub(shell_color_re,  "", d)
-      info(f"got: {d}")
+      info(f"got re: {d=}")
       ds = d.strip()
       if ds:
         if tmp:
-          ds = tmp + ds
+          ds = tmp + "\n" + d
           tmp = ""
+          ds = d.strip()
         await send(ds, src)
       else:
         tmp += d
