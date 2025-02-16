@@ -1258,7 +1258,7 @@ def format_byte(num):
 
 async def init_myshell():
   if "myshell_p" not in globals():
-    global mysshell_p
+    global myshell_p
     myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
 
 
