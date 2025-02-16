@@ -2200,7 +2200,11 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
       #  logger.info(f"{type(res)}: {res} {msg}")
       if asyncio.iscoroutine(res) or type(res) is stream.StanzaToken:
         #  dbg(f"client send: {res=}")
-        res2 = await res
+        try:
+          res2 = await res
+        except Exception as e:
+          err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}")
+          return False
         if res2 is None:
           dbg(f"send msg: finally: {res=}")
         #  elif hasattr(res, "stanza") and res.stanza and res.stanza.error is None:
