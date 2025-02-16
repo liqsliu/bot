@@ -5678,12 +5678,12 @@ async def add_cmd():
 
   async def _(cmds, src):
     if len(cmds) == 1:
-      return f"exec\n.{cmds[0]} $code"
+      return f"exec\nreturn res\n.{cmds[0]} $code"
     cmds.pop(0)
     res = await my_exec(' '.join(cmds), src)
     return f"{res}"
-  cmd_funs["py"] = _
-  cmd_for_admin.add('py')
+  cmd_funs["exec"] = _
+  cmd_for_admin.add('exec')
 
   async def _(cmds, src):
     if len(cmds) == 1:
