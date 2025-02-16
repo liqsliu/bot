@@ -1419,6 +1419,12 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
           #  except TimeoutError as e:
           if t1.done():
             d = await t1
+            try:
+              while True:
+                d + = await asyncio.wait_for(p.stdout.readline(), timeout=0.3)
+            except TimeoutError as e:
+              info("stdout end")
+              pass
             info(f"got stdout: {d}")
             tmp = await pr(d, tmp)
             #  o += await t1
@@ -1426,6 +1432,11 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             ts[0] = t1
           if t2.done():
             d = await t2
+            try:
+              while True:
+                d + = await asyncio.wait_for(p.stderr.readline(), timeout=0.3)
+            except TimeoutError as e:
+              info("stderr end")
             info(f"got stderr: {d}")
             tmp = await pr(d, tmp)
             #  d = d.decode("utf-8", errors="ignore")
@@ -1436,9 +1447,6 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             ts[1] = t2
           l -= 1
           if len(done) == 0:
-            if l == 0:
-              await send("结束", src)
-              return
             break
           else:
             info("got a line of res")
@@ -1454,6 +1462,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
       #  myshell_p.stdin.close()
       #  await myshell_p.stdin.wait_closed()
       #  info("close stdin ok")
+    await send("结束", src)
 
 
 
