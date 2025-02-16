@@ -1386,7 +1386,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     info("send ok")
     await p.stdin.drain()
     info("wait res...")
-    await def pr(d):
+    async def pr(d):
       d = d.decode("utf-8", errors="ignore")
       d = re.sub(shell_color_re,  "", d)
       info(f"got: {d}")
