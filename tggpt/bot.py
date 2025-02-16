@@ -762,11 +762,12 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
     pass
   else:
     return
-  res = await http(url=url, method="POST", data=data, headers=headers,  **kwargs)
+  res, res_hewders = await http(url=url, method="POST", data=data, headers=headers, return_headers=True, **kwargs)
 #    res = res + "." + filename.split(".")[-1]
   res = res.strip()
+  info(f"pb res: {res_hewders=} {res}")
   if url == pb_list["fars"][0]:
-    if not url.startswith("https://fars.ee/"):
+    if not res.startswith("https://fars.ee/"):
       res = await pastebin(data=data, filename=filename, extra=extra, use="0x0", **kwargs)
       warn(f"fallback 0x0: {res}")
   return res
@@ -2785,7 +2786,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               err("url: {}\nunknown encoding: {}".format(url, res.headers['Content-Encoding']))
               #  return data
         except Exception as e:
-          warn(f"解压时出现错误: {e=}")
+          err(f"解压时出现错误: {e=}")
         try:
           # if "text/plain" in res.headers['content-type']:
           if "text" in res.headers['content-type']:
