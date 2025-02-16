@@ -1288,7 +1288,7 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None, ext=None):
   #  tmp = await p.communicate()
   if ext:
     ext = ext.encode()
-  t = asyncio.create_task( p.communicate(input=ext)) )
+  t = asyncio.create_task( p.communicate(input=ext) )
   o = None
   e = None
   while True:
