@@ -1425,12 +1425,20 @@ async def my_exec(cmd, src=None, client=None, **args):
   #  res = await my_subprocess_exec(*cmd, src=src)
   #  res = format_out_of_shell(res)
   # https://www.runoob.com/python3/python3-func-exec.html
-  local_vars = {}
+  #  local_vars = {}
   #  await asyncio.to_thread()
-  exec(cmd, globals(), local_vars)
-  if "res" in local_vars:
-    return local_vars["res"]
-  return local_vars
+  #  await exec(cmd, globals(), local_vars)
+  #  if "res" in local_vars:
+  #    return local_vars["res"]
+  #  return local_vars
+  # https://stackoverflow.com/a/53255739
+  exec(
+    f'async def __ex(): ' +
+    ''.join(f'\n {l}' for l in code.split('\n'))
+  )
+
+  # Get `__ex` from local variables, call it and return the result
+  return await locals()['__ex']()
 
 
 async def my_eval(cmd):
