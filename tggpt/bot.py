@@ -487,7 +487,7 @@ def _exceptions_handler(e, *args, **kwargs):
   except AttributeError:
     pass
   except OSError as e:
-    logger.error(res, exc_info=True, stack_info=True)
+    logger.error("出错啦 %s" % res, exc_info=True, stack_info=True)
     raise
 
   except urllib.error.HTTPError:
@@ -1258,7 +1258,7 @@ def format_byte(num):
 
 async def myshell(cmd, max_time=run_shell_timx_max, src=None):
   #  if "myshell_p" not in globals():
-  #    global mysshell_p
+  global mysshell_p
   #    myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   p = myshell_p
   if myshell_lock.locked():
@@ -1266,18 +1266,31 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     if src:
       await send("前一次任务还没结束", src, correct=True)
   async with myshell_lock:
+    info("send \\n...")
     p.stdin.write(b"\n")
     await p.stdin.drain()
+    info("wait for steam...")
     t1 = asyncio.create_task(p.stdout.read())
     t2 = asyncio.create_task(p.stderr.read())
-    await asyncio.sleep(0.3)
-    start_time = time.time()
-    if t1.done() or t2.done():
-      err(f"管道关闭，无法接受返回数据，终止执行 {cmd}")
-      return
-    t1.cancel()
-    t2.cancel()
+    try:
+      await asyncio.sleep(0.3)
+      start_time = time.time()
+      if t1.done() or t2.done():
+        #  err(f"管道关闭，无法接受返回数据，终止执行 {cmd}")
+        #  return
+        warn(f"管道关闭，无法接受返回数据 now: {cmd}")
+        if p.returncode is None:
+          await stop_sub(p)
+          info("start another shell...")
+          myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+          p = myshell_p
+    finally:
+      if not t1.done():
+        t1.cancel()
+      if not t2.done():
+        t2.cancel()
     await asyncio.sleep(0.1)
+    info("send cmd...")
     p.stdin.writelines( x.encode()+b" " for x in cmd )
     #  await p.stdin.drain()
     #  o = b""
@@ -1290,11 +1303,13 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
       return asyncio.create_task(p.stderr.readline())
     t1 = f1()
     t2 = f2()
+    info("wait res...")
     while True:
       try:
         #  for _ in asyncio.as_completed([t1, t2]):
         #    break
         await asyncio.wait([t1, t2], timeout=interval, return_when=asyncio.FIRST_COMPLETED)
+        info("got a line of res")
       except TimeoutError as e:
         await send("结束", src)
         break
@@ -1389,17 +1404,8 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
     if now - ress[0] < max_time and now - start_time < max_time*10:
       pass
     elif p.returncode is None:
-      p.terminate()
       warn(f"执行超时，尝试停止: {p} {o=} {e=}")
-      await asycnio.sleep(1)
-      if p.returncode is None:
-        p.kill()
-        warn(f"强制停止: {p} {o=} {e=}")
-        await asycnio.sleep(1)
-      if p.returncode is None:
-        err(f"强制停止失败: {p} {o=} {e=}")
-      else:
-        err(f"已停止: {p} {o=} {e=} {p.returncode=}")
+      await stop_sub(p)
   if o:
     o = o.decode("utf-8", errors="ignore")
   else:
@@ -7326,6 +7332,24 @@ async def xmppbot2():
     await asyncio.sleep(5)
     t = asyncio.create_task(xmppbot(), name="xmppbot")
     await t
+
+
+
+async def stop_sub(p):
+  if p.returncode is None:
+    p.terminate()
+    warn(f"尝试停止: {p}")
+    await asycnio.sleep(1)
+    if p.returncode is None:
+      p.kill()
+      warn(f"强制停止: {p}")
+      await asycnio.sleep(1)
+    if p.returncode is None:
+      err(f"强制停止失败: {p}")
+      return False
+    else:
+      err(f"已停止: {p} {p.returncode=}")
+  return True
 
 
 async def after_init():
