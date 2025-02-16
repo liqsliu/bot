@@ -7434,11 +7434,11 @@ async def stop_sub(p):
   if p.returncode is None:
     p.terminate()
     warn(f"尝试停止: {p}")
-    await asycnio.sleep(1)
+    await asyncio.sleep(1)
     if p.returncode is None:
       p.kill()
       warn(f"强制停止: {p}")
-      await asycnio.sleep(1)
+      await asyncio.sleep(1)
     if p.returncode is None:
       err(f"强制停止失败: {p}")
       return False
