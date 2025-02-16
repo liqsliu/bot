@@ -1283,7 +1283,7 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None, ext=None):
   #  ress = [start_time, b""]
   p.stderr.read = wrap_read( p.stderr.read, src, ress)
   #  tmp = await p.communicate()
-  t = asyncio.create_task( p.communicate(input=ext) )
+  t = asyncio.create_task( p.communicate(input=ext.encode()) )
   o = None
   e = None
   while True:
