@@ -4082,7 +4082,8 @@ async def parse_tg_out_msg(event):
 
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
-      res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
+      #  res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
+      res = await run_cmd(text, chat_id, f"G {MY_NAME}: ", is_admin=True)
       if res is True:
         return
       if res:
