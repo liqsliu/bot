@@ -5935,7 +5935,7 @@ async def add_cmd():
 
   async def _(cmds, src):
     if len(cmds) == 1:
-      return f"bash -i\n.{cmds[0]} $code"
+      return f"bash -i\n.{cmds[0]} $code/stop/restart/err/kill"
     global myshell_p
     if cmds[1] == "restart":
       if await stop_sub(myshell_p):
@@ -5948,7 +5948,7 @@ async def add_cmd():
         return "ok"
       else:
         return "failed"
-    elif cmds[1] == "fs":
+    elif cmds[1] == "err":
       #  raise OSError("stop by sh3")
       raise SystemExit("stop by sh3, restart...")
       return "ok"
