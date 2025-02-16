@@ -7436,6 +7436,11 @@ async def xmppbot2():
 
 async def stop_sub(p):
   if p.returncode is None:
+    if p.stdin is not None:
+      warn(f"尝试关闭stream stdin: {p.stdin}")
+      p.stdin.close()
+      await p.stdin.wait_closed()
+      await asyncio.sleep(0.2)
     p.terminate()
     warn(f"尝试停止: {p}")
     await asyncio.sleep(1)
