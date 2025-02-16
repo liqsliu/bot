@@ -4671,6 +4671,9 @@ async def send_typing(muc):
     return True
   if muc in my_groups:
     type_=MessageType.GROUPCHAT
+  elif type(muc) is int:
+    # telegram
+    return
   else:
     type_=MessageType.CHAT
 
