@@ -719,7 +719,8 @@ def decompress(data):
 pb_list = {
     "anon": ["https://api.anonfiles.com/upload", "file"],
     "0x0": ["https://0x0.st/", "file"],
-    "fars": ["https://fars.ee/?u=1", "c"]
+    #  "fars": ["https://fars.ee/?u=1", "c"]
+    "fars": ["https://fars.ee/", "c"]
     }
 #async def pastebin(data="test", filename=None, url="https://fars.ee/?u=1", fieldname="c", extra={}, **kwargs):
 @exceptions_handler
