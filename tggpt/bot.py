@@ -1734,7 +1734,9 @@ async def save_data():
     info("已保存临时数据")
     return True
   else:
-    warn("保存失败")
+    #  warn("保存失败")
+    logger.warning("保存失败", exc_info=True, stack_info=True)
+
 
 
 
