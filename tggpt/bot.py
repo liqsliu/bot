@@ -1381,7 +1381,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     t2 = f2()
     ts = [t1, t2]
 
-    cmd = list( x.encode()+b" " for x in cmd )
+    #  cmd = list( x.encode()+b" " for x in cmd )
     info(f"send cmd: {cmd}")
     p.stdin.writelines( cmd )
     info("send ok")
@@ -5959,6 +5959,8 @@ async def add_cmd():
       myshell_p.kill()
       return "ok"
     cmds.pop(0)
+    cmds = ' '.join(cmds)
+    cmds = list(f"{x}\n" for x in cmds.splitlines())
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
     res = await myshell(cmds, src=src)
     #  return format_out_of_shell(res)
