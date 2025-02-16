@@ -1275,7 +1275,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     t1.cancel()
     t2.cancel()
     await asyncio.sleep(0.1)
-    p.stdin.writelines( x.encode()+b" " for x in cmd )
+    p.stdin.writelines( x+b" " for x in cmd )
     #  await p.stdin.drain()
     #  o = b""
     #  e = b""
@@ -1360,7 +1360,6 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
     try:
       ts = asyncio.shield(t)
       o, e = await asyncio.wait_for(ts, interval+1)
-      info(f"执行结束: {p} {o=} {e=}")
       break
     #  start_timme = loop.time()
     #  async with asyncio.timeout(max_time) as cm:
