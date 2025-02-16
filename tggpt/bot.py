@@ -2717,8 +2717,8 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
     headers.update({
       "Accept-Encoding": "br;q=1.0, gzip;q=0.8, deflate;q=0.5"
       })
-  #  if "User-agent" not in headers:
-  #    headers.update({'User-agent': UA})
+  if "User-agent" not in headers:
+    headers.update({'User-agent': UA})
   if "Accept" not in headers:
     headers.update({'Accept': "application/json,text/x-yaml,text/plain,text/html,*/*"})
   res = None
