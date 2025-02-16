@@ -1271,6 +1271,7 @@ async def init_myshell():
     info("start my shell...")
     global myshell_p
     myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+    loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
     info("wait for steam ok...")
     t1 = asyncio.create_task(myshell_p.stdout.read())
     t2 = asyncio.create_task(myshell_p.stderr.read())
