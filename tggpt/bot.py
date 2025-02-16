@@ -1248,15 +1248,16 @@ def format_byte(num):
 #        return p.returncode, res, errs
 
 
-async def my_subprocess_exec(*args, max_time=run_shell_timx_max, src=None):
-  p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+async def my_sexec(cmds, max_time=run_shell_timx_max, src=None):
+  #  p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  p = await asyncio.create_subprocess_exec(cmds, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   return await my_subprocess(p, max_time=max_time, src=src)
 
 
-async def my_subprocess_shell(cmd, max_time=run_shell_timx_max, src=None):
-  #  p = await asyncio.create_subprocess_shell(cmd, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  return await my_subprocess(p, max_time=max_time, src=src)
+async def my_sshell(cmd, max_time=run_shell_timx_max, src=None, ext=None):
+  p = await asyncio.create_subprocess_shell(cmd, stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  #  p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  return await my_subprocess(p, max_time=max_time, src=src, ext=ext)
 
 
 def wrap_read(func, src, ress):
@@ -1269,21 +1270,20 @@ def wrap_read(func, src, ress):
       ress[0] = now
       #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
       if src:
-        asyncio.create_task(send( "执行中: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, correct=True) )
+        asyncio.create_task(send( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, correct=True) )
       ress[1] = b""
     #  print(f"{len(data)}")
     return data
   return wrapper
 
-
-async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
+async def my_subprocess(p, max_time=run_shell_timx_max, src=None, ext=None):
   start_time = time.time()
   ress = [start_time, b""]
   p.stdout.read = wrap_read( p.stdout.read, src, ress)
   #  ress = [start_time, b""]
   p.stderr.read = wrap_read( p.stderr.read, src, ress)
   #  tmp = await p.communicate()
-  t = asyncio.create_task( p.communicate() )
+  t = asyncio.create_task( p.communicate(input=ext) )
   o = None
   e = None
   while True:
@@ -1293,7 +1293,7 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
     #    break
     try:
       ts = asyncio.shield(t)
-      o, e = await asyncio.wait_for(ts, interval)
+      o, e = await asyncio.wait_for(ts, interval+1)
       break
     #  start_timme = loop.time()
     #  async with asyncio.timeout(max_time) as cm:
@@ -1313,14 +1313,19 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
     except TimeoutError:
       #  warn(f"timeout: {args}")
       info(f"执行中: {p} {o=} {e=}")
-    if time.time() - ress[0] < max_time and time.time() - start_time < max_time*10:
+    now = time.time()
+    if now - ress[0] > interval:
+      send( "执行中 %ss" % int(now-start_time), src, correct=True)
+    if now - ress[0] < max_time and now - start_time < max_time*10:
       pass
     elif p.returncode is None:
       p.terminate()
       warn(f"执行超时，尝试停止: {p} {o=} {e=}")
+      await asycnio.sleep(1)
       if p.returncode is None:
-        warn(f"强制停止: {p} {o=} {e=}")
         p.kill()
+        warn(f"强制停止: {p} {o=} {e=}")
+        await asycnio.sleep(1)
       if p.returncode is None:
         err(f"强制停止失败: {p} {o=} {e=}")
       else:
@@ -1404,10 +1409,9 @@ async def my_py(cmd, src=None, client=None, **args):
   #             **args)
   #  cmd = ["python3", "-c", " ".join(cmd)]
   cmd = ["python3", "-c", cmd]
-  res = await my_subprocess_exec(*cmd, src=src)
+  res = await my_sexec(cmd, src=src)
   res = format_out_of_shell(res)
   return res
-
 
 async def my_exec(cmd, src=None, client=None, **args):
   #  exec(cmd) #return always is None
@@ -1422,7 +1426,7 @@ async def my_exec(cmd, src=None, client=None, **args):
   #             **args)
   #  cmd = ["python3", "-c", " ".join(cmd)]
   #  cmd = ["python3", "-c", cmd]
-  #  res = await my_subprocess_exec(*cmd, src=src)
+  #  res = await my_sexec(cmd, src=src)
   #  res = format_out_of_shell(res)
   # https://www.runoob.com/python3/python3-func-exec.html
   #  local_vars = {}
@@ -1511,7 +1515,7 @@ async def send_cmd_to_bash(gateway, name, text):
   #  await my_popen(shell_cmd, shell=False)
   #  await my_popen(" ".join(shell_cmd))
   #  res = await my_popen(shell_cmd, shell=False, src=gateway)
-  r, o, e = await my_subprocess_exec(*shell_cmd, src=gateway)
+  r, o, e = await my_sexec(shell_cmd, src=gateway)
   if r == 0:
     if o:
       return re.sub(shell_color_re,  "", o)
@@ -1795,7 +1799,7 @@ async def backup(path, src=None, delete=False):
     info(f"backup: {path}")
     shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
   #  res = await run_my_bash(shell_cmd, shell=False)
-  res = await my_subprocess_exec(*shell_cmd)
+  res = await my_sexec(shell_cmd)
   if res:
     info(f"res: {res} {path}")
     if src:
@@ -1821,7 +1825,7 @@ async def get_title(url, src=None, opts=[]):
     max_time = 600
   else:
     max_time = 60
-  r, o, e = await my_subprocess_exec(*shell_cmd, src=src, max_time=max_time)
+  r, o, e = await my_sexec(shell_cmd, src=src, max_time=max_time)
   if r == 0:
     s = o.splitlines()
     if len(s) > 1:
@@ -2151,8 +2155,8 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
         break
 
     if text:
-      if jid == log_group_private:
-        sendme(text)
+      #  if jid == log_group_private:
+      #    sendme(text)
       msgs = []
       for text in await split_long_text(text, MAX_MSG_BYTES):
         if msgs:
@@ -2429,6 +2433,7 @@ async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kw
   logger.info(f"send group msg: {jid} {text}")
   if jid is None:
     jid = log_group_private
+    asyncio.create_task(_sendme(text))
   recipient_jid = JID.fromstr(jid)
   msg = aioxmpp.Message(
       to=recipient_jid,  # recipient_jid must be an aioxmpp.JID
@@ -3780,7 +3785,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         #  else:
         #    warn(f"转换tgs文件失败: {path} {r=} {o=} {e=}")
         #  r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
-        r, _, _ = await my_subprocess_exec(*shell_cmd, max_time=get_timeout(length)*3+30)
+        r, _, _ = await my_sexec(shell_cmd, max_time=get_timeout(length)*3+30)
         #  info(f"{r=}")
         if r == 0:
           #  shell_cmd = ["rm", path]
@@ -5670,14 +5675,35 @@ async def add_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"bash\n.{cmds[0]} $code"
-    #  cmds[0] = "bash"
     cmds.pop(0)
     #  res = await my_popen(cmds)
     #  res = await my_popen(' '.join(cmds), src=src, shell=True)
-    res = await my_subprocess_shell(' '.join(cmds), src=src)
+    #  res = await my_sexec(' '.join(cmds), src=src)
+    res = await my_sshell(' '.join(cmds), src=src)
     return format_out_of_shell(res)
   cmd_funs["sh"] = _
   cmd_for_admin.add('sh')
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"bash -l\n.{cmds[0]} $code"
+    #  cmds[0] = "bash"
+    cmds.pop(0)
+    cmds.insert(0, "-c")
+    cmds.insert(0, "bash")
+    res = await my_sexec(cmds, src=src)
+    return format_out_of_shell(res)
+  cmd_funs["sh2"] = _
+  cmd_for_admin.add('sh2')
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"bash -i\n.{cmds[0]} $code"
+    cmds.pop(0)
+    res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
+    return format_out_of_shell(res)
+  cmd_funs["sh3"] = _
+  cmd_for_admin.add('sh3')
 
   async def _(cmds, src):
     if len(cmds) == 1:
@@ -7269,7 +7295,7 @@ async def amain():
         pass
       elif sys.argv[1] == 'cmd':
         #  res = await my_popen(' '.join(sys.argv[2:]))
-        res = await my_subprocess_shell(' '.join(sys.argv[2:]))
+        res = await my_sshell(' '.join(sys.argv[2:]))
         print(res)
       elif sys.argv[1] == 'cmd2':
         res = await send_cmd_to_bash("gateway1", "X test", ' '.join(sys.argv[2:]))
