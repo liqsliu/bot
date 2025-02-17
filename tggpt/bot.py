@@ -4786,6 +4786,7 @@ async def get_server_name(jid):
 
 def run_run_loop():
   info("独立线程，启动...")
+  info("判断是否在主线程，应该是False: %s" % main_thread.native_id == threading.get_native_id())
   global loop2
   loop2 = asyncio.new_event_loop()  # 创建新的事件循环
   asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
@@ -7946,9 +7947,9 @@ async def stop_sub(p=None):
 async def after_init():
   info("run after init...")
   global loop2_thread, loop2, main_thread
+  main_thread =  threading.main_thread()
   loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
   loop2_thread.start()
-  main_thread =  threading.main_thread()
   while True:
     if "loop2" in globals() and loop2.is_running():
       info("子线程事件循环正在运行")
@@ -7956,6 +7957,8 @@ async def after_init():
     else:
       info("等待子线程事件循环启动")
       await sleep(2)
+  info("判断是否在主线程，应该是True: %s" % main_thread.native_id == threading.get_native_id())
+  info("判断是否在副线程，应该是False: %s" % loop2_thread.native_id == threading.get_native_id())
   
   if await init_myshell():
     info("启动常驻shell成功")
