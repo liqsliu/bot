@@ -817,7 +817,7 @@ async def decompress(data, m):
     data = data.encode()
   #  return zstandard.decompress(data)
   if m in _decompress_funcs:
-    return _decompress_funcs[m](data)
+    #  return _decompress_funcs[m](data)
     #  return run_cb_in_thread(_compress_funcs[m], data)
     async def f():
       return _decompress_funcs[m](data)
@@ -3395,7 +3395,8 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
   if "Accept-Encoding" not in headers:
     headers.update({
       #  "Accept-Encoding": "br;q=1.0, gzip;q=0.8, deflate;q=0.5"
-      "Accept-Encoding": "gzip, deflate, br, zstd"
+      #  "Accept-Encoding": "gzip, deflate, br, zstd"
+      "Accept-Encoding": "gzip, deflate, br"
       })
   res = None
   data = None
@@ -3468,7 +3469,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
         except brotli.error as e:
           err(f"解压时出现错误: {e=} {data[:512]}")
         except Exception as e:
-          err(f"解压时出现错误: {e=} {data[512]}")
+          err(f"解压时出现错误: {e=} {data[:512]}")
         try:
           # if "text/plain" in res.headers['content-type']:
           if "text" in res.headers['content-type']:
