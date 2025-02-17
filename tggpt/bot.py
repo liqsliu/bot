@@ -4796,7 +4796,9 @@ def run_run_loop():
 
 def in_main_thread():
   if main_thread.native_id == threading.get_native_id():
+    info(f"in main: ids: main: {main_thread.native_id}  loop2: {loop2_thread.native_id} now: {threading.get_native_id()}")
     return True
+  info(f"not in main: ids: main: {main_thread.native_id}  loop2: {loop2_thread.native_id} now: {threading.get_native_id()}")
   #  if loop2_thread.native_id == threading.get_native_id():
   # fixme: 有可能第三个线程
   return False
