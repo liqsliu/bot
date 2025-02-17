@@ -1397,7 +1397,7 @@ async def _init_myshell():
       if myshell_p.returncode is None:
         await stop_sub(myshell_p)
       return
-    info(f"myshell is running...")
+    info(f"myshell is ok, task of reading is running {f}")
     #  while True:
     while myshell_p.returncode is None:
       d = await f()
@@ -1622,10 +1622,26 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     #  t1 = f1()
     #  t2 = f2()
     #  ts = [t1, t2]
+          #  try:
+          #    async with asyncio.timeout() as cm2:
+          #      while True:
+          #        n, d = await myshell_queue.get()
+          #        if cm2.when() is None:
+          #          cm2.reschedule(asyncio.get_running_loop().time()+0.1)
+          #        else:
+          #          cm2.reschedule(asyncio.get_running_loop().time()+0.01)
+                #  if cm2.when() is None:
+                #  if tmp is None:
+          #        tmp += d
+          #        info(f"got{n}: {d[:16]}")
+          #  except TimeoutError:
+          #    pass
 
     start_time = time.time()
     last = start_time-0.7 # 第一条消息更快收到
-    tmp = ""
+    #  tmp = ""
+    tmp = None
+    ds = None
     try:
       async with asyncio.timeout(interval) as cm:
         k =  len(cmd)
@@ -1634,54 +1650,68 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
           cm.reschedule(asyncio.get_running_loop().time()+interval)
           info("send ok")
           k -= 1
-          try:
-            async with asyncio.timeout() as cm2:
-              while True:
-                n, d = await myshell_queue.get()
-                cm.reschedule(asyncio.get_running_loop().time()+interval)
-                if cm2.when() is None:
-                  cm2.reschedule(asyncio.get_running_loop().time()+0.2)
-                d = d.decode("utf-8", errors="ignore")
-                info(f"got{n}: {d=}")
-                d = re.sub(shell_color_re,  "", d)
-                tmp += d
-                info(f"got{n}>: {ds=}")
-          except TimeoutError:
-            pass
+          while True:
+            n, d = await myshell_queue.get()
+            tmp += d 
+            s = time.time()
+            if ds is None:
+              dl = 0.1
+            else:
+              dl = 0.3
+            try:
+              while dl + s > time.time():
+                n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
+                dl += 0.01
+                tmp += d 
+                #  info(f"got{n}: {d[:16]}")
+            except TimeoutError:
+              info("one queue")
+            cm.reschedule(asyncio.get_running_loop().time()+interval)
+            ds = tmp.decode("utf-8", errors="ignore")
+            info(f"got{n}: {d=}")
+            ds = re.sub(shell_color_re,  "", ds)
+            info(f"got{n}>: {ds=}")
             ds = tmp.strip()
             if ds:
               await send(ds, src)
-
-              ds = d.strip()
-              now = time.time()
-              need_send = False
-              if ds:
-                if now - last > 0.8:
-                  need_send = True
-                elif len(ds) > 512:
-                  need_send = True
-              if need_send is True:
-                if tmp:
-                  ds = tmp + "\n" + d
-                  tmp = ""
-                await send(ds.strip(), src)
-                last = now
-              else:
-                tmp += d
+              tmp = ""
+              #  ds = d.strip()
+              #  now = time.time()
+              #  need_send = False
+              #  if ds:
+              #    if now - last > 0.8:
+              #      need_send = True
+              #    elif len(ds) > 512:
+              #      need_send = True
+              #  if need_send is True:
+              #    if tmp:
+              #      ds = tmp + "\n" + d
+              #      tmp = ""
+              #    await send(ds.strip(), src)
+              #    last = now
+              #  else:
+              #    tmp += d
               if now - start_time > interval*10:
                 log("end")
-                break
+                return
               if k > 1:
                 await sleep(0.2)
                 await p.stdin.drain()
                 if myshell_queue.empty():
                   break
     except TimeoutError:
-      ds = tmp.strip()
-      if ds:
-        await send(ds, src)
-      #  if now - start_time > interval:
-      info("timeout")
+      if tmp:
+        ds = tmp.decode("utf-8", errors="ignore")
+        info(f"got{n}: {d=}")
+        ds = re.sub(shell_color_re,  "", ds)
+        info(f"got{n}>: {ds=}")
+        ds = tmp.strip()
+        if ds:
+          ds = tmp.strip()
+          if ds:
+            await send(ds, src)
+        #  if now - start_time > interval:
+        info("timeout")
 
   return
 
