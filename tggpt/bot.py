@@ -234,15 +234,8 @@ def info(text):
 
 
 def log(text):
-  if type(text) is not str:
-    text = f"{text=}"
-  #  lineno = currentframe().f_back.f_lineno
-  #  lineno = sys._getframe(1).f_lineno
-  tb = sys._getframe()
-  lineno = get_lineno(tb)
-  text = f"{lineno} {text}"
+  info(text)
   send_log(text)
-  logger.warning(text)
 
 def dbg(text):
   logger.debug(text)
@@ -1520,7 +1513,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         await p.stdin.drain()
       #  done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
       while True:
-        info("wait finally res...")
+        log("wait for finally res...")
         await sleep(interval+1)
         if time.time() - ress[0] > interval:
           break
@@ -1529,7 +1522,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         ts[0].cancel()
       if not ts[1].done():
         ts[1].cancel()
-    info("end")
+    log("end")
     return
 
     #  cmd = list( x.encode()+b" " for x in cmd )
@@ -4009,7 +4002,7 @@ async def parse_tg_msg(event):
         res, nick, delay = await print_tg_msg(event)
         #  logger.info(f"转发桥接消息: {chat_id} -> {bridges[chat_id]}: {msg.text[:64]}")
         if res:
-          logger.info(f"转发桥接消息: {chat_id} -> {bridges[chat_id]}: {res[:16]}")
+          logger.info(f"sync: {chat_id} -> {bridges[chat_id]}: {res.split('\n', 1)[0][:16]}")
           #  await send(msg.text, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
           await send(res, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
 
@@ -5085,7 +5078,8 @@ async def xmpp_msgp(msg):
 
           jid = str(item.jid.bare())
           res = f"上线{len(msg.xep0045_muc_user.items)}: {msg.from_} {jid} {item.nick} {item.role} {item.affiliation} {msg.status}"
-          print(res)
+          #  print(res)
+          info(res)
           if item.nick is None:
             rnick = msg.from_.resource
             #  info(f"空nick：{item.jid} {item.nick} -> {rnick} {msg}")
@@ -5255,7 +5249,8 @@ async def xmpp_msgp(msg):
         pprint(msg)
         await send(f"未知群组消息: {msg}")
     else:
-      print(f"上线: {msg.from_} {msg.status}")
+      #  print(f"上线: {msg.from_} {msg.status}")
+      info(f"上线: {msg.from_} {msg.status}")
       #  if muc != rssbot:
       #    await send(f"上线: {msg.from_} {msg.status}")
     #  for i in msg.xep0045_muc_user.items:
@@ -5286,7 +5281,8 @@ async def xmpp_msgp(msg):
           warn(f"未知错误，待修复的联系人删除: {msg.from_} {e=}")
       log(f"已拒绝状态订阅请求：{msg.from_} {res=}")
   elif msg.type_ == PresenceType.UNAVAILABLE:
-    print(f"离线: {msg.from_} {msg.status}")
+    #  print(f"离线: {msg.from_} {msg.status}")
+    info(f"离线: {msg.from_} {msg.status}")
     #  if muc in my_groups:
     #    pass
     #  else:
@@ -5305,11 +5301,10 @@ async def xmpp_msgp(msg):
     #    await sendg(f"离线: {msg.from_} {msg.status} {msg.xep0045_muc_user}")
   else:
     #  pprint(msg)
-    print(f"未知状态{msg.type_}: {msg.from_} {msg.status}")
+    #  print(f"未知状态{msg.type_}: {msg.from_} {msg.status}")
+    info(f"未知状态 {msg.type_}: {msg.from_} {msg.status}")
     #  if muc in me:
     #    await sendg(f"{msg.type_}: {msg.from_} {msg.status}")
-
-
 
 def hide_nick(msg):
   if type(msg) is str:
