@@ -528,7 +528,7 @@ def _exceptions_handler(e, *args, **kwargs):
   #    tb = tb.tb_next
   while True:
     last = tb.tb_next
-    if last.tb_frame.f_code.co_filenaem != os.path.abspath(__file__):
+    if last.tb_frame.f_code.co_filename != os.path.abspath(__file__):
       break
     if last is None:
       break
@@ -1603,7 +1603,7 @@ async def _init_myshell():
 #        #  info("close stdin ok")
 #      await send("结束", src)
 
-
+@exceptions_handler
 async def myshell(cmd, max_time=run_shell_timx_max, src=None):
   #  if await init_myshell():
   #    pass
@@ -1679,6 +1679,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             info(f"got{n}>: {ds=}")
             ds = tmp.strip()
             if ds:
+              info(f"send: {src} {type(ds)} {ds[:16]}")
               await send(ds, src)
               tmp = b""
               #  ds = d.strip()
