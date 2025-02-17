@@ -97,7 +97,7 @@ from os.path import isdir
 import time
 #  from time import time, sleep
 #  from time import time
-#  from asyncio import sleep
+from asyncio import sleep
 import asyncio
 
 #  HOME = os.environ.get("HOME")
@@ -144,7 +144,7 @@ wtf_ban_time = 300
 
 async def wtf_loop():
   while True:
-    await asyncio.sleep(wtf_time)
+    await sleep(wtf_time)
     for muc in users:
       if muc not in public_groups:
         continue
@@ -544,7 +544,7 @@ def _exceptions_handler(e, *args, **kwargs):
     msg_delay_default += (300 - msg_delay_default)/2
     async def f():
       global msg_delay_default
-      await asyncio.sleep(60)
+      await sleep(60)
       msg_delay_default -= (300 - msg_delay_default)/2
       if msg_delay_default < 0:
         msg_delay_default = 0.4
@@ -1126,13 +1126,13 @@ def format_byte(num):
 #          data[0] = e.stdout.decode("utf-8")
 #        if e.stderr:
 #          data[1] = e.stderr.decode("utf-8")
-#      await asyncio.sleep(1)
+#      await sleep(1)
 #
 #
 #  async def update_stdout(data):
 #    while True:
 #      print(1)
-#      await asyncio.sleep(3)
+#      await sleep(3)
 #      tmp = await data[2].stdout.readline()
 #      if tmp:
 #        data[0] = data[0] + tmp.decode("utf-8")
@@ -1144,7 +1144,7 @@ def format_byte(num):
 #  async def update_stderr(data):
 #    while True:
 #      print(2)
-#      await asyncio.sleep(2.5)
+#      await sleep(2.5)
 #      tmp = await data[2].stderr.readline()
 #      if tmp:
 #        data[1] = data[1] + tmp.decode("utf-8")
@@ -1192,7 +1192,7 @@ def format_byte(num):
 #      errs = ""
 #      data = ["", "", p]
 #      asyncio.create_task(update_stdouterr(data))
-#      await asyncio.sleep(1)
+#      await sleep(1)
 #      logger.info(f"popen cmd: {p.args}")
 #      if type(cmd) == list:
 #        if len(cmd) == 6 and "bcmd.sh" in cmd[1]:
@@ -1210,7 +1210,7 @@ def format_byte(num):
 #          pass
 #        else:
 #          break
-#        #  await asyncio.sleep(0.5)
+#        #  await sleep(0.5)
 #        res = data[0]
 #        errs = data[1]
 #
@@ -1237,7 +1237,7 @@ def format_byte(num):
 #              #  logger.error(f"can not send tmp: {e=}")
 #              #  msg = await client.send_message(MY_ID, tmp)
 #              warn(f"无法发送临时输出: {tmp} {e=}")
-#        await asyncio.sleep(interval)
+#        await sleep(interval)
 #        if time.time() - start_time > max_time:
 #          p.kill()
 #          res = "my_popen: timeout, killed, cmd: {}\nres: {}".format(cmd, res)
@@ -1309,7 +1309,7 @@ async def init_myshell():
     t1 = asyncio.create_task(myshell_p.stdout.read())
     t2 = asyncio.create_task(myshell_p.stderr.read())
     try:
-      await asyncio.sleep(2)
+      await sleep(2)
       if t1.done() or t2.done():
         info(f"fixme: 管道无法保持开启")
         if myshell_p.returncode is None:
@@ -1347,7 +1347,7 @@ async def init_myshell():
 #      #  t1 = asyncio.create_task(p.stdout.read())
 #      #  t2 = asyncio.create_task(p.stderr.read())
 #      #  try:
-#      #    await asyncio.sleep(0.3)
+#      #    await sleep(0.3)
 #      #    start_time = time.time()
 #      #    if t1.done() or t2.done():
 #      #      #  err(f"管道关闭，无法接受返回数据，终止执行 {cmd}")
@@ -1366,7 +1366,7 @@ async def init_myshell():
 #      #      t1.cancel()
 #      #    if not t2.done():
 #      #      t2.cancel()
-#      #  await asyncio.sleep(0.1)
+#      #  await sleep(0.1)
 #
 #
 #      #  o = b""
@@ -1480,29 +1480,51 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     #  e = b""
     #  t1 = asyncio.create_task(p.stdout.readline())
     #  t2 = asyncio.create_task(p.stderr.readline())
-    def f1():
-      return asyncio.create_task(p.stdout.readline())
-    def f2():
-      return asyncio.create_task(p.stderr.readline())
-    t1 = f1()
-    t2 = f2()
-    ts = [t1, t2]
+    #  def f1():
+    #    return asyncio.create_task(p.stdout.readline())
+    #  def f2():
+    #    return asyncio.create_task(p.stderr.readline())
+    #  t1 = f1()
+    #  t2 = f2()
+    #  ts = [t1, t2]
 
-    async def pr(d, tmp):
-      d = d.decode("utf-8", errors="ignore")
-      info(f"got: {d=}")
-      d = re.sub(shell_color_re,  "", d)
-      info(f"got re: {d=}")
-      ds = d.strip()
-      if ds:
-        if tmp:
-          ds = tmp + "\n" + d
-          tmp = ""
-          ds = d.strip()
-        #  await send(ds, src)
-      else:
-        tmp += d
-      return tmp
+    async def pr(f, p=""):
+      tmp = ""
+      while True:
+        d = await f()
+        d = d.decode("utf-8", errors="ignore")
+        info(f"got{p}: {d=}")
+        d = re.sub(shell_color_re,  "", d)
+        info(f"got re: {d=}")
+        #  ds = d.strip()
+        #  if ds:
+        #    if tmp:
+        #      ds = tmp + "\n" + d
+        #      tmp = ""
+        #      ds = d.strip()
+        #    #  await send(ds, src)
+        #  else:
+        #    tmp += d
+        ress[0] = time.time()
+
+    ress = [time.time()]
+    #  asyncio.create_task(p.stdout.readline())
+    t1 = asyncio.create_task(pr(p.stdout.readline, " out"))
+    t2 = asyncio.create_task(pr(p.stderr.readline, " err"))
+    try:
+      info("wait res...")
+      #  done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
+      while True:
+        await sleep(interval+1)
+        if time.time() - ress[0] > interval:
+          break
+    finally:
+      if not ts[0].done():
+        ts[0].cancel()
+      if not ts[1].done():
+        ts[1].cancel()
+    info("end")
+    return
 
     #  cmd = list( x.encode()+b" " for x in cmd )
     info(f"send cmd: {cmd}")
@@ -1617,7 +1639,7 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
   o = None
   e = None
   while True:
-    #  await asyncio.sleep(interval)
+    #  await sleep(interval)
     #  if t.done():
     #    o, e = t.result()
     #    break
@@ -1688,13 +1710,13 @@ def format_out_of_shell(res):
 #    start_time = time.time()
 #    res = ""
 #    errs = ""
-#    await asyncio.sleep(0.5)
+#    await sleep(0.5)
 #    if p.poll() == None and p.returncode == None:
 #      while p.poll() == None and p.returncode == None:
 #        if time.time() - start_time > max_time:
 #          p.kill()
 #          break
-#        await asyncio.sleep(1)
+#        await sleep(1)
 #
 #    try:
 #      res, errs = p.communicate(timeout=3)
@@ -2497,7 +2519,7 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
       msgs = [msg]
 
     for msg in msgs:
-      await asyncio.sleep(msg_delay_default)
+      await sleep(msg_delay_default)
       if text:
         add_id_to_msg(msg, correct)
         msg.xep0085_chatstate = chatstates.ChatState.ACTIVE
@@ -2545,7 +2567,7 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
         #    return True
           if delay:
             #  info(f"delay: {delay}s")
-            await asyncio.sleep(delay)
+            await sleep(delay)
           return True
         else:
           logger.info(f"send msg: finally: {res=} {res2=}")
@@ -2761,7 +2783,7 @@ async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
   async with tg_send_lock:
     for t in await split_long_text(text, MAX_MSG_BYTES_TG):
       try:
-        await asyncio.sleep(msg_delay_default)
+        await sleep(msg_delay_default)
         if omsg is not None:
           msg = await omsg.edit(t)
           omsg = None
@@ -2773,7 +2795,7 @@ async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
           err(f"发送tg消息失败: {chat_id} {type(t)} {t=} {e=}")
           return
         raise
-      await asyncio.sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2)
+      await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2)
     if correct:
       last_outmsg[chat_id] = msg
 
@@ -2873,13 +2895,13 @@ async def mt_read():
     except Exception as e:
       err(f"{e=} line: {line}")
       raise
-    await asyncio.sleep(3)
+    await sleep(3)
 
 
 #  @exceptions_handler
 #  async def titlebot(msgd):
 #
-#    await asyncio.sleep(5)
+#    await sleep(5)
 #    text = msgd['text']
 
 
@@ -3042,7 +3064,7 @@ async def parse_mt(msg):
   #    #  logger.error(info)
   #    logger.error("error: msg from mt to tg: ", exc_info=True, stack_info=True)
   #    #  await NB.send_message(MY_ID, info)
-  #    await asyncio.sleep(5)
+  #    await sleep(5)
 
 
 
@@ -3069,7 +3091,7 @@ async def clear_history(src=None):
     return
   music_bot_state.clear()
   allright.clear()
-  #  await asyncio.sleep(1)
+  #  await sleep(1)
   #  for g in queues:
   if src:
     tmp = []
@@ -3268,7 +3290,7 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
       for _ in range(5):
         if os.path.exists(fn):
           logger.info(f"busy: {gateway} {fn}")
-          await asyncio.sleep(2)
+          await sleep(2)
         else:
           break
 
@@ -3338,7 +3360,7 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
           asyncio.create_task(send("开始上传: {:.1f}MB {}".format(total/1024/1024, fp.name), src))
       async def update_tmp_msg():
         while True:
-          await asyncio.sleep(interval)
+          await sleep(interval)
           if len(last_time) == 2:
             await send("准备中", src, correct=True)
             if time.time() - last_time[0] > 15:
@@ -3429,7 +3451,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     start_time = last_time[0]
     last_current = 0
     while True:
-      await asyncio.sleep(interval)
+      await sleep(interval)
       now = time.time()-start_time
       #  if music_bot_state[src] != 3:
       #    await send("取消：{}".format(now, res), src, correct=True)
@@ -3464,13 +3486,13 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     if src:
       while src in tg_download_tasks:
         await send("下载任务排队中 {}".format(res), src, correct=True)
-        await asyncio.sleep(interval)
+        await sleep(interval)
       tg_download_tasks.add(src)
       t = asyncio.create_task(update_tmp_msg())
     t1 = asyncio.create_task(_download_media(msg, path))
     now = time.time()
     while True:
-      await asyncio.sleep(interval)
+      await sleep(interval)
       if t1.done():
         file_path = t1.result()
         if file_path is None:
@@ -3894,11 +3916,11 @@ async def parse_tg_msg(event):
   #      #  await mt_send(msg.text, "C rss2tg_bot", id2gateway[rss_bot])
   #      #  await mt_send_for_long_text(msg.text, id2gateway[rss_bot])
   #      await send(msg.text, rss_group, name="")
-  #      await asyncio.sleep(5)
+  #      await sleep(5)
   #    return
   #  elif event.chat_id in bridges:
   #    await send(msg.text, bridges[event.chat_id], name="")
-  #    await asyncio.sleep(5)
+  #    await sleep(5)
   #    return
     #  print("N: skip: %s != %s" % (event.chat_id, gpt_bot))
   else:
@@ -3968,7 +3990,7 @@ async def parse_tg_msg(event):
             if now > l[1]:
               l[1] = now
               l.append(gid)
-            await asyncio.sleep(5)
+            await sleep(5)
             if mid in mtmsgsg[jid] and now == l[1]:
               await send(text, jid=jid)
             else:
@@ -4196,7 +4218,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             url = t.result()
             if url:
              info(url)
-             await asyncio.sleep(2)
+             await sleep(2)
              res = await UB.send_file(chat_id, file=url, caption=url)
         except rpcerrorlist.WebpageCurlFailedError as e:
           err(f"文件url有问题: {e=} {url}")
@@ -4217,7 +4239,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
           pass
         else:
           err(f"backup failed: {path}")
-          await asyncio.sleep(60)
+          await sleep(60)
         asyncio.create_task(backup(path, delete=True))
 
 
@@ -4443,7 +4465,7 @@ async def stop(client=None):
     while True:
       if client.running:
         logger.info(f"等待断开账户: {jid}")
-        await asyncio.sleep(0.5)
+        await sleep(0.5)
       else:
         logger.info(f"已断开: {jid}")
         break
@@ -4502,7 +4524,7 @@ async def disco_item(jid=None, node=None, client=None):
 
 
 async def get_server_name(jid):
-  await asyncio.sleep(0.5)
+  await sleep(0.5)
   res = await disco_info(jid)
   if res:
     if res.identities:
@@ -4579,7 +4601,7 @@ async def get_server_name(jid):
 
 
   #  while True:
-  #    await asyncio.sleep(1)
+  #    await sleep(1)
   #    if fu2.done():
   #      break
   #    info(f"wait for result of fu: {coro}")
@@ -4665,14 +4687,14 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   #  async def coro():
     #  async def update_tmp_msg2():
     #    while True:
-    #      await asyncio.sleep(1)
+    #      await sleep(1)
     #      print("上传线程没卡住")
     #  async def update_tmp_msg(file):
     #    #  asyncio.create_task(update_tmp_msg2())
     #    i = 0
     #    start_time = time.time()
     #    while True:
-    #      await asyncio.sleep(1)
+    #      await sleep(1)
     #      if file.closed:
     #        info(f"文件已关闭: {file.name}")
     #        return
@@ -4685,7 +4707,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     #        info(f"end: {now}")
     #        return
     #      info(f"当前 {fp.name} {now}")
-    #      #  await asyncio.sleep(interval/2)
+    #      #  await sleep(interval/2)
     #      i += 1
     #      if i < interval:
     #        continue
@@ -4728,7 +4750,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       #  file.read = d(file.read)
       #  file.close = dc(file.close)
       file.readline = wrap_read(file.readline)
-      #  await asyncio.sleep(5)
+      #  await sleep(5)
       res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
       #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
       #  coro = _sendme("测试进程间通信 res: {}".format(res))
@@ -4940,7 +4962,7 @@ def add_id_to_msg(msg, correct):
 #            break
 #          else:
 #            logger.info("msg id 不可用: {last_outmsg[j][1]}")
-#            await asyncio.sleep(1)
+#            await sleep(1)
 #        if last_outmsg[j][1] is None:
 #          last_outmsg[j] = [msg, None]
 #      else:
@@ -4958,7 +4980,7 @@ def add_id_to_msg(msg, correct):
 #            msg.xep0308_replace = r
 #          else:
 #            logger.info("msg id 不可用: {last_outmsg[j][1]}")
-#            await asyncio.sleep(1)
+#            await sleep(1)
 #        if last_outmsg[j][1] is None:
 #          last_outmsg[j] = [msg, None]
 #        last_outmsg[j].append(0)
@@ -5344,7 +5366,7 @@ async def xmpp_msg(msg):
   if msg.xep0203_delay:
     delay = msg.xep0203_delay[0]
     #  pprint(delay)
-    #  await asyncio.sleep(1)
+    #  await sleep(1)
     real_time = delay.stamp.timestamp()
     if time.time() - real_time > 60:
       print("跳过旧消息: %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body, delay))
@@ -6003,7 +6025,7 @@ async def add_cmd():
     elif cmds[1] == "clear2":
       tg_download_tasks.clear()
       music_bot_state.clear()
-      await asyncio.sleep(interval+1)
+      await sleep(interval+1)
       tg_download_tasks.clear()
       return "ok"
     if len(cmds) == 3:
@@ -6615,7 +6637,7 @@ async def add_cmd():
     res = rc.subscribe(JID.fromstr(cmds[1]))
     #  print(f"结果：{res}")
     await send(f"结果：{res}", src)
-    await asyncio.sleep(1)
+    await sleep(1)
     res = rc.approve(JID.fromstr(cmds[1]))
     #  print(f"结果：{res}")
     await send(f"结果：{res}", src)
@@ -6942,7 +6964,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
               #  return f"bot太忙({len(target)}), 请重试"
               target.clear()
               break
-            await asyncio.sleep(4)
+            await sleep(4)
 
           mtmsgs.clear()
 
@@ -7096,7 +7118,7 @@ async def login(client=None):
       #  vc.set_photo_data('image/jpeg', data)
       vc.set_photo_data('image/png', data)
       await vs.set_vcard(vc)
-      await asyncio.sleep(1)
+      await sleep(1)
       vc = await vs.get_vcard(None)
       if vc.get_photo_mime_type() is not None:
         logger.info(f"头像设置成功: {jid} {fn}")
@@ -7307,7 +7329,7 @@ async def _bypass(msg):
   #  s = ocr.classification(res)
   s = await asyncio.to_thread(run_ocr, img=res)
   if s:
-    await asyncio.sleep(3)
+    await sleep(3)
 		#  -H 'Origin: https://suchat.org:5443' \
 		#  --data-raw 'id=13773455620261259216&key=427617&enter=OK'
     data = {
@@ -7324,7 +7346,7 @@ async def _bypass(msg):
     logger.info(res)
     #  while True:
     #    logger.info(f"等待进群结果: {myid} {jid}")
-    #    await asyncio.sleep(3)
+    #    await sleep(3)
     #    if jid in muc_now:
     #      if myid in muc_now[jid]:
     #        break
@@ -7370,7 +7392,7 @@ async def join_all():
     #    logger.info(f"无法进入的群组: {tmp}")
     #    #  await mt_send_for_long_text(f"无法进入的群组: {tmp}")
     #    ms = tmp
-    #    await asyncio.sleep(5)
+    #    await sleep(5)
     #  else:
     #    break
 
@@ -7398,7 +7420,7 @@ async def join_all():
   if tmp:
     async def f():
       send_log("进群失败，会继续尝试：\n%s" % "\n".join(tmp))
-      await asyncio.sleep(300)
+      await sleep(300)
       asyncio.create_task(join_all())
     asyncio.create_task(f())
   return True
@@ -7532,7 +7554,7 @@ async def join(jid=None, nick=None, client=None):
         if sum_try > 3:
           warn(f"进群失败(重试次数达到最大值): {myid} {jid}")
           return False
-        await asyncio.sleep(0.1)
+        await sleep(0.1)
 
     finally:
       if auto_input:
@@ -7606,7 +7628,7 @@ async def xmppbot():
 async def xmppbot2():
   while True:
     if XB.running:
-      await asyncio.sleep(6)
+      await sleep(6)
       continue
     logger.info("需要重新启动xmppbot")
     #  try:
@@ -7619,7 +7641,7 @@ async def xmppbot2():
     await stop()
     await save_data()
     sys.exit(2)
-    await asyncio.sleep(5)
+    await sleep(5)
     t = asyncio.create_task(xmppbot(), name="xmppbot")
     await t
 
@@ -7631,14 +7653,14 @@ async def stop_sub(p):
       warn(f"尝试关闭stream stdin: {p.stdin}")
       p.stdin.close()
       await p.stdin.wait_closed()
-      await asyncio.sleep(0.2)
+      await sleep(0.2)
     p.terminate()
     warn(f"尝试停止: {p}")
-    await asyncio.sleep(1)
+    await sleep(1)
     if p.returncode is None:
       p.kill()
       warn(f"强制停止: {p}")
-      await asyncio.sleep(1)
+      await sleep(1)
     if p.returncode is None:
       err(f"强制停止失败: {p}")
       return False
@@ -7683,7 +7705,7 @@ async def after_init():
   #      break
   #    else:
   #      info("等待子线程事件循环启动")
-  #      await asyncio.sleep(2)
+  #      await sleep(2)
 
 
 async def init():
@@ -7798,7 +7820,7 @@ async def amain():
       while True:
         if allright_task > 0:
           logger.info(f"等待初始化完成，剩余任务数：{allright_task}")
-          await asyncio.sleep(1)
+          await sleep(1)
           continue
         allright.set()
         break
