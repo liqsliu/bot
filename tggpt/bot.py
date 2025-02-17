@@ -6344,8 +6344,8 @@ async def add_cmd():
     #  res = await my_sexec(' '.join(cmds), src=src)
     res = await my_sshell(' '.join(cmds), src=src)
     return format_out_of_shell(res)
-  cmd_funs["sh"] = _
-  cmd_for_admin.add('sh')
+  cmd_funs["sh3"] = _
+  cmd_for_admin.add('sh3')
 
   async def _(cmds, src):
     if len(cmds) == 1:
@@ -6360,27 +6360,28 @@ async def add_cmd():
   cmd_for_admin.add('sh2')
 
   async def _(cmds, src):
+    global myshell_p
     if len(cmds) == 1:
       return f"bash -i\n.{cmds[0]} $code/stop/restart/err/kill"
-    global myshell_p
-    if cmds[1] == "restart":
-      if await stop_sub(myshell_p):
-        myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-        return "ok"
-      else:
+    elif len(cmds) == 2:
+      if cmds[1] == "restart":
+        if await stop_sub(myshell_p):
+          #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+          if await init_myshell():
+            return "ok"
         return "failed"
-    elif cmds[1] == "stop":
-      if await stop_sub(myshell_p):
+      elif cmds[1] == "stop":
+        if await stop_sub(myshell_p):
+          return "ok"
+        else:
+          return "failed"
+      elif cmds[1] == "kill":
+        myshell_p.kill()
         return "ok"
-      else:
-        return "failed"
-    elif cmds[1] == "err":
-      #  raise OSError("stop by sh3")
-      raise SystemExit("stop by sh3, restart...")
-      return "ok"
-    elif cmds[1] == "kill":
-      myshell_p.kill()
-      return "ok"
+      elif cmds[1] == "err":
+        #  raise OSError("stop by sh3")
+        raise SystemExit("stop by sh3, restart...")
+        return "ok"
     cmds.pop(0)
     cmds = ' '.join(cmds)
     cmds = list(f"{x}\n" for x in cmds.splitlines())
@@ -6388,8 +6389,8 @@ async def add_cmd():
     #  res = await myshell(cmds, src=src)
     res = await run_run( myshell(cmds, src=src) , False)
     #  return format_out_of_shell(res)
-  cmd_funs["sh3"] = _
-  cmd_for_admin.add('sh3')
+  cmd_funs["sh"] = _
+  cmd_for_admin.add('sh')
 
   async def _(cmds, src):
     if len(cmds) == 1:
