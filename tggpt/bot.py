@@ -817,7 +817,7 @@ async def decompress(data, m):
     data = data.encode()
   #  return zstandard.decompress(data)
   if m in _decompress_funcs:
-    #  return _compress_funcs[m](data)
+    return _decompress_funcs[m](data)
     #  return run_cb_in_thread(_compress_funcs[m], data)
     async def f():
       return _decompress_funcs[m](data)
