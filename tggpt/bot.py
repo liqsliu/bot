@@ -3457,9 +3457,9 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
         err(f"http connect error: {e=} {url=}")
 
       if data:
-        info(f"decompress: {type(data)} {data[:64]}")
         try:
           if "Content-Encoding" in res.headers:
+            info(f"decompress: %s {type(data)} {data[:64]}" % res.headers['Content-Encoding'])
             res = await decompress(data, res.headers['Content-Encoding'])
             if res:
               data = res
