@@ -1593,33 +1593,43 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     tmp = ""
     try:
       async with asyncio.timeout(interval) as cm:
-        while True:
-          n, d = await queue.get()
-          cm.reschedule(asyncio.get_running_loop().time()+interval)
-          d = d.decode("utf-8", errors="ignore")
-          info(f"got{p}: {d=}")
-          d = re.sub(shell_color_re,  "", d)
-          ds = d.strip()
-          info(f"got re: {d=}")
-          now = time.time()
-          need_send = False
-          if ds:
-            if now - start_time > 0.3:
-              need_send = True
-            elif len(ds) > 512:
-              need_send = True
-            if need_send is True:
-              if tmp:
-                ds = tmp + "\n" + d
-                tmp = ""
-                ds = d.strip()
-              await send(ds, src)
-          if now - start_time > interval*10:
-            log("end")
-            break
+        k =  len(cmd)
+        for c in cmd:
+          p.stdin.write( c.encode() )
+          info("send ok")
+          while True:
+            n, d = await myshell_queue.get()
+            cm.reschedule(asyncio.get_running_loop().time()+interval)
+            d = d.decode("utf-8", errors="ignore")
+            info(f"got{p}: {d=}")
+            d = re.sub(shell_color_re,  "", d)
+            ds = d.strip()
+            info(f"got re: {d=}")
+            now = time.time()
+            need_send = False
+            if ds:
+              if now - start_time > 0.3:
+                need_send = True
+              elif len(ds) > 512:
+                need_send = True
+              if need_send is True:
+                if tmp:
+                  ds = tmp + "\n" + d
+                  tmp = ""
+                  ds = d.strip()
+                await send(ds, src)
+            k -= 1
+            if now - start_time > interval*10:
+              log("end")
+              break
+            if k > 0:
+              await sleep(0.2)
+              await p.stdin.drain()
+              if myshell_queue.empty():
+                break
     except TimeoutError:
-      if now - start_time > interval:
-        info("timeout")
+      #  if now - start_time > interval:
+      info("timeout")
 
     return
 
