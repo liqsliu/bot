@@ -1539,16 +1539,18 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         d = re.sub(shell_color_re,  "", d)
         info(f"got re: {d=}")
         ds = d.strip()
-        if ds:
+        now = time.time()
+        if ds and now - ress[0] > 0.3:
+          ress[0] = now
           if tmp:
             ds = tmp + "\n" + d
             tmp = ""
             ds = d.strip()
           await send(ds, src)
+          
         else:
           #  tmp += d
           tmp = tmp + "\n" + d
-        ress[0] = time.time()
 
     ress = [time.time()]
     #  asyncio.create_task(p.stdout.readline())
