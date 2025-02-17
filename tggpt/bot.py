@@ -7916,7 +7916,10 @@ async def xmppbot2():
 
 async def stop_sub(p=None):
   if p is None:
-    p = myshell_p
+    if "myshell_p" in globals():
+      p = myshell_p
+    else:
+      return True
   if p.returncode is None:
     if p.stdin is not None:
       warn(f"尝试关闭stream stdin: {p.stdin}")
