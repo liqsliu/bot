@@ -1643,12 +1643,12 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
           #    pass
 
     start_time = time.time()
-    last = start_time-0.7 # 第一条消息更快收到
     #  tmp = ""
     tmp = b""
     ds = None
     try:
       async with asyncio.timeout(interval) as cm:
+        info(f"cmds: {cmd}")
         k =  len(cmd)
         for c in cmd:
           p.stdin.write( c.encode() )
