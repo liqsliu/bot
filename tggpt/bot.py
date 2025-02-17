@@ -1328,16 +1328,34 @@ def format_byte(num):
 
 
 async def init_myshell():
-  return await run_run(_init_myshell(), False)
+  #  return await run_run(_init_myshell(), False)
+  asyncio.create_task( run_run(_init_myshell(), False) )
+  await sleep(1)
+  if myshell_p.returncode is None:
+    return True
 
 async def _init_myshell():
   #  if "myshell_p" not in globals():
   info("start my shell...")
-  global myshell_p, myshell_lock
+  global myshell_p, myshell_lock, myshell_queue
   myshell_lock = asyncio.Lock()
   #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, preexec_fn=os.setpgrp)
   myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  #  info("close stdin...")
+  p = myshell_p
+
+  def wrap_read(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+      d = await func(*args, **kwargs)
+      print(len(d), d)
+      await myshell_queue.put(d)
+      #  asyncio.create_task( queue.put(d) )
+      return d
+    return wrapper
+  p.stdout.read = wrap_read( p.stdout.read)
+  p.stderr.read = wrap_read( p.stderr.read)
+  myshell_queue = asyncio.Queue()
+
   #  myshell_p.stdin.close()
   #  await myshell_p.stdin.wait_closed()
   #  info("close stdin ok")
@@ -1347,28 +1365,60 @@ async def _init_myshell():
   t2 = asyncio.create_task(myshell_p.stderr.read())
   try:
     await sleep(2)
-    if t1.done() or t2.done():
+    if t1.done() or t2.done() or p.returncode is not None:
       info(f"fixme: 管道无法保持开启")
       if myshell_p.returncode is None:
         await stop_sub(myshell_p)
       return False
+    info(f"myshell is running...")
+    # 据说会死锁，有问题就换成 while True
+    r = await myshell_p.wait()
+    warn(f"myshell is killed, returncode: {r}")
   finally:
     if not t1.done():
       t1.cancel()
     if not t2.done():
       t2.cancel()
-
-
   return True
 
 
-  if myshell_p.returncode is None:
-    info("use old shell...")
-  else:
-    info(f"fixme: shell is closed")
-    return False
-  return True
-
+#  async def _init_myshell():
+#    #  if "myshell_p" not in globals():
+#    info("start my shell...")
+#    global myshell_p, myshell_lock
+#    myshell_lock = asyncio.Lock()
+#    #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, preexec_fn=os.setpgrp)
+#    myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+#    #  info("close stdin...")
+#    #  myshell_p.stdin.close()
+#    #  await myshell_p.stdin.wait_closed()
+#    #  info("close stdin ok")
+#    #  loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
+#    info("wait for steam ok...")
+#    t1 = asyncio.create_task(myshell_p.stdout.read())
+#    t2 = asyncio.create_task(myshell_p.stderr.read())
+#    try:
+#      await sleep(2)
+#      if t1.done() or t2.done():
+#        info(f"fixme: 管道无法保持开启")
+#        if myshell_p.returncode is None:
+#          await stop_sub(myshell_p)
+#        return False
+#    finally:
+#      if not t1.done():
+#        t1.cancel()
+#      if not t2.done():
+#        t2.cancel()
+#    return True
+#
+#
+#    if myshell_p.returncode is None:
+#      info("use old shell...")
+#    else:
+#      info(f"fixme: shell is closed")
+#      return False
+#    return True
+#
 
 
 #  async def myshell(cmd, max_time=run_shell_timx_max, src=None):
@@ -1534,11 +1584,12 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
       tmp = ""
       while True:
         d = await f()
+        await queue.put(d)
         d = d.decode("utf-8", errors="ignore")
         info(f"got{p}: {d=}")
         d = re.sub(shell_color_re,  "", d)
-        info(f"got re: {d=}")
         ds = d.strip()
+        info(f"got re: {d=}")
         now = time.time()
         if ds and now - ress[0] > 0.3:
           ress[0] = now
@@ -1550,7 +1601,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
           
         else:
           #  tmp += d
-          tmp = tmp + "\n" + d
+          tmp = tmp + d
 
     ress = [time.time()]
     #  asyncio.create_task(p.stdout.readline())
