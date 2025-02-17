@@ -1604,6 +1604,7 @@ async def _init_myshell():
 #      await send("结束", src)
 
 
+@exceptions_handler
 async def myshell(cmd, max_time=run_shell_timx_max, src=None):
   #  if await init_myshell():
   #    pass
@@ -1644,7 +1645,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     start_time = time.time()
     last = start_time-0.7 # 第一条消息更快收到
     #  tmp = ""
-    tmp = None
+    tmp = b""
     ds = None
     try:
       async with asyncio.timeout(interval) as cm:
