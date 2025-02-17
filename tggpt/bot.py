@@ -259,11 +259,11 @@ def warn(text, more=False, no_send=True):
     logger.warning(text)
   send_log(text)
 
-def info(text):
+def info(text, tb=sys._getframe()):
   if type(text) is not str:
     text = f"{text=}"
   #  lineno = sys._getframe(1).f_lineno
-  tb = sys._getframe()
+  #  tb = sys._getframe()
   #  text = f"W: {tb.f_lineno} {tb.f_code.co_name}: {text}"
   lineno = get_lineno(tb)
   text = f"{lineno} {text}"
@@ -272,7 +272,8 @@ def info(text):
 
 
 def log(text):
-  info(text)
+  tb = sys._getframe()
+  info(text, tb)
   send_log(text)
 
 def dbg(text):
