@@ -1634,126 +1634,126 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
   return
 
 
-    async def pr(f, p=""):
-      tmp = ""
-      while True:
-        d = await f()
-        await queue.put(d)
-        d = d.decode("utf-8", errors="ignore")
-        info(f"got{p}: {d=}")
-        d = re.sub(shell_color_re,  "", d)
-        ds = d.strip()
-        info(f"got re: {d=}")
-        now = time.time()
-        if ds and now - ress[0] > 0.3:
-          ress[0] = now
-          if tmp:
-            ds = tmp + "\n" + d
-            tmp = ""
-            ds = d.strip()
-          await send(ds, src)
-          
-        else:
-          #  tmp += d
-          tmp = tmp + d
-
-    ress = [time.time()]
-    #  asyncio.create_task(p.stdout.readline())
-    t1 = asyncio.create_task(pr(p.stdout.readline, " out"))
-    t2 = asyncio.create_task(pr(p.stderr.readline, " err"))
-    try:
-      info("wait res...")
-      for c in cmd:
-        p.stdin.write( c.encode() )
-        info("send ok")
-        await p.stdin.drain()
-        #  done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
-        l = ress[0]
-        await sleep(0.5)
-        if ress[0] == l:
-          continue
-      while True:
-        info("wait for finally res...")
-        await sleep(interval+1)
-        if time.time() - ress[0] > interval:
-          info("timeout")
-          break
-        else:
-          info(f"{time.time()} << {ress[0]} + {interval}")
-    finally:
-      if not ts[0].done():
-        ts[0].cancel()
-      if not ts[1].done():
-        ts[1].cancel()
-    log("end")
-    return
-
-    #  cmd = list( x.encode()+b" " for x in cmd )
-    info(f"send cmd: {cmd}")
-    start_time=time.time()
-    tmp = ""
-    l = len(cmd)
-    try:
-      #  p.stdin.writelines( cmd )
-      for c in cmd:
-        p.stdin.write( c.encode() )
-        info("send ok")
-        await p.stdin.drain()
-        info("wait res...")
-
-
-        while True:
-          #  try:
-            #  for _ in asyncio.as_completed([t1, t2]):
-            #    break
-          done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
-          #  except TimeoutError as e:
-          if t2.done():
-            d = await t2
-            try:
-              while True:
-                d += await asyncio.wait_for(p.stderr.readline(), timeout=0.6)
-            except TimeoutError as e:
-              info("stderr end")
-            info(f"got stderr: {d}")
-            tmp = await pr(d, tmp)
-            #  d = d.decode("utf-8", errors="ignore")
-            #  d = re.sub(shell_color_re,  "", d)
-            #  await send(d, src)
-            #  e += await t2
-            t2 = f2()
-            ts[1] = t2
-          if t1.done():
-            d = await t1
-            try:
-              while True:
-                d += await asyncio.wait_for(p.stdout.readline(), timeout=0.6)
-            except TimeoutError as e:
-              info("stdout end")
-              pass
-            info(f"got stdout: {d}")
-            tmp = await pr(d, tmp)
-            #  o += await t1
-            t1 = f1()
-            ts[0] = t1
-          l -= 1
-          if len(done) == 0:
-            break
-          else:
-            info("got a line of res")
-          if time.time() - start_time > max_time:
-            await send("结束。", src)
-            return
-    finally:
-      if not ts[0].done():
-        ts[0].cancel()
-      if not ts[1].done():
-        ts[1].cancel()
-      #  info("close stdin...")
-      #  myshell_p.stdin.close()
-      #  await myshell_p.stdin.wait_closed()
-      #  info("close stdin ok")
-    await send("结束", src)
+    #  async def pr(f, p=""):
+    #    tmp = ""
+    #    while True:
+    #      d = await f()
+    #      await queue.put(d)
+    #      d = d.decode("utf-8", errors="ignore")
+    #      info(f"got{p}: {d=}")
+    #      d = re.sub(shell_color_re,  "", d)
+    #      ds = d.strip()
+    #      info(f"got re: {d=}")
+    #      now = time.time()
+    #      if ds and now - ress[0] > 0.3:
+    #        ress[0] = now
+    #        if tmp:
+    #          ds = tmp + "\n" + d
+    #          tmp = ""
+    #          ds = d.strip()
+    #        await send(ds, src)
+    #
+    #      else:
+    #        #  tmp += d
+    #        tmp = tmp + d
+    #
+    #  ress = [time.time()]
+    #  #  asyncio.create_task(p.stdout.readline())
+    #  t1 = asyncio.create_task(pr(p.stdout.readline, " out"))
+    #  t2 = asyncio.create_task(pr(p.stderr.readline, " err"))
+    #  try:
+    #    info("wait res...")
+    #    for c in cmd:
+    #      p.stdin.write( c.encode() )
+    #      info("send ok")
+    #      await p.stdin.drain()
+    #      #  done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
+    #      l = ress[0]
+    #      await sleep(0.5)
+    #      if ress[0] == l:
+    #        continue
+    #    while True:
+    #      info("wait for finally res...")
+    #      await sleep(interval+1)
+    #      if time.time() - ress[0] > interval:
+    #        info("timeout")
+    #        break
+    #      else:
+    #        info(f"{time.time()} << {ress[0]} + {interval}")
+    #  finally:
+    #    if not ts[0].done():
+    #      ts[0].cancel()
+    #    if not ts[1].done():
+    #      ts[1].cancel()
+    #  log("end")
+    #  return
+    #
+    #  #  cmd = list( x.encode()+b" " for x in cmd )
+    #  info(f"send cmd: {cmd}")
+    #  start_time=time.time()
+    #  tmp = ""
+    #  l = len(cmd)
+    #  try:
+    #    #  p.stdin.writelines( cmd )
+    #    for c in cmd:
+    #      p.stdin.write( c.encode() )
+    #      info("send ok")
+    #      await p.stdin.drain()
+    #      info("wait res...")
+    #
+    #
+    #      while True:
+    #        #  try:
+    #          #  for _ in asyncio.as_completed([t1, t2]):
+    #          #    break
+    #        done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
+    #        #  except TimeoutError as e:
+    #        if t2.done():
+    #          d = await t2
+    #          try:
+    #            while True:
+    #              d += await asyncio.wait_for(p.stderr.readline(), timeout=0.6)
+    #          except TimeoutError as e:
+    #            info("stderr end")
+    #          info(f"got stderr: {d}")
+    #          tmp = await pr(d, tmp)
+    #          #  d = d.decode("utf-8", errors="ignore")
+    #          #  d = re.sub(shell_color_re,  "", d)
+    #          #  await send(d, src)
+    #          #  e += await t2
+    #          t2 = f2()
+    #          ts[1] = t2
+    #        if t1.done():
+    #          d = await t1
+    #          try:
+    #            while True:
+    #              d += await asyncio.wait_for(p.stdout.readline(), timeout=0.6)
+    #          except TimeoutError as e:
+    #            info("stdout end")
+    #            pass
+    #          info(f"got stdout: {d}")
+    #          tmp = await pr(d, tmp)
+    #          #  o += await t1
+    #          t1 = f1()
+    #          ts[0] = t1
+    #        l -= 1
+    #        if len(done) == 0:
+    #          break
+    #        else:
+    #          info("got a line of res")
+    #        if time.time() - start_time > max_time:
+    #          await send("结束。", src)
+    #          return
+    #  finally:
+    #    if not ts[0].done():
+    #      ts[0].cancel()
+    #    if not ts[1].done():
+    #      ts[1].cancel()
+    #    #  info("close stdin...")
+    #    #  myshell_p.stdin.close()
+    #    #  await myshell_p.stdin.wait_closed()
+    #    #  info("close stdin ok")
+    #  await send("结束", src)
 
 
 
