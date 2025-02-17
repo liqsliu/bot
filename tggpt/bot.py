@@ -1604,7 +1604,6 @@ async def _init_myshell():
 #      await send("结束", src)
 
 
-@exceptions_handler
 async def myshell(cmd, max_time=run_shell_timx_max, src=None):
   #  if await init_myshell():
   #    pass
@@ -1665,7 +1664,6 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             else:
               dl = 0.3
             try:
-              kkkkkkkkkkkk
               while dl + s > time.time():
                 n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
                 info(f"got: {d}")
@@ -6374,7 +6372,8 @@ async def add_cmd():
     cmds = ' '.join(cmds)
     cmds = list(f"{x}\n" for x in cmds.splitlines())
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
-    res = await myshell(cmds, src=src)
+    #  res = await myshell(cmds, src=src)
+    res = await run_run( myshell(cmds, src=src) , False)
     #  return format_out_of_shell(res)
   cmd_funs["sh3"] = _
   cmd_for_admin.add('sh3')
