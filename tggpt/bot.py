@@ -8172,7 +8172,7 @@ def main():
     sys.exit(1)
   except SystemExit as e:
     logger.warning(f"捕获到systemexit: {e=} {e.args=}", exc_info=True, stack_info=True)
-    if "restart" in e.args[0]:
+    if "restart" in str(e.args[0]):
       sys.exit(1)
     else:
       sys.exit(2)
