@@ -2085,7 +2085,7 @@ async def send_cmd_to_bash(gateway, name, text):
   shell_cmd = ["bash", SH_PATH + "/bcmd.sh"]
   #  shell_cmd = [SH_PATH + "/bcmd.sh"]
   shell_cmd.append(gateway)
-  shell_cmd.append(name)
+  shell_cmd.append(str(name))
   shell_cmd.append(text)
   shell_cmd.append(repr(msg))
 
