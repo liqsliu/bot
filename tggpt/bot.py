@@ -3396,7 +3396,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
     headers.update({
       #  "Accept-Encoding": "br;q=1.0, gzip;q=0.8, deflate;q=0.5"
       #  "Accept-Encoding": "gzip, deflate, br, zstd"
-      "Accept-Encoding": "gzip, deflate, br"
+      "Accept-Encoding": "gzip, deflate"
       })
   res = None
   data = None
