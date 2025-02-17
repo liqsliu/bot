@@ -1597,6 +1597,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         for c in cmd:
           p.stdin.write( c.encode() )
           info("send ok")
+          k -= 1
           while True:
             n, d = await myshell_queue.get()
             cm.reschedule(asyncio.get_running_loop().time()+interval)
@@ -1616,8 +1617,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
               if tmp:
                 ds = tmp + "\n" + d
                 tmp = ""
-                ds = d.strip()
-              await send(ds, src)
+              await send(ds.strip(), src)
             else:
               tmp += d
             if now - start_time > interval*10:
@@ -1628,7 +1628,6 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
               await p.stdin.drain()
               if myshell_queue.empty():
                 break
-            k -= 1
     except TimeoutError:
       ds = tmp.strip()
       if ds:
