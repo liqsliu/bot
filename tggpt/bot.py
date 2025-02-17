@@ -1362,73 +1362,6 @@ def format_byte(num):
 #        return p.returncode, res, errs
 
 
-async def init_myshell():
-  return await run_run(_init_myshell(), False)
-  #  asyncio.create_task( run_run(_init_myshell(), False) )
-  #  await sleep(1)
-  #  if myshell_p.returncode is None:
-  #    return True
-
-async def _init_myshell():
-  #  if "myshell_p" not in globals():
-  info("start my shell...")
-  global myshell_p, myshell_lock, myshell_queue
-  myshell_lock = asyncio.Lock()
-  #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, preexec_fn=os.setpgrp)
-  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  p = myshell_p
-
-  #  def wrap_read(func):
-  #    @wraps(func)
-  #    async def wrapper(*args, **kwargs):
-  #      d = await func(*args, **kwargs)
-  #      print(len(d), d)
-  #      await myshell_queue.put(d)
-  #      #  asyncio.create_task( queue.put(d) )
-  #      return d
-  #    return wrapper
-  #  p.stdout.readline = wrap_readline( p.stdout.readline)
-  #  p.stderr.readline = wrap_readline( p.stderr.readline)
-  myshell_queue = asyncio.Queue()
-  async def pr(f, n=1):
-    await sleep(1)
-    #  if t1.done() or t2.done() or p.returncode is not None:
-    if p.returncode is not None:
-      warn(f"fixme: 管道无法保持开启")
-      if myshell_p.returncode is None:
-        await stop_sub(myshell_p)
-      return
-    info(f"myshell is ok, task of reading is running {f}")
-    #  while True:
-    while myshell_p.returncode is None:
-      d = await f()
-      await myshell_queue.put((n, d))
-    warn(f"myshell is killed, returncode: {myshell_p.returncode}")
-
-  #  myshell_p.stdin.close()
-  #  await myshell_p.stdin.wait_closed()
-  #  info("close stdin ok")
-  #  loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
-  #  info("wait for steam ok...")
-  #  t1 = asyncio.create_task(myshell_p.stdout.readline())
-  #  t2 = asyncio.create_task(myshell_p.stderr.readline())
-  t1 = asyncio.create_task(pr(p.stdout.readline, 1))
-  t2 = asyncio.create_task(pr(p.stderr.readline, 2))
-  info("clean...")
-  while not myshell_queue.empty():
-    info(await myshell_queue.get())
-  info("clean ok")
-  #  try:
-    # 据说会死锁，有问题就换成 while True
-    #  r = await myshell_p.wait()
-    #  warn(f"myshell is killed, returncode: {r}")
-  #  finally:
-  #    if not t1.done():
-  #      t1.cancel()
-  #    if not t2.done():
-  #      t2.cancel()
-  return True
-
 
 #  async def _init_myshell():
 #    #  if "myshell_p" not in globals():
@@ -1604,6 +1537,74 @@ async def _init_myshell():
 #        #  info("close stdin ok")
 #      await send("结束", src)
 
+async def init_myshell():
+  return await run_run(_init_myshell(), False)
+  #  asyncio.create_task( run_run(_init_myshell(), False) )
+  #  await sleep(1)
+  #  if myshell_p.returncode is None:
+  #    return True
+
+async def _init_myshell():
+  #  if "myshell_p" not in globals():
+  info("start my shell...")
+  global myshell_p, myshell_lock, myshell_queue
+  myshell_lock = asyncio.Lock()
+  #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, preexec_fn=os.setpgrp)
+  #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  p = myshell_p
+  #  def wrap_read(func):
+  #    @wraps(func)
+  #    async def wrapper(*args, **kwargs):
+  #      d = await func(*args, **kwargs)
+  #      print(len(d), d)
+  #      await myshell_queue.put(d)
+  #      #  asyncio.create_task( queue.put(d) )
+  #      return d
+  #    return wrapper
+  #  p.stdout.readline = wrap_readline( p.stdout.readline)
+  #  p.stderr.readline = wrap_readline( p.stderr.readline)
+  myshell_queue = asyncio.Queue()
+  async def pr(f, n=1):
+    await sleep(1)
+    #  if t1.done() or t2.done() or p.returncode is not None:
+    if p.returncode is not None:
+      warn(f"fixme: 管道无法保持开启")
+      if myshell_p.returncode is None:
+        await stop_sub(myshell_p)
+      return
+    info(f"myshell is ok, task of reading is running {f}")
+    #  while True:
+    while myshell_p.returncode is None:
+      d = await f()
+      await myshell_queue.put((n, d))
+    warn(f"myshell is killed, returncode: {myshell_p.returncode}")
+
+  #  myshell_p.stdin.close()
+  #  await myshell_p.stdin.wait_closed()
+  #  info("close stdin ok")
+  #  loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
+  #  info("wait for steam ok...")
+  #  t1 = asyncio.create_task(myshell_p.stdout.readline())
+  #  t2 = asyncio.create_task(myshell_p.stderr.readline())
+  t1 = asyncio.create_task(pr(p.stdout.readline, 1))
+  t2 = asyncio.create_task(pr(p.stderr.readline, 2))
+  #  info("clean...")
+  #  await sleep(1)
+  #  while not myshell_queue.empty():
+  #    info(await myshell_queue.get())
+  #  info("clean ok")
+  #  try:
+    # 据说会死锁，有问题就换成 while True
+    #  r = await myshell_p.wait()
+    #  warn(f"myshell is killed, returncode: {r}")
+  #  finally:
+  #    if not t1.done():
+  #      t1.cancel()
+  #    if not t2.done():
+  #      t2.cancel()
+  return True
+
 @exceptions_handler
 async def myshell(cmd, max_time=run_shell_timx_max, src=None):
   #  if await init_myshell():
@@ -1672,7 +1673,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
                 tmp += d 
                 #  info(f"got{n}: {d[:16]}")
             except TimeoutError:
-              info("send")
+              info("----")
             cm.reschedule(asyncio.get_running_loop().time()+interval)
             ds = tmp.decode("utf-8", errors="ignore")
             info(f"got{n}: {d=}")
@@ -4786,9 +4787,9 @@ async def get_server_name(jid):
 
 def run_run_loop():
   info("独立线程，启动...")
-  info("判断是否在主线程，应该是False: %s" % str(main_thread.native_id == threading.get_native_id()))
-  info("判断是否在副线程，应该是True: %s" % str(loop2_thread.native_id == threading.get_native_id()))
-  info(f"ids: {main_thread.native_id}  {loop2_thread.native_id} {threading.get_native_id()}")
+  #  info("判断是否在主线程，应该是False: %s" % str(main_thread.native_id == threading.get_native_id()))
+  #  info("判断是否在副线程，应该是True: %s" % str(loop2_thread.native_id == threading.get_native_id()))
+  #  info(f"ids: {main_thread.native_id}  {loop2_thread.native_id} {threading.get_native_id()}")
   global loop2
   loop2 = asyncio.new_event_loop()  # 创建新的事件循环
   asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
@@ -4796,9 +4797,9 @@ def run_run_loop():
 
 def in_main_thread():
   if main_thread.native_id == threading.get_native_id():
-    info(f"in main: ids: main: {main_thread.native_id}  loop2: {loop2_thread.native_id} now: {threading.get_native_id()}")
+    #  info(f"in main: ids: main: {main_thread.native_id}  loop2: {loop2_thread.native_id} now: {threading.get_native_id()}")
     return True
-  info(f"not in main: ids: main: {main_thread.native_id}  loop2: {loop2_thread.native_id} now: {threading.get_native_id()}")
+  #  info(f"not in main: ids: main: {main_thread.native_id}  loop2: {loop2_thread.native_id} now: {threading.get_native_id()}")
   #  if loop2_thread.native_id == threading.get_native_id():
   # fixme: 有可能第三个线程
   return False
@@ -7961,9 +7962,9 @@ async def after_init():
     else:
       info("等待子线程事件循环启动")
       await sleep(2)
-  info("判断是否在主线程，应该是True: %s" % str(main_thread.native_id == threading.get_native_id()))
-  info("判断是否在副线程，应该是False: %s" % str(loop2_thread.native_id == threading.get_native_id()))
-  info(f"ids: {main_thread.native_id} {loop2_thread.native_id} {threading.get_native_id()}")
+  #  info("判断是否在主线程，应该是True: %s" % str(main_thread.native_id == threading.get_native_id()))
+  #  info("判断是否在副线程，应该是False: %s" % str(loop2_thread.native_id == threading.get_native_id()))
+  #  info(f"ids: {main_thread.native_id} {loop2_thread.native_id} {threading.get_native_id()}")
   
   if await init_myshell():
     info("启动常驻shell成功")
