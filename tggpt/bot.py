@@ -259,9 +259,11 @@ def warn(text, more=False, no_send=True):
     logger.warning(text)
   send_log(text)
 
-def info(text, tb=sys._getframe()):
+def info(text, tb=None):
   if type(text) is not str:
     text = f"{text=}"
+  if tb is None:
+    tb=sys._getframe()
   #  lineno = sys._getframe(1).f_lineno
   #  tb = sys._getframe()
   #  text = f"W: {tb.f_lineno} {tb.f_code.co_name}: {text}"
@@ -7705,7 +7707,9 @@ async def xmppbot2():
 
 
 
-async def stop_sub(p=myshell_p):
+async def stop_sub(p=None):
+  if p is None:
+    p = myshell_p
   if p.returncode is None:
     if p.stdin is not None:
       warn(f"尝试关闭stream stdin: {p.stdin}")
