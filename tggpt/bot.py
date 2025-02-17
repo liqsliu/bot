@@ -1699,7 +1699,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
               #    last = now
               #  else:
               #    tmp += d
-              if now - start_time > interval*10:
+              if s - start_time > interval*10:
                 log("end")
                 return
               if k > 0:
@@ -2836,7 +2836,6 @@ async def send(*args, **kwargs):
     #  asyncio.run_coroutine_threadsafe(coro, loop)
 
 
-@exceptions_handler
 async def send_t(text, jid=None, *args, **kwargs):
   if type(jid) is int:
     if jid == CHAT_ID:
