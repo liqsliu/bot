@@ -4779,7 +4779,7 @@ def run_cb_in_thread(cb, *args, **kwargs):
 
 def cb_for_future(f, f2, oloop):
   # for multi thread
-  def cb():
+  def cb(o):
     oloop.call_soon_threadsafe(partial(f, f2()))
   return cb
 
