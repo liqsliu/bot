@@ -1513,6 +1513,11 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     t2 = asyncio.create_task(pr(p.stderr.readline, " err"))
     try:
       info("wait res...")
+      for c in cmd:
+        p.stdin.write( c.encode() )
+        info("send ok")
+        await p.stdin.drain()
+        info("wait finally res...")
       #  done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
       while True:
         await sleep(interval+1)
