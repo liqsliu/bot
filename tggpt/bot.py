@@ -3457,7 +3457,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
         err(f"http connect error: {e=} {url=}")
 
       if data:
-        info(f"decompress: {type(data)} {data[:16]}")
+        info(f"decompress: {type(data)} {data[:64]}")
         try:
           if "Content-Encoding" in res.headers:
             res = await decompress(data, res.headers['Content-Encoding'])
@@ -3477,7 +3477,8 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
             html = data.decode(errors='ignore')
           else:
             #  html = data.decode()
-            html = data
+            #  html = data
+            html = data.decode(errors='ignore')
           info(f"http res: {html} url: {url}")
         except UnicodeDecodeError as e:
           warn(f"{e=} res data: {data[:64]} 64/{len(data)}")
@@ -4829,11 +4830,14 @@ def run_cb_in_thread(cb, *args, **kwargs):
 
 def cb_for_future(f, f2, oloop):
   # for multi thread
+  @exceptions_handler
   def cb(o):
     oloop.call_soon_threadsafe(partial(f, f2()))
   return cb
 
+
 #  async def run_run(coro, *args, **kwargs, need_main=False):
+@exceptions_handler
 async def run_run(coro, need_main=False):
   if need_main:
     #  if threading.current_thread() is loop2_thread:
@@ -5302,7 +5306,7 @@ def wtf_str(s, for_what="nick"):
       tmp.append(c)
   return "".join(tmp)
 
-@exceptions_handler
+#  @exceptions_handler
 def msg_out(msg):
   if not allright.is_set():
     #  logger.info("skip msg: allright is not ok: {msg.from_}: {msg.body}")
