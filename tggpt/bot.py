@@ -1601,10 +1601,10 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             n, d = await myshell_queue.get()
             cm.reschedule(asyncio.get_running_loop().time()+interval)
             d = d.decode("utf-8", errors="ignore")
-            info(f"got{p}: {d=}")
+            info(f"got{n}: {d=}")
             d = re.sub(shell_color_re,  "", d)
             ds = d.strip()
-            info(f"got re: {d=}")
+            info(f"got{n}>: {ds=}")
             now = time.time()
             need_send = False
             if ds:
@@ -1612,22 +1612,27 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
                 need_send = True
               elif len(ds) > 512:
                 need_send = True
-              if need_send is True:
-                if tmp:
-                  ds = tmp + "\n" + d
-                  tmp = ""
-                  ds = d.strip()
-                await send(ds, src)
-            k -= 1
+            if need_send is True:
+              if tmp:
+                ds = tmp + "\n" + d
+                tmp = ""
+                ds = d.strip()
+              await send(ds, src)
+            else:
+              tmp += d
             if now - start_time > interval*10:
               log("end")
               break
-            if k > 0:
+            if k > 1:
               await sleep(0.2)
               await p.stdin.drain()
               if myshell_queue.empty():
                 break
+            k -= 1
     except TimeoutError:
+      ds = tmp.strip()
+      if ds:
+        await send(ds, src)
       #  if now - start_time > interval:
       info("timeout")
 
