@@ -4830,7 +4830,7 @@ async def run_run(coro, need_main=False):
   if need_main:
     #  if threading.current_thread() is loop2_thread:
       #  if asyncio.iscoroutine():
-    if in_main_thread:
+    if in_main_thread():
       return await coro
     elif loop2_thread.native_id == threading.get_native_id():
       fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
@@ -4841,7 +4841,7 @@ async def run_run(coro, need_main=False):
       return
   else:
     #  if threading.current_thread() is loop2_thread:
-    if in_main_thread:
+    if in_main_thread():
       fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
       oloop = loop
     #  elif main_thread.native_id != threading.get_native_id():
