@@ -2009,7 +2009,8 @@ async def my_exec(cmd, src=None, client=None, **args):
 
 async def my_eval(cmd):
   res = eval(cmd)
-  logger.info("%s %s" % (res, type(res)))
+  #  logger.info("%s %s" % (res, type(res)))
+  info("%s %s" % (type(res), str(res)[:32]))
   #  res = await cmd_answer(str(res), client=client, msg=msg, **args)
   return res
 
@@ -7888,9 +7889,12 @@ async def stop_sub(p=None):
       p.kill()
       warn(f"强制停止: {p}")
       await sleep(1)
-    if p.returncode is None:
-      err(f"强制停止失败: {p}")
-      return False
+      if p.returncode is None:
+        err(f"强制停止失败: {p}")
+        return False
+      else:
+        err(f"强制停止成功: {p}")
+        return False
     else:
       err(f"已停止: {p} {p.returncode=}")
   return True
