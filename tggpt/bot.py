@@ -5371,10 +5371,10 @@ async def xmpp_msg(msg):
     #  await sleep(1)
     real_time = delay.stamp.timestamp()
     if time.time() - real_time > 60:
-      print("跳过旧消息: %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body, delay))
+      info("跳过旧消息: %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body, delay))
       return
     else:
-      print("旧消息: %s %s %s %s %s 延迟%ss" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body, time.time() - delay.stamp.timestamp()))
+      info("旧消息: %s %s %s %s %s 延迟%ss" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body, time.time() - delay.stamp.timestamp()))
   else:
     #  info(f"假定消息无延迟: {msg}")
     real_time = time.time()
@@ -5437,13 +5437,13 @@ async def xmpp_msg(msg):
     #  if str(msg.from_) == str(rooms[muc].me.conversation_jid.bare()):
     #  if msg.from_.resource == rooms[muc].me.nick:
     if room.me is not None and nick == room.me.nick:
-      print("跳过自己发送的消息1: %s %s %s" % (msg.from_, msg.to, text[:16]))
+      info("跳过自己发送的消息1: %s %s %s" % (msg.from_, msg.to, text[:16]))
       return
 
     jids = users[muc]
     j = jids[myjid]
     if nick == j[0]:
-      print("跳过自己发送的消息2: %s %s %s" % (msg.from_, msg.to, text[:16]))
+      info("跳过自己发送的消息2: %s %s %s" % (msg.from_, msg.to, text[:16]))
       return
 
     rejoin = False
@@ -5457,7 +5457,7 @@ async def xmpp_msg(msg):
         if i.nick == nick:
           jid = str(i.direct_jid.bare())
           if jid == myjid:
-            print("跳过自己发送的消息3: %s %s %s" % (msg.from_, msg.to, text[:16]))
+            info("跳过自己发送的消息3: %s %s %s" % (msg.from_, msg.to, text[:16]))
             return
           existed = True
 
@@ -5516,7 +5516,7 @@ async def xmpp_msg(msg):
       #  if score > wtf_limit:
       if score > wtf_limit/(9/(w[1]+8) +0.1):
         if type(j[2]) is str:
-          info(f"fixme: 跳过已禁言用户的消息{int(j[2]-real_time)}: {muc} {nick} {text[:64]}")
+          warn(f"fixme: 跳过已禁言用户的消息{int(j[2]-real_time)}: {muc} {nick} {text[:64]}")
         else:
           info(f"跳过已禁言用户的消息{int(j[2]-real_time)}: {muc} {nick} {text[:64]}")
           j[2] = int(j[2] + wtf_ban_time)
@@ -5568,7 +5568,7 @@ async def xmpp_msg(msg):
     await send(text, acg_group, name="", delay=5)
     return
   else:
-    print("未知来源的消息%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
+    info("未知来源的消息%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
     if text == "ping":
       reply = msg.make_reply()
       reply.body[None] = "pong"
@@ -5585,9 +5585,7 @@ async def xmpp_msg(msg):
     return
     #  pprint(msg)
 
-  print("%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
-
-
+  info("%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
 
 
 
