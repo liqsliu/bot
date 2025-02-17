@@ -884,8 +884,8 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
   res = res.strip()
   info(f"pb res: {res_hewders=} {res}")
   if url == pb_list["fars"][0]:
-    if 'Location' in res.headers:
-      return res.headers['Location']
+    if 'Location' in res_headers:
+      return res_headers['Location']
     if res.startswith("https://fars.ee/"):
       return res
     else:
