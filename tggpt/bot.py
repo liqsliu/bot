@@ -6380,7 +6380,7 @@ async def add_cmd():
         return "ok"
       elif cmds[1] == "err":
         #  raise OSError("stop by sh3")
-        raise SystemExit("stop by sh3, restart...")
+        raise SystemExit("stop by me, restart...")
         return "ok"
     cmds.pop(0)
     cmds = ' '.join(cmds)
