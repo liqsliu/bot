@@ -794,8 +794,8 @@ async def compress(data, m="zst"):
     #  return _compress_funcs[m](data)
     #  return run_cb_in_thread(_compress_funcs[m], data)
     async def f():
-      return _decompress_funcs[m](data)
-    d = await run_run(f, False)
+      return _compress_funcs[m](data)
+    d = await run_run(f(), False)
     if d:
       info(f"压缩成功: {m} {data[:32]} -> {d[:32]}")
     else:
@@ -821,7 +821,7 @@ async def decompress(data, m):
     #  return run_cb_in_thread(_compress_funcs[m], data)
     async def f():
       return _decompress_funcs[m](data)
-    d = await run_run(f, False)
+    d = await run_run(f(), False)
     if d:
       info(f"解压成功: {m} {data[:32]} -> {d[:32]}")
     else:
