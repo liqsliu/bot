@@ -1656,6 +1656,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
           k -= 1
           while True:
             n, d = await myshell_queue.get()
+            info(f"first line: {d}")
             tmp += d 
             s = time.time()
             if ds is None:
@@ -1665,11 +1666,12 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             try:
               while dl + s > time.time():
                 n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
+                info(f"got: {d}")
                 dl += 0.01
                 tmp += d 
                 #  info(f"got{n}: {d[:16]}")
             except TimeoutError:
-              info("one queue")
+              info("send")
             cm.reschedule(asyncio.get_running_loop().time()+interval)
             ds = tmp.decode("utf-8", errors="ignore")
             info(f"got{n}: {d=}")
