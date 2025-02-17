@@ -105,24 +105,24 @@ import asyncio
 import logging
 logger = logging.getLogger(__name__)
 
-class NoParsingFilter(logging.Filter):
-  def filter(self, record):
-    #  if record.name == 'tornado.access' and record.levelno == 20:
-    if record.levelno == 20:
-      if record.name == 'httpx':
-        #  pprint(record)
-        msg = record.getMessage()
-        if msg.startswith('HTTP Request: GET https://qwen-qwen1-5-72b-chat.hf.space/--replicas/3kh1x/heartbeat/') and msg.endswith(' "HTTP/1.1 404 Not Found"'):
-          return False
-        elif '404 Not Found' in msg and 'GET https://qwen-qwen1-5-72b-chat.hf.space/--replicas/3kh1x/heartbeat/' in msg:
-           #  logger.info(f"根据关键词找到了文本: {msg=}")
-           return False
-        elif '404 Not Found' in msg:
-           logger.info(f"根据关键词找到了文本: {msg=}")
-           return False
-        #  else:
-        #    logger.info(f"文本不对: {msg=}")
-    return True
+#  class NoParsingFilter(logging.Filter):
+#    def filter(self, record):
+#      #  if record.name == 'tornado.access' and record.levelno == 20:
+#      if record.levelno == 20:
+#        if record.name == 'httpx':
+#          #  pprint(record)
+#          msg = record.getMessage()
+#          if msg.startswith('HTTP Request: GET https://qwen-qwen1-5-72b-chat.hf.space/--replicas/3kh1x/heartbeat/') and msg.endswith(' "HTTP/1.1 404 Not Found"'):
+#            return False
+#          elif '404 Not Found' in msg and 'GET https://qwen-qwen1-5-72b-chat.hf.space/--replicas/3kh1x/heartbeat/' in msg:
+#             #  logger.info(f"根据关键词找到了文本: {msg=}")
+#             return False
+#          elif '404 Not Found' in msg:
+#             logger.info(f"根据关键词找到了文本: {msg=}")
+#             return False
+#          #  else:
+#          #    logger.info(f"文本不对: {msg=}")
+#      return True
 
 
 interval = 5
@@ -132,6 +132,44 @@ run_shell_timx_max = 60
 
 
 msg_delay_default = 0.4
+
+async def safe_send(jid):
+  # msg_safe_delay
+  if jid not in send_locks:
+    send_locks[jid] = asyncio.Lock()
+  #  async with send_locks[jid]:
+  return send_locks[jid]
+
+
+
+
+#  class MyMsgLock(asyncio.Lock):
+#    def __init__(self) -> None:
+#      self.lock = super().__init__()
+#      self.last = 0
+#      return self
+#
+#    async def __aenter__(self, jid) -> None:
+#      #  return await super().__aenter__()
+#      l =  await super().__aenter__()
+#      now = time.time()
+#      #  now = time.time()
+#      # fixme：检测多条消息好一点
+#      await sleep(0.02/(time.time()-self.last)-0.004)
+#      self.last = now
+#
+#    #  async def __aexit__(self, exc_type: type[BaseException] | None, exc: BaseException | None, tb: TracebackType | None) -> None:
+#    #    return await super().__aexit__(exc_type, exc, tb)
+
+#  def get_send_lock(jid):
+#    if jid not in send_locks:
+#      send_locks[jid] = asyncio.Lock()
+#    now = time.time()
+#    #  now = time.time()
+#    # fixme：检测多条消息好一点
+#    await sleep(0.02/(time.time()-self.last)-0.004)
+
+
 
 wtf_time = 5
 wtf_time_max = 1800
@@ -187,9 +225,9 @@ def info2(s):
   print("%s" % s.replace("\n", " "))
 
 def send_log(text):
+  asyncio.create_task(send(text))
   #  asyncio.create_task(mt_send_for_long_text(text))
-  #  asyncio.create_task(send(text))
-  asyncio.create_task(sendg(text))
+  #  asyncio.create_task(sendg(text))
 
 def err(text, no_send=False):
   if type(text) is not str:
@@ -399,7 +437,6 @@ mt_send_lock2 = asyncio.Lock()
 downlaod_lock = asyncio.Lock()
 bash_lock = asyncio.Lock()
 tg_send_lock = asyncio.Lock()
-myshell_lock = asyncio.Lock()
 
 rss_lock = asyncio.Lock()
 
@@ -1287,33 +1324,41 @@ def format_byte(num):
 #        return p.returncode, res, errs
 
 
-
 async def init_myshell():
-  if "myshell_p" not in globals():
-    info("start my shell...")
-    global myshell_p
-    #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, preexec_fn=os.setpgrp)
-    myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-    #  info("close stdin...")
-    #  myshell_p.stdin.close()
-    #  await myshell_p.stdin.wait_closed()
-    #  info("close stdin ok")
-    #  loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
-    info("wait for steam ok...")
-    t1 = asyncio.create_task(myshell_p.stdout.read())
-    t2 = asyncio.create_task(myshell_p.stderr.read())
-    try:
-      await sleep(2)
-      if t1.done() or t2.done():
-        info(f"fixme: 管道无法保持开启")
-        if myshell_p.returncode is None:
-          await stop_sub(myshell_p)
-        return False
-    finally:
-      if not t1.done():
-        t1.cancel()
-      if not t2.done():
-        t2.cancel()
+  return await run_run(_init_myshell(), False)
+
+async def _init_myshell():
+  #  if "myshell_p" not in globals():
+  info("start my shell...")
+  global myshell_p, myshell_lock
+  myshell_lock = asyncio.Lock()
+  #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, preexec_fn=os.setpgrp)
+  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  #  info("close stdin...")
+  #  myshell_p.stdin.close()
+  #  await myshell_p.stdin.wait_closed()
+  #  info("close stdin ok")
+  #  loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
+  info("wait for steam ok...")
+  t1 = asyncio.create_task(myshell_p.stdout.read())
+  t2 = asyncio.create_task(myshell_p.stderr.read())
+  try:
+    await sleep(2)
+    if t1.done() or t2.done():
+      info(f"fixme: 管道无法保持开启")
+      if myshell_p.returncode is None:
+        await stop_sub(myshell_p)
+      return False
+  finally:
+    if not t1.done():
+      t1.cancel()
+    if not t2.done():
+      t2.cancel()
+
+
+  return True
+
+
   if myshell_p.returncode is None:
     info("use old shell...")
   else:
@@ -1460,10 +1505,10 @@ async def init_myshell():
 
 
 async def myshell(cmd, max_time=run_shell_timx_max, src=None):
-  if await init_myshell():
-    pass
-  else:
-    return
+  #  if await init_myshell():
+  #    pass
+  #  else:
+  #    return
   p = myshell_p
   if myshell_lock.locked():
     warn(f"myshell is busy: {cmd=}")
@@ -2577,14 +2622,14 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
       return False
 
 
-#  async def send(*args, **kwargs):
-#    return await run_run(send_t(*args, **kwargs), need_main=True)
-#    #  if threading.current_thread() is loop2_thread:
-#      #  asyncio.run_coroutine_threadsafe(coro, loop)
+async def send(*args, **kwargs):
+  return await run_run(send_t(*args, **kwargs), need_main=True)
+  #  if threading.current_thread() is loop2_thread:
+    #  asyncio.run_coroutine_threadsafe(coro, loop)
 
 
 @exceptions_handler
-async def send(text, jid=None, *args, **kwargs):
+async def send_t(text, jid=None, *args, **kwargs):
   if type(jid) is int:
     if jid == CHAT_ID:
       await _sendme(text, *args, **kwargs)
@@ -2807,7 +2852,7 @@ async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kw
   if name:
     text = f"{name}{text}"
   #  sendme(text)
-  logger.info(f"send group msg: {jid} {text}")
+  info(f"sending xmpp group msg: {jid} {text}")
   if jid is None:
     jid = log_group_private
     asyncio.create_task(_sendme(text))
@@ -2896,7 +2941,6 @@ async def mt_read():
       err(f"{e=} line: {line}")
       raise
     await sleep(3)
-
 
 #  @exceptions_handler
 #  async def titlebot(msgd):
@@ -4535,68 +4579,73 @@ async def get_server_name(jid):
 
 
 
-#  def run_run_loop():
-#    info("独立线程，启动...")
-#    global loop2
-#    loop2 = asyncio.new_event_loop()  # 创建新的事件循环
-#    asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
-#    loop2.run_forever()  # 启动事件循环
-#
-#  def in_main_thread():
-#    if loop2_thread.native_id == threading.get_native_id():
-#      return False
-#    # fixme: 有可能第三个线程
-#    return True
-#
-#  def run_cb_in_main(cb, *args, **kwargs):
-#    # fixme: 不支持多线程
-#    if in_main_thread():
-#      return cb(*args, **kwargs)
-#    loop.call_soon_threadsafe(partial(cb, *args, **kwargs))
-#
-#  def run_cb_in_thread(cb, *args, **kwargs):
-#    # fixme: 不支持多线程
-#    if in_main_thread():
-#      loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
-#    return cb(*args, **kwargs)
-#
-#  #  async def run_run(coro, *args, **kwargs, need_main=False):
-#  async def run_run(coro, need_main=False):
-#    if need_main:
-#      #  if threading.current_thread() is loop2_thread:
-#        #  if asyncio.iscoroutine():
-#      if in_main_thread:
-#        if main_thread.native_id != threading.get_native_id():
-#          fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
-#          return
-#        else:
-#          return await coro
-#      else:
-#        fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
-#        oloop = loop2
-#    else:
-#      #  if threading.current_thread() is loop2_thread:
-#      if in_main_thread:
-#        if main_thread.native_id != threading.get_native_id():
-#          return await coro
-#        else:
-#          fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
-#          oloop = loop
-#      else:
-#        return await coro
-#
-#    fu = asyncio.Future()
-#    async def cb2(fu, result=0):
-#      fu.set_result(result)
-#    def cb(fu2):
-#      if fu2.done():
-#        #  print("确实结束了")
-#        asyncio.run_coroutine_threadsafe(cb2(fu, fu2.result()), oloop)
-#      else:
-#        print("wtffffffffffffffffffffffffffffffffff, 还没结束")
-#        asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
-#    fu2.add_done_callback(cb)
-#    return await fu
+def run_run_loop():
+  info("独立线程，启动...")
+  global loop2
+  loop2 = asyncio.new_event_loop()  # 创建新的事件循环
+  asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
+  loop2.run_forever()  # 启动事件循环
+
+def in_main_thread():
+  if main_thread.native_id == threading.get_native_id():
+    return True
+  #  if loop2_thread.native_id == threading.get_native_id():
+  # fixme: 有可能第三个线程
+  return False
+
+def run_cb_in_main(cb, *args, **kwargs):
+  # fixme: 不支持多线程
+  if in_main_thread():
+    return cb(*args, **kwargs)
+  loop.call_soon_threadsafe(partial(cb, *args, **kwargs))
+
+def run_cb_in_thread(cb, *args, **kwargs):
+  # fixme: 不支持多线程
+  if in_main_thread():
+    loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
+  return cb(*args, **kwargs)
+
+
+#  async def run_run(coro, *args, **kwargs, need_main=False):
+async def run_run(coro, need_main=False):
+  if need_main:
+    #  if threading.current_thread() is loop2_thread:
+      #  if asyncio.iscoroutine():
+    if in_main_thread:
+      return await coro
+    elif loop2_thread.native_id == threading.get_native_id():
+      fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+      oloop = loop2
+    else:
+      # 未知线程
+      fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+      return
+  else:
+    #  if threading.current_thread() is loop2_thread:
+    if in_main_thread:
+      fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
+      oloop = loop
+    #  elif main_thread.native_id != threading.get_native_id():
+    elif loop2_thread.native_id == threading.get_native_id():
+      return await coro
+    else:
+      # 未知线程
+      return await coro
+
+  fu = asyncio.Future()
+  #  async def cb2(fu, result=0):
+  #    fu.set_result(result)
+  def cb(fu2):
+    if fu2.done():
+      print("确实结束了")
+      #  asyncio.run_coroutine_threadsafe(cb2(fu, fu2.result()), oloop)
+      oloop.call_soon_threadsafe(partial(fu.set_result, fu2.result()))
+    else:
+      print("wtffffffffffffffffffffffffffffffffff, 还没结束")
+      #  asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
+      oloop.call_soon_threadsafe(partial(fu.set_result, fu2.result()))
+  fu2.add_done_callback(cb)
+  return await fu
 
 
 
@@ -7672,6 +7721,20 @@ async def stop_sub(p):
 
 async def after_init():
   info("run after init...")
+  global loop2_thread, loop2, main_thread
+  loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
+  loop2_thread.start()
+  main_thread =  threading.main_thread()
+  while True:
+    if "loop2" in globals() and loop2.is_running():
+      info("子线程事件循环正在运行")
+      break
+    else:
+      info("等待子线程事件循环启动")
+      await sleep(2)
+  
+  if not await init_myshell():
+    warn("启动常驻shell失败")
   #  global myshell_p
   #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   #  start_time = time.time()
@@ -7696,17 +7759,6 @@ async def after_init():
   #  ress.append(b"")
   #  p.stderr.readline = wrap_read(p.stderr.readline)
 
-  #  global loop2_thread, loop2, main_thread
-  #  loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
-  #  loop2_thread.start()
-  #  main_thread =  threading.main_thread()
-  #  while True:
-  #    if "loop2" in globals() and loop2.is_running():
-  #      info("子线程事件循环正在运行")
-  #      break
-  #    else:
-  #      info("等待子线程事件循环启动")
-  #      await sleep(2)
 
 
 async def init():
@@ -7716,12 +7768,12 @@ async def init():
 
   #  LOGGER.addFilter(NoParsingFilter())
   # https://stackoverflow.com/questions/17275334/what-is-a-correct-way-to-filter-different-loggers-using-python-logging
-  for handler in logging.root.handlers:
-    #  handler.addFilter(logging.Filter('foo'))
-    #  handler.addFilter(NoParsingFilter())
-    f = NoParsingFilter()
-    handler.addFilter(f)
-    logger.info(f"added filter to: {handler}")
+  #  for handler in logging.root.handlers:
+  #    #  handler.addFilter(logging.Filter('foo'))
+  #    #  handler.addFilter(NoParsingFilter())
+  #    f = NoParsingFilter()
+  #    handler.addFilter(f)
+  #    logger.info(f"added filter to: {handler}")
 
   #  await init_aiohttp_session()
   #  global session
