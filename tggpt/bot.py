@@ -1328,11 +1328,11 @@ def format_byte(num):
 
 
 async def init_myshell():
-  #  return await run_run(_init_myshell(), False)
-  asyncio.create_task( run_run(_init_myshell(), False) )
-  await sleep(1)
-  if myshell_p.returncode is None:
-    return True
+  return await run_run(_init_myshell(), False)
+  #  asyncio.create_task( run_run(_init_myshell(), False) )
+  #  await sleep(1)
+  #  if myshell_p.returncode is None:
+  #    return True
 
 async def _init_myshell():
   #  if "myshell_p" not in globals():
@@ -1343,42 +1343,51 @@ async def _init_myshell():
   myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   p = myshell_p
 
-  def wrap_read(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-      d = await func(*args, **kwargs)
-      print(len(d), d)
-      await myshell_queue.put(d)
-      #  asyncio.create_task( queue.put(d) )
-      return d
-    return wrapper
-  p.stdout.read = wrap_read( p.stdout.read)
-  p.stderr.read = wrap_read( p.stderr.read)
+  #  def wrap_read(func):
+  #    @wraps(func)
+  #    async def wrapper(*args, **kwargs):
+  #      d = await func(*args, **kwargs)
+  #      print(len(d), d)
+  #      await myshell_queue.put(d)
+  #      #  asyncio.create_task( queue.put(d) )
+  #      return d
+  #    return wrapper
+  #  p.stdout.readline = wrap_readline( p.stdout.readline)
+  #  p.stderr.readline = wrap_readline( p.stderr.readline)
   myshell_queue = asyncio.Queue()
+  async def pr(f, n=1):
+    await sleep(1)
+    #  if t1.done() or t2.done() or p.returncode is not None:
+    if p.returncode is not None:
+      warn(f"fixme: 管道无法保持开启")
+      if myshell_p.returncode is None:
+        await stop_sub(myshell_p)
+      return
+    info(f"myshell is running...")
+    #  while True:
+    while myshell_p.returncode is None:
+      d = await f()
+      await myshell_queue.put((n, d))
+    warn(f"myshell is killed, returncode: {myshell_p.returncode}")
 
   #  myshell_p.stdin.close()
   #  await myshell_p.stdin.wait_closed()
   #  info("close stdin ok")
   #  loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
-  info("wait for steam ok...")
-  t1 = asyncio.create_task(myshell_p.stdout.read())
-  t2 = asyncio.create_task(myshell_p.stderr.read())
-  try:
-    await sleep(2)
-    if t1.done() or t2.done() or p.returncode is not None:
-      info(f"fixme: 管道无法保持开启")
-      if myshell_p.returncode is None:
-        await stop_sub(myshell_p)
-      return False
-    info(f"myshell is running...")
+  #  info("wait for steam ok...")
+  #  t1 = asyncio.create_task(myshell_p.stdout.readline())
+  #  t2 = asyncio.create_task(myshell_p.stderr.readline())
+  t1 = asyncio.create_task(pr(p.stdout.readline, 1))
+  t2 = asyncio.create_task(pr(p.stderr.readline, 2))
+  #  try:
     # 据说会死锁，有问题就换成 while True
-    r = await myshell_p.wait()
-    warn(f"myshell is killed, returncode: {r}")
-  finally:
-    if not t1.done():
-      t1.cancel()
-    if not t2.done():
-      t2.cancel()
+    #  r = await myshell_p.wait()
+    #  warn(f"myshell is killed, returncode: {r}")
+  #  finally:
+  #    if not t1.done():
+  #      t1.cancel()
+  #    if not t2.done():
+  #      t2.cancel()
   return True
 
 
@@ -1579,6 +1588,41 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     #  t1 = f1()
     #  t2 = f2()
     #  ts = [t1, t2]
+
+    start_time = time.time()
+    tmp = ""
+    try:
+      async with asyncio.timeout(interval) as cm:
+        while True:
+          n, d = await queue.get()
+          cm.reschedule(asyncio.get_running_loop().time()+interval)
+          d = d.decode("utf-8", errors="ignore")
+          info(f"got{p}: {d=}")
+          d = re.sub(shell_color_re,  "", d)
+          ds = d.strip()
+          info(f"got re: {d=}")
+          now = time.time()
+          need_send = False
+          if ds:
+            if now - start_time > 0.3:
+              need_send = True
+            elif len(ds) > 512:
+              need_send = True
+            if need_send is True:
+              if tmp:
+                ds = tmp + "\n" + d
+                tmp = ""
+                ds = d.strip()
+              await send(ds, src)
+          if now - start_time > interval*10:
+            log("end")
+            break
+    except TimeoutError:
+      if now - start_time > interval:
+        info("timeout")
+
+    return
+
 
     async def pr(f, p=""):
       tmp = ""
