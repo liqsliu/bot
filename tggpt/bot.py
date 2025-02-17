@@ -1653,7 +1653,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     k =  len(cmd)
     for c in cmd:
       p.stdin.write( c.encode() )
-      cm.reschedule(asyncio.get_running_loop().time()+interval)
+      #  cm.reschedule(asyncio.get_running_loop().time()+interval)
       info("send ok")
       k -= 1
       while True:
