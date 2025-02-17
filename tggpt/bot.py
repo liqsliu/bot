@@ -4778,6 +4778,7 @@ def run_cb_in_thread(cb, *args, **kwargs):
   return cb(*args, **kwargs)
 
 def cb_for_future(f, f2, oloop):
+  # for multi thread
   def cb():
     oloop.call_soon_threadsafe(partial(f, f2()))
   return cb
@@ -4811,15 +4812,16 @@ async def run_run(coro, need_main=False):
   fu = asyncio.Future()
   #  async def cb2(fu, result=0):
   #    fu.set_result(result)
-  def cb(fu2):
-    if fu2.done():
-      print("确实结束了")
-      #  asyncio.run_coroutine_threadsafe(cb2(fu, fu2.result()), oloop)
-      oloop.call_soon_threadsafe(partial(fu.set_result, fu2.result()))
-    else:
-      print("wtffffffffffffffffffffffffffffffffff, 还没结束")
-      #  asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
-      oloop.call_soon_threadsafe(partial(fu.set_result, fu2.result()))
+  #  def cb(fu2):
+  #    if fu2.done():
+  #      print("确实结束了")
+  #      #  asyncio.run_coroutine_threadsafe(cb2(fu, fu2.result()), oloop)
+  #      oloop.call_soon_threadsafe(partial(fu.set_result, fu2.result()))
+  #    else:
+  #      print("wtffffffffffffffffffffffffffffffffff, 还没结束")
+  #      #  asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
+  #      oloop.call_soon_threadsafe(partial(fu.set_result, fu2.result()))
+  cb = cb_for_future(fu.set_result, fu2.result, oloop)
   fu2.add_done_callback(cb)
   return await fu
 
@@ -7914,7 +7916,9 @@ async def after_init():
       info("等待子线程事件循环启动")
       await sleep(2)
   
-  if not await init_myshell():
+  if await init_myshell():
+    info("启动常驻shell成功")
+  else:
     warn("启动常驻shell失败")
   #  global myshell_p
   #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
