@@ -1558,12 +1558,19 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         p.stdin.write( c.encode() )
         info("send ok")
         await p.stdin.drain()
-      #  done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
+        #  done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
+        l = ress[0]
+        await sleep(0.5)
+        if ress[0] == l:
+          continue
       while True:
-        log("wait for finally res...")
+        info("wait for finally res...")
         await sleep(interval+1)
         if time.time() - ress[0] > interval:
+          info("timeout")
           break
+        else:
+          info(f"{time.time()} << {ress[0]} + {interval}")
     finally:
       if not ts[0].done():
         ts[0].cancel()
@@ -7698,7 +7705,7 @@ async def xmppbot2():
 
 
 
-async def stop_sub(p):
+async def stop_sub(p=myshell_p):
   if p.returncode is None:
     if p.stdin is not None:
       warn(f"尝试关闭stream stdin: {p.stdin}")
@@ -7921,6 +7928,7 @@ async def amain():
     #    pass
     #  await save_data()
     await stop()
+    await stop_sub()
     #  loop.run_until_complete(stop())
     #  loop.run_until_complete(loop.shutdown_asyncgens())
     #  loop.close()
