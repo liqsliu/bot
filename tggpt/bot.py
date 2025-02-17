@@ -879,10 +879,10 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
     pass
   else:
     return
-  res, res_hewders = await http(url=url, method="POST", data=data, headers=headers, return_headers=True, **kwargs)
+  res, res_headers = await http(url=url, method="POST", data=data, headers=headers, return_headers=True, **kwargs)
 #    res = res + "." + filename.split(".")[-1]
   res = res.strip()
-  info(f"pb res: {res_hewders=} {res}")
+  info(f"pb res: {res_headers=} {res}")
   if url == pb_list["fars"][0]:
     if 'Location' in res_headers:
       return res_headers['Location']
