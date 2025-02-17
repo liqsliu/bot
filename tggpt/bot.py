@@ -1590,6 +1590,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     #  ts = [t1, t2]
 
     start_time = time.time()
+    last = start_time-0.3 # 第一条消息更快收到
     tmp = ""
     try:
       async with asyncio.timeout(interval) as cm:
@@ -1609,7 +1610,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             now = time.time()
             need_send = False
             if ds:
-              if now - start_time > 0.3:
+              if now - last > 0.8:
                 need_send = True
               elif len(ds) > 512:
                 need_send = True
@@ -1618,6 +1619,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
                 ds = tmp + "\n" + d
                 tmp = ""
               await send(ds.strip(), src)
+              last = now
             else:
               tmp += d
             if now - start_time > interval*10:
