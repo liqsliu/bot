@@ -1329,6 +1329,142 @@ async def init_myshell():
 
 
 
+#  async def myshell(cmd, max_time=run_shell_timx_max, src=None):
+#    if await init_myshell():
+#      pass
+#    else:
+#      return
+#    p = myshell_p
+#    if myshell_lock.locked():
+#      warn(f"myshell is busy: {cmd=}")
+#      if src:
+#        await send("前一次任务还没结束", src, correct=True)
+#    async with myshell_lock:
+#      #  info("send \\n...")
+#      #  p.stdin.write(b"\n")
+#      #  await p.stdin.drain()
+#      #  info("wait for steam ok...")
+#      #  t1 = asyncio.create_task(p.stdout.read())
+#      #  t2 = asyncio.create_task(p.stderr.read())
+#      #  try:
+#      #    await asyncio.sleep(0.3)
+#      #    start_time = time.time()
+#      #    if t1.done() or t2.done():
+#      #      #  err(f"管道关闭，无法接受返回数据，终止执行 {cmd}")
+#      #      #  return
+#      #      warn(f"管道关闭，无法接受返回数据 now: {cmd}")
+#      #      if p.returncode is None:
+#      #        await stop_sub(p)
+#      #        info("start another shell...")
+#      #        if await init_myshell():
+#      #          pass
+#      #        else:
+#      #          return
+#      #        p = myshell_p
+#      #  finally:
+#      #    if not t1.done():
+#      #      t1.cancel()
+#      #    if not t2.done():
+#      #      t2.cancel()
+#      #  await asyncio.sleep(0.1)
+#
+#
+#      #  o = b""
+#      #  e = b""
+#      #  t1 = asyncio.create_task(p.stdout.readline())
+#      #  t2 = asyncio.create_task(p.stderr.readline())
+#      def f1():
+#        return asyncio.create_task(p.stdout.readline())
+#      def f2():
+#        return asyncio.create_task(p.stderr.readline())
+#      t1 = f1()
+#      t2 = f2()
+#      ts = [t1, t2]
+#
+#      async def pr(d, tmp):
+#        d = d.decode("utf-8", errors="ignore")
+#        info(f"got: {d=}")
+#        d = re.sub(shell_color_re,  "", d)
+#        info(f"got re: {d=}")
+#        ds = d.strip()
+#        if ds:
+#          if tmp:
+#            ds = tmp + "\n" + d
+#            tmp = ""
+#            ds = d.strip()
+#          await send(ds, src)
+#        else:
+#          tmp += d
+#        return tmp
+#
+#      #  cmd = list( x.encode()+b" " for x in cmd )
+#      info(f"send cmd: {cmd}")
+#      start_time=time.time()
+#      tmp = ""
+#      l = len(cmd)
+#      try:
+#        #  p.stdin.writelines( cmd )
+#        for c in cmd:
+#          p.stdin.write( c.encode() )
+#          info("send ok")
+#          await p.stdin.drain()
+#          info("wait res...")
+#
+#
+#          while True:
+#            #  try:
+#              #  for _ in asyncio.as_completed([t1, t2]):
+#              #    break
+#            done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
+#            #  except TimeoutError as e:
+#            if t2.done():
+#              d = await t2
+#              try:
+#                while True:
+#                  d += await asyncio.wait_for(p.stderr.readline(), timeout=0.6)
+#              except TimeoutError as e:
+#                info("stderr end")
+#              info(f"got stderr: {d}")
+#              tmp = await pr(d, tmp)
+#              #  d = d.decode("utf-8", errors="ignore")
+#              #  d = re.sub(shell_color_re,  "", d)
+#              #  await send(d, src)
+#              #  e += await t2
+#              t2 = f2()
+#              ts[1] = t2
+#            if t1.done():
+#              d = await t1
+#              try:
+#                while True:
+#                  d += await asyncio.wait_for(p.stdout.readline(), timeout=0.6)
+#              except TimeoutError as e:
+#                info("stdout end")
+#                pass
+#              info(f"got stdout: {d}")
+#              tmp = await pr(d, tmp)
+#              #  o += await t1
+#              t1 = f1()
+#              ts[0] = t1
+#            l -= 1
+#            if len(done) == 0:
+#              break
+#            else:
+#              info("got a line of res")
+#            if time.time() - start_time > max_time:
+#              await send("结束。", src)
+#              return
+#      finally:
+#        if not ts[0].done():
+#          ts[0].cancel()
+#        if not ts[1].done():
+#          ts[1].cancel()
+#        #  info("close stdin...")
+#        #  myshell_p.stdin.close()
+#        #  await myshell_p.stdin.wait_closed()
+#        #  info("close stdin ok")
+#      await send("结束", src)
+
+
 async def myshell(cmd, max_time=run_shell_timx_max, src=None):
   if await init_myshell():
     pass
@@ -1340,35 +1476,6 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     if src:
       await send("前一次任务还没结束", src, correct=True)
   async with myshell_lock:
-    #  info("send \\n...")
-    #  p.stdin.write(b"\n")
-    #  await p.stdin.drain()
-    #  info("wait for steam ok...")
-    #  t1 = asyncio.create_task(p.stdout.read())
-    #  t2 = asyncio.create_task(p.stderr.read())
-    #  try:
-    #    await asyncio.sleep(0.3)
-    #    start_time = time.time()
-    #    if t1.done() or t2.done():
-    #      #  err(f"管道关闭，无法接受返回数据，终止执行 {cmd}")
-    #      #  return
-    #      warn(f"管道关闭，无法接受返回数据 now: {cmd}")
-    #      if p.returncode is None:
-    #        await stop_sub(p)
-    #        info("start another shell...")
-    #        if await init_myshell():
-    #          pass
-    #        else:
-    #          return
-    #        p = myshell_p
-    #  finally:
-    #    if not t1.done():
-    #      t1.cancel()
-    #    if not t2.done():
-    #      t2.cancel()
-    #  await asyncio.sleep(0.1)
-
-
     #  o = b""
     #  e = b""
     #  t1 = asyncio.create_task(p.stdout.readline())
@@ -1392,7 +1499,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
           ds = tmp + "\n" + d
           tmp = ""
           ds = d.strip()
-        await send(ds, src)
+        #  await send(ds, src)
       else:
         tmp += d
       return tmp
@@ -1415,21 +1522,8 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
           #  try:
             #  for _ in asyncio.as_completed([t1, t2]):
             #    break
-          done, pending = await asyncio.wait(ts, timeout=interval/l+2, return_when=asyncio.FIRST_COMPLETED)
+          done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
           #  except TimeoutError as e:
-          if t1.done():
-            d = await t1
-            try:
-              while True:
-                d += await asyncio.wait_for(p.stdout.readline(), timeout=0.6)
-            except TimeoutError as e:
-              info("stdout end")
-              pass
-            info(f"got stdout: {d}")
-            tmp = await pr(d, tmp)
-            #  o += await t1
-            t1 = f1()
-            ts[0] = t1
           if t2.done():
             d = await t2
             try:
@@ -1445,6 +1539,19 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             #  e += await t2
             t2 = f2()
             ts[1] = t2
+          if t1.done():
+            d = await t1
+            try:
+              while True:
+                d += await asyncio.wait_for(p.stdout.readline(), timeout=0.6)
+            except TimeoutError as e:
+              info("stdout end")
+              pass
+            info(f"got stdout: {d}")
+            tmp = await pr(d, tmp)
+            #  o += await t1
+            t1 = f1()
+            ts[0] = t1
           l -= 1
           if len(done) == 0:
             break
