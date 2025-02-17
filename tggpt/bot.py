@@ -787,8 +787,8 @@ _decompress_funcs={
     }
 
 async def compress(data, m="zst"):
-    if isinstance(data, str):
-        data = data.encode()
+  if isinstance(data, str):
+    data = data.encode()
   if m in _decompress_funcs:
     #  return _compress_funcs[m](data)
     #  return run_cb_in_thread(_compress_funcs[m], data)
