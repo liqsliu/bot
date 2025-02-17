@@ -772,27 +772,57 @@ def encode_base64(data, altchars=b'+/'):
         data = data.encode()
     return base64.b64encode(data, altchars=altchars).decode().rstrip("=")
 
+_compress_funcs={
+    "zstd": zstandard.compress,
+    "br": brotli.compress,
+    "gzip": gzip.compress,
+    "deflate": zlib.compress,
+    }
 
-def compress(data, m="zst"):
+_decompress_funcs={
+    "zstd": zstandard.decompress,
+    "br": brotli.decompress,
+    "gzip": gzip.decompress,
+    "deflate": zlib.decompress,
+    }
+
+async def compress(data, m="zst"):
     if isinstance(data, str):
         data = data.encode()
-    if m == "zst":
-        return zstandard.compress(data, level=22)
-    if m == "br":
-        return brotli.compress(data)
-    if m == "gzip":
-        return gzip.compress(data)
-    if m == "deflate":
-        return zlib.compress(data)
-
-
+  if m in _decompress_funcs:
+    #  return _compress_funcs[m](data)
+    #  return run_cb_in_thread(_compress_funcs[m], data)
+    async def f():
+      return _decompress_funcs[m](data)
+    d = await run_run(f, False)
+    if d:
+      info(f"成功: {m} {data[:32]} -> {d[:32]}")
+    return d
+  err(f"unknown encoding: {m}")
+    #  if m == "zst":
+    #      return zstandard.compress(data, level=22)
+    #  if m == "br":
+    #      return brotli.compress(data)
+    #  if m == "gzip":
+    #      return gzip.compress(data)
+    #  if m == "deflate":
+    #      return zlib.compress(data)
 #  return zlib.compress(data,level=9)
 
-
-def decompress(data):
-    if isinstance(data, str):
-        data = data.encode()
-    return zstandard.decompress(data)
+async def decompress(data, m):
+  if isinstance(data, str):
+    data = data.encode()
+  #  return zstandard.decompress(data)
+  if m in _decompress_funcs:
+    #  return _compress_funcs[m](data)
+    #  return run_cb_in_thread(_compress_funcs[m], data)
+    async def f():
+      return _decompress_funcs[m](data)
+    d = await run_run(f, False)
+    if d:
+      info(f"解压成功: {m} {data[:32]} -> {d[:32]}")
+    return d
+  err(f"unknown encoding: {m}")
 
 
 
@@ -827,7 +857,7 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
 #    data = gzip.compress(data.encode())
 #    headers = {'Content-Encoding': 'gzip'}
     if ce:
-      data = compress(data.encode(), ce)
+      data = await compress(data.encode(), ce)
       headers = {'Content-Encoding': ce}
     data = {fieldname: data}
     data.update(extra)
@@ -3377,22 +3407,12 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
         err(f"http connect error: {e=} {url=}")
 
       if data:
-        info("decompress: {type(data)} {data[:16]}")
+        info(f"decompress: {type(data)} {data[:16]}")
         try:
           if "Content-Encoding" in res.headers:
-            if res.headers['Content-Encoding'] == "zstd":
-              logger.info("use zstd")
-              data = decompress(data)
-            elif res.headers['Content-Encoding'] == "gzip":
-              logger.info("use gzip")
-              data = gzip.decompress(data)
-            elif res.headers['Content-Encoding'] == "deflate":
-              logger.info("use zlib")
-              data = zlib.decompress(data)
-            elif res.headers['Content-Encoding'] == "br":
-              logger.info("use br")
-              data = brotli.decompress(data)
-            #  elif res.headers['Content-Encoding']:
+            res = await decompress(data, res.headers['Content-Encoding'])
+            if res:
+              data = res
             else:
               err("unknown encoding: {} url: {}\n".format(res.headers['Content-Encoding'], url))
               #  return data
@@ -4745,9 +4765,17 @@ def run_cb_in_main(cb, *args, **kwargs):
 def run_cb_in_thread(cb, *args, **kwargs):
   # fixme: 不支持多线程
   if in_main_thread():
+    #  fu = asyncio.Future()
+    #  cb = cb_for_future(fu.set_result, cb, loop)
     loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
+    #  return await fu
+
   return cb(*args, **kwargs)
 
+def cb_for_future(f, f2, oloop):
+  def cb():
+    oloop.call_soon_threadsafe(partial(f, f2()))
+  return cb
 
 #  async def run_run(coro, *args, **kwargs, need_main=False):
 async def run_run(coro, need_main=False):
