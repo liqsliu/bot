@@ -796,7 +796,9 @@ async def compress(data, m="zst"):
       return _decompress_funcs[m](data)
     d = await run_run(f, False)
     if d:
-      info(f"成功: {m} {data[:32]} -> {d[:32]}")
+      info(f"压缩成功: {m} {data[:32]} -> {d[:32]}")
+    else:
+      info(f"压缩failed: {m} {data[:32]}")
     return d
   err(f"unknown encoding: {m}")
     #  if m == "zst":
@@ -821,6 +823,8 @@ async def decompress(data, m):
     d = await run_run(f, False)
     if d:
       info(f"解压成功: {m} {data[:32]} -> {d[:32]}")
+    else:
+      info(f"解压failed: {m} {data[:32]}")
     return d
   err(f"unknown encoding: {m}")
 
