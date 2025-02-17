@@ -4002,7 +4002,8 @@ async def parse_tg_msg(event):
         res, nick, delay = await print_tg_msg(event)
         #  logger.info(f"转发桥接消息: {chat_id} -> {bridges[chat_id]}: {msg.text[:64]}")
         if res:
-          logger.info(f"sync: {chat_id} -> {bridges[chat_id]}: {res.split('\n', 1)[0][:16]}")
+          #  logger.info(f"sync: {chat_id} -> {bridges[chat_id]}: " + res.split('\n', 1)[0][:16] )
+          info(f"sync: {chat_id} -> {bridges[chat_id]}: " + res.split('\n', 1)[0][:16] )
           #  await send(msg.text, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
           await send(res, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
 
