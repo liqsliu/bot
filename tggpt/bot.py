@@ -1517,7 +1517,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         p.stdin.write( c.encode() )
         info("send ok")
         await p.stdin.drain()
-        info("wait finally res...")
+      info("wait finally res...")
       #  done, pending = await asyncio.wait(ts, timeout=interval/l, return_when=asyncio.FIRST_COMPLETED)
       while True:
         await sleep(interval+1)
