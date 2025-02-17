@@ -4786,7 +4786,9 @@ async def get_server_name(jid):
 
 def run_run_loop():
   info("独立线程，启动...")
-  info("判断是否在主线程，应该是False: %s" % main_thread.native_id == threading.get_native_id())
+  info("判断是否在主线程，应该是False: %s" % str(main_thread.native_id == threading.get_native_id()))
+  info("判断是否在副线程，应该是True: %s" % str(loop2_thread.native_id == threading.get_native_id()))
+  info(f"ids: {main_thread.native_id}  {loop2_thread.native_id} {threading.get_native_id()}")
   global loop2
   loop2 = asyncio.new_event_loop()  # 创建新的事件循环
   asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
@@ -7957,8 +7959,9 @@ async def after_init():
     else:
       info("等待子线程事件循环启动")
       await sleep(2)
-  info("判断是否在主线程，应该是True: %s" % main_thread.native_id == threading.get_native_id())
-  info("判断是否在副线程，应该是False: %s" % loop2_thread.native_id == threading.get_native_id())
+  info("判断是否在主线程，应该是True: %s" % str(main_thread.native_id == threading.get_native_id()))
+  info("判断是否在副线程，应该是False: %s" % str(loop2_thread.native_id == threading.get_native_id()))
+  info(f"ids: {main_thread.native_id} {loop2_thread.native_id} {threading.get_native_id()}")
   
   if await init_myshell():
     info("启动常驻shell成功")
