@@ -1678,7 +1678,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
             info(f"got{n}: {d=}")
             ds = re.sub(shell_color_re,  "", ds)
             info(f"got{n}>: {ds=}")
-            ds = tmp.strip()
+            ds = ds.strip()
             if ds:
               info(f"send: {src} {type(ds)} {ds[:16]}")
               await send(ds, src)
