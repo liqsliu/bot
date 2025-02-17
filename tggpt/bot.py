@@ -1590,46 +1590,58 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     #  ts = [t1, t2]
 
     start_time = time.time()
-    last = start_time-0.3 # 第一条消息更快收到
+    last = start_time-0.7 # 第一条消息更快收到
     tmp = ""
     try:
       async with asyncio.timeout(interval) as cm:
         k =  len(cmd)
         for c in cmd:
           p.stdin.write( c.encode() )
+          cm.reschedule(asyncio.get_running_loop().time()+interval)
           info("send ok")
           k -= 1
-          while True:
-            n, d = await myshell_queue.get()
-            cm.reschedule(asyncio.get_running_loop().time()+interval)
-            d = d.decode("utf-8", errors="ignore")
-            info(f"got{n}: {d=}")
-            d = re.sub(shell_color_re,  "", d)
-            ds = d.strip()
-            info(f"got{n}>: {ds=}")
-            now = time.time()
-            need_send = False
+          try:
+            async with asyncio.timeout() as cm2:
+              while True:
+                n, d = await myshell_queue.get()
+                cm.reschedule(asyncio.get_running_loop().time()+interval)
+                if cm2.when() is None:
+                  cm2.reschedule(asyncio.get_running_loop().time()+0.2)
+                d = d.decode("utf-8", errors="ignore")
+                info(f"got{n}: {d=}")
+                d = re.sub(shell_color_re,  "", d)
+                tmp += d
+                info(f"got{n}>: {ds=}")
+          except TimeoutError:
+            pass
+            ds = tmp.strip()
             if ds:
-              if now - last > 0.8:
-                need_send = True
-              elif len(ds) > 512:
-                need_send = True
-            if need_send is True:
-              if tmp:
-                ds = tmp + "\n" + d
-                tmp = ""
-              await send(ds.strip(), src)
-              last = now
-            else:
-              tmp += d
-            if now - start_time > interval*10:
-              log("end")
-              break
-            if k > 1:
-              await sleep(0.2)
-              await p.stdin.drain()
-              if myshell_queue.empty():
+              await send(ds, src)
+
+              ds = d.strip()
+              now = time.time()
+              need_send = False
+              if ds:
+                if now - last > 0.8:
+                  need_send = True
+                elif len(ds) > 512:
+                  need_send = True
+              if need_send is True:
+                if tmp:
+                  ds = tmp + "\n" + d
+                  tmp = ""
+                await send(ds.strip(), src)
+                last = now
+              else:
+                tmp += d
+              if now - start_time > interval*10:
+                log("end")
                 break
+              if k > 1:
+                await sleep(0.2)
+                await p.stdin.drain()
+                if myshell_queue.empty():
+                  break
     except TimeoutError:
       ds = tmp.strip()
       if ds:
@@ -3303,7 +3315,8 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
     headers.update({'Accept': "application/json,text/x-yaml,text/plain,text/html,*/*"})
   if "Accept-Encoding" not in headers:
     headers.update({
-      "Accept-Encoding": "br;q=1.0, gzip;q=0.8, deflate;q=0.5"
+      #  "Accept-Encoding": "br;q=1.0, gzip;q=0.8, deflate;q=0.5"
+      "Accept-Encoding": "gzip, deflate, br, zstd"
       })
   res = None
   data = None
@@ -3364,9 +3377,13 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
         err(f"http connect error: {e=} {url=}")
 
       if data:
+        info("decompress: {type(data)} {data[:16]}")
         try:
           if "Content-Encoding" in res.headers:
-            if res.headers['Content-Encoding'] == "gzip":
+            if res.headers['Content-Encoding'] == "zstd":
+              logger.info("use zstd")
+              data = decompress(data)
+            elif res.headers['Content-Encoding'] == "gzip":
               logger.info("use gzip")
               data = gzip.decompress(data)
             elif res.headers['Content-Encoding'] == "deflate":
@@ -3375,11 +3392,14 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
             elif res.headers['Content-Encoding'] == "br":
               logger.info("use br")
               data = brotli.decompress(data)
-            elif res.headers['Content-Encoding']:
+            #  elif res.headers['Content-Encoding']:
+            else:
               err("unknown encoding: {} url: {}\n".format(res.headers['Content-Encoding'], url))
               #  return data
+        except brotli.error as e:
+          err(f"解压时出现错误: {e=} {data[:512]}")
         except Exception as e:
-          err(f"解压时出现错误: {e=}")
+          err(f"解压时出现错误: {e=} {data[512]}")
         try:
           # if "text/plain" in res.headers['content-type']:
           if "text" in res.headers['content-type']:
