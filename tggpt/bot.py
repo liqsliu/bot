@@ -1642,6 +1642,7 @@ async def myshell(cmd, max_time=interval, src=None):
           break
         if n == 1:
           if d == b'EOF\n':
+            info(f"found EOF at 1")
             r = True
             break
           o += d
@@ -1662,6 +1663,7 @@ async def myshell(cmd, max_time=interval, src=None):
             n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
             if n == 1:
               if d == b'EOF\n':
+                info(f"found EOF at 2")
                 r = True
                 break
               o += d
