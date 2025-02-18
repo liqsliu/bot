@@ -592,7 +592,7 @@ def _exceptions_handler(e, *args, **kwargs):
     #  logger.error(f"W: {repr(e)} line: {e.__traceback__.tb_lineno}", exc_info=True, stack_info=True)
     #  print(f"W: {repr(e)} line: {e.__traceback__.tb_next.tb_next.tb_lineno}")
 
-  res = f"已忽略{res}"
+  res = f"已忽略异常: {res}"
   #  log(res)
   #  logger.warning(res)
   #  asyncio.create_task(mt_send(res))
@@ -603,6 +603,7 @@ def _exceptions_handler(e, *args, **kwargs):
   else:
     logger.warning(res)
   #  logger.warning(res)
+  return
   return res
 
 
@@ -827,7 +828,8 @@ async def decompress(data, m):
     else:
       info(f"解压failed: {m} {data[:32]}")
     return d
-  err(f"unknown encoding: {m}")
+  else:
+    err(f"unknown encoding: {m}")
 
 
 
@@ -3395,8 +3397,8 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
   if "Accept-Encoding" not in headers:
     headers.update({
       #  "Accept-Encoding": "br;q=1.0, gzip;q=0.8, deflate;q=0.5"
-      #  "Accept-Encoding": "gzip, deflate, br, zstd"
-      "Accept-Encoding": "deflate"
+      "Accept-Encoding": "gzip, deflate, br, zstd"
+      #  "Accept-Encoding": "deflate"
       })
   res = None
   data = None
@@ -3459,12 +3461,12 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
       if data:
         try:
           if "Content-Encoding" in res.headers:
-            info(f"decompress: %s {type(data)} {data[:64]}" % res.headers['Content-Encoding'])
+            info(f"start to decompress: %s {type(data)} {data[:64]}" % res.headers['Content-Encoding'])
             res = await decompress(data, res.headers['Content-Encoding'])
             if res:
               data = res
             else:
-              err("unknown encoding: {} url: {}\n".format(res.headers['Content-Encoding'], url))
+              err("解压失败: {} url: {}\n".format(res.headers['Content-Encoding'], url))
               #  return data
         except brotli.error as e:
           err(f"解压时出现错误: {e=} {data[:512]}")
@@ -4828,6 +4830,8 @@ def run_cb_in_thread(cb, *args, **kwargs):
 
   return cb(*args, **kwargs)
 
+
+@exceptions_handler
 def cb_for_future(f, f2, oloop):
   # for multi thread
   @exceptions_handler
