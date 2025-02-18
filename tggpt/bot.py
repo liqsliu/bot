@@ -3358,6 +3358,7 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
   #      data = data.encode()
     if use == "fars":
       data = data.encode()
+      filename = "-"
     elif use == "0x0":
       data = data.encode()
       filename = "-"
