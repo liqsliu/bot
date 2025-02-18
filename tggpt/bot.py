@@ -1627,7 +1627,11 @@ async def myshell(cmd, max_time=3, src=None):
           n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time)
         except TimeoutError:
           #  info("timeout")
-          await send("结束", src)
+          res = res.strip()
+          if res:
+            await send(res, src)
+          else:
+            await send("结束", src)
           return
         info(f"first line: {d}")
         tmp += d 
@@ -2380,7 +2384,7 @@ async def backup(path, src=None, delete=False):
   return url
 
 
-async def get_title(url, src=None, opts=[], max_time=60):
+async def get_title(url, src=None, opts=[], max_time=1):
   shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
   #  shell_cmd.append(url)
   shell_cmd.append(shlex.quote(url))
@@ -2407,8 +2411,8 @@ async def get_title(url, src=None, opts=[], max_time=60):
   #    return "%s\n--\nE: %s\n%s" % (o, r, e)
   cmds = ' '.join(shell_cmd)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
-  #  res = await run_run(myshell(cmds, src=src, max_time=max_time) , False)
-  res = await run_run(myshell(cmds, src=src) , False)
+  res = await run_run(myshell(cmds, src=src, max_time=max_time) , False)
+  #  res = await run_run(myshell(cmds, src=src) , False)
   if res:
     o = res
     s = o.splitlines()
