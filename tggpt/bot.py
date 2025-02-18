@@ -1667,7 +1667,8 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           # fixme: 不知道该设为多少
           r = 0
           break
-        await sleep(0.001)
+        if myshell_queue.empty():
+          await sleep(0.001)
         #  info(time.time())
         # 0.0006s
         while not myshell_queue.empty():
@@ -1706,8 +1707,8 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
         if k > 0:
           if k == 1:
             info(f"res {n}: {d}")
-          await p.stdin.drain()
-          await sleep(0.01)
+          #  await p.stdin.drain()
+          #  await sleep(0.01)
           if myshell_queue.empty():
             break
   if tmp:
