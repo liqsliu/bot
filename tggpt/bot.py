@@ -585,8 +585,8 @@ def _exceptions_handler(e, *args, **kwargs):
     asyncio.create_task(f())
     return True
   except OSError as e:
-    logger.error("出错啦 %s" % res, exc_info=True, stack_info=True)
-    raise
+    logger.error("出错啦 OSError %s" % res, exc_info=True, stack_info=True)
+    #  raise
   except Exception:
     pass
     #  logger.error(f"W: {repr(e)} line: {e.__traceback__.tb_lineno}", exc_info=True, stack_info=True)
