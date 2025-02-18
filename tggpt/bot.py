@@ -2839,7 +2839,7 @@ async def send_t(text, jid=None, *args, **kwargs):
       #  warn(f"fixme: 该消息为xmpp专用，不能发往telegram, 日志可能会缺失 {text}")
       if text.type_ == MessageType.GROUPCHAT:
         muc = str(text.to.bare())
-        jid = muc
+        #  jid = muc
       #  await _sendme(text0, *args, **kwargs)
       #  sendme(text0, *args, **kwargs)
     #  info(f"该消息为xmpp专用，不能发往telegram, {text}")
@@ -2856,8 +2856,8 @@ async def send_t(text, jid=None, *args, **kwargs):
     #    #  await _sendme(text, *args, **kwargs)
     #    sendme(text0, *args, **kwargs)
     #    jid = log_group_private
-  #  if jid is None:
-  #    return
+    if jid is None:
+      return
 
   #  if 'correct' in kwargs:
   #    correct = kwargs["correct"]
