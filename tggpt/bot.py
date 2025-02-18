@@ -522,6 +522,7 @@ def exceptions_handler(func):
 
 def _exceptions_handler(e, *args, **kwargs):
   more = True
+  no_send = False
   #  res = f'内部错误: {e=} line: {e.__traceback__.tb_next.tb_lineno}'
   tb = e.__traceback__
   #  lineno = get_lineno2(tb)
@@ -565,8 +566,10 @@ def _exceptions_handler(e, *args, **kwargs):
   except socket.timeout:
     res += ' socket timed out'
   except ConnectionError as e:
-    logger.error("链接问题，退出吧 %s" % res, exc_info=True, stack_info=True)
-    raise
+    no_send = True
+    #  logger.error("链接问题，退出吧 %s" % res, exc_info=True, stack_info=True)
+    #  raise
+    more = False
     if e.args[0] == 'stream is not ready':
       # sending xmpp msg
       more = False
@@ -580,6 +583,7 @@ def _exceptions_handler(e, *args, **kwargs):
   except UnicodeDecodeError:
     pass
   except rpcerrorlist.FloodWaitError:
+    no_send = True
     info(f"消息发送太快，被服务器当作洪水信息攻击了。")
     global msg_delay_default
     msg_delay_default += (300 - msg_delay_default)/2
@@ -592,6 +596,7 @@ def _exceptions_handler(e, *args, **kwargs):
     asyncio.create_task(f())
     return True
   except OSError as e:
+    no_send = True
     logger.error("出错啦 OSError %s" % res, exc_info=True, stack_info=True)
     raise
   except Exception:
@@ -606,10 +611,11 @@ def _exceptions_handler(e, *args, **kwargs):
   #  asyncio.create_task(send(res, ME))
   if more:
     logger.error(res, exc_info=True, stack_info=True)
-    send_log(res)
   else:
     logger.warning(res)
   #  logger.warning(res)
+  if not no_send:
+    send_log(res)
   return
   return res
 
