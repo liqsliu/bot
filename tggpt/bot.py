@@ -132,7 +132,7 @@ upload_media_time_max = 900
 run_shell_time_max = 60
 
 
-msg_delay_default = 0.4
+msg_delay_default = 0
 
 async def safe_send(jid):
   # msg_safe_delay
@@ -322,7 +322,7 @@ def generand(N=4, M=None, *, no_uppercase=False):
 
 
 async def split_long_text(text, msg_max_length=500, correct=False):
-  if len(text.encode()) / msg_max_length > 3:
+  if len(text.encode()) / msg_max_length > 2:
     url =await pastebin(text)
     if correct:
       return [f"{text[:500]}..."]
@@ -3086,10 +3086,11 @@ async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
     omsg = last_outmsg[chat_id]
   else:
     omsg = None
+  k = 0
   async with tg_send_lock:
     for t in await split_long_text(text, MAX_MSG_BYTES_TG, correct):
+      k += 1
       try:
-        await sleep(msg_delay_default)
         if omsg is not None:
           msg = await omsg.edit(t)
           omsg = None
@@ -3102,10 +3103,16 @@ async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
           return
         raise
       if correct:
+        last_outmsg[chat_id] = msg
         break
-      await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2)
-    if correct:
-      last_outmsg[chat_id] = msg
+      else:
+        last_outmsg.pop(chat_id)
+      if k > 1:
+        await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2+msg_delay_default)
+      else:
+        await sleep(msg_delay_default)
+    #  if correct:
+    #    last_outmsg[chat_id] = msg
 
   return True
   chat = await get_entity(CHAT_ID, True)
