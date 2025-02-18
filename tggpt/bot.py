@@ -834,8 +834,9 @@ async def decompress(data, m):
 
 
 pb_list = {
-    "anon": ["https://api.anonfiles.com/upload", "file"],
+    #  "anon": ["https://api.anonfiles.com/upload", "file"],
     "0x0": ["https://0x0.st/", "file"],
+    "senio": ["https://paste.sensio.no/", "-"],
     #  "fars": ["https://fars.ee/?u=1", "c"]
     "fars": ["https://fars.ee/", "c"]
     }
