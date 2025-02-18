@@ -1630,7 +1630,7 @@ async def myshell(cmd, max_time=3, src=None):
           #  info("timeout")
           res = res.strip()
           if res:
-            return res
+            pass
           else:
             res = "结束"
             await send(res, src)
@@ -1659,7 +1659,7 @@ async def myshell(cmd, max_time=3, src=None):
         info(f"got{n}: {ds[:16]}")
         ds = re.sub(shell_color_re,  "", ds)
         info(f"got{n}>: {ds[:16]}")
-        res = "\n" + ds
+        res += "\n" + ds
         ds = ds.strip()
         if ds:
           info(f"send: {src} {type(ds)} {ds[:16]}")
