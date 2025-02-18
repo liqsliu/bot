@@ -2407,7 +2407,8 @@ async def get_title(url, src=None, opts=[], max_time=60):
   #    return "%s\n--\nE: %s\n%s" % (o, r, e)
   cmds = ' '.join(shell_cmd)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
-  res = await run_run(myshell(cmds, src=src, max_time=max_time) , False)
+  #  res = await run_run(myshell(cmds, src=src, max_time=max_time) , False)
+  res = await run_run(myshell(cmds, src=src) , False)
   if res:
     o = res
     s = o.splitlines()
