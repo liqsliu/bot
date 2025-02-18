@@ -1636,23 +1636,25 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           await send(res, src)
           r = 0
           break
-        if myshell_queue.empty():
-          await p.stdin.drain()
-          await sleep(0.006)
-          if myshell_queue.empty():
-            info(f"wait for res: {c}")
-            if k > 0:
-              break
-            else:
-              continue
-        n, d = await myshell_queue.get()
+        #  if myshell_queue.empty():
+        #    await p.stdin.drain()
+        #    await sleep(0.006)
+        #    if myshell_queue.empty():
+        #      info(f"wait for res: {c}")
+        #      if k > 0:
+        #        break
+        #      else:
+        #        continue
+        #  n, d = await myshell_queue.get()
         #  #  n, d = await myshell_queue.get()
-        #  try:
-        #    n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval)
-        #  except TimeoutError:
-        #    if k > 0:
-        #      warn(f"timeout: {cmd}")
-        #      break
+        try:
+          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval)
+        except TimeoutError:
+          if k > 0:
+            #  warn(f"timeout: {cmd}")
+            break
+          warn(f"timeout: {cmd}")
+          continue
         #    res = "结束"
         #    await send(res, src)
         #    # fixme: 不知道该设为多少
