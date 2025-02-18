@@ -2826,7 +2826,7 @@ async def send_t(text, jid=None, *args, **kwargs):
 
   if jid is None:
     if isinstance(text, aioxmpp.Message):
-      warn(f"fixme: 该消息为xmpp专用，不能发往telegram, {text}")
+      #  warn(f"fixme: 该消息为xmpp专用，不能发往telegram, {text}")
     #  for i in msg.body:
     #    text = msg.body[i]
     #    if text:
