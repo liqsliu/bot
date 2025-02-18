@@ -1707,7 +1707,15 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
         #    info("----")
         #  cm.reschedule(asyncio.get_running_loop().time()+interval)
 
-        if k > 2:
+        if k == 0:
+          #  if d == b'EOF\n':
+          if d == eof:
+            info(f"found EOF")
+            o = o[:-(len(myeof))]
+            tmp = tmp[:-(len(myeof))]
+            r = True
+            break
+        elif k > 2:
           # 至少还有一条待执行的命令
           if len(tmp) < 512:
             if time.time() - start_time < 0.3:
@@ -1744,12 +1752,6 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           await p.stdin.drain()
           await sleep(0.1)
           if myshell_queue.empty():
-            break
-        if k == 0:
-          #  if d == b'EOF\n':
-          if d == eof:
-            info(f"found EOF")
-            r = True
             break
   if o:
     o = o.decode("utf-8", errors="ignore")
