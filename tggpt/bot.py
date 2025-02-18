@@ -788,12 +788,14 @@ _decompress_funcs={
     "deflate": zlib.decompress,
     }
 
+@exceptions_handler
 async def compress(data, m="zst"):
   if isinstance(data, str):
     data = data.encode()
   if m in _decompress_funcs:
     #  return _compress_funcs[m](data)
     #  return run_cb_in_thread(_compress_funcs[m], data)
+    @exceptions_handler
     async def f():
       return _compress_funcs[m](data)
     d = await run_run(f(), False)
@@ -813,6 +815,7 @@ async def compress(data, m="zst"):
     #      return zlib.compress(data)
 #  return zlib.compress(data,level=9)
 
+@exceptions_handler
 async def decompress(data, m):
   if isinstance(data, str):
     data = data.encode()
@@ -820,6 +823,7 @@ async def decompress(data, m):
   if m in _decompress_funcs:
     #  return _decompress_funcs[m](data)
     #  return run_cb_in_thread(_compress_funcs[m], data)
+    @exceptions_handler
     async def f():
       return _decompress_funcs[m](data)
     d = await run_run(f(), False)
