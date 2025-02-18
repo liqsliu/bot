@@ -2436,13 +2436,9 @@ async def get_title(url, src=None, opts=[], max_time=1):
   #    max_time = 60
   #  r, o, e = await my_sexec(shell_cmd, src=src, max_time=max_time)
   #  if r == 0:
-  #  else:
-  #    #  if err:
-  #    warn("%s\n--\nE: %s\n%s" % (o, r, e))
-  #    return "%s\n--\nE: %s\n%s" % (o, r, e)
   cmds = ' '.join(shell_cmd)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
-  r, o, e = await run_run(myshell(cmds, src=src, max_time=max_time) , False)
+  r, o, e = await run_run(myshell(cmds, src=src, max_time=1) , False)
   #  res = await run_run(myshell(cmds, src=src) , False)
   #  if res:
   #    o = res
@@ -2464,6 +2460,10 @@ async def get_title(url, src=None, opts=[], max_time=1):
       return "\n".join(s)
     else:
       return o
+  else:
+    #  if err:
+    warn("%s\n--\nE: %s\n%s" % (o, r, e))
+    return "%s\n--\nE: %s\n%s" % (o, r, e)
 
 
 
@@ -6500,7 +6500,8 @@ async def add_cmd():
       opts.append(cmds[4])
     else:
       opts.append("600")
-    res = await get_title(cmds[1], src, opts=opts, max_time=600)
+    #  res = await get_title(cmds[1], src, opts=opts, max_time=600)
+    res = await get_title(cmds[1], src, opts=opts)
     return f"{res}"
   cmd_funs["down"] = _
   cmd_for_admin.add('down')
