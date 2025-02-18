@@ -6530,7 +6530,7 @@ async def add_cmd():
       #  opts.append("600")
       max_time = run_shell_time_max
     opts.append(str(max_time))
-    res = await get_title(cmds[1], src, opts=opts, max_time=max_time))
+    res = await get_title(cmds[1], src, opts=opts, max_time=max_time)
     return f"{res}"
   cmd_funs["down"] = _
   cmd_for_admin.add('down')
