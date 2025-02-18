@@ -2704,12 +2704,12 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
             #  else:
             #    logger.info(f"not found room: {msg.to}")
 
-    #  text = None
-    text = msg.body.any()
-    #  for i in msg.body:
-    #    text = msg.body[i]
-    #    if text:
-    #      break
+    text = None
+    #  text = msg.body.any() # ValueError("any() on empty map")
+    for i in msg.body:
+      text = msg.body[i]
+      if text:
+        break
 
     if text:
       #  if jid == log_group_private:
@@ -2840,6 +2840,7 @@ async def send_t(text, jid=None, *args, **kwargs):
   #  #    jid = main_group
 
   if isinstance(text, aioxmpp.Message):
+    info(f"该消息为xmpp专用，不能发往telegram, {text}")
     #  text0 = text.body[None]
     text0 = text.body.any()
     #  text.body[None] = f"{name}{text0}"
@@ -2847,6 +2848,7 @@ async def send_t(text, jid=None, *args, **kwargs):
       text.body[i] = f"{name}{text0}"
       break
     if jid is None:
+      warn(f"fixme: 该消息为xmpp专用，不能发往telegram, 日志可能会缺失 {text}")
       if text.type_ == MessageType.GROUPCHAT:
         muc = str(text.to.bare())
       #  await _sendme(text0, *args, **kwargs)
