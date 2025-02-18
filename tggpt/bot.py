@@ -3353,9 +3353,9 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
   headers.update({'Accept': "*/*"})
 
   #  if type(data) is str:
-  if use == "fars":
-    if isinstance(data, str):
-      data = data.encode()
+  #  if isinstance(data, str):
+  #    if use == "fars" or use == "0x0":
+  #      data = data.encode()
 
   use_json = None
   if isinstance(data, str):
@@ -3364,7 +3364,9 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
 #    headers = {'Content-Encoding': 'deflate'}
 #    data = gzip.compress(data.encode())
 #    headers = {'Content-Encoding': 'gzip'}
-    if use == "senio_text":
+    if use == "fars":
+      data = data.encode()
+    elif use == "senio_text":
       pass
     else:
       if ce:
@@ -3374,7 +3376,8 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
       data.update(extra)
       if use == "0x0":
         use_json = True
-  elif isinstance(data, bytes) or type(data) == BufferedReader or type(data) == TextIOWrapper or type(data) == BytesIO:
+
+  if isinstance(data, bytes) or type(data) == BufferedReader or type(data) == TextIOWrapper or type(data) == BytesIO:
     if filename:
       data = file_for_post(data, filename=filename, fieldname=fieldname, **extra)
     else:
