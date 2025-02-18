@@ -2856,8 +2856,8 @@ async def send_t(text, jid=None, *args, **kwargs):
     #    #  await _sendme(text, *args, **kwargs)
     #    sendme(text0, *args, **kwargs)
     #    jid = log_group_private
-  if jid is None:
-    return
+  #  if jid is None:
+  #    return
 
   #  if 'correct' in kwargs:
   #    correct = kwargs["correct"]
