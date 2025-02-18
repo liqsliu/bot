@@ -1623,9 +1623,13 @@ async def myshell(cmd, max_time=interval, src=None):
       #  cm.reschedule(asyncio.get_running_loop().time()+interval)
       info("send ok")
       k -= 1
-      while True:
+      while r is None:
         if time.time() - start_time > run_shell_timx_max*10:
-          log("end")
+          #  log("end")
+          res = "end"
+          await send(res, src)
+          r = 0
+          break
           return
         #  n, d = await myshell_queue.get()
         try:
