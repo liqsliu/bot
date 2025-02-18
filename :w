@@ -3033,8 +3033,6 @@ async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
           err(f"发送tg消息失败: {chat_id} {type(t)} {t=} {e=}")
           return
         raise
-      if correct:
-        break
       await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2)
     if correct:
       last_outmsg[chat_id] = msg
