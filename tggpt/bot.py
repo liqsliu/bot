@@ -225,7 +225,11 @@ def info1(s):
 def info2(s):
   print("%s" % s.replace("\n", " "))
 
-def send_log(text):
+def send_log(text, wait=5):
+  t1 = asyncio.create_task(_send_log(text, wait=wait))
+
+async def _send_log(text, wait=5):
+  await sleep(wait)
   t1 = asyncio.create_task(send(text, jid=CHAT_ID))
   t2 = asyncio.create_task(send(text, jid=log_group_private))
   return t1, t2
@@ -616,14 +620,23 @@ def _exceptions_handler(e, *args, **kwargs):
   #  logger.warning(res)
   info("check _sendme: {}".format(_sendme.__name__ in fs))
   info("check __send: {}".format(__send.__name__ in fs))
+  if _sendme.__name__ in fs:
+    no_send = True
+    info(f"fixme: 要刷屏了 {fs} {res}")
+  elif __send.__name__ in fs:
+    no_send = True
+    info(f"fixme: 要刷屏了 {fs} {res}")
+  elif _sendme.__name__ in res:
+    no_send = True
+    info(f"fixme: 要刷屏了 {fs} {res}")
+  elif __send.__name__ in res:
+    no_send = True
+    info(f"fixme: 要刷屏了 {fs} {res}")
   if not no_send:
     logger.error(res, exc_info=True, stack_info=True)
-    if _sendme.__name__ in fs:
-      info(f"fixme: 要刷屏了 {fs}")
-    elif __send.__name__ in fs:
-      info(f"fixme: 要刷屏了 {fs}")
-    else:
-      send_log(res)
+    # wait is ok
+    #  await sleep(5)
+    send_log(res)
   elif more:
     logger.error(res, exc_info=True, stack_info=True)
   else:
