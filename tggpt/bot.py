@@ -1659,7 +1659,7 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           tmp += d 
         except TimeoutError:
           if k > 0:
-            info(f"fixme: timeout: {cmd}")
+            info(f"fixme: timeout: {c=} {cmd}")
             break
           warn(f"timeout: {cmd}")
           res = "结束"
@@ -1680,20 +1680,20 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           tmp += d 
           await sleep(0.001)
 
-          # 至少还有一条待执行的命令
-        #  if k > 2:
-        if k > 1:
-          if len(tmp) < 512:
-            if time.time() - start_time < 0.3:
-              if not e:
-                  break
-        elif k == 0:
+        if k == 0:
           if d == eof:
             info(f"found EOF")
             o = o[:-(len(eof))]
             tmp = tmp[:-(len(eof))]
             r = True
             break
+          # 至少还有一条待执行的命令
+        #  if k > 2:
+        elif k > 1:
+          if len(tmp) < 512:
+            if time.time() - start_time < 0.2:
+              if not e:
+                  break
         ds = tmp.decode("utf-8", errors="ignore")
         #  info(f"got{n}: {ds[:16]}")
         ds = re.sub(shell_color_re,  "", ds)
