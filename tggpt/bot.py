@@ -1566,8 +1566,9 @@ async def _init_myshell():
   #      t2.cancel()
   return True
 
+#  async def myshell(cmd, max_time=interval, src=None):
 @exceptions_handler
-async def myshell(cmd, max_time=interval, src=None):
+async def myshell(cmd, max_time=3, src=None):
   #  if await init_myshell():
   #    pass
   #  else:
@@ -2400,31 +2401,32 @@ async def get_title(url, src=None, opts=[], max_time=60):
   #    max_time = 60
   #  r, o, e = await my_sexec(shell_cmd, src=src, max_time=max_time)
   #  if r == 0:
-  #    s = o.splitlines()
-  #    if len(s) > 1:
-  #      path = s[-1]
-  #      if os.path.exists(path):
-  #        t = asyncio.create_task(backup(path))
-  #        url = await upload(path, src)
-  #        await t
-  #        asyncio.create_task(backup(path, delete=True))
-  #        if url:
-  #          s[-1] = f"\n- {url}"
-  #        else:
-  #          s.pop(-1)
-  #      else:
-  #        s.pop(-1)
-  #      return "\n".join(s)
-  #    else:
-  #      return o
   #  else:
   #    #  if err:
   #    warn("%s\n--\nE: %s\n%s" % (o, r, e))
   #    return "%s\n--\nE: %s\n%s" % (o, r, e)
   cmds = ' '.join(shell_cmd)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
-  res = await myshell(cmds, src=src, max_time=max_time)
-  return res
+  res = await run_run(myshell(cmds, src=src, max_time=max_time) , False)
+  if res:
+    o = res
+    s = o.splitlines()
+    if len(s) > 1:
+      path = s[-1]
+      if os.path.exists(path):
+        t = asyncio.create_task(backup(path))
+        url = await upload(path, src)
+        await t
+        asyncio.create_task(backup(path, delete=True))
+        if url:
+          s[-1] = f"\n- {url}"
+        else:
+          s.pop(-1)
+      else:
+        s.pop(-1)
+      return "\n".join(s)
+    else:
+      return o
 
 
 
