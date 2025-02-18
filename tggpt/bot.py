@@ -226,8 +226,9 @@ def info2(s):
   print("%s" % s.replace("\n", " "))
 
 def send_log(text):
-  asyncio.create_task(send(text, jid=CHAT_ID))
-  asyncio.create_task(send(text, jid=log_group_private))
+  t1 = asyncio.create_task(send(text, jid=CHAT_ID))
+  t2 = asyncio.create_task(send(text, jid=log_group_private))
+  return t1, t2
   #  asyncio.create_task(mt_send_for_long_text(text))
   #  asyncio.create_task(sendg(text))
 
@@ -532,14 +533,17 @@ def _exceptions_handler(e, *args, **kwargs):
   #    lineno += " %s" % tb.tb_next.tb_lineno
   #    last_num = tb.tb_next.tb_lineno
   #    tb = tb.tb_next
+  fs = set()
+  fs.add(tb.tb_frame.f_code.co_name)
   while True:
     last = tb.tb_next
     if last is None:
       break
     if last.tb_frame.f_code.co_filename != os.path.abspath(__file__):
-      print(last.tb_frame.f_code.co_filename, " != ", os.path.abspath(__file__))
+      #  print(last.tb_frame.f_code.co_filename, " != ", os.path.abspath(__file__))
       break
     tb = last
+    fs.add(tb.tb_frame.f_code.co_name)
   #  res = f'{tb.tb_frame.f_code.co_name} {tb.tb_frame.f_code.f_lineno} 内部错误 {e=}'
   res = f'{tb.tb_frame.f_code.co_name} {tb.tb_lineno} 内部错误 {e=}'
   try:
@@ -614,10 +618,17 @@ def _exceptions_handler(e, *args, **kwargs):
   else:
     logger.warning(res)
   #  logger.warning(res)
+  info("check _sendme: {}".format(_sendme.__name__ in fs))
+  info("check __send: {}".format(__send.__name__ in fs))
   if not no_send:
-    send_log(res)
-  return
+    if _sendme.__name__ in fs:
+      info("fixme: 要刷屏了")
+    elif __send.__name__ in fs:
+      info("fixme: 要刷屏了")
+    else:
+      send_log(res)
   return res
+
 
 
 # https://www.utf8-chartable.de/unicode-utf8-table.pl
@@ -3106,7 +3117,8 @@ async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
         last_outmsg[chat_id] = msg
         break
       else:
-        last_outmsg.pop(chat_id)
+        if chat_id in last_outmsg:
+          last_outmsg.pop(chat_id)
       if k > 1:
         await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2+msg_delay_default)
       else:
