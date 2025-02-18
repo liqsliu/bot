@@ -959,10 +959,16 @@ async def ipfs_add(data, filename=None, url="https://ipfs.pixura.io/api/v0/add",
 def file_for_post(data, filename=None, fieldname="c", mimetype=None, **kwargs):
 #  file = aiohttp.FormData()
   file = FormData(kwargs)
-  if filename and not mimetype:
-    mimetype = mimetypes.guess_type(filename)[0]
-    if not mimetype:
-      mimetype = 'application/octet-stream'
+  if not mimetype:
+    #  mimetype = 'text/plain'
+    #  mimetype = 'application/octet-stream'
+    if filename:
+      if isinstance(filename, str) and filename == "-":
+          mimetype = 'text/plain'
+      else:
+        mimetype = mimetypes.guess_type(filename)[0]
+  if not mimetype:
+    mimetype = 'application/octet-stream'
 #  for i in kwargs:
 #    file.add_fields((i, kwargs[i]))
   file.add_field(fieldname, data, filename=filename, content_type=mimetype)
@@ -3323,8 +3329,8 @@ pb_list = {
     "senio": ["https://paste.sensio.no/", "file"],
     "senio_text": ["https://paste.sensio.no/", "text"],
     "senio_put": ["https://paste.sensio.no/"],
-    "fars": ["https://fars.ee/?u=1", "c"]
-    #  "fars": ["https://fars.ee/", "c"]
+    "fars": ["https://fars.ee/?u=1", "c"],
+    "fars1": ["https://fars.ee/", "c"]
     }
 #async def pastebin(data="test", filename=None, url="https://fars.ee/?u=1", fieldname="c", extra={}, **kwargs):
 @exceptions_handler
@@ -3345,26 +3351,29 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
   headers.update({'User-agent': "curl/8.12.1"})
   #  headers.update({'Accept': "application/json,text/x-yaml,text/plain,*/*"})
   headers.update({'Accept': "*/*"})
-  #  if type(data) == str:
+
+  #  if type(data) is str:
+  if use == "fars":
+    if isinstance(data, str):
+      data = data.encode()
+
+  use_json = None
   if isinstance(data, str):
 #  data = {"content": data}
 #    data = zlib.compress(data)
 #    headers = {'Content-Encoding': 'deflate'}
 #    data = gzip.compress(data.encode())
 #    headers = {'Content-Encoding': 'gzip'}
-    if ce:
-      data = await compress(data.encode(), ce)
-      headers = {'Content-Encoding': ce}
-    data = {
-        fieldname: data
-            }
-    data.update(extra)
-    if use == "0x0":
-      data.update(
-          {
-        "filename": "-"
-            }
-          )
+    if use == "senio_text":
+      pass
+    else:
+      if ce:
+        data = await compress(data.encode(), ce)
+        headers = {'Content-Encoding': ce}
+      data = { fieldname: data }
+      data.update(extra)
+      if use == "0x0":
+        use_json = True
   elif isinstance(data, bytes) or type(data) == BufferedReader or type(data) == TextIOWrapper or type(data) == BytesIO:
     if filename:
       data = file_for_post(data, filename=filename, fieldname=fieldname, **extra)
@@ -3378,7 +3387,10 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
     pass
   else:
     return
-  res, res_headers = await http(url=url, method="POST", data=data, headers=headers, return_headers=True, **kwargs)
+  if use_json:
+    res, res_headers = await http(url=url, method="POST", json=data, headers=headers, return_headers=True, **kwargs)
+  else:
+    res, res_headers = await http(url=url, method="POST", data=data, headers=headers, return_headers=True, **kwargs)
 #    res = res + "." + filename.split(".")[-1]
   res = res.strip()
   info(f"pb res: {res_headers=} {res}")
