@@ -2797,7 +2797,8 @@ async def send(*args, **kwargs):
 async def send_t(text, jid=None, *args, **kwargs):
   if  type(jid) is int:
     if jid == CHAT_ID:
-      await _sendme(text, *args, **kwargs)
+      #  await _sendme(text, *args, **kwargs)
+      sendme(text, *args, **kwargs)
       jid = log_group_private
     else:
       return await _sendme(text, jid, *args, **kwargs)
@@ -2856,12 +2857,14 @@ async def send_t(text, jid=None, *args, **kwargs):
     if jid is None:
       if text.type_ == MessageType.GROUPCHAT:
         muc = str(text.to.bare())
-      await _sendme(text0, *args, **kwargs)
+      #  await _sendme(text0, *args, **kwargs)
+      sendme(text0, *args, **kwargs)
   else:
     text0 = text
     text = f"{name}{text}"
     if jid is None:
-      await _sendme(text, *args, **kwargs)
+      #  await _sendme(text, *args, **kwargs)
+      sendme(text0, *args, **kwargs)
       jid = log_group_private
 
 
@@ -3000,10 +3003,9 @@ async def send1(text, jid=None, *args, **kwargs):
 #    #  return await client.send(msg)
 #    return await _send(msg, client, gpm=gpm)
 
-def sendme(text, chat_id=CHAT_ID):
-  asyncio.create_task(_sendme(text))
+def sendme(*args, **kwargs):
+  asyncio.create_task(_sendme(*args, **kwargs))
   #  asyncio.create_task(run_run(_sendme(text)))
-
 
 
 async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
@@ -4329,7 +4331,7 @@ async def parse_tg_msg(event):
         #  logger.info(f"转发桥接消息: {chat_id} -> {bridges[chat_id]}: {msg.text[:64]}")
         if res:
           #  logger.info(f"sync: {chat_id} -> {bridges[chat_id]}: " + res.split('\n', 1)[0][:16] )
-          info(f"sync: {chat_id} -> {bridges[chat_id]}: " + res.split('\n', 1)[0][:16] )
+          info(f"sync: {chat_id} -> {bridges[chat_id]}: " + (res.split('\n', 1)[0][:16]) )
           #  await send(msg.text, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
           await send(res, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
 
@@ -4464,8 +4466,10 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       except Exception as e:
         err(f"fixme: {e=}")
         
-    src = log_group_private
-    path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
+    #  src = log_group_private
+    src = chat_id
+    #  path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
+    path = await tg_download_media(tmsg, src=chat_id, max_wait_time=600)
     if path:
       if path.endswith(".tgs"):
         info(f"found tgs file: {path}")
@@ -4488,7 +4492,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         #  else:
         #    warn(f"转换tgs文件失败: {path} {r=} {o=} {e=}")
         #  r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
-        r, _, _ = await my_sexec(shell_cmd, max_time=get_timeout(length)*3+30)
+        r, _, _ = await my_sexec(shell_cmd, max_time=get_timeout(length)*3+30, src=chat_id)
         #  info(f"{r=}")
         if r == 0:
           #  shell_cmd = ["rm", path]
@@ -7230,6 +7234,7 @@ async def run_cmd(*args, **kwargs):
     res = wtf_str(res, "xmpp")
   return res
 
+@exceptions_handler
 async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
   if text == "ping":
     return "pong"
