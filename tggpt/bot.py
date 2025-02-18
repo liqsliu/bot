@@ -129,7 +129,7 @@ logger = logging.getLogger(__name__)
 interval = 5
 download_media_time_max = 60
 upload_media_time_max = 900
-run_shell_timx_max = 60
+run_shell_time_max = 60
 
 
 msg_delay_default = 0.4
@@ -1363,7 +1363,7 @@ def format_byte(num):
 #
 
 
-#  async def myshell(cmd, max_time=run_shell_timx_max, src=None):
+#  async def myshell(cmd, max_time=run_shell_time_max, src=None):
 #    if await init_myshell():
 #      pass
 #    else:
@@ -1568,7 +1568,7 @@ async def _init_myshell():
 
 #  async def myshell(cmd, max_time=interval, src=None):
 @exceptions_handler
-async def myshell(cmd, max_time=interval, src=None):
+async def myshell(cmd, max_time=run_shell_time_max, src=None):
   # 有个问题，不知道何时运行结束，目前想到两种方案：bash -i和最后发送echo end然后等出现end提示。
   #  if await init_myshell():
   #    pass
@@ -1617,7 +1617,10 @@ async def myshell(cmd, max_time=interval, src=None):
   #    async with asyncio.timeout(interval) as cm:
   info(f"cmds: {cmd}")
   cmd.append("echo $?\n")
-  cmd.append("echo EOF\n")
+  eof = generand(16) + "\n"
+  #  cmd.append(f"echo EOF\n")
+  cmd.append(f"echo "+eof)
+  eof = eof.encode()
   k =  len(cmd)
   async with myshell_lock:
     for c in cmd:
@@ -1627,11 +1630,13 @@ async def myshell(cmd, max_time=interval, src=None):
       k -= 1
       while r is None:
         if k == 0:
-          if d == b'EOF\n':
+          #  if d == b'EOF\n':
+          if d == eof:
             info(f"found EOF")
             r = True
             break
-        if time.time() - start_time > run_shell_timx_max*10:
+        #  if time.time() - start_time > run_shell_time_max*10:
+        if time.time() - start_time > max_time:
           #  log("end")
           res = "end"
           await send(res, src)
@@ -1648,7 +1653,8 @@ async def myshell(cmd, max_time=interval, src=None):
           break
         if n == 1:
           if k == 0:
-            if d == b'EOF\n':
+            #  if d == b'EOF\n':
+            if d == eof:
               info(f"found EOF at 1")
               r = True
               break
@@ -1880,14 +1886,14 @@ async def myshell(cmd, max_time=interval, src=None):
 
 
 
-async def my_sexec(cmds, max_time=run_shell_timx_max, src=None):
+async def my_sexec(cmds, max_time=run_shell_time_max, src=None):
   #  p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   info(f"run shell cmds: {cmds}")
   p = await asyncio.create_subprocess_exec(*cmds, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   return await my_subprocess(p, max_time=max_time, src=src)
 
 
-async def my_sshell(cmd, max_time=run_shell_timx_max, src=None):
+async def my_sshell(cmd, max_time=run_shell_time_max, src=None):
   info(f"run shell cmd: {cmd}")
   p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   #  p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
@@ -1911,7 +1917,7 @@ def wrap_read(func, src, ress):
     return data
   return wrapper
 
-async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
+async def my_subprocess(p, max_time=run_shell_time_max, src=None):
   start_time = time.time()
   ress = [start_time, b""]
   p.stdout.read = wrap_read( p.stdout.read, src, ress)
@@ -2436,7 +2442,8 @@ async def backup(path, src=None, delete=False):
   return url
 
 
-async def get_title(url, src=None, opts=[], max_time=1):
+@exceptions_handler
+async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
   #  shell_cmd.append(url)
   shell_cmd.append(shlex.quote(url))
@@ -6518,10 +6525,12 @@ async def add_cmd():
       else:
         break
     if len(cmds) == 5:
-      opts.append(cmds[4])
+      max_time = cmds[4]
     else:
-      opts.append("600")
-    res = await get_title(cmds[1], src, opts=opts, max_time=8)
+      #  opts.append("600")
+      max_time = run_shell_time_max
+    opts.append(str(max_time))
+    res = await get_title(cmds[1], src, opts=opts, max_time=max_time))
     return f"{res}"
   cmd_funs["down"] = _
   cmd_for_admin.add('down')
