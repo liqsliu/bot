@@ -1709,6 +1709,12 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           await sleep(0.01)
           if myshell_queue.empty():
             break
+  if tmp:
+    ds = tmp.decode("utf-8", errors="ignore")
+    ds = re.sub(shell_color_re,  "", ds)
+    ds = ds.strip()
+    if ds:
+      await send(ds, src)
   if o:
     o = o.decode("utf-8", errors="ignore")
     o = o.strip()
