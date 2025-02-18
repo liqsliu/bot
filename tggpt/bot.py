@@ -1626,13 +1626,15 @@ async def myshell(cmd, max_time=3, src=None):
         try:
           n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time)
         except TimeoutError:
+          #  await send("结束", src)
           #  info("timeout")
           res = res.strip()
           if res:
-            await send(res, src)
+            return res
           else:
-            await send("结束", src)
-          return
+            res = "结束"
+            await send(res, src)
+          return res
         info(f"first line: {d}")
         tmp += d 
         if ds is None:
