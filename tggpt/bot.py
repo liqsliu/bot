@@ -1604,7 +1604,6 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           #  except TimeoutError:
           #    pass
 
-  start_time = time.time()
   #  tmp = ""
   tmp = b""
   res = ""
@@ -1622,6 +1621,7 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
   cmd.append(f"echo "+eof)
   eof = eof.encode()
   k =  len(cmd)
+  start_time = time.time()
   async with myshell_lock:
     for c in cmd:
       p.stdin.write( c.encode() )
@@ -1661,30 +1661,45 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           o += d
         else:
           e += d
-        info(f"first line: {d}")
         tmp += d 
-        if ds is None:
-          #  dl = 0.1
-          dl = time.time() + 0.1
-        else:
-          #  dl = 0.3
-          dl = time.time() + 0.3
+        info(f"got {n}: {d}")
+        if k == 1:
+          if myshell_queue.empty():
+          #  r = int(d.decode().strip())
+            break
+        #  elif k > 1:
+        #  if ds is None:
+        #    dl = time.time() + 0.1
+        #  else:
+        #    dl = time.time() + 0.3
+        #  if not myshell_queue.empty() and dl > time.time():
+        #    continue
         #  s = time.time()
-        try:
-          #  while dl + s > time.time():
-          while dl > time.time():
-            n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
-            if n == 1:
-              o += d
-            else:
-              e += d
-            info(f"got: {d}")
-            dl += 0.01
-            tmp += d 
-            #  info(f"got{n}: {d[:16]}")
-        except TimeoutError:
-          info("----")
+        #  try:
+        #    #  while dl + s > time.time():
+        #    while dl > time.time():
+        while not myshell_queue.empty():
+        #      n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
+          n, d = await myshell_queue.get()
+          if n == 1:
+            o += d
+          else:
+            e += d
+          await sleep(0.1)
+        #      info(f"got: {d}")
+        #      dl += 0.01
+        #      tmp += d
+        #      #  info(f"got{n}: {d[:16]}")
+        #  except TimeoutError:
+        #    info("----")
         #  cm.reschedule(asyncio.get_running_loop().time()+interval)
+
+        if k > 2:
+          # 至少还有一条待执行的命令
+          if len(tmp) < 512:
+            if time.time() - start_time < 0.3:
+              if not e:
+                  break
         ds = tmp.decode("utf-8", errors="ignore")
         info(f"got{n}: {ds[:16]}")
         ds = re.sub(shell_color_re,  "", ds)
@@ -1692,7 +1707,7 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
         #  res += "\n" + ds
         ds = ds.strip()
         if ds:
-          info(f"send: {src} {type(ds)} {ds[:16]}")
+          #  info(f"send: {src} {type(ds)} {ds[:16]}")
           #  if src is not None:
           await send(ds, src)
           tmp = b""
@@ -1717,29 +1732,6 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           await p.stdin.drain()
           if myshell_queue.empty():
             break
-      #  k -= 1
-      #  if r is not None:
-      #    break
-  #  except TimeoutError:
-  #    #  if tmp:
-  #    #    ds = tmp.decode("utf-8", errors="ignore")
-  #    #    info(f"got{n}: {d=}")
-  #    #    ds = re.sub(shell_color_re,  "", ds)
-  #    #    info(f"got{n}>: {ds=}")
-  #    #    ds = tmp.strip()
-  #    #    if ds:
-  #    #      ds = tmp.strip()
-  #    #      if ds:
-  #    #        await send(ds, src)
-  #      #  if now - start_time > interval:
-  #    info("timeout")
-    #  res = format_out_of_shell(0, o, e)
-    #  #  await send("结束", src)
-    #  #  info("timeout")
-    #  res = res.strip()
-    #  if res:
-    #    pass
-    #  else:
   if o:
     o = o.decode("utf-8", errors="ignore")
     o = o.strip()
