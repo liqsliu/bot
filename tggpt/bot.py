@@ -1612,6 +1612,7 @@ async def myshell(cmd, max_time=interval, src=None):
   e = b""
   r = None
   ds = None
+  d = None
   #  try:
   #    async with asyncio.timeout(interval) as cm:
   info(f"cmds: {cmd}")
@@ -1624,13 +1625,17 @@ async def myshell(cmd, max_time=interval, src=None):
       info("send ok")
       k -= 1
       while r is None:
+        if k == 0:
+          if d == b'EOF\n':
+            info(f"found EOF")
+            r = True
+            break
         if time.time() - start_time > run_shell_timx_max*10:
           #  log("end")
           res = "end"
           await send(res, src)
           r = 0
           break
-          return
         #  n, d = await myshell_queue.get()
         try:
           n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval)
@@ -1641,10 +1646,11 @@ async def myshell(cmd, max_time=interval, src=None):
           r = 0
           break
         if n == 1:
-          if d == b'EOF\n':
-            info(f"found EOF at 1")
-            r = True
-            break
+          if k == 0:
+            if d == b'EOF\n':
+              info(f"found EOF at 1")
+              r = True
+              break
           o += d
         else:
           e += d
@@ -1662,10 +1668,6 @@ async def myshell(cmd, max_time=interval, src=None):
           while dl > time.time():
             n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
             if n == 1:
-              if d == b'EOF\n':
-                info(f"found EOF at 2")
-                r = True
-                break
               o += d
             else:
               e += d
@@ -1708,9 +1710,9 @@ async def myshell(cmd, max_time=interval, src=None):
           await p.stdin.drain()
           if myshell_queue.empty():
             break
-      k -= 1
-      if r is not None:
-        break
+      #  k -= 1
+      #  if r is not None:
+      #    break
   #  except TimeoutError:
   #    #  if tmp:
   #    #    ds = tmp.decode("utf-8", errors="ignore")
