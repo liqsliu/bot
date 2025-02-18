@@ -613,20 +613,21 @@ def _exceptions_handler(e, *args, **kwargs):
   #  logger.warning(res)
   #  asyncio.create_task(mt_send(res))
   #  asyncio.create_task(send(res, ME))
-  if more:
-    logger.error(res, exc_info=True, stack_info=True)
-  else:
-    logger.warning(res)
   #  logger.warning(res)
   info("check _sendme: {}".format(_sendme.__name__ in fs))
   info("check __send: {}".format(__send.__name__ in fs))
   if not no_send:
+    logger.error(res, exc_info=True, stack_info=True)
     if _sendme.__name__ in fs:
-      info("fixme: 要刷屏了")
+      info(f"fixme: 要刷屏了 {fs}")
     elif __send.__name__ in fs:
-      info("fixme: 要刷屏了")
+      info(f"fixme: 要刷屏了 {fs}")
     else:
       send_log(res)
+  elif more:
+    logger.error(res, exc_info=True, stack_info=True)
+  else:
+    logger.warning(res)
   return res
 
 
