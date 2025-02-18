@@ -2438,7 +2438,7 @@ async def get_title(url, src=None, opts=[], max_time=1):
   #  if r == 0:
   cmds = ' '.join(shell_cmd)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
-  r, o, e = await run_run(myshell(cmds, src=src, max_time=1) , False)
+  r, o, e = await run_run(myshell(cmds, src=src, max_time=max_time) , False)
   #  res = await run_run(myshell(cmds, src=src) , False)
   #  if res:
   #    o = res
@@ -6500,8 +6500,7 @@ async def add_cmd():
       opts.append(cmds[4])
     else:
       opts.append("600")
-    #  res = await get_title(cmds[1], src, opts=opts, max_time=600)
-    res = await get_title(cmds[1], src, opts=opts)
+    res = await get_title(cmds[1], src, opts=opts, max_time=8)
     return f"{res}"
   cmd_funs["down"] = _
   cmd_for_admin.add('down')
