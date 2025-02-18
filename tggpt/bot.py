@@ -837,69 +837,6 @@ async def decompress(data, m):
 
 
 
-pb_list = {
-    #  "anon": ["https://api.anonfiles.com/upload", "file"],
-    "0x0": ["https://0x0.st/", "file"],
-    "senio": ["https://paste.sensio.no/", "-"],
-    #  "fars": ["https://fars.ee/?u=1", "c"]
-    "fars": ["https://fars.ee/", "c"]
-    }
-#async def pastebin(data="test", filename=None, url="https://fars.ee/?u=1", fieldname="c", extra={}, **kwargs):
-@exceptions_handler
-async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname="c", extra={}, ce=None, use=None, **kwargs):
-  #  use = "0x0"
-  if not data:
-    return
-  if use:
-    if use not in pb_list:
-      use = "fars"
-    url = pb_list[use][0]
-    fieldname = pb_list[use][1]
-  if not ce:
-    if url == pb_list["fars"][0]:
-      ce = "br"
-
-  headers = {}
-  headers.update({'User-agent': ""})
-  #  if type(data) == str:
-  if isinstance(data, str):
-#  data = {"content": data}
-#    data = zlib.compress(data)
-#    headers = {'Content-Encoding': 'deflate'}
-#    data = gzip.compress(data.encode())
-#    headers = {'Content-Encoding': 'gzip'}
-    if ce:
-      data = await compress(data.encode(), ce)
-      headers = {'Content-Encoding': ce}
-    data = {fieldname: data}
-    data.update(extra)
-  elif isinstance(data, bytes) or type(data) == BufferedReader or type(data) == TextIOWrapper or type(data) == BytesIO:
-    if filename:
-      data = file_for_post(data, filename=filename, fieldname=fieldname, **extra)
-    else:
-      data = {fieldname: data}
-      data.update(extra)
-  elif isinstance(data, dict):
-    pass
-#  elif type(data) == aiohttp.formdata.FormData:
-  elif type(data) == FormData:
-    pass
-  else:
-    return
-  res, res_headers = await http(url=url, method="POST", data=data, headers=headers, return_headers=True, **kwargs)
-#    res = res + "." + filename.split(".")[-1]
-  res = res.strip()
-  info(f"pb res: {res_headers=} {res}")
-  if url == pb_list["fars"][0]:
-    if 'Location' in res_headers:
-      return res_headers['Location']
-    if res.startswith("https://fars.ee/"):
-      return res
-    else:
-      res = await pastebin(data=data, filename=filename, extra=extra, use="0x0", **kwargs)
-      warn(f"fallback 0x0: {res}")
-  return res
-
 def raise_error(error: str):
     error = "-" * 24 + f"\nerror:\n" + "-" * 24 + f"\n{error}" + "-" * 24
     #            logger.exception(info)
@@ -3380,6 +3317,72 @@ async def clear_history(src=None):
   logger.info("reset ok")
 
 
+pb_list = {
+    #  "anon": ["https://api.anonfiles.com/upload", "file"],
+    "0x0": ["https://0x0.st/", "file"],
+    "senio": ["https://paste.sensio.no/", "file"],
+    #  "fars": ["https://fars.ee/?u=1", "c"]
+    "fars": ["https://fars.ee/", "c"]
+    }
+#async def pastebin(data="test", filename=None, url="https://fars.ee/?u=1", fieldname="c", extra={}, **kwargs):
+@exceptions_handler
+async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname="c", extra={}, ce=None, use=None, **kwargs):
+  #  use = "0x0"
+  if not data:
+    return
+  if use:
+    if use not in pb_list:
+      use = "fars"
+    url = pb_list[use][0]
+    fieldname = pb_list[use][1]
+  if not ce:
+    if url == pb_list["fars"][0]:
+      ce = "br"
+
+  headers = {}
+  #  headers.update({'User-agent': ""})
+  #  if type(data) == str:
+  if isinstance(data, str):
+#  data = {"content": data}
+#    data = zlib.compress(data)
+#    headers = {'Content-Encoding': 'deflate'}
+#    data = gzip.compress(data.encode())
+#    headers = {'Content-Encoding': 'gzip'}
+    if ce:
+      data = await compress(data.encode(), ce)
+      headers = {'Content-Encoding': ce}
+    data = {fieldname: data}
+    data.update(extra)
+  elif isinstance(data, bytes) or type(data) == BufferedReader or type(data) == TextIOWrapper or type(data) == BytesIO:
+    if filename:
+      data = file_for_post(data, filename=filename, fieldname=fieldname, **extra)
+    else:
+      data = {fieldname: data}
+      data.update(extra)
+  elif isinstance(data, dict):
+    pass
+#  elif type(data) == aiohttp.formdata.FormData:
+  elif type(data) == FormData:
+    pass
+  else:
+    return
+  res, res_headers = await http(url=url, method="POST", data=data, headers=headers, return_headers=True, **kwargs)
+#    res = res + "." + filename.split(".")[-1]
+  res = res.strip()
+  info(f"pb res: {res_headers=} {res}")
+  if url == pb_list["fars"][0]:
+    if 'Location' in res_headers:
+      return res_headers['Location']
+    if res.startswith("https://fars.ee/"):
+      return res
+    else:
+      res = await pastebin(data=data, filename=filename, extra=extra, use="0x0", **kwargs)
+      warn(f"fallback 0x0: {res}")
+  elif url == pb_list["senio"][0]:
+    # fixme
+    return res
+  return res
+
 #  session = None
 #  async def init_aiohttp_session():
 #    global session
@@ -3474,10 +3477,10 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
             else:
               err("解压失败: {} url: {}\n".format(res.headers['Content-Encoding'], url))
               #  return data
-        except brotli.error as e:
-          err(f"解压时出现错误: {e=} {data[:512]}")
+        #  except brotli.error as e:
+        #    err(f"解压时出现错误: {e=} {res.headers=} {data[:512]}")
         except Exception as e:
-          err(f"解压时出现错误: {e=} {data[:512]}")
+          err(f"解压时出现错误: {e=} {res.headers=} {data[:512]}")
         try:
           # if "text/plain" in res.headers['content-type']:
           if "text" in res.headers['content-type']:
@@ -3487,7 +3490,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
             #  html = data.decode()
             #  html = data
             html = data.decode(errors='ignore')
-          info(f"http res: {html} url: {url}")
+          info(f"http res: {html[:32]} url: {url}")
         except UnicodeDecodeError as e:
           warn(f"{e=} res data: {data[:64]} 64/{len(data)}")
           html = data
