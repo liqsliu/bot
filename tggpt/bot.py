@@ -4995,8 +4995,23 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       return False
   else:
     warn(f"unknown file size limit: {UPLOAD}")
-  print("upload to xmpp: ", XB,UPLOAD, filename, os.path.getsize(fp), mimetypes.guess_type(fp)[0], file_path)
-  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, length, mimetypes.guess_type(fp)[0])
+  t = mimetypes.guess_type(fp)[0]
+  if t is None:
+    info(f"自动获取mimetypes失败")
+        #  ft=$(file --mime-type -b -- "$fn")
+    cmds = "file --mime-type -b --"
+    cmds = cmds.split(" ")
+    cmds.append(file_path)
+    r, o, e = await my_sexec(cmds, src=src)
+    if r == 0:
+      if o:
+        t = o
+  if t is None:
+    warn(f"获取mimetypes失败")
+    #  return
+    t = 'application/octet-stream'
+  print("upload to xmpp: ", XB,UPLOAD, filename, os.path.getsize(fp), t, file_path)
+  slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, length, content_type=t)
   #  slot = await XB.send(aioxmpp.IQ(
   #      type_=aioxmpp.IQType.GET,
   #      to=UPLOAD,
