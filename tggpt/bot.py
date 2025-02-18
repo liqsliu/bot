@@ -54,6 +54,7 @@ from functools import wraps
 from functools import partial
 import pickle
 from pathlib import Path
+import shlex
 
 import os
 import sys
@@ -225,7 +226,8 @@ def info2(s):
   print("%s" % s.replace("\n", " "))
 
 def send_log(text):
-  asyncio.create_task(send(text))
+  asyncio.create_task(send(text, jid=CHAT_ID))
+  asyncio.create_task(send(text, jid=log_group_private))
   #  asyncio.create_task(mt_send_for_long_text(text))
   #  asyncio.create_task(sendg(text))
 
@@ -1565,7 +1567,7 @@ async def _init_myshell():
   return True
 
 @exceptions_handler
-async def myshell(cmd, max_time=run_shell_timx_max, src=None):
+async def myshell(cmd, max_time=interval, src=None, res=None):
   #  if await init_myshell():
   #    pass
   #  else:
@@ -1573,8 +1575,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
   p = myshell_p
   if myshell_lock.locked():
     warn(f"myshell is busy: {cmd=}")
-    if src:
-      await send("前一次任务还没结束", src, correct=True)
+    await send("前一次任务还没结束", src, correct=True)
   async with myshell_lock:
     #  o = b""
     #  e = b""
@@ -1605,6 +1606,8 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     start_time = time.time()
     #  tmp = ""
     tmp = b""
+    if res is not None:
+      res = tmp
     ds = None
     #  try:
     #    async with asyncio.timeout(interval) as cm:
@@ -1616,22 +1619,28 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
       info("send ok")
       k -= 1
       while True:
+        if time.time() - start_time > interval*10:
+          log("end")
+          return
         #  n, d = await myshell_queue.get()
         try:
-          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval)
+          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time)
         except TimeoutError:
           #  info("timeout")
           await send("结束", src)
           return
         info(f"first line: {d}")
         tmp += d 
-        s = time.time()
         if ds is None:
-          dl = 0.1
+          #  dl = 0.1
+          dl = time.time() + 0.1
         else:
-          dl = 0.3
+          #  dl = 0.3
+          dl = time.time() + 0.3
+        #  s = time.time()
         try:
-          while dl + s > time.time():
+          #  while dl + s > time.time():
+          while dl > time.time():
             n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
             info(f"got: {d}")
             dl += 0.01
@@ -1647,8 +1656,11 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
         ds = ds.strip()
         if ds:
           info(f"send: {src} {type(ds)} {ds[:16]}")
+          #  if src is not None:
           await send(ds, src)
           tmp = b""
+          if res is not None:
+            res += tmp
           #  ds = d.strip()
           #  now = time.time()
           #  need_send = False
@@ -1665,12 +1677,9 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
           #    last = now
           #  else:
           #    tmp += d
-        if s - start_time > interval*10:
-          log("end")
-          return
         if k > 0:
-          await p.stdin.drain()
           await sleep(0.2)
+          await p.stdin.drain()
           if myshell_queue.empty():
             break
     #  except TimeoutError:
@@ -1687,7 +1696,7 @@ async def myshell(cmd, max_time=run_shell_timx_max, src=None):
     #      #  if now - start_time > interval:
     #    info("timeout")
 
-  return
+  return res
 
 
     #  async def pr(f, p=""):
@@ -1839,7 +1848,8 @@ def wrap_read(func, src, ress):
     if data:
       if now - ress[0] > interval/2:
         ress[0] = now
-        if src and ress[1].strip():
+        #  if src and ress[1].strip():
+        if ress[1].strip():
           asyncio.create_task(send( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, correct=True) )
         ress[1] = b""
       #  print(f"{len(data)}")
@@ -1904,7 +1914,6 @@ async def my_subprocess(p, max_time=run_shell_timx_max, src=None):
   info("my sub exec res: %s" % format_out_of_shell((p.returncode, o, e)))
   return p.returncode, o, e
     
-
 def format_out_of_shell(res):
   if res[0] == 0 and res[2] is None:
     return "%s" % res[1]
@@ -2391,6 +2400,9 @@ async def get_title(url, src=None, opts=[]):
   else:
     max_time = 60
   r, o, e = await my_sexec(shell_cmd, src=src, max_time=max_time)
+  #  cmds = ' '.join(shell_cmd)
+  #  cmds = list(f"{x}\n" for x in cmds.splitlines())
+  #  res = await myshell(cmds, src=src, max_time=max_time, res=True)
   if r == 0:
     s = o.splitlines()
     if len(s) > 1:
@@ -2814,13 +2826,38 @@ async def send_t(text, jid=None, *args, **kwargs):
     else:
       return await _sendme(text, jid, *args, **kwargs)
 
-  #  muc = None
-  muc = jid
+
   if 'name' in kwargs:
     name = kwargs["name"]
     #  kwargs.pop("name")
   else:
     name = "**C bot:** "
+  #  muc = None
+  muc = jid
+  if isinstance(text, aioxmpp.Message):
+    if jid is None:
+      #  warn(f"fixme: 该消息为xmpp专用，不能发往telegram, 日志可能会缺失 {text}")
+      if text.type_ == MessageType.GROUPCHAT:
+        muc = str(text.to.bare())
+        jid = muc
+      #  await _sendme(text0, *args, **kwargs)
+      #  sendme(text0, *args, **kwargs)
+    #  info(f"该消息为xmpp专用，不能发往telegram, {text}")
+    #  text0 = text.body[None]
+    text0 = text.body.any()
+    #  text.body[None] = f"{name}{text0}"
+    for i in text.body:
+      text.body[i] = f"{name}{text0}"
+      break
+  else:
+    text0 = text
+    text = f"{name}{text}"
+    #  if jid is None:
+    #    #  await _sendme(text, *args, **kwargs)
+    #    sendme(text0, *args, **kwargs)
+    #    jid = log_group_private
+  if jid is None:
+    return
 
   #  if 'correct' in kwargs:
   #    correct = kwargs["correct"]
@@ -2847,28 +2884,6 @@ async def send_t(text, jid=None, *args, **kwargs):
   #      jid = log_group_private
   #  #  elif jid == "gateway1":
   #  #    jid = main_group
-
-  if isinstance(text, aioxmpp.Message):
-    info(f"该消息为xmpp专用，不能发往telegram, {text}")
-    #  text0 = text.body[None]
-    text0 = text.body.any()
-    #  text.body[None] = f"{name}{text0}"
-    for i in text.body:
-      text.body[i] = f"{name}{text0}"
-      break
-    if jid is None:
-      warn(f"fixme: 该消息为xmpp专用，不能发往telegram, 日志可能会缺失 {text}")
-      if text.type_ == MessageType.GROUPCHAT:
-        muc = str(text.to.bare())
-      #  await _sendme(text0, *args, **kwargs)
-      #  sendme(text0, *args, **kwargs)
-  else:
-    text0 = text
-    text = f"{name}{text}"
-    if jid is None:
-      #  await _sendme(text, *args, **kwargs)
-      sendme(text0, *args, **kwargs)
-      jid = log_group_private
 
   if name:
     kwargs["name"] = name[2:-4]
