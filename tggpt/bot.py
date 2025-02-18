@@ -6436,8 +6436,6 @@ async def add_cmd():
       "cal"
       ]:
     async def _(cmds, src):
-      if len(cmds) == 1:
-        return f"bash cmd\n.{cmds[0]}"
       cmds = cmds[0]
       cmds = list(f"{x}\n" for x in cmds.splitlines())
       await run_run( myshell(cmds, src=src) , False)
