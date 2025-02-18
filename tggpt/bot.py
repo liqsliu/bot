@@ -3451,8 +3451,8 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               async for tmp, _ in res.content.iter_chunks():
                 data += tmp
                 if len(data) > HTTP_FILE_MAX_BYTES:
+                  info(f"http downlod ok: ({length}) | {len(tmp)} > {len(data)}")
                   break
-                info(f"http downlod ok: ({length}) | {len(tmp)} > {len(data)}")
             else:
               info(f"http downlod ok: ({length})")
             # if res.headers['content-type'] == "text/plain; charset=utf-8":
@@ -3464,12 +3464,13 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
         err(f"http connect error: {e=} {url=}")
 
       if data:
+        info("http body data: {len(data)} {data[:64]}")
         try:
           if "Content-Encoding" in res.headers:
             info(f"start to decompress: %s {type(data)} {data[:64]}" % res.headers['Content-Encoding'])
-            res = await decompress(data, res.headers['Content-Encoding'])
-            if res:
-              data = res
+            b = await decompress(data, res.headers['Content-Encoding'])
+            if b:
+              data = b
             else:
               err("解压失败: {} url: {}\n".format(res.headers['Content-Encoding'], url))
               #  return data
