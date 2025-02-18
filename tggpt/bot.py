@@ -3340,7 +3340,8 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
       ce = "br"
 
   headers = {}
-  #  headers.update({'User-agent': ""})
+  headers.update({'User-agent': "curl/8.12.1"})
+  headers.update({'Accept': "application/json,text/x-yaml,text/plain,*/*"})
   #  if type(data) == str:
   if isinstance(data, str):
 #  data = {"content": data}
