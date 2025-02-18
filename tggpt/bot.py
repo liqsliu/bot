@@ -1568,7 +1568,8 @@ async def _init_myshell():
 
 #  async def myshell(cmd, max_time=interval, src=None):
 @exceptions_handler
-async def myshell(cmd, max_time=3, src=None):
+async def myshell(cmd, max_time=interval, src=None):
+  # 有个问题，不知道何时运行结束，目前想到两种方案：bash -i和最后发送echo end然后等出现end提示。
   #  if await init_myshell():
   #    pass
   #  else:
@@ -1577,7 +1578,6 @@ async def myshell(cmd, max_time=3, src=None):
   if myshell_lock.locked():
     warn(f"myshell is busy: {cmd=}")
     await send("前一次任务还没结束", src, correct=True)
-  async with myshell_lock:
     #  o = b""
     #  e = b""
     #  t1 = asyncio.create_task(p.stdout.readline())
@@ -1604,53 +1604,45 @@ async def myshell(cmd, max_time=3, src=None):
           #  except TimeoutError:
           #    pass
 
-    start_time = time.time()
-    #  tmp = ""
-    tmp = b""
-    res = ""
-    o = b""
-    e = b""
-    ds = None
-    #  try:
-    #    async with asyncio.timeout(interval) as cm:
-    info(f"cmds: {cmd}")
-    k =  len(cmd)
+  start_time = time.time()
+  #  tmp = ""
+  tmp = b""
+  res = ""
+  o = b""
+  e = b""
+  r = None
+  ds = None
+  #  try:
+  #    async with asyncio.timeout(interval) as cm:
+  info(f"cmds: {cmd}")
+  k =  len(cmd)
+  cmd.append(b"echo $?; echo EOF\n")
+  async with myshell_lock:
     for c in cmd:
       p.stdin.write( c.encode() )
       #  cm.reschedule(asyncio.get_running_loop().time()+interval)
       info("send ok")
       k -= 1
       while True:
-        if time.time() - start_time > interval*10:
+        if time.time() - start_time > run_shell_timx_max*10:
           log("end")
           return
         #  n, d = await myshell_queue.get()
         try:
-          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time)
-          if n == 1:
-            o += d
-          else:
-            e += d
+          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval)
         except TimeoutError:
           res = "结束"
           await send(res, src)
-          #  res = format_out_of_shell(0, o, e)
-          #  #  await send("结束", src)
-          #  #  info("timeout")
-          #  res = res.strip()
-          #  if res:
-          #    pass
-          #  else:
-          if o:
-            o = o.decode("utf-8", errors="ignore")
-          else:
-            o = None
-          if e:
-            e = e.decode("utf-8", errors="ignore")
-          else:
-            e = None
-          return (0, o, e)
-          return res
+          # fixme: 不知道该设为多少
+          r = 0
+          break
+        if n == 1:
+          if d == b'EOF\n':
+            r = True
+            break
+          o += d
+        else:
+          e += d
         info(f"first line: {d}")
         tmp += d 
         if ds is None:
@@ -1664,13 +1656,16 @@ async def myshell(cmd, max_time=3, src=None):
           #  while dl + s > time.time():
           while dl > time.time():
             n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
-            info(f"got: {d}")
-            dl += 0.01
-            tmp += d 
             if n == 1:
+              if d == b'EOF\n':
+                r = True
+                break
               o += d
             else:
               e += d
+            info(f"got: {d}")
+            dl += 0.01
+            tmp += d 
             #  info(f"got{n}: {d[:16]}")
         except TimeoutError:
           info("----")
@@ -1707,29 +1702,47 @@ async def myshell(cmd, max_time=3, src=None):
           await p.stdin.drain()
           if myshell_queue.empty():
             break
-    #  except TimeoutError:
-    #    #  if tmp:
-    #    #    ds = tmp.decode("utf-8", errors="ignore")
-    #    #    info(f"got{n}: {d=}")
-    #    #    ds = re.sub(shell_color_re,  "", ds)
-    #    #    info(f"got{n}>: {ds=}")
-    #    #    ds = tmp.strip()
-    #    #    if ds:
-    #    #      ds = tmp.strip()
-    #    #      if ds:
-    #    #        await send(ds, src)
-    #      #  if now - start_time > interval:
-    #    info("timeout")
-
+      k -= 1
+      if r is not None:
+        break
+  #  except TimeoutError:
+  #    #  if tmp:
+  #    #    ds = tmp.decode("utf-8", errors="ignore")
+  #    #    info(f"got{n}: {d=}")
+  #    #    ds = re.sub(shell_color_re,  "", ds)
+  #    #    info(f"got{n}>: {ds=}")
+  #    #    ds = tmp.strip()
+  #    #    if ds:
+  #    #      ds = tmp.strip()
+  #    #      if ds:
+  #    #        await send(ds, src)
+  #      #  if now - start_time > interval:
+  #    info("timeout")
+    #  res = format_out_of_shell(0, o, e)
+    #  #  await send("结束", src)
+    #  #  info("timeout")
+    #  res = res.strip()
+    #  if res:
+    #    pass
+    #  else:
   if o:
     o = o.decode("utf-8", errors="ignore")
+    o = o.strip()
+    if r is True:
+      o = o.splitlines
+      r = o[-1]
+      r = int(r)
+      o = o[:-1]
   else:
     o = None
   if e:
     e = e.decode("utf-8", errors="ignore")
+    e = e.strip()
   else:
     e = None
-  return  (0, o, e)
+  #  if r is not None:
+  #    return  (r, o, e)
+  return  (r, o, e)
   return res.strip()
 
 
