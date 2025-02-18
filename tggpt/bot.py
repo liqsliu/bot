@@ -1711,8 +1711,8 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           #  if d == b'EOF\n':
           if d == eof:
             info(f"found EOF")
-            o = o[:-(len(myeof))]
-            tmp = tmp[:-(len(myeof))]
+            o = o[:-(len(eof))]
+            tmp = tmp[:-(len(eof))]
             r = True
             break
         elif k > 2:
