@@ -1567,7 +1567,7 @@ async def _init_myshell():
   return True
 
 @exceptions_handler
-async def myshell(cmd, max_time=interval, src=None, res=None):
+async def myshell(cmd, max_time=interval, src=None):
   #  if await init_myshell():
   #    pass
   #  else:
@@ -1606,8 +1606,7 @@ async def myshell(cmd, max_time=interval, src=None, res=None):
     start_time = time.time()
     #  tmp = ""
     tmp = b""
-    if res is not None:
-      res = tmp
+    res = ""
     ds = None
     #  try:
     #    async with asyncio.timeout(interval) as cm:
@@ -1653,14 +1652,13 @@ async def myshell(cmd, max_time=interval, src=None, res=None):
         info(f"got{n}: {ds[:16]}")
         ds = re.sub(shell_color_re,  "", ds)
         info(f"got{n}>: {ds[:16]}")
+        res = "\n" + ds
         ds = ds.strip()
         if ds:
           info(f"send: {src} {type(ds)} {ds[:16]}")
           #  if src is not None:
           await send(ds, src)
           tmp = b""
-          if res is not None:
-            res += tmp
           #  ds = d.strip()
           #  now = time.time()
           #  need_send = False
@@ -1696,7 +1694,7 @@ async def myshell(cmd, max_time=interval, src=None, res=None):
     #      #  if now - start_time > interval:
     #    info("timeout")
 
-  return res
+  return res.strip()
 
 
     #  async def pr(f, p=""):
@@ -2381,9 +2379,10 @@ async def backup(path, src=None, delete=False):
   return url
 
 
-async def get_title(url, src=None, opts=[]):
+async def get_title(url, src=None, opts=[], max_time=60):
   shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
-  shell_cmd.append(url)
+  #  shell_cmd.append(url)
+  shell_cmd.append(shlex.quote(url))
   #  while opts:
   #    shell_cmd.append(opts.pop(0))
   shell_cmd.extend(opts)
@@ -2395,36 +2394,37 @@ async def get_title(url, src=None, opts=[]):
   #      else:
   #        break
   #    shell_cmd.append("down")
-  if len(shell_cmd) == 6:
-    max_time = 600
-  else:
-    max_time = 60
-  r, o, e = await my_sexec(shell_cmd, src=src, max_time=max_time)
-  #  cmds = ' '.join(shell_cmd)
-  #  cmds = list(f"{x}\n" for x in cmds.splitlines())
-  #  res = await myshell(cmds, src=src, max_time=max_time, res=True)
-  if r == 0:
-    s = o.splitlines()
-    if len(s) > 1:
-      path = s[-1]
-      if os.path.exists(path):
-        t = asyncio.create_task(backup(path))
-        url = await upload(path, src)
-        await t
-        asyncio.create_task(backup(path, delete=True))
-        if url:
-          s[-1] = f"\n- {url}"
-        else:
-          s.pop(-1)
-      else:
-        s.pop(-1)
-      return "\n".join(s)
-    else:
-      return o
-  else:
-    #  if err:
-    warn("%s\n--\nE: %s\n%s" % (o, r, e))
-    return "%s\n--\nE: %s\n%s" % (o, r, e)
+  #  if len(shell_cmd) == 6:
+  #    max_time = 600
+  #  else:
+  #    max_time = 60
+  #  r, o, e = await my_sexec(shell_cmd, src=src, max_time=max_time)
+  #  if r == 0:
+  #    s = o.splitlines()
+  #    if len(s) > 1:
+  #      path = s[-1]
+  #      if os.path.exists(path):
+  #        t = asyncio.create_task(backup(path))
+  #        url = await upload(path, src)
+  #        await t
+  #        asyncio.create_task(backup(path, delete=True))
+  #        if url:
+  #          s[-1] = f"\n- {url}"
+  #        else:
+  #          s.pop(-1)
+  #      else:
+  #        s.pop(-1)
+  #      return "\n".join(s)
+  #    else:
+  #      return o
+  #  else:
+  #    #  if err:
+  #    warn("%s\n--\nE: %s\n%s" % (o, r, e))
+  #    return "%s\n--\nE: %s\n%s" % (o, r, e)
+  cmds = ' '.join(shell_cmd)
+  cmds = list(f"{x}\n" for x in cmds.splitlines())
+  res = await myshell(cmds, src=src, max_time=max_time)
+  return res
 
 
 
@@ -6427,7 +6427,7 @@ async def add_cmd():
 
   async def _(cmds, src):
     if len(cmds) == 1:
-      return f"download file by url\n.{cmds[0]} $url [raw/curl/tg/clear[2]] [direct]"
+      return f"download file by url\n.{cmds[0]} $url [raw/curl/tg/clear[2]] [direct] [timeout]"
     if cmds[1] == "clear":
       if src in tg_download_tasks:
         tg_download_tasks.remove(src)
@@ -6457,8 +6457,11 @@ async def add_cmd():
         opts.append("")
       else:
         break
-    opts.append("down")
-    res = await get_title(cmds[1], src, opts=opts)
+    if len(cmds) == 5:
+      opts.append(cmds[4])
+    else:
+      opts.append("600")
+    res = await get_title(cmds[1], src, opts=opts, max_time=600)
     return f"{res}"
   cmd_funs["down"] = _
   cmd_for_admin.add('down')

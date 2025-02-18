@@ -13,15 +13,17 @@ LA='Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6'
 
 # https://stackoverflow.com/questions/20317945/limit-size-wget-can-download/20318140#20318140
 
-if [[ "$4" == "down" ]]; then
+# if [[ "$4" == "down" ]]; then
+if [[ -n "$4" ]]; then
   # 暂时忽略自定义大小
 ulimit -f 2048000
 MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-1000000000}
-MAX_TIMEOUT=300
+# MAX_TIMEOUT=300
+MAX_TIMEOUT=$4
 
 else
 ulimit -f 204800
-MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-100000000}
+MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-10000000}
 MAX_TIMEOUT=16
 
 
