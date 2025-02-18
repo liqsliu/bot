@@ -1662,11 +1662,12 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
         else:
           e += d
         tmp += d 
-        info(f"got {n}: {d}")
         if k == 1:
           if myshell_queue.empty():
+            info(f"res {n}: {d}")
           #  r = int(d.decode().strip())
             break
+        info(f"got {n}: {d}")
         #  elif k > 1:
         #  if ds is None:
         #    dl = time.time() + 0.1
@@ -1678,6 +1679,7 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
         #  try:
         #    #  while dl + s > time.time():
         #    while dl > time.time():
+        await sleep(0.1)
         while not myshell_queue.empty():
         #      n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
           n, d = await myshell_queue.get()
@@ -1686,7 +1688,7 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           else:
             e += d
           tmp += d 
-          await sleep(0.1)
+          await sleep(0.05)
         #      info(f"got: {d}")
         #      dl += 0.01
         #      tmp += d
