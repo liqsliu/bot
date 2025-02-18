@@ -225,7 +225,7 @@ def info1(s):
 def info2(s):
   print("%s" % s.replace("\n", " "))
 
-def send_log(text, wait=5):
+def send_log(text, wait=1):
   t1 = asyncio.create_task(_send_log(text, wait=wait))
 
 async def _send_log(text, wait=5):
@@ -636,7 +636,7 @@ def _exceptions_handler(e, *args, **kwargs):
     logger.error(res, exc_info=True, stack_info=True)
     # wait is ok
     #  await sleep(5)
-    send_log(res)
+    send_log(res, 9)
   elif more:
     logger.error(res, exc_info=True, stack_info=True)
   else:
@@ -1670,7 +1670,7 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           break
         #  n, d = await myshell_queue.get()
         try:
-          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval)
+          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
           if n == 1:
             if k == 0:
               #  if d == b'EOF\n':
