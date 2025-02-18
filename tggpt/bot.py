@@ -2796,6 +2796,7 @@ async def send(*args, **kwargs):
 
 async def send_t(text, jid=None, *args, **kwargs):
   if  type(jid) is int:
+    return await _sendme(text, jid, *args, **kwargs)
     if jid == CHAT_ID:
       #  await _sendme(text, *args, **kwargs)
       sendme(text, *args, **kwargs)
@@ -2858,13 +2859,13 @@ async def send_t(text, jid=None, *args, **kwargs):
       if text.type_ == MessageType.GROUPCHAT:
         muc = str(text.to.bare())
       #  await _sendme(text0, *args, **kwargs)
-      sendme(text0, *args, **kwargs)
+      #  sendme(text0, *args, **kwargs)
   else:
     text0 = text
     text = f"{name}{text}"
     if jid is None:
       #  await _sendme(text, *args, **kwargs)
-      sendme(text0, *args, **kwargs)
+      #  sendme(text0, *args, **kwargs)
       jid = log_group_private
 
 
