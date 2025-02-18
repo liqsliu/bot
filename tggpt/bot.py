@@ -798,15 +798,18 @@ async def compress(data, m="zst"):
   if m in _decompress_funcs:
     #  return _compress_funcs[m](data)
     #  return run_cb_in_thread(_compress_funcs[m], data)
-    @exceptions_handler
-    async def f():
-      return _compress_funcs[m](data)
-    d = await run_run(f(), False)
+    #  @exceptions_handler
+    #  async def f():
+    #    return _compress_funcs[m](data)
+    #  d = await run_run(f(), False)
+    fu = run_cb_in_thread(_compress_funcs[m], data)
+    d = await fu
     if d:
       info(f"压缩成功: {m} {data[:32]} -> {d[:32]}")
+      return d
     else:
       info(f"压缩failed: {m} {data[:32]}")
-    return d
+      return data
   err(f"unknown encoding: {m}")
     #  if m == "zst":
     #      return zstandard.compress(data, level=22)
@@ -826,15 +829,18 @@ async def decompress(data, m):
   if m in _decompress_funcs:
     #  return _decompress_funcs[m](data)
     #  return run_cb_in_thread(_compress_funcs[m], data)
-    @exceptions_handler
-    async def f():
-      return _decompress_funcs[m](data)
-    d = await run_run(f(), False)
+    #  @exceptions_handler
+    #  async def f():
+    #    return _decompress_funcs[m](data)
+    #  d = await run_run(f(), False)
+    fu = run_cb_in_thread(_decompress_funcs[m], data)
+    d = await fu
     if d:
       info(f"解压成功: {m} {data[:32]} -> {d[:32]}")
+      return d
     else:
       info(f"解压failed: {m} {data[:32]}")
-    return d
+      return data
   else:
     err(f"unknown encoding: {m}")
 
@@ -3641,7 +3647,8 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
       #  await mt_send(res, gateway=gateway, name="")
       name = ""
     if need_delete:
-      os.remove(fn)
+      #  os.remove(fn)
+      run_cb_in_thread(os.remove, fn)
 
   return True
 
@@ -4897,26 +4904,31 @@ def run_cb_in_main(cb, *args, **kwargs):
   # fixme: 不支持多线程
   if in_main_thread():
     return cb(*args, **kwargs)
+  cb, fu = cb_for_future(cb, loop2)
   loop.call_soon_threadsafe(partial(cb, *args, **kwargs))
+  return fu
 
 def run_cb_in_thread(cb, *args, **kwargs):
   # fixme: 不支持多线程
   if in_main_thread():
     #  fu = asyncio.Future()
     #  cb = cb_for_future(fu.set_result, cb, loop)
+    #  loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
+    cb, fu = cb_for_future(cb, loop)
     loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
-    #  return await fu
+    return fu
 
   return cb(*args, **kwargs)
 
 
-@exceptions_handler
-def cb_for_future(f, f2, oloop):
+#  @exceptions_handler
+def cb_for_future(f2, oloop):
+  fu = asyncio.Future()
   # for multi thread
   @exceptions_handler
-  def cb(o):
-    oloop.call_soon_threadsafe(partial(f, f2()))
-  return cb
+  def cb():
+    oloop.call_soon_threadsafe(partial(fu.set_result, f2()))
+  return cb, fu
 
 
 #  async def run_run(coro, *args, **kwargs, need_main=False):
@@ -4928,16 +4940,16 @@ async def run_run(coro, need_main=False):
     if in_main_thread():
       return await coro
     elif loop2_thread.native_id == threading.get_native_id():
-      fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+      fu = asyncio.run_coroutine_threadsafe(coro, loop)
       oloop = loop2
     else:
       # 未知线程
-      fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
+      fu = asyncio.run_coroutine_threadsafe(coro, loop)
       return
   else:
     #  if threading.current_thread() is loop2_thread:
     if in_main_thread():
-      fu2 = asyncio.run_coroutine_threadsafe(coro, loop2)
+      fu = asyncio.run_coroutine_threadsafe(coro, loop2)
       oloop = loop
     #  elif main_thread.native_id != threading.get_native_id():
     elif loop2_thread.native_id == threading.get_native_id():
@@ -4946,7 +4958,7 @@ async def run_run(coro, need_main=False):
       # 未知线程
       return await coro
 
-  fu = asyncio.Future()
+  fua = asyncio.Future()
   #  async def cb2(fu, result=0):
   #    fu.set_result(result)
   #  def cb(fu2):
@@ -4958,9 +4970,12 @@ async def run_run(coro, need_main=False):
   #      print("wtffffffffffffffffffffffffffffffffff, 还没结束")
   #      #  asyncio.run_coroutine_threadsafe(cb2(fu), oloop)
   #      oloop.call_soon_threadsafe(partial(fu.set_result, fu2.result()))
-  cb = cb_for_future(fu.set_result, fu2.result, oloop)
-  fu2.add_done_callback(cb)
-  return await fu
+  #  cb = cb_for_future(fu.set_result, fu2.result, oloop)
+  def cb(fu):
+    #  oloop.call_soon_threadsafe(partial(f, f2()))
+    oloop.call_soon_threadsafe(partial(fua.set_result, fu.result()))
+  fu.add_done_callback(cb)
+  return await fua
 
 
 
