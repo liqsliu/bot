@@ -565,6 +565,8 @@ def _exceptions_handler(e, *args, **kwargs):
   except socket.timeout:
     res += ' socket timed out'
   except ConnectionError as e:
+    logger.error("链接问题，退出吧 %s" % res, exc_info=True, stack_info=True)
+    raise
     if e.args[0] == 'stream is not ready':
       # sending xmpp msg
       more = False
@@ -591,7 +593,7 @@ def _exceptions_handler(e, *args, **kwargs):
     return True
   except OSError as e:
     logger.error("出错啦 OSError %s" % res, exc_info=True, stack_info=True)
-    #  raise
+    raise
   except Exception:
     pass
     #  logger.error(f"W: {repr(e)} line: {e.__traceback__.tb_lineno}", exc_info=True, stack_info=True)
