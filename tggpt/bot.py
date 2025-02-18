@@ -3363,6 +3363,7 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
       data = data.encode()
       filename = "-"
 
+
   use_json = None
   if isinstance(data, str):
 #  data = {"content": data}
@@ -3371,33 +3372,35 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
 #    data = gzip.compress(data.encode())
 #    headers = {'Content-Encoding': 'gzip'}
     if use == "senio_text":
-      pass
+      d = data
     else:
       if ce:
-        data = await compress(data.encode(), ce)
+        b = await compress(data.encode(), ce)
         headers = {'Content-Encoding': ce}
-      data = { fieldname: data }
-      data.update(extra)
+        d = { fieldname: b }
+      else:
+        d = { fieldname: data }
+      d.update(extra)
       #  if use == "0x0":
       #    use_json = True
 
   elif isinstance(data, bytes) or type(data) == BufferedReader or type(data) == TextIOWrapper or type(data) == BytesIO:
     if filename:
-      data = file_for_post(data, filename=filename, fieldname=fieldname, **extra)
+      d = file_for_post(data, filename=filename, fieldname=fieldname, **extra)
     else:
-      data = {fieldname: data}
-      data.update(extra)
+      d = {fieldname: data}
+      d.update(extra)
   elif isinstance(data, dict):
-    pass
+    d = data
 #  elif type(data) == aiohttp.formdata.FormData:
   elif type(data) == FormData:
-    pass
+    d = data
   else:
     return
   if use_json:
-    res, res_headers = await http(url=url, method="POST", json=data, headers=headers, return_headers=True, **kwargs)
+    res, res_headers = await http(url=url, method="POST", json=d, headers=headers, return_headers=True, **kwargs)
   else:
-    res, res_headers = await http(url=url, method="POST", data=data, headers=headers, return_headers=True, **kwargs)
+    res, res_headers = await http(url=url, method="POST", data=d, headers=headers, return_headers=True, **kwargs)
 #    res = res + "." + filename.split(".")[-1]
   res = res.strip()
   info(f"pb res: {res_headers=} {res}")
