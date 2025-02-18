@@ -2795,7 +2795,8 @@ async def send(*args, **kwargs):
 
 
 async def send_t(text, jid=None, *args, **kwargs):
-  if  type(jid) is int:
+  #  if  type(jid) is int:
+  if isinstance(jid, int):
     return await _sendme(text, jid, *args, **kwargs)
     if jid == CHAT_ID:
       #  await _sendme(text, *args, **kwargs)
@@ -2811,21 +2812,11 @@ async def send_t(text, jid=None, *args, **kwargs):
     #  kwargs.pop("name")
   else:
     name = "**C bot:** "
-  if name:
-    kwargs["name"] = name[2:-4]
-    nick = name[2:-4]
-  else:
-    kwargs["name"] = None
-    nick = name
+
   #  if 'correct' in kwargs:
   #    correct = kwargs["correct"]
   #  else:
   #    correct = False
-
-  if 'xmpp_only' in kwargs:
-    xmpp_only = kwargs["xmpp_only"]
-  else:
-    xmpp_only = False
 
   #  if jid is None:
   #    if isinstance(text, aioxmpp.Message):
@@ -2865,9 +2856,20 @@ async def send_t(text, jid=None, *args, **kwargs):
     text = f"{name}{text}"
     if jid is None:
       #  await _sendme(text, *args, **kwargs)
-      #  sendme(text0, *args, **kwargs)
+      sendme(text0, *args, **kwargs)
       jid = log_group_private
 
+  if name:
+    kwargs["name"] = name[2:-4]
+    nick = name[2:-4]
+  else:
+    kwargs["name"] = None
+    nick = name
+
+  if 'xmpp_only' in kwargs:
+    xmpp_only = kwargs["xmpp_only"]
+  else:
+    xmpp_only = False
 
 
 
