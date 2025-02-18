@@ -1633,7 +1633,6 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
   async with myshell_lock:
     for c in cmd:
       p.stdin.write( c.encode() )
-      #  cm.reschedule(asyncio.get_running_loop().time()+interval)
       info(f"send ok: {c}")
       k -= 1
       while r is None:
@@ -1703,9 +1702,9 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           #  info(f"send: {src} {type(ds)} {ds[:16]}")
           await send(ds, src)
           tmp = b""
-        if k == 1:
-          info(f"res {n}: {d}")
-        elif k > 0:
+        if k > 0:
+          if k == 1:
+            info(f"res {n}: {d}")
           await p.stdin.drain()
           await sleep(0.01)
           if myshell_queue.empty():
