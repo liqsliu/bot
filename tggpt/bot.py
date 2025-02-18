@@ -1617,7 +1617,7 @@ async def myshell(cmd, max_time=interval, src=None):
   #    async with asyncio.timeout(interval) as cm:
   info(f"cmds: {cmd}")
   k =  len(cmd)
-  cmd.append(b"echo $?; echo EOF\n")
+  cmd.append("echo $?; echo EOF\n")
   async with myshell_lock:
     for c in cmd:
       p.stdin.write( c.encode() )
