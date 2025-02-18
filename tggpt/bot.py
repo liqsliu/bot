@@ -4904,8 +4904,9 @@ def run_cb_in_main(cb, *args, **kwargs):
   # fixme: 不支持多线程
   if in_main_thread():
     return cb(*args, **kwargs)
-  cb, fu = cb_for_future(cb, loop2)
-  loop.call_soon_threadsafe(partial(cb, *args, **kwargs))
+  #  cb, fu = cb_for_future(cb, loop2, *args, **kwargs)
+  cb, fu = cb_for_future(partial(cb, *args, **kwargs), loop2)
+  loop.call_soon_threadsafe(cb)
   return fu
 
 def run_cb_in_thread(cb, *args, **kwargs):
@@ -4914,8 +4915,9 @@ def run_cb_in_thread(cb, *args, **kwargs):
     #  fu = asyncio.Future()
     #  cb = cb_for_future(fu.set_result, cb, loop)
     #  loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
-    cb, fu = cb_for_future(cb, loop)
-    loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
+    #  cb, fu = cb_for_future(cb, loop, *args, **kwargs)
+    cb, fu = cb_for_future(partial(cb, *args, **kwargs), loop)
+    loop2.call_soon_threadsafe(cb)
     return fu
 
   return cb(*args, **kwargs)
