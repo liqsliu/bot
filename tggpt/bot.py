@@ -1608,6 +1608,8 @@ async def myshell(cmd, max_time=3, src=None):
     #  tmp = ""
     tmp = b""
     res = ""
+    o = b""
+    e = b""
     ds = None
     #  try:
     #    async with asyncio.timeout(interval) as cm:
@@ -1625,15 +1627,29 @@ async def myshell(cmd, max_time=3, src=None):
         #  n, d = await myshell_queue.get()
         try:
           n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time)
-        except TimeoutError:
-          #  await send("结束", src)
-          #  info("timeout")
-          res = res.strip()
-          if res:
-            pass
+          if n == 1:
+            o += d
           else:
-            res = "结束"
-            await send(res, src)
+            e += d
+        except TimeoutError:
+          res = "结束"
+          await send(res, src)
+          #  res = format_out_of_shell(0, o, e)
+          #  #  await send("结束", src)
+          #  #  info("timeout")
+          #  res = res.strip()
+          #  if res:
+          #    pass
+          #  else:
+          if o:
+            o = o.decode("utf-8", errors="ignore")
+          else:
+            o = None
+          if e:
+            e = e.decode("utf-8", errors="ignore")
+          else:
+            e = None
+          return (0, o, e)
           return res
         info(f"first line: {d}")
         tmp += d 
@@ -1651,6 +1667,10 @@ async def myshell(cmd, max_time=3, src=None):
             info(f"got: {d}")
             dl += 0.01
             tmp += d 
+            if n == 1:
+              o += d
+            else:
+              e += d
             #  info(f"got{n}: {d[:16]}")
         except TimeoutError:
           info("----")
@@ -1659,7 +1679,7 @@ async def myshell(cmd, max_time=3, src=None):
         info(f"got{n}: {ds[:16]}")
         ds = re.sub(shell_color_re,  "", ds)
         info(f"got{n}>: {ds[:16]}")
-        res += "\n" + ds
+        #  res += "\n" + ds
         ds = ds.strip()
         if ds:
           info(f"send: {src} {type(ds)} {ds[:16]}")
@@ -1701,6 +1721,15 @@ async def myshell(cmd, max_time=3, src=None):
     #      #  if now - start_time > interval:
     #    info("timeout")
 
+  if o:
+    o = o.decode("utf-8", errors="ignore")
+  else:
+    o = None
+  if e:
+    e = e.decode("utf-8", errors="ignore")
+  else:
+    e = None
+  return  (0, o, e)
   return res.strip()
 
 
@@ -2413,10 +2442,11 @@ async def get_title(url, src=None, opts=[], max_time=1):
   #    return "%s\n--\nE: %s\n%s" % (o, r, e)
   cmds = ' '.join(shell_cmd)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
-  res = await run_run(myshell(cmds, src=src, max_time=max_time) , False)
+  r, o, e = await run_run(myshell(cmds, src=src, max_time=max_time) , False)
   #  res = await run_run(myshell(cmds, src=src) , False)
-  if res:
-    o = res
+  #  if res:
+  #    o = res
+  if r == 0:
     s = o.splitlines()
     if len(s) > 1:
       path = s[-1]
