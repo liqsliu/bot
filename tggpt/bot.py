@@ -1629,12 +1629,6 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
       info(f"send ok: {c}")
       k -= 1
       while r is None:
-        if k == 0:
-          #  if d == b'EOF\n':
-          if d == eof:
-            info(f"found EOF")
-            r = True
-            break
         #  if time.time() - start_time > run_shell_time_max*10:
         if time.time() - start_time > max_time:
           #  log("end")
@@ -1642,20 +1636,33 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           await send(res, src)
           r = 0
           break
-        #  n, d = await myshell_queue.get()
-        try:
-          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval)
-        except TimeoutError:
-          res = "结束"
-          await send(res, src)
-          # fixme: 不知道该设为多少
-          r = 0
-          break
+        if myshell_queue.empty():
+          await p.stdin.drain()
+          await sleep(0.006)
+          if myshell_queue.empty():
+            info(f"wait for res: {c}")
+            if k > 0:
+              break
+            else:
+              continue
+        n, d = await myshell_queue.get()
+        #  #  n, d = await myshell_queue.get()
+        #  try:
+        #    n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval)
+        #  except TimeoutError:
+        #    if k > 0:
+        #      warn(f"timeout: {cmd}")
+        #      break
+        #    res = "结束"
+        #    await send(res, src)
+        #    # fixme: 不知道该设为多少
+        #    r = 0
+        #    break
         if n == 1:
           if k == 0:
             #  if d == b'EOF\n':
             if d == eof:
-              info(f"found EOF at 1")
+              info(f"found EOF")
               r = True
               break
           o += d
@@ -1667,7 +1674,7 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
             info(f"res {n}: {d}")
           #  r = int(d.decode().strip())
             break
-        info(f"got {n}: {d}")
+        #  info(f"got {n}: {d}")
         #  elif k > 1:
         #  if ds is None:
         #    dl = time.time() + 0.1
@@ -1707,9 +1714,9 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
               if not e:
                   break
         ds = tmp.decode("utf-8", errors="ignore")
-        info(f"got{n}: {ds[:16]}")
+        #  info(f"got{n}: {ds[:16]}")
         ds = re.sub(shell_color_re,  "", ds)
-        info(f"got{n}>: {ds[:16]}")
+        #  info(f"got{n}>: {ds[:16]}")
         #  res += "\n" + ds
         ds = ds.strip()
         if ds:
@@ -1734,9 +1741,15 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           #  else:
           #    tmp += d
         if k > 0:
-          await sleep(0.2)
           await p.stdin.drain()
+          await sleep(0.1)
           if myshell_queue.empty():
+            break
+        if k == 0:
+          #  if d == b'EOF\n':
+          if d == eof:
+            info(f"found EOF")
+            r = True
             break
   if o:
     o = o.decode("utf-8", errors="ignore")
