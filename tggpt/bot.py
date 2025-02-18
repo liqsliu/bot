@@ -2704,11 +2704,12 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
             #  else:
             #    logger.info(f"not found room: {msg.to}")
 
-    text = None
-    for i in msg.body:
-      text = msg.body[i]
-      if text:
-        break
+    #  text = None
+    text = msg.body.any()
+    #  for i in msg.body:
+    #    text = msg.body[i]
+    #    if text:
+    #      break
 
     if text:
       #  if jid == log_group_private:
@@ -2794,12 +2795,13 @@ async def send(*args, **kwargs):
 
 
 async def send_t(text, jid=None, *args, **kwargs):
-  if type(jid) is int:
+  if  type(jid) is int:
     if jid == CHAT_ID:
       await _sendme(text, *args, **kwargs)
       jid = log_group_private
     else:
       return await _sendme(text, jid, *args, **kwargs)
+
   muc = None
   if 'name' in kwargs:
     name = kwargs["name"]
@@ -2824,11 +2826,20 @@ async def send_t(text, jid=None, *args, **kwargs):
 
   if jid is None:
     if isinstance(text, aioxmpp.Message):
+      warn(f"fixme: 该消息为xmpp专用，不能发往telegram, {text}")
+    #  for i in msg.body:
+    #    text = msg.body[i]
+    #    if text:
+    #      break
+      text_any = text.body.any()
+      info(f"fixme: 该消息为xmpp专用，不能发往telegram, {text_any=}")
+      await _sendme(text_any, *args, **kwargs)
       if text.type_ == MessageType.GROUPCHAT:
         muc = str(text.to.bare())
       else:
         pass
     else:
+      await _sendme(text, *args, **kwargs)
       #  err(f"需要jid")
       #  return False
       jid = log_group_private
@@ -2843,6 +2854,7 @@ async def send_t(text, jid=None, *args, **kwargs):
   else:
     text0 = text
     text = f"{name}{text}"
+
 
 
   ms = get_mucs(muc)
