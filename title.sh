@@ -160,20 +160,19 @@ fi
   if [[ -n "$ext" ]]; then
     fe=".$ext"
     if [[ "${fno%.${ext}}" == "$fno" ]]; then
-      :
+      mv "$fn" "$HOME/t/$fno$fe"
+      fn="$HOME/t/$fno$fe"
     else
       fno=${fno%.${ext}}
     fi
   fi
 
 
-
-
-
     # fs=$(du -b -- "$fn" | cut -f1)
     fs=$(du -h -- "$fn" | cut -f1)
     ft=$(file -i -b -- "$fn") 
     ft3=$(file -b -- "$fn") 
+
     if [[ ${#fno} -gt 4 ]]; then
       fno=${fno::4}
       mv "$fn" "$HOME/t/$fno$fe"
