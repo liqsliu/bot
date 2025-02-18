@@ -6419,6 +6419,33 @@ async def add_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"bash\n.{cmds[0]} $code"
+    return str(time.time())
+  cmd_funs["now"] = _
+
+  #  async def _(cmds, src):
+  #    if len(cmds) == 1:
+  #      return f"bash\n.{cmds[0]} $code"
+  #    cmds = cmds[0]
+  #    cmds = list(f"{x}\n" for x in cmds.splitlines())
+  #    await run_run( myshell(cmds, src=src) , False)
+  #  cmd_funs["date"] = _
+
+  for i in [
+      "date",
+      "free",
+      "cal"
+      ]:
+    async def _(cmds, src):
+      if len(cmds) == 1:
+        return f"bash cmd\n.{cmds[0]}"
+      cmds = cmds[0]
+      cmds = list(f"{x}\n" for x in cmds.splitlines())
+      await run_run( myshell(cmds, src=src) , False)
+    cmd_funs[i] = _
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"bash\n.{cmds[0]} $code"
     cmds.pop(0)
     #  res = await my_popen(cmds)
     #  res = await my_popen(' '.join(cmds), src=src, shell=True)
