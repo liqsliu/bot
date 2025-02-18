@@ -42,6 +42,10 @@ fi
     fn=$(echo "$fn" | sed "s/^-*//g")
     if [[ -z "$fn" ]]; then
       fn=$(date "+%Y%m%d_%H%M%S")
+    elif [[ "${fn}" == "index.html" ]]; then
+      fn=$(date "+%Y%m%d_%H%M%S")
+    elif [[ "${fn}" == "index" ]]; then
+      fn=$(date "+%Y%m%d_%H%M%S")
     fi
     fno=$fn
     fn="$HOME/t/$fn"
