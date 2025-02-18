@@ -1738,7 +1738,7 @@ async def myshell(cmd, max_time=interval, src=None):
     o = o.decode("utf-8", errors="ignore")
     o = o.strip()
     if r is True:
-      o = o.splitlines
+      o = o.splitlines()
       r = o[-1]
       r = int(r)
       o = o[:-1]
