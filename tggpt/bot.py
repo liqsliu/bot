@@ -3366,6 +3366,8 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
 #    headers = {'Content-Encoding': 'gzip'}
     if use == "fars":
       data = data.encode()
+    elif use == "0x0":
+      data = data.encode()
     elif use == "senio_text":
       pass
     else:
@@ -3374,8 +3376,8 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
         headers = {'Content-Encoding': ce}
       data = { fieldname: data }
       data.update(extra)
-      if use == "0x0":
-        use_json = True
+      #  if use == "0x0":
+      #    use_json = True
 
   if isinstance(data, bytes) or type(data) == BufferedReader or type(data) == TextIOWrapper or type(data) == BytesIO:
     if filename:
@@ -3480,8 +3482,8 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               data = b""
               async for tmp, _ in res.content.iter_chunks():
                 data += tmp
+                info(f"http downlod chunk ok: ({length}) | {len(tmp)} > {len(data)}")
                 if len(data) > HTTP_FILE_MAX_BYTES:
-                  info(f"http downlod ok: ({length}) | {len(tmp)} > {len(data)}")
                   break
             else:
               info(f"http downlod ok: ({length})")
@@ -3494,7 +3496,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
         err(f"http connect error: {e=} {url=}")
 
       if data:
-        info("http body data: {len(data)} {data[:64]}")
+        info(f"http body data: {len(data)} {data[:64]}")
         try:
           if "Content-Encoding" in res.headers:
             info(f"start to decompress: %s {type(data)} {data[:64]}" % res.headers['Content-Encoding'])
