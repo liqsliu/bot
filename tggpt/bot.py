@@ -319,10 +319,13 @@ def generand(N=4, M=None, *, no_uppercase=False):
   return ''.join(random.choice(l) for x in range(N))
 
 
-async def split_long_text(text, msg_max_length=500):
+async def split_long_text(text, msg_max_length=500, correct=False):
   if len(text.encode()) / msg_max_length > 3:
     url =await pastebin(text)
-    return [f"文本过长，请打开链接查看: {url}"]
+    if correct:
+      return [f"{text[:500]}..."]
+    else:
+      return [f"文本过长，请打开链接查看: {url}"]
   texts = []
   if len(text.encode()) > msg_max_length:
     ls = text.splitlines()
@@ -2715,7 +2718,7 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
       #  if jid == log_group_private:
       #    sendme(text)
       msgs = []
-      for text in await split_long_text(text, MAX_MSG_BYTES):
+      for text in await split_long_text(text, MAX_MSG_BYTES, correct):
         if msgs:
           msg = aioxmpp.Message(
               to=msg.to,
@@ -2933,7 +2936,7 @@ async def send1(text, jid=None, *args, **kwargs):
       #  if gpm and '/' not in jid:
       #    err(f"无法群私聊，地址错误: {jid}")
       #    return False
-    texts = await split_long_text(text, 4096)
+    #  texts = await split_long_text(text, 4096)
     #  for i in texts:
     if jid in my_groups:
       msg = aioxmpp.Message(
@@ -3019,7 +3022,7 @@ async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
   else:
     omsg = None
   async with tg_send_lock:
-    for t in await split_long_text(text, MAX_MSG_BYTES_TG):
+    for t in await split_long_text(text, MAX_MSG_BYTES_TG, correct):
       try:
         await sleep(msg_delay_default)
         if omsg is not None:
@@ -3631,7 +3634,7 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
       await write_file(text, fn, "w")
       need_delete = True
 
-    for i in await split_long_text(text):
+    for i in await split_long_text(text, correct=True):
       #  if await send(i, *args, **kwargs) is not True:
       if await mt_send(i, gateway=gateway, name=name, *args, **kwargs) is not True:
         break
