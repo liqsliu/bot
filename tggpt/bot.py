@@ -1660,12 +1660,7 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           # fixme: 不知道该设为多少
           r = 0
           break
-        if k == 1:
-          if myshell_queue.empty():
-            info(f"res {n}: {d}")
-          #  r = int(d.decode().strip())
-            break
-        await sleep(0.006)
+        await sleep(0.001)
         #  info(time.time())
         # 0.0006s
         while not myshell_queue.empty():
@@ -1677,19 +1672,19 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           tmp += d 
           await sleep(0.001)
 
-        if k == 0:
+        if k > 2:
+          # 至少还有一条待执行的命令
+          if len(tmp) < 512:
+            if time.time() - start_time < 0.3:
+              if not e:
+                  break
+        elif k == 0:
           if d == eof:
             info(f"found EOF")
             o = o[:-(len(eof))]
             tmp = tmp[:-(len(eof))]
             r = True
             break
-        elif k > 2:
-          # 至少还有一条待执行的命令
-          if len(tmp) < 512:
-            if time.time() - start_time < 0.3:
-              if not e:
-                  break
         ds = tmp.decode("utf-8", errors="ignore")
         #  info(f"got{n}: {ds[:16]}")
         ds = re.sub(shell_color_re,  "", ds)
@@ -1698,28 +1693,13 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
         ds = ds.strip()
         if ds:
           #  info(f"send: {src} {type(ds)} {ds[:16]}")
-          #  if src is not None:
           await send(ds, src)
           tmp = b""
-          #  ds = d.strip()
-          #  now = time.time()
-          #  need_send = False
-          #  if ds:
-          #    if now - last > 0.8:
-          #      need_send = True
-          #    elif len(ds) > 512:
-          #      need_send = True
-          #  if need_send is True:
-          #    if tmp:
-          #      ds = tmp + "\n" + d
-          #      tmp = ""
-          #    await send(ds.strip(), src)
-          #    last = now
-          #  else:
-          #    tmp += d
-        if k > 0:
+        if k == 1:
+          info(f"res {n}: {d}")
+        elif k > 0:
           await p.stdin.drain()
-          await sleep(0.1)
+          await sleep(0.01)
           if myshell_queue.empty():
             break
   if o:
