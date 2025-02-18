@@ -1668,6 +1668,13 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           await send(res, src)
           r = 0
           break
+        if myshell_queue.empty():
+          await p.stdin.drain()
+        if myshell_queue.empty():
+            await sleep(0.001)
+        if myshell_queue.empty():
+          if k > 0:
+            break
         #  n, d = await myshell_queue.get()
         try:
           n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
