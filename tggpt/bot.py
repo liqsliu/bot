@@ -1685,6 +1685,7 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
             o += d
           else:
             e += d
+          tmp += d 
           await sleep(0.1)
         #      info(f"got: {d}")
         #      dl += 0.01
