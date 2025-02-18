@@ -2802,7 +2802,8 @@ async def send_t(text, jid=None, *args, **kwargs):
     else:
       return await _sendme(text, jid, *args, **kwargs)
 
-  muc = None
+  #  muc = None
+  muc = jid
   if 'name' in kwargs:
     name = kwargs["name"]
     #  kwargs.pop("name")
@@ -2824,36 +2825,45 @@ async def send_t(text, jid=None, *args, **kwargs):
   else:
     xmpp_only = False
 
-  if jid is None:
-    if isinstance(text, aioxmpp.Message):
-      #  warn(f"fixme: 该消息为xmpp专用，不能发往telegram, {text}")
-    #  for i in msg.body:
-    #    text = msg.body[i]
-    #    if text:
-    #      break
-      text_any = text.body.any()
-      info(f"fixme: 该消息为xmpp专用，不能发往telegram, {text_any=}")
-      await _sendme(text_any, *args, **kwargs)
-      if text.type_ == MessageType.GROUPCHAT:
-        muc = str(text.to.bare())
-      else:
-        pass
-    else:
-      await _sendme(text, *args, **kwargs)
-      #  err(f"需要jid")
-      #  return False
-      jid = log_group_private
-  #  elif jid == "gateway1":
-  #    jid = main_group
-  else:
-    muc = jid
+  #  if jid is None:
+  #    if isinstance(text, aioxmpp.Message):
+  #      #  warn(f"fixme: 该消息为xmpp专用，不能发往telegram, {text}")
+  #    #  for i in msg.body:
+  #    #    text = msg.body[i]
+  #    #    if text:
+  #    #      break
+  #      text_any = text.body.any()
+  #      await _sendme(text_any, *args, **kwargs)
+  #      if text.type_ == MessageType.GROUPCHAT:
+  #        muc = str(text.to.bare())
+  #      else:
+  #        pass
+  #    else:
+  #      await _sendme(text, *args, **kwargs)
+  #      #  err(f"需要jid")
+  #      #  return False
+  #      jid = log_group_private
+  #  #  elif jid == "gateway1":
+  #  #    jid = main_group
 
   if isinstance(text, aioxmpp.Message):
-    text0 = text.body[None]
-    text.body[None] = f"{name}{text0}"
+    #  text0 = text.body[None]
+    text0 = text.body.any()
+    #  text.body[None] = f"{name}{text0}"
+    for i in text.body:
+      text.body[i] = f"{name}{text0}"
+      break
+    if jid is None:
+      if text.type_ == MessageType.GROUPCHAT:
+        muc = str(text.to.bare())
+      await _sendme(text0, *args, **kwargs)
   else:
     text0 = text
     text = f"{name}{text}"
+    if jid is None:
+      await _sendme(text, *args, **kwargs)
+      jid = log_group_private
+
 
 
 
