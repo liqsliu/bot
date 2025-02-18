@@ -3355,8 +3355,16 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
     if ce:
       data = await compress(data.encode(), ce)
       headers = {'Content-Encoding': ce}
-    data = {fieldname: data}
+    data = {
+        fieldname: data
+            }
     data.update(extra)
+    if use == "0x0":
+      data.update(
+          {
+        "filename": "-"
+            }
+          )
   elif isinstance(data, bytes) or type(data) == BufferedReader or type(data) == TextIOWrapper or type(data) == BytesIO:
     if filename:
       data = file_for_post(data, filename=filename, fieldname=fieldname, **extra)
