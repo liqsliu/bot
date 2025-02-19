@@ -1672,7 +1672,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
   eof = eof.encode()
   k =  len(cmds)
   start_time = time.time()
-  last_send = 0
+  last_send = start_time
   async with myshell_lock:
     for c in cmds:
       p.stdin.write( c.encode() )
@@ -1775,8 +1775,9 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
         if k > 1:
           if len(tmp) < 512:
             if time.time() - last_send < 1:
+              info(f"等一下，合并后续消息")
               #  if not e:
-                break
+              break
         elif k == 1:
           if d == b"0\n":
             info(f"skip sending of returncode 0")
@@ -1805,12 +1806,6 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           #    info("wait for more")
           #    if myshell_queue.empty():
           #      break
-  if tmp:
-    ds = tmp.decode("utf-8", errors="ignore")
-    ds = re.sub(shell_color_re,  "", ds)
-    ds = ds.strip()
-    if ds:
-      await send(ds, src)
   if o:
     o = o.decode("utf-8", errors="ignore")
     o = o.strip()
@@ -1825,6 +1820,16 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
     e = e.strip()
   else:
     e = None
+    
+  if tmp:
+    ds = tmp.decode("utf-8", errors="ignore")
+    ds = re.sub(shell_color_re,  "", ds)
+    ds = ds.strip()
+    if ds:
+      if r == 0:
+        if ds.endswith("\n0"):
+          ds = ds[:-2]
+      await send(ds, src)
   #  if r is not None:
   #    return  (r, o, e)
   return  (r, o, e)
