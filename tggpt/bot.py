@@ -2556,23 +2556,27 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   #  if res:
   #    o = res
   if r == 0:
-    s = o.splitlines()
-    if len(s) > 1:
-      path = s[-1]
-      if os.path.exists(path):
-        t = asyncio.create_task(backup(path))
-        url = await upload(path, src)
-        await t
-        asyncio.create_task(backup(path, delete=True))
-        if url:
-          s[-1] = f"\n- {url}"
+    if o:
+      s = o.splitlines()
+      if len(s) > 1:
+        path = s[-1]
+        if os.path.exists(path):
+          t = asyncio.create_task(backup(path))
+          url = await upload(path, src)
+          await t
+          asyncio.create_task(backup(path, delete=True))
+          if url:
+            s[-1] = f"\n- {url}"
+          else:
+            s.pop(-1)
         else:
           s.pop(-1)
+        return "\n".join(s)
       else:
-        s.pop(-1)
-      return "\n".join(s)
+        return o
     else:
-      return o
+      warn("failed: %s\n--\nE: %s\n%s" % (o, r, e))
+      return
   else:
     #  if err:
     warn("%s\n--\nE: %s\n%s" % (o, r, e))
@@ -7696,18 +7700,18 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       if url.startswith("https://icq.im"):
         return
       elif url.startswith("https://x.com/"):
-        res = await get_twitter(url)
+        res = await get_twitter(url, max_time=8)
         return res
       elif url.startswith("https://twitter.com/"):
-        res = await get_twitter(url)
+        res = await get_twitter(url, max_time=8)
         return res
       if not res:
         if len(urls) == 1:
-          res="%s" % await get_title(url)
+          res="%s" % await get_title(url, max_time=8)
           break
         res="[ %s urls ]" % len(urls)
       #  res+="\n\n> %s\n%s" % (url, await get_title(url, src))
-      res+="\n\n> %s\n%s" % (url, await get_title(url))
+      res+="\n\n> %s\n%s" % (url, await get_title(url, max_time=8))
 
     if res:
       res = f"{name}{res}"
