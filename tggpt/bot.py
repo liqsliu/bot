@@ -1741,7 +1741,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             #  await sleep(0.001)
         try:
           while True:
-            if len(tmp.encode()) > MAX_MSG_BYTES_TG:
+            if len(tmp)) > MAX_MSG_BYTES_TG:
               warn(f"res is too loog: {len(tmp)} {tmp[:54]}")
               break
             n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
