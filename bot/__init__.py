@@ -24,7 +24,7 @@ LOG_FILE = WORK_DIR / 'last_run.log'
 
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-LOG_FORMAT = "%(levelname)s %(asctime)s%(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+LOG_FORMAT = "%(levelname)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 #  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 
 
@@ -36,36 +36,36 @@ levelname_map = {
     'CRITICAL': 'C'
 }
 
-# 创建一个自定义的日志格式
-class CustomFormatter(logging.Formatter):
-#  class CustomFormatter(colorlog.ColoredFormatter):
-  def format(self, record):
-    # 获取调用栈中的前一个帧
-    #  caller_frame = sys._getframe(8)  # 获取上级调用的帧
-    #  if caller_frame.f_back is not None:
-    #    caller_frame = caller_frame.f_back
-    caller_frame = sys._getframe(8)  # 获取上级调用的帧
-    #  if caller_frame.f_code.co_name == "wrapper":
-    if caller_frame.f_back.f_code.co_name != "wrapper":
-      caller_frame = caller_frame.f_back
-    if record.name == "bot.m":
-      record.name = " "
-    else:
-      record.name = f" {record.name} "
-    #  record.levelname = levelname_map.get(record.levelname, record.levelname)
-    record.levelname = levelname_map.get(record.levelname)
-
-    #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
-    #  record.funcName = caller_function  # 修改 LogRecord 的 funcName
-    record.funcName = caller_frame.f_code.co_name
-    record.lineno = caller_frame.f_lineno
-    #  print(f"finally: {record}")
-    return super().format(record)
-
-#  formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
-
-#  formatter = CustomFormatter(LOG_FORMAT, datefmt="%H:%M:%S")
-logging.Formatter = CustomFormatter
+#  # 创建一个自定义的日志格式
+#  class CustomFormatter(logging.Formatter):
+#  #  class CustomFormatter(colorlog.ColoredFormatter):
+#    def format(self, record):
+#      # 获取调用栈中的前一个帧
+#      #  caller_frame = sys._getframe(8)  # 获取上级调用的帧
+#      #  if caller_frame.f_back is not None:
+#      #    caller_frame = caller_frame.f_back
+#      caller_frame = sys._getframe(8)  # 获取上级调用的帧
+#      #  if caller_frame.f_code.co_name == "wrapper":
+#      if caller_frame.f_back.f_code.co_name != "wrapper":
+#        caller_frame = caller_frame.f_back
+#      if record.name == "bot.m":
+#        record.name = " "
+#      else:
+#        record.name = f" {record.name} "
+#      #  record.levelname = levelname_map.get(record.levelname, record.levelname)
+#      record.levelname = levelname_map.get(record.levelname)
+#
+#      #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
+#      #  record.funcName = caller_function  # 修改 LogRecord 的 funcName
+#      record.funcName = caller_frame.f_code.co_name
+#      record.lineno = caller_frame.f_lineno
+#      #  print(f"finally: {record}")
+#      return super().format(record)
+#
+#  #  formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
+#
+#  #  formatter = CustomFormatter(LOG_FORMAT, datefmt="%H:%M:%S")
+#  logging.Formatter = CustomFormatter
 
 
 
