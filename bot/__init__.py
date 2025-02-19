@@ -41,7 +41,7 @@ class CustomFormatter(logging.Formatter):
     if record.name == "bot.m":
       record.name = ""
     else:
-      record.name = " {record.name} "
+      record.name = f" {record.name} "
     #  record.levelname = levelname_map.get(record.levelname, record.levelname)
     record.levelname = levelname_map.get(record.levelname)
 
