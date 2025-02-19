@@ -3992,6 +3992,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   def download_media_callback(current, total):
     #  last_time[0] = time.time()
     last_time[1] = current
+    info(f"剩余 {total-current}")
     if len(last_time) == 2:
       last_time.append(total)
       if total > 512*1024:
@@ -4012,7 +4013,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     last_current = 0
     while True:
       await sleep(interval)
-      now = time.time()-start_time
+      #  now = time.time()-start_time
       #  if music_bot_state[src] != 3:
       #    await send("取消：{}".format(now, res), src, correct=True)
       #    break
@@ -4021,7 +4022,8 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
         #    await send(f"等待超时: {res}", src, xmpp_only=True, correct=True)
         #    break
         #  await send("准备中({:.0f}s)：{}".format(now, res), src, xmpp_only=True, correct=True)
-        await send("准备中({:.0f}s)：{}".format(now, res), src, correct=True)
+        #  await send("准备中({:.0f}s)：{}".format(now, res), src, correct=True)
+        await send("准备中：{}".format(res), src, correct=True)
       else:
         current = last_time[1]
         total = last_time[2]
