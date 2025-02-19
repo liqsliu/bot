@@ -4433,17 +4433,21 @@ async def parse_tg_msg(event):
                 await send(text, jid=jid)
                 return
 
+          if msg.edit_date:
+            correct = True
+          else:
+            correct = False
           #  if msg.edit_date is None:
           if len(l) == 1:
             #  if type(l[0]) is str:
             #  l[0] = now
             l.append(now)
             l.append(gid)
-            await send(text, jid=jid, correct=True)
+            await send(text, jid=jid, correct=correct)
           elif jid in bot_groups:
             l[1] = now
             l.append(gid)
-            await send(text, jid=jid, correct=True)
+            await send(text, jid=jid, correct=correct)
           else:
             if now > l[1]:
               l[1] = now
