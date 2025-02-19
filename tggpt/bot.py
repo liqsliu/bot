@@ -8260,9 +8260,9 @@ async def xmppbot():
 async def xmppbot2():
   while True:
     if XB.running:
-      await sleep(6)
+      await sleep(60)
       continue
-    logger.info("需要重新启动xmppbot")
+    logger.info("xmppbot is not running")
     #  try:
     #  # RuntimeError: write() called (invalid in state _State.CLOSED, closing=False)
     #  except RuntimeError as e:
