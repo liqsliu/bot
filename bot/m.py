@@ -2545,9 +2545,10 @@ async def backup(path, src=None, delete=False):
     info(f"backup: {path}")
     shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
   #  res = await run_my_bash(shell_cmd, shell=False)
-  res = await my_sexec(shell_cmd)
+  #  res = await my_sexec(shell_cmd)
+  res = await myshell(shell_cmd)
   if res:
-    info(f"res: {res} {path}")
+    info(f"res: {res} {shell_cmd}")
     if src:
       await send(url, src)
   return url
