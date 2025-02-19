@@ -271,6 +271,9 @@ def warn(text, more=False, no_send=True):
   if more:
     logger.warning(text, exc_info=True, stack_info=True)
   else:
+    if tb is None:
+      tb=sys._getframe(1)
+    text = f"{tb.f_code.co_name} {tb.f_lineno} {text}"
     logger.warning(text)
   send_log(text)
 
@@ -284,12 +287,13 @@ def warn(text, more=False, no_send=True):
   #  text = f"W: {tb.f_lineno} {tb.f_code.co_name}: {text}"
   #  lineno = get_lineno(tb)
   #  text = f"{lineno} {text}"
-def info(*args, tb=None):
-  text = " ".join(f"{x}" for x in args)
-  logger.info(text)
-  #  if tb is None:
-  #    tb=sys._getframe(1)
-  #  logger.info(f"{tb.f_code.co_name} {tb.f_lineno} {text}")
+#  def info(*args, tb=None):
+#    text = " ".join(f"{x}" for x in args)
+def info(text, tb=None):
+  #  logger.info(text)
+  if tb is None:
+    tb=sys._getframe(1)
+  logger.info(f"{tb.f_code.co_name} {tb.f_lineno} {text}")
 
 
 def log(text):
@@ -5283,7 +5287,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     #  return
     t = 'application/octet-stream'
   #  print("upload to xmpp: ", XB,UPLOAD, filename, os.path.getsize(fp), t, file_path)
-  info("upload to xmpp: ", XB,UPLOAD, filename, os.path.getsize(fp), t, file_path)
+  print("upload to xmpp: ", XB,UPLOAD, filename, os.path.getsize(fp), t, file_path)
   slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, length, content_type=t)
   #  slot = await XB.send(aioxmpp.IQ(
   #      type_=aioxmpp.IQType.GET,

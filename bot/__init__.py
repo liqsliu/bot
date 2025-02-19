@@ -1,7 +1,4 @@
 import logging
-LOGGER = logging.getLogger()
-logger=LOGGER
-
 
 import colorlog
 from pathlib import Path
@@ -28,13 +25,13 @@ LOG_FORMAT = "%(levelname)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(linen
 #  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 
 
-levelname_map = {
-    'DEBUG': 'D',
-    'INFO': 'I',
-    'WARNING': 'W',
-    'ERROR': 'E',
-    'CRITICAL': 'C'
-}
+#  levelname_map = {
+#      'DEBUG': 'D',
+#      'INFO': 'I',
+#      'WARNING': 'W',
+#      'ERROR': 'E',
+#      'CRITICAL': 'C'
+#  }
 
 #  # 创建一个自定义的日志格式
 #  class CustomFormatter(logging.Formatter):
@@ -82,6 +79,9 @@ levelname_map = {
 #          'CRITICAL': 'bold_red',
 #      }
 #  )
+
+LOGGER = logging.getLogger()
+logger=LOGGER
 
 
 debug = False
