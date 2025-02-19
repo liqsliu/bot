@@ -40,9 +40,24 @@ logger=LOGGER
 debug = False
 debug = True
 
-
-
 if debug:
+  #  handler = logging.StreamHandler()
+  #  handler.setFormatter(formatter)
+  #  logger.addHandler(handler)
+  logging.basicConfig()
+  LOGGER.setLevel(logging.INFO)
+  OUT = None
+  ERR = None
+
+elif False:
+  logging.basicConfig(format=LOG_FORMAT)
+  LOGGER.setLevel(logging.INFO)
+  OUT = None
+  ERR = None
+
+
+elif False:
+  # https://docs.python.org/zh-cn/3/library/logging.html#logging.basicConfig
   logging.basicConfig(format=LOG_FORMAT)
   LOGGER.setLevel(logging.INFO)
   OUT = None
@@ -55,7 +70,7 @@ if debug:
   #  OUT.addFilter(NoParsingFilter())
   #
   #  LOGGER.addHandler(OUT)
-else:
+elif False:
   logging.basicConfig(filename=str(LOG_FILE), filemode='w', format=LOG_FORMAT)
 
   handler = TimedRotatingFileHandler(LOG_FILE, when="d", interval=1, backupCount=3)
