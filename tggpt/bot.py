@@ -3904,18 +3904,19 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
       last_time = [time.time(), 0]
       def cb(sent, total):
         last_time[1] = sent
-        total = last_time[2]
-        if len(last_time) == 2:
-          last_time.append(total)
-          asyncio.create_task(send("开始上传: {:.1f}MB".format(total-sent/1024/1024), src, correct=True))
-        elif current == total:
+        #  if len(last_time) == 2:
+        #    last_time.append(total)
+        #    asyncio.create_task(send("开始上传: {:.1f}MB".format(total-sent/1024/1024), src, correct=True))
+        #  else:
+          #  total = last_time[2]
+        if sent == length:
           asyncio.create_task(send("上传完成", src))
         else:
-          info("剩余 {:.1f}M".format((total-send)/1024/1024))
+          info("剩余 {:.1f}M".format((length-send)/1024/1024))
           now = time.time()
           if now - last_time[0] > interval:
             last_time[0] = now
-            asyncio.create_task(send("{:.1f}M".format((total-current)/1024/1024), src, correct=True))
+            asyncio.create_task(send("{:.1f}M".format((length-sent)/1024/1024), src, correct=True))
       #  async def update_tmp_msg():
       #    while True:
       #      await sleep(interval)
