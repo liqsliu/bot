@@ -23,7 +23,9 @@ FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 class CustomFormatter(logging.Formatter):
   def format(self, record):
     # 获取调用栈中的前一个帧
-    caller_frame = sys._getframe(2)  # 获取上级调用的帧
+    caller_frame = sys._getframe(8)  # 获取上级调用的帧
+    if caller_frame.f_back is not None:
+      caller_frame = caller_frame.f_back
     #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
     #  record.funcName = caller_function  # 修改 LogRecord 的 funcName
     record.funcName = caller_frame.f_code.co_name
