@@ -8558,7 +8558,7 @@ async def amain():
 
       #  while True:
       #    if XB.running:
-      while if XB.running:
+      while XB.running:
         await sleep(60)
         continue
       warn("xmppbot is not running, restart...")
