@@ -2552,11 +2552,13 @@ async def get_twitter(url, src=None, opts=[], max_time=run_shell_time_max):
 async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   # also download
   #  cmds = ["bash", f"{SH_PATH}/title.sh"]
+  #  cmds = [f"{SH_PATH}/title.sh", shlex.quote(url)]
+  #  cmds = shlex.join(opts)
   cmds = [f"{SH_PATH}/title.sh", url]
+  cmds.extend(opts)
 #  cmds.append(shlex.quote(url))
 #  while opts:
 #    cmds.append(opts.pop(0))
-  cmds.extend(opts)
     #  res = await send_cmd_to_bash(src, name, url)
     #  res = await send_cmd_to_bash(None, name, url)
     #  return res
