@@ -1,4 +1,9 @@
 import logging
+
+LOGGER = logging.getLogger()
+logger=LOGGER
+
+import colorlog
 from pathlib import Path
 from logging.handlers import TimedRotatingFileHandler
 import sys
@@ -13,6 +18,10 @@ PARENT_DIR = WORK_DIR.parent
 
 LOG_FILE = PARENT_DIR / 'last_run.log'
 LOG_FILE = WORK_DIR / 'last_run.log'
+
+
+
+
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 LOG_FORMAT = "%(levelname)s %(asctime)s%(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
@@ -28,7 +37,8 @@ levelname_map = {
 }
 
 # 创建一个自定义的日志格式
-class CustomFormatter(logging.Formatter):
+#  class CustomFormatter(logging.Formatter):
+class CustomFormatter(colorlog.ColoredFormatter):
   def format(self, record):
     # 获取调用栈中的前一个帧
     #  caller_frame = sys._getframe(8)  # 获取上级调用的帧
@@ -56,13 +66,38 @@ class CustomFormatter(logging.Formatter):
 logging.Formatter = CustomFormatter
 
 
-LOGGER = logging.getLogger()
-logger=LOGGER
+
+
+
+formatter = colorlog.ColoredFormatter(
+    '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
+    datefmt='%m-%d %H:%M:%S',
+    log_colors={
+        'DEBUG': 'blue',
+        'INFO': 'green',
+        'WARNING': 'yellow',
+        'ERROR': 'red',
+        'CRITICAL': 'bold_red',
+    }
+)
+
+
+
 
 debug = False
 debug = True
 
 if debug:
+
+  handler = logging.StreamHandler()
+  handler.setFormatter(formatter)
+  logger.addHandler(handler)
+  LOGGER.setLevel(logging.INFO)
+  OUT = None
+  ERR = None
+
+
+elif False:
   #  handler = logging.StreamHandler()
   #  handler.setFormatter(formatter)
   #  logger.addHandler(handler)
