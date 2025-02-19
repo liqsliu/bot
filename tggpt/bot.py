@@ -1583,6 +1583,9 @@ async def _init_myshell():
   #  t2 = asyncio.create_task(myshell_p.stderr.readline())
   t1 = asyncio.create_task(pr(p.stdout.readline, 1))
   t2 = asyncio.create_task(pr(p.stderr.readline, 2))
+  cmds = ["source", "~/.bash_profile"]
+  res = await my_sshell(cmds)
+  info(f"init bash: {res}")
   #  info("clean...")
   #  await sleep(1)
   #  while not myshell_queue.empty():
@@ -7635,6 +7638,10 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         return
       if url.startswith("https://icq.im"):
         return
+      elif url.startswith("https://x.com/"):
+        res = await get_twitter(url)
+      elif url.startswith("https://twitter.com/"):
+        res = await get_twitter(url)
       if not res:
         if len(urls) == 1:
           res="%s" % await get_title(url)
