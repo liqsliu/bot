@@ -1651,14 +1651,15 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
   d = None
   #  try:
   #    async with asyncio.timeout(interval) as cm:
-  info(f"cmds: {cmds}")
   if isinstance(cmds, str):
-    cmds = get_cmd(cmds)
+    info(f"收到字符串命令: {cmds}")
+    #  cmds = get_cmd(cmds)
   else:
     #  cmds = list(shlex.quote(x) for x in cmds)
     #  cmds = ' '.join(cmds)
     cmds = shlex.join(cmds)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
+  info(f"run shell cmds: {cmds}")
   cmds.append("echo $?\n")
   eof = generand(16) + "\n"
   #  cmd.append(f"echo EOF\n")
@@ -1705,6 +1706,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           else:
             e += d
           tmp += d 
+          info(f"got{n}: {d}")
         except TimeoutError:
           if k > 0:
             await sleep(0.001)
@@ -1729,7 +1731,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             e += d
           tmp += d 
           await sleep(0.001)
-
+          print(f"got{n}: {d}")
         if k == 0:
           if d == eof:
             info(f"found EOF")
@@ -6665,7 +6667,7 @@ async def add_cmd():
         raise SystemExit("stop by me, restart...")
         return "ok"
     cmds.pop(0)
-    #  cmds = ' '.join(cmds)
+    cmds = ' '.join(cmds)
     #  cmds = list(f"{x}\n" for x in cmds.splitlines())
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
     #  res = await myshell(cmds, src=src)
