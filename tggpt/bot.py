@@ -1676,7 +1676,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
   async with myshell_lock:
     for c in cmds:
       p.stdin.write( c.encode() )
-      info(f"send ok: {c}")
+      info(f"send {k}: {c}")
       k -= 1
       while r is None:
         #  if time.time() - start_time > run_shell_time_max*10:
@@ -1714,7 +1714,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
                 r = True
                 break
             elif k == 1:
-              if d == b"0\n":
+              if d == b'0\n':
                 info(f"found returncode")
             o += d
           else:
@@ -1759,7 +1759,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
                   r = True
                   break
               elif k == 1:
-                if d == b"0\n":
+                if d == b'0\n':
                   print(f"found returncode?")
                   #  r = int(d[:-1])
                   #  break
