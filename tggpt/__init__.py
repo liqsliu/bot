@@ -30,12 +30,14 @@ class CustomFormatter(logging.Formatter):
     record.lineno = caller_frame.f_lineno
     return super().format(record)
 
-FORMATTER: logging.Formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
+#  FORMATTER: logging.Formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
+formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
 
 
 
 LOGGER = logging.getLogger()
 logger=LOGGER
+logger.setFormatter(formatter)
 
 debug = False
 debug = True
