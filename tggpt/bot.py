@@ -1583,7 +1583,7 @@ async def _init_myshell():
   #  t2 = asyncio.create_task(myshell_p.stderr.readline())
   t1 = asyncio.create_task(pr(p.stdout.readline, 1))
   t2 = asyncio.create_task(pr(p.stderr.readline, 2))
-  cmds = ["source", "~/.bash_profile"]
+  cmds = "source ~/.bash_profile"
   res = await myshell(cmds)
   info(f"init bash: {res}")
   #  info("clean...")
