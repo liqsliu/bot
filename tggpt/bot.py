@@ -653,8 +653,10 @@ def _exceptions_handler(e, *args, **kwargs):
     no_send_xmpp = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
 
+
   if _send_log.__name__ in fs:
     no_send = True
+
 
   if no_send:
     if more:

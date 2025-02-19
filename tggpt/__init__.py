@@ -15,7 +15,7 @@ LOG_FILE = PARENT_DIR / 'last_run.log'
 LOG_FILE = WORK_DIR / 'last_run.log'
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
+LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 
 
@@ -53,7 +53,7 @@ if debug:
   #  handler.setFormatter(formatter)
   #  logger.addHandler(handler)
   #  logging.basicConfig()
-  logging.basicConfig(format=LOG_FORMAT)
+  logging.basicConfig(format=LOG_FORMAT, datefmt="%H:%M:%S")
   LOGGER.setLevel(logging.INFO)
   OUT = None
   ERR = None
