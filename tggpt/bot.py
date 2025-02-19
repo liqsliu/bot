@@ -1683,15 +1683,21 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           await send(res, src)
           r = 0
           break
-        if myshell_queue.empty():
-          await p.stdin.drain()
-          await sleep(0.001)
+        if k > 1:
           if myshell_queue.empty():
-            await sleep(0.01)
+            await p.stdin.drain()
+            await sleep(0.001)
+            info("wait for more")
             if myshell_queue.empty():
-              #  if k > 0:
-              if k > 1:
-                break
+              await sleep(0.01)
+              info("wait for more 2")
+              if myshell_queue.empty():
+                await sleep(0.1)
+                info("wait for more 3")
+                if myshell_queue.empty():
+                  info("wait for more fail")
+                #  if k > 0:
+                  break
         #  n, d = await myshell_queue.get()
         try:
           #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
@@ -1732,21 +1738,21 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           n, d = await myshell_queue.get()
           if n == 1:
             o += d
+            if k == 0:
+              if d == eof:
+                print(f"found EOF?")
+                o = o[:-(len(eof))]
+                tmp = tmp[:-(len(eof))]
+                r = True
+                break
           else:
             e += d
           tmp += d 
           await sleep(0.001)
           print(f"got{n}: {d}")
-        if k == 0:
-          if d == eof:
-            info(f"found EOF")
-            o = o[:-(len(eof))]
-            tmp = tmp[:-(len(eof))]
-            r = True
-            break
           # 至少还有一条待执行的命令
         #  if k > 2:
-        elif k > 1:
+        if k > 1:
           if len(tmp) < 512:
             if time.time() - start_time < 0.2:
               if not e:
@@ -1762,15 +1768,16 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             #  info(f"send: {src} {type(ds)} {ds[:16]}")
             await send(ds, src)
             tmp = b""
-        if k > 0:
-          if k == 1:
-            info(f"res {n}: {d}")
+        if k == 1:
+          info(f"res {n}: {d}")
+          break
+        #  if k > 0:
           #  await p.stdin.drain()
-          if myshell_queue.empty():
-            info("wait for more")
-            await sleep(0.01)
-            if myshell_queue.empty():
-              break
+          #  if myshell_queue.empty():
+          #    await sleep(0.01)
+          #    info("wait for more")
+          #    if myshell_queue.empty():
+          #      break
   if tmp:
     ds = tmp.decode("utf-8", errors="ignore")
     ds = re.sub(shell_color_re,  "", ds)
@@ -7642,8 +7649,10 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         return
       elif url.startswith("https://x.com/"):
         res = await get_twitter(url)
+        return res
       elif url.startswith("https://twitter.com/"):
         res = await get_twitter(url)
+        return res
       if not res:
         if len(urls) == 1:
           res="%s" % await get_title(url)
