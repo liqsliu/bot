@@ -4443,6 +4443,7 @@ async def parse_tg_msg(event):
             #  l[0] = now
             l.append(now)
             l.append(gid)
+            #  await send(text, jid=jid, correct=correct)
             await send(text, jid=jid, correct=correct)
           elif jid in bot_groups:
             l[1] = now
@@ -4452,9 +4453,10 @@ async def parse_tg_msg(event):
             if now > l[1]:
               l[1] = now
               l.append(gid)
-            await sleep(5)
+            await sleep(3)
             if mid in mtmsgsg[jid] and now == l[1]:
-              await send(text, jid=jid)
+              #  await send(text, jid=jid)
+              await send(text, jid=jid, correct=correct)
             else:
               info(f"忽略旧的临时消息: {text[:64]}")
         else:
