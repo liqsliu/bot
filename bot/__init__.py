@@ -1,5 +1,7 @@
 import logging
 
+LOGGER = logging.getLogger()
+logger=LOGGER
 
 import colorlog
 from pathlib import Path
@@ -57,14 +59,12 @@ class CustomFormatter(colorlog.ColoredFormatter):
     #  record.funcName = caller_function  # 修改 LogRecord 的 funcName
     record.funcName = caller_frame.f_code.co_name
     record.lineno = caller_frame.f_lineno
-    print(f"finally: {record}")
+    #  print(f"finally: {record}")
     return super().format(record)
 
 #  formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
 
 #  logging.Formatter = CustomFormatter
-
-
 
 
 
@@ -90,9 +90,6 @@ if debug:
 
   handler = logging.StreamHandler()
   handler.setFormatter(formatter)
-
-  LOGGER = logging.getLogger()
-  logger=LOGGER
 
   logger.addHandler(handler)
   LOGGER.setLevel(logging.INFO)
