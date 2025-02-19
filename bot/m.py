@@ -3910,9 +3910,10 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
       fp = path
     cb = None
     length = os.path.getsize(path)
-    await send("准备上传: {:.1f}MB {}".format(length/1024/1024, fp.name), src)
+    await send("准备上传: {} {}".format(hbyte(length), fp.name), src)
     if length > 1000000:
       last_time = [time.time(), 0]
+      start_time = time.time()
       def cb(sent, total):
         last_time[1] = sent
         #  if len(last_time) == 2:
@@ -3921,13 +3922,13 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
         #  else:
           #  total = last_time[2]
         if sent == length:
-          asyncio.create_task(send("上传完成", src))
+          asyncio.create_task(send("上传完成，用时: {}s".format(int(time.time()-start_time)), src))
         else:
-          info("剩余 {:.1f}M".format((length-sent)/1024/1024))
+          info("剩余 {}".format(hbyte(length-sent)))
           now = time.time()
           if now - last_time[0] > interval:
             last_time[0] = now
-            asyncio.create_task(send("{:.1f}M".format((length-sent)/1024/1024), src, correct=True))
+            asyncio.create_task(send("{}".format(hbyte(length-sent)), src, correct=True))
       #  async def update_tmp_msg():
       #    while True:
       #      await sleep(interval)
@@ -3973,6 +3974,13 @@ def get_timeout(size):
   return timeout
 
 
+def hbyte(size):
+  if size > 512*1024:
+    return "{:.1}M".format(size/1024/1024)
+  else:
+    return "{:.0}K".format(size/1024)
+
+
 #  last_time = {}
 
 tg_download_tasks = set()
@@ -3986,6 +3994,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     else:
       res = ''
     size = msg.file.size
+    await send("准备下载：{} {}".format(hbyte(size), res), src)
     timeout = get_timeout(size)
     if max_wait_time > timeout:
       timeout = max_wait_time
@@ -4003,13 +4012,10 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   def download_media_callback(current, total):
     #  last_time[0] = time.time()
     last_time[1] = current
-    info(f"剩余 {total-current}")
+    info("剩余 {}".format(hbyte(total)))
     if len(last_time) == 2:
       last_time.append(total)
-      if total > 512*1024:
-        asyncio.create_task(send("开始下载 {:.1f}M {}".format(total/1024/1024, res), src))
-      else:
-        asyncio.create_task(send("开始下载 {:.1f}KB {}".format(total/1024, res), src))
+      asyncio.create_task(send("开始下载 {} {}".format(hbyte(size), res), src))
     #  print('Downloaded', current, 'out of', total,
     #    'bytes: {:.2%}'.format(current / total))
     #  if time.time() - last_time[src] > interval:
@@ -4039,11 +4045,11 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
         current = last_time[1]
         total = last_time[2]
         if current == total:
-          await send("下载完成：{}".format(res), src)
+          await send("下载完成：{} 用时: {}s".format(res), src, int(time.time()-start_time))
           break
         #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
         #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
-        await send("{:.1f}M".format((total-current)/1024/1024), src, correct=True)
+        await send(hbyte(total-current), src, correct=True)
         last_time[0] = time.time()
         #  last_current = current
 
@@ -5338,7 +5344,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   headers["Content-Length"] = str(length)
   #  if src:
   info("开启进度刷新消息")
-  await send("开始上传 {:.1f}M {}".format(length/1024/1024, filename), src)
+  await send("开始上传 {} {}".format(hbyte(length), filename), src)
 
     #  async def coro(slot, fp, timeout, headers):
   #  async def coro():
@@ -5381,13 +5387,13 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     @wraps(func)
     async def wrapper(*args, **kwargs):
       data = await func(*args, **kwargs)
-      info("剩余: {:.1f}M".format((length-ress[1])/1024/1024))
+      info("剩余: {}".format(hbyte(length-ress[1])))
       now = time.time()
       if now - ress[0] > interval:
         ress[0] = now
         ress[1] += len(data)
         #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
-        asyncio.create_task( send("{:.1f}M".format((length-ress[1])/1024/1024), src, correct=True) )
+        asyncio.create_task( send(hbyte(length-ress[1]), src, correct=True) )
       else:
         ress[1] += len(data)
       #  print(f"{len(data)}")
