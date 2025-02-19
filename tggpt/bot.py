@@ -225,13 +225,22 @@ def info1(s):
 def info2(s):
   print("%s" % s.replace("\n", " "))
 
-def send_log(text, wait=1):
+def send_log(text, wait=5):
   t1 = asyncio.create_task(_send_log(text, wait=wait))
 
-async def _send_log(text, wait=5):
+async def _send_log(text, wait=1, to=0):
   await sleep(wait)
-  t1 = asyncio.create_task(send(text, jid=CHAT_ID))
-  t2 = asyncio.create_task(send(text, jid=log_group_private))
+  if to == 1:
+    t1 = asyncio.create_task(send(text, jid=CHAT_ID))
+    return await t1
+  if to == 2:
+    t2 = asyncio.create_task(send(text, jid=log_group_private))
+    return await t2
+  else:
+    t1 = asyncio.create_task(send(text, jid=CHAT_ID))
+    t2 = asyncio.create_task(send(text, jid=log_group_private))
+    await t1
+    await t2
   return t1, t2
   #  asyncio.create_task(mt_send_for_long_text(text))
   #  asyncio.create_task(sendg(text))
@@ -528,6 +537,8 @@ def exceptions_handler(func):
 def _exceptions_handler(e, *args, **kwargs):
   more = True
   no_send = False
+  no_send_tg = False
+  no_send_xmpp = False
   #  res = f'内部错误: {e=} line: {e.__traceback__.tb_next.tb_lineno}'
   tb = e.__traceback__
   #  lineno = get_lineno2(tb)
@@ -613,6 +624,7 @@ def _exceptions_handler(e, *args, **kwargs):
     #  print(f"W: {repr(e)} line: {e.__traceback__.tb_next.tb_next.tb_lineno}")
 
   res = f"已忽略异常: {res}"
+
   #  log(res)
   #  logger.warning(res)
   #  asyncio.create_task(mt_send(res))
@@ -622,16 +634,23 @@ def _exceptions_handler(e, *args, **kwargs):
   info("check __send: {}".format(__send.__name__ in fs))
   if _sendme.__name__ in fs:
     no_send = True
+    no_send_tg = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
   elif __send.__name__ in fs:
     no_send = True
+    no_send_xmpp = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
   elif _sendme.__name__ in res:
     no_send = True
+    no_send_tg = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
   elif __send.__name__ in res:
     no_send = True
+    no_send_xmpp = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
+
+  if _send_log.__name__ in fs:
+    no_send = True
 
   if no_send:
     if more:
@@ -642,7 +661,11 @@ def _exceptions_handler(e, *args, **kwargs):
     logger.error(res, exc_info=True, stack_info=True)
     # wait is ok
     #  await sleep(5)
-    send_log(res, 9)
+    #  send_log(res, 9)
+    if not no_send_tg:
+      t1 = asyncio.create_task(_send_log(res, wait=9, to=1))
+    elif not no_send_xmpp:
+      t1 = asyncio.create_task(_send_log(res, wait=9, to=2))
   return res
 
 
