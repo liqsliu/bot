@@ -1705,7 +1705,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
   async with myshell_lock:
     for c in cmds:
       p.stdin.write( c.encode() )
-      info(f"send {k}: {c}")
+      info(f"send {k}: {c[:16]=}")
       k -= 1
       while r is None:
         #  if time.time() - start_time > run_shell_time_max*10:
