@@ -281,7 +281,7 @@ def info(*args, tb=None):
     if type(text) is not str:
       text = f"{text=}"
   else:
-    text = " ".join(f"{x=}" for x in args)
+    text = " ".join(f"{x}" for x in args)
   if tb is None:
     tb=sys._getframe()
   #  lineno = sys._getframe(1).f_lineno
