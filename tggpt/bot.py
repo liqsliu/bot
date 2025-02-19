@@ -1670,10 +1670,15 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           break
         if myshell_queue.empty():
           await p.stdin.drain()
-        if myshell_queue.empty():
-          if k > 0:
-            break
           await sleep(0.001)
+        if myshell_queue.empty():
+          if k == 1:
+            await sleep(0.1)
+            await p.stdin.drain()
+            if myshell_queue.empty():
+              break
+          elif k > 0:
+            break
         #  n, d = await myshell_queue.get()
         try:
           n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
@@ -1690,8 +1695,8 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
           tmp += d 
         except TimeoutError:
           if k > 0:
-            await p.stdin.drain()
             await sleep(0.001)
+            await p.stdin.drain()
             info(f"fixme: timeout: {c=} {cmd}")
             break
           warn(f"timeout: {cmd}")
