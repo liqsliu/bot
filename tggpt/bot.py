@@ -1601,7 +1601,7 @@ async def _init_myshell():
 
 @exceptions_handler
 async def myshell(*args,  **kwargs):
-  return await run_run(*args,  **kwargs) , False)
+  return await run_run(_myshell(*args,  **kwargs) , False)
 
 #  async def myshell(cmd, max_time=interval, src=None):
 @exceptions_handler
