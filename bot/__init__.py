@@ -24,7 +24,7 @@ LOG_FILE = WORK_DIR / 'last_run.log'
 
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-#  LOG_FORMAT = "%(levelname)s %(asctime)s%(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+LOG_FORMAT = "%(levelname)s %(asctime)s%(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 #  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 
 
@@ -37,8 +37,8 @@ levelname_map = {
 }
 
 # 创建一个自定义的日志格式
-#  class CustomFormatter(logging.Formatter):
-class CustomFormatter(colorlog.ColoredFormatter):
+class CustomFormatter(logging.Formatter):
+#  class CustomFormatter(colorlog.ColoredFormatter):
   def format(self, record):
     # 获取调用栈中的前一个帧
     #  caller_frame = sys._getframe(8)  # 获取上级调用的帧
@@ -64,23 +64,24 @@ class CustomFormatter(colorlog.ColoredFormatter):
 
 #  formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
 
+formatter = CustomFormatter(LOG_FORMAT, datefmt="%H:%M:%S")
 #  logging.Formatter = CustomFormatter
 
 
 
 #  formatter = colorlog.ColoredFormatter(
-formatter = CustomFormatter(
-    #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
-"%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s",
-    datefmt='%m-%d %H:%M:%S',
-    log_colors={
-        'DEBUG': 'blue',
-        'INFO': 'green',
-        'WARNING': 'yellow',
-        'ERROR': 'red',
-        'CRITICAL': 'bold_red',
-    }
-)
+#  formatter = CustomFormatter(
+#      #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
+#  "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s",
+#      datefmt='%m-%d %H:%M:%S',
+#      log_colors={
+#          'DEBUG': 'blue',
+#          'INFO': 'green',
+#          'WARNING': 'yellow',
+#          'ERROR': 'red',
+#          'CRITICAL': 'bold_red',
+#      }
+#  )
 
 
 debug = False
