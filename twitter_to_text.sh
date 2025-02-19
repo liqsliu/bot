@@ -1,7 +1,5 @@
 #!/bin/bash
 
-
-
 SH_PATH=${SH_PATH:-$(cd $(dirname ${BASH_SOURCE[0]}) || exit; pwd )}
 LP=${LP:-/var/www/dav/tmp}
 #DOMAIN=${DOMAIN:-liuu.tk}
