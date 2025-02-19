@@ -4630,6 +4630,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     await _sendme(tmsg.stringify(), chat_id)
   elif tmsg.file:
     file = tmsg.file
+    file_size = file.size
     await _sendme(f"file: {type(file)} {file.name} {file.size}", chat_id)
     res = None
     #  if tmsg.text:
@@ -4696,7 +4697,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     #  src = log_group_private
     src = chat_id
     #  path = await tg_download_media(tmsg, src=log_group_private, max_wait_time=600)
-    path = await tg_download_media(tmsg, src=chat_id, max_wait_time=600)
+    #  path = await tg_download_media(tmsg, src=chat_id, max_wait_time=download_media_time_max)
+    path = await tg_download_media(tmsg, src=chat_id, max_wait_time=get_timeout(file_size))
     if path:
       if path.endswith(".tgs"):
         info(f"found tgs file: {path}")
@@ -4738,7 +4740,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
         if opts == 2 or res is None or opts == 0:
           try:
-            res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
+            res = await tg_upload_media(path, src, chat_id=chat_id, caption=url, max_time=get_timeout(file_size))
             if opts == 2:
               return
           except Exception as e:
@@ -4786,7 +4788,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
         if res is None and opts != 2:
           try:
-            res = await tg_upload_media(path, src, chat_id=chat_id, caption=url)
+            res = await tg_upload_media(path, src, chat_id=chat_id, caption=url, max_time=get_timeout(file_size))
           except Exception as e:
             err(f"上传失败 {e=}")
 
