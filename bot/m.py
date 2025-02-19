@@ -8385,6 +8385,21 @@ async def stop_sub(p=None):
 
 async def after_init():
   info("run after init...")
+
+  global loop2_thread, loop2, main_thread
+  main_thread =  threading.main_thread()
+  loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
+  loop2_thread.start()
+  while True:
+    if "loop2" in globals() and loop2.is_running():
+      info("子线程事件循环正在运行")
+      break
+    else:
+      info("等待子线程事件循环启动")
+      await sleep(2)
+  #  info("判断是否在主线程，应该是True: %s" % str(main_thread.native_id == threading.get_native_id()))
+  #  info("判断是否在副线程，应该是False: %s" % str(loop2_thread.native_id == threading.get_native_id()))
+  #  info(f"ids: {main_thread.native_id} {loop2_thread.native_id} {threading.get_native_id()}")
   
   if await init_myshell():
     info("启动常驻shell成功")
@@ -8420,20 +8435,6 @@ async def init():
   global loop
   loop = asyncio.get_event_loop()
 
-  global loop2_thread, loop2, main_thread
-  main_thread =  threading.main_thread()
-  loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
-  loop2_thread.start()
-  while True:
-    if "loop2" in globals() and loop2.is_running():
-      info("子线程事件循环正在运行")
-      break
-    else:
-      info("等待子线程事件循环启动")
-      await sleep(2)
-  #  info("判断是否在主线程，应该是True: %s" % str(main_thread.native_id == threading.get_native_id()))
-  #  info("判断是否在副线程，应该是False: %s" % str(loop2_thread.native_id == threading.get_native_id()))
-  #  info(f"ids: {main_thread.native_id} {loop2_thread.native_id} {threading.get_native_id()}")
   #
 
   #  LOGGER.addFilter(NoParsingFilter())
