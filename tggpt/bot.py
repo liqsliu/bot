@@ -7613,10 +7613,11 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       if url.startswith("https://icq.im"):
         return
       if url.startswith("https://x.com/"):
-        res = await send_cmd_to_bash(src, name, url)
+        #  res = await send_cmd_to_bash(src, name, url)
+        res = await send_cmd_to_bash(None, name, url)
         return res
       if url.startswith("https://twitter.com/"):
-        res = await send_cmd_to_bash(src, name, url)
+        res = await send_cmd_to_bash(None, name, url)
         return res
       if not res:
         if len(urls) == 1:
@@ -7633,7 +7634,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       #    res += f"\n{res2}"
       return res
     else:
-      res = await send_cmd_to_bash(src, name, text)
+      res = await send_cmd_to_bash(None, name, text)
       return res
       #  await mt_send(res, gateway=gateway, name="titlebot")
 
