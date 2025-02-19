@@ -15,7 +15,7 @@ LOG_FILE = PARENT_DIR / 'last_run.log'
 LOG_FILE = WORK_DIR / 'last_run.log'
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-LOG_FORMAT = "%(asctime)s [%(levelname)s]%(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+LOG_FORMAT = "%(levelname)s %(asctime)s%(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 #  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 
 
@@ -39,7 +39,7 @@ class CustomFormatter(logging.Formatter):
     if caller_frame.f_back.f_code.co_name != "wrapper":
       caller_frame = caller_frame.f_back
     if record.name == "bot.m":
-      record.name = ""
+      record.name = " "
     else:
       record.name = f" {record.name} "
     #  record.levelname = levelname_map.get(record.levelname, record.levelname)
