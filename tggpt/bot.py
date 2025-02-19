@@ -275,9 +275,13 @@ def warn(text, more=False, no_send=True):
     logger.warning(text)
   send_log(text)
 
-def info(text, tb=None):
-  if type(text) is not str:
-    text = f"{text=}"
+def info(*args, tb=None):
+  if len(args) == 1:
+    text = args[0]
+    if type(text) is not str:
+      text = f"{text=}"
+  else:
+    text = " ".join(f"{x=}" for x in args)
   if tb is None:
     tb=sys._getframe()
   #  lineno = sys._getframe(1).f_lineno
@@ -291,7 +295,7 @@ def info(text, tb=None):
 
 def log(text):
   tb = sys._getframe()
-  info(text, tb)
+  info(text, tb=tb)
   send_log(text)
 
 def dbg(text):
