@@ -1735,8 +1735,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           else:
             e += d
           tmp += d 
-          #  await sleep(0.001)
-          await sleep(0.01)
+          await sleep(0.001)
           print(f"got{n}: {d}")
         if k == 0:
           if d == eof:
@@ -1767,9 +1766,11 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           if k == 1:
             info(f"res {n}: {d}")
           #  await p.stdin.drain()
-          #  await sleep(0.01)
           if myshell_queue.empty():
-            break
+            info("wait for more")
+            await sleep(0.01)
+            if myshell_queue.empty():
+              break
   if tmp:
     ds = tmp.decode("utf-8", errors="ignore")
     ds = re.sub(shell_color_re,  "", ds)
