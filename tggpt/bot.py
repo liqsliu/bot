@@ -1713,6 +1713,9 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
                 info(f"found EOF")
                 r = True
                 break
+            elif k == 1:
+              if d == b"0\n":
+                info(f"found returncode")
             o += d
           else:
             e += d
@@ -1748,14 +1751,19 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
               break
             n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
             if n == 1:
-              o += d
               if k == 0:
                 if d == eof:
                   print(f"found EOF?")
-                  o = o[:-(len(eof))]
-                  tmp = tmp[:-(len(eof))]
+                  #  o = o[:-(len(eof))]
+                  #  tmp = tmp[:-(len(eof))]
                   r = True
                   break
+              elif k == 1:
+                if d == b"0\n":
+                  print(f"found returncode?")
+                  #  r = int(d[:-1])
+                  #  break
+              o += d
             else:
               e += d
             tmp += d 
@@ -1769,6 +1777,10 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             if time.time() - last_send > 1:
               if not e:
                 break
+        elif k == 1:
+          if d == b"0\n":
+            info(f"skip sending of returncode 0")
+            break
         if src is not None:
           ds = tmp.decode("utf-8", errors="ignore")
           #  info(f"got{n}: {ds[:16]}")
@@ -1781,8 +1793,8 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             await send(ds, src)
             tmp = b""
         if k > 0:
-          if k == 1:
-            info(f"res {n}: {d}")
+          #  if k == 1:
+          #    info(f"res {n}: {d}")
           await p.stdin.drain()
           if myshell_queue.empty():
             break
