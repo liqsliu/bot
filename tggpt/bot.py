@@ -1660,7 +1660,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
     info(f"收到字符串命令: {cmds}")
     #  cmds = get_cmd(cmds)
   else:
-    #  cmds = list(shlex.quote(x) for x in cmds)
+    cmds = list(shlex.quote(x) for x in cmds)
     #  cmds = ' '.join(cmds)
     cmds = shlex.join(cmds)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
@@ -2196,6 +2196,7 @@ async def send_cmd_to_bash(gateway, name, text):
   #  shell_cmd = ["bash -l", SH_PATH + "/bcmd.sh"]
   #  shell_cmd = ["bash", SH_PATH + "/bcmd.sh"]
   #  shell_cmd = [SH_PATH + "/bcmd.sh"]
+  #  cmds = [f"{SH_PATH}/bcmd.sh", str(gateway), shlex.quote( name ), shlex.quote( text ), repr(msg)]
   cmds = [f"{SH_PATH}/bcmd.sh", str(gateway), name, text, repr(msg)]
 
   #  if shell_cmd[1] == "gateway1":
@@ -6636,6 +6637,7 @@ async def add_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
+
     res = await get_title(cmds[1], src=src, opts=cmds[2:4])
     return f"{res}"
   cmd_funs["tl"] = _
