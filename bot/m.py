@@ -4345,7 +4345,7 @@ music_bot_state = {}
 
 
 @exceptions_handler
-async def parse_tg_msg(event):
+async def tg_msg(event):
   msg = event.message
   chat_id = event.chat_id
   
@@ -4584,7 +4584,8 @@ async def parse_tg_msg(event):
         #  info(f"转发桥接消息: {chat_id} -> {bridges[chat_id]}: {msg.text[:64]}")
         if res:
           #  info(f"sync: {chat_id} -> {bridges[chat_id]}: " + res.split('\n', 1)[0][:16] )
-          info(f"sync: {chat_id} -> {bridges[chat_id]}: " + (res.split('\n', 1)[0][:16]) )
+          #  info(f"sync: {chat_id} -> {bridges[chat_id]}: %s" % res.split('\n', 1)[0][:16] )
+          info(f"sync: {chat_id} -> {bridges[chat_id]}: %s" % res[:16] )
           #  await send(msg.text, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
           await send(res, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
 
@@ -4851,7 +4852,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
 
 @exceptions_handler
-async def parse_tg_out_msg(event):
+async def tg_msg_out(event):
   #  info(event.stringify())
   chat_id = event.chat_id
   if chat_id in last_outmsg:
@@ -5472,7 +5473,7 @@ async def regisger_handler(client):
       #  aioxmpp.MessageType.GROUPCHAT,
       None,
       None,
-      xmpp_msg_in,
+      xmpp_msg
   )
   #  message_dispatcher.register_callback(
   #      aioxmpp.MessageType.NORMAL,
@@ -5492,7 +5493,7 @@ async def regisger_handler(client):
   presence_dispatcher.register_callback(
       None,
       None,
-      xmpp_msgp_in,
+      xmpp_msg_p,
   )
 
 #  client.stream.register_iq_request_handler(
@@ -5705,14 +5706,14 @@ def msg_out(msg):
 
 
 #  @exceptions_handler
-def xmpp_msgp_in(msg):
+def xmpp_msg_p(msg):
   # 状态消息，在线离线等
   if not allright.is_set():
     return
-  asyncio.create_task(xmpp_msgp(msg))
+  asyncio.create_task(_xmpp_msg_p(msg))
 
 @exceptions_handler
-async def xmpp_msgp(msg):
+async def _xmpp_msg_p(msg):
   muc = str(msg.from_.bare())
   if msg.type_ == PresenceType.AVAILABLE:
     if msg.xep0045_muc_user:
@@ -5989,7 +5990,7 @@ def hide_nick(msg):
 
 #  def gmsg(msg, member, source, **kwargs):
 #  @exceptions_handler
-def xmpp_msg_in(msg):
+def xmpp_msg(msg):
   if not allright.is_set():
     #  info("skip msg: allright is not ok")
     return
@@ -5998,12 +5999,12 @@ def xmpp_msg_in(msg):
   #    info("skip msg: delayed: {msg.xep0203_delay}")
   #  if hasattr(msg, "xep308_replace"):
   #    pprint(msg.xep308_replace)
-  asyncio.create_task(xmpp_msg(msg))
+  asyncio.create_task(_xmpp_msg(msg))
   #  return
   #  info("\n>>> msg: %s\n" % msg)
 
 @exceptions_handler
-async def xmpp_msg(msg):
+async def _xmpp_msg(msg):
   #  if str(msg.from_.bare()) == rssbot:
   #    pprint(msg)
   muc = str(msg.from_.bare())
@@ -6092,13 +6093,13 @@ async def xmpp_msg(msg):
     #  if str(msg.from_) == str(rooms[muc].me.conversation_jid.bare()):
     #  if msg.from_.resource == rooms[muc].me.nick:
     if room.me is not None and nick == room.me.nick:
-      info("跳过自己发送的消息1: %s %s %s" % (msg.from_, msg.to, text[:16]))
+      info("跳过自消息1: %s %s %s" % (msg.from_, msg.to, text[:16]))
       return
 
     jids = users[muc]
     j = jids[myjid]
     if nick == j[0]:
-      info("跳过自己发送的消息2: %s %s %s" % (msg.from_, msg.to, text[:16]))
+      info("跳过自消息2: %s %s %s" % (msg.from_, msg.to, text[:16]))
       return
 
     rejoin = False
@@ -6112,7 +6113,7 @@ async def xmpp_msg(msg):
         if i.nick == nick:
           jid = str(i.direct_jid.bare())
           if jid == myjid:
-            info("跳过自己发送的消息3: %s %s %s" % (msg.from_, msg.to, text[:16]))
+            info("跳过自消息3: %s %s %s" % (msg.from_, msg.to, text[:16]))
             return
           existed = True
 
@@ -6583,7 +6584,7 @@ member_only_mode = False
 cmd_funs = {}
 cmd_for_admin = set()
 
-async def add_cmd():
+async def init_cmd():
 
   async def _(cmds, src):
     return "pong"
@@ -8272,7 +8273,7 @@ async def join(jid=None, nick=None, client=None):
 
 
 @exceptions_handler
-async def xmppbot():
+async def xmpp_start():
   info("开始登录xmpp")
   global XB, myjid, UPLOAD, UPLOAD_MAX
   myjid = get_my_key("JID")
@@ -8301,8 +8302,7 @@ async def xmppbot():
   global allright_task
   if allright_task > 0:
     allright_task -= 1
-    await add_cmd()
-    asyncio.create_task(xmppbot2(), name="xmppbot2")
+    #  asyncio.create_task(xmpp_daemon(), name="xmpp")
   else:
     await sendg("已重新启动xmppbot")
     
@@ -8330,26 +8330,26 @@ async def xmppbot():
 
   #  await upload()
 
-@exceptions_handler
-async def xmppbot2():
-  while True:
-    if XB.running:
-      await sleep(60)
-      continue
-    info("xmppbot is not running")
-    #  try:
-    #  # RuntimeError: write() called (invalid in state _State.CLOSED, closing=False)
-    #  except RuntimeError as e:
-    #    if e.args[0] == 'write() called (invalid in state _State.CLOSED, closing=False)':
-    #      warn(f"fixme: xmpp error {e=}")
-    #    else:
-    #      warn(f"fixme: unknown xmpp error {e=}")
-    await stop()
-    await save_data()
-    sys.exit(2)
-    await sleep(5)
-    t = asyncio.create_task(xmppbot(), name="xmppbot")
-    await t
+#  @exceptions_handler
+#  async def xmpp_daemon():
+#    while True:
+#      if XB.running:
+#        await sleep(60)
+#        continue
+#      info("xmppbot is not running")
+#      #  try:
+#      #  # RuntimeError: write() called (invalid in state _State.CLOSED, closing=False)
+#      #  except RuntimeError as e:
+#      #    if e.args[0] == 'write() called (invalid in state _State.CLOSED, closing=False)':
+#      #      warn(f"fixme: xmpp error {e=}")
+#      #    else:
+#      #      warn(f"fixme: unknown xmpp error {e=}")
+#      await stop()
+#      await save_data()
+#      sys.exit(2)
+#      await sleep(5)
+#      t = asyncio.create_task(xmppbot(), name="xmppbot")
+#      await t
 
 
 
@@ -8487,7 +8487,7 @@ async def amain():
     global allright_task
 
     allright_task += 1
-    asyncio.create_task(xmppbot(), name="xmppbot")
+    asyncio.create_task(xmpp_start(), name="xmpp")
 
     #  asyncio.create_task(wtf_loop())
 
@@ -8521,6 +8521,7 @@ async def amain():
       MY_ID = me.id
       MY_NAME = me.username
       print(f"{MY_NAME}: {MY_ID}")
+      UB.parse_mode = 'md'
 
       @UB.on(events.NewMessage(incoming=True))
       @UB.on(events.MessageEdited(incoming=True))
@@ -8528,16 +8529,17 @@ async def amain():
         if not allright.is_set():
           #  info("skip msg: allright is not ok")
           return
-        asyncio.create_task(parse_tg_msg(event))
+        asyncio.create_task(tg_msg(event))
 
       @UB.on(events.NewMessage(outgoing=True))
       async def _(event):
         #  if not allright.is_set():
         #    #  info("skip msg: allright is not ok")
         #    return
-        asyncio.create_task(parse_tg_out_msg(event))
+        asyncio.create_task(tg_msg_out(event))
 
-      UB.parse_mode = 'md'
+      await after_init()
+      await init_cmd()
 
       #  await mt_send("gpt start")
       while True:
@@ -8550,24 +8552,23 @@ async def amain():
 
       mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
 
-
       info(f"初始化完成")
       send_log(f"启动成功，用时: {int(time.time()-start_time)}s")
       #  await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
-      await after_init()
+
+      #  while True:
+      #    if XB.running:
+      while if XB.running:
+        await sleep(60)
+        continue
+      warn("xmppbot is not running, restart...")
+      await stop()
+      await save_data()
+      sys.exit(2)
 
       await UB.run_until_disconnected()
 
-
-    info("主程序正常结束")
-  #  except KeyboardInterrupt as e:
-  #    info("I: 手动终止")
-  #    #  raise e
-  #  except SystemExit as e:
-  #    raise e
-  #  except Exception as e:
-  #    err("error: stop...", exc_info=True, stack_info=True)
-  #    raise e
+    info("主程序结束")
   finally:
     info("正在收尾...")
     #  for j in asyncio.all_tasks(loop):
