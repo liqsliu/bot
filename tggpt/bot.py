@@ -6693,7 +6693,7 @@ async def add_cmd():
   async def _(cmds, src):
     global myshell_p
     if len(cmds) == 1:
-      return f"bash -i\n.{cmds[0]} $code/stop/restart/err/kill"
+      return f"bash -i\n.{cmds[0]} $code/stop/restart/err/kill\n'\\ '会翻译成空格再执行"
     elif len(cmds) == 2:
       if cmds[1] == "restart":
         if await stop_sub(myshell_p):
@@ -6718,10 +6718,22 @@ async def add_cmd():
     #  cmds = list(f"{x}\n" for x in cmds.splitlines())
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
     #  res = await myshell(cmds, src=src)
-    res = await run_run( myshell(cmds, src=src) , False)
+    #  res = await run_run( myshell(cmds, src=src) , False)
+    res = await myshell(cmds, src=src)
     #  return format_out_of_shell(res)
   cmd_funs["sh"] = _
   cmd_for_admin.add('sh')
+
+  async def _(cmds, src):
+    global myshell_p
+    if len(cmds) == 1:
+      return f"bash -i\n不显示临时结果，只显示最终结果\n.{cmds[0]} $code"
+    cmds.pop(0)
+    cmds = ' '.join(cmds)
+    res = await myshell(cmds)
+    return format_out_of_shell(res)
+  cmd_funs["sh5"] = _
+  cmd_for_admin.add('sh5')
 
   async def _(cmds, src):
     if len(cmds) == 1:
