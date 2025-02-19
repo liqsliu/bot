@@ -4835,9 +4835,12 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 @exceptions_handler
 async def parse_tg_out_msg(event):
   #  info(event.stringify())
+  chat_id = event.chat_id
+  if chat_id in last_outmsg:
+    #  omsg = last_outmsg[chat_id]
+    last_outmsg.pop(chat_id)
   msg = event.message
   text = msg.text
-  chat_id = event.chat_id
   info(f"tg out msg: {chat_id}: {text}")
   if text.startswith("$"):
     cmds = get_cmd(text)
