@@ -246,13 +246,13 @@ async def _send_log(text, wait=1, to=0):
   #  asyncio.create_task(sendg(text))
 
 def err(text, no_send=False):
-  if type(text) is not str:
-    text = f"{text=}"
+  #  if type(text) is not str:
+  #    text = f"{text=}"
   #  lineno = currentframe().f_back.f_lineno
   #  lineno = sys._getframe(1).f_lineno
-  tb = sys._getframe()
-  lineno = get_lineno(tb)
-  text = f"{lineno} {text}"
+  #  tb = sys._getframe()
+  #  lineno = get_lineno(tb)
+  #  text = f"{lineno} {text}"
   logger.error(text, exc_info=True, stack_info=True)
   #  raise ValueError
   if no_send:
@@ -261,13 +261,13 @@ def err(text, no_send=False):
     send_log(text)
 
 def warn(text, more=False, no_send=True):
-  if type(text) is not str:
-    text = f"{text=}"
+  #  if type(text) is not str:
+  #    text = f"{text=}"
   #  lineno = currentframe().f_back.f_lineno
   #  lineno = sys._getframe(1).f_lineno
-  tb = sys._getframe()
-  lineno = get_lineno(tb)
-  text = f"{lineno} {text}"
+  #  tb = sys._getframe()
+  #  lineno = get_lineno(tb)
+  #  text = f"{lineno} {text}"
   if more:
     logger.warning(text, exc_info=True, stack_info=True)
   else:
@@ -286,14 +286,16 @@ def warn(text, more=False, no_send=True):
   #  text = f"{lineno} {text}"
 def info(*args, tb=None):
   text = " ".join(f"{x}" for x in args)
-  if tb is None:
-    tb=sys._getframe(1)
-  logger.info(f"{tb.f_code.co_name} {tb.f_lineno} {text}")
+  logger.info(text)
+  #  if tb is None:
+  #    tb=sys._getframe(1)
+  #  logger.info(f"{tb.f_code.co_name} {tb.f_lineno} {text}")
 
 
 def log(text):
-  tb = sys._getframe()
-  info(text, tb=tb)
+  #  tb = sys._getframe()
+  #  info(text, tb=tb)
+  logger.info(text)
   send_log(text)
 
 def dbg(text):
