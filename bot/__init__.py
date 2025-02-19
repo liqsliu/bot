@@ -1,7 +1,5 @@
 import logging
 
-LOGGER = logging.getLogger()
-logger=LOGGER
 
 import colorlog
 from pathlib import Path
@@ -64,7 +62,7 @@ class CustomFormatter(colorlog.ColoredFormatter):
 
 #  formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
 
-logging.Formatter = CustomFormatter
+#  logging.Formatter = CustomFormatter
 
 
 
@@ -91,6 +89,10 @@ if debug:
 
   handler = logging.StreamHandler()
   handler.setFormatter(formatter)
+
+  LOGGER = logging.getLogger()
+  logger=LOGGER
+
   logger.addHandler(handler)
   LOGGER.setLevel(logging.INFO)
   OUT = None
