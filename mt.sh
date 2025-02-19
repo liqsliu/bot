@@ -12,7 +12,8 @@ r=0
 #./matterbridge "$@" || bash tg.sh "matterbridge exit $?"
 ./mt "$@" || {
   r=$?
-  bash tg.sh "matterbridge exit $?"
+  # bash tg.sh "matterbridge exit $?"
+  # bash ~/bot/sm.sh "C cmd" "mt stopped" 4249 test
 }
 echo "res: $r"
 date
