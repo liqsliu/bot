@@ -6648,8 +6648,8 @@ async def add_cmd():
         raise SystemExit("stop by me, restart...")
         return "ok"
     cmds.pop(0)
-    cmds = ' '.join(cmds)
-    cmds = list(f"{x}\n" for x in cmds.splitlines())
+    #  cmds = ' '.join(cmds)
+    #  cmds = list(f"{x}\n" for x in cmds.splitlines())
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
     #  res = await myshell(cmds, src=src)
     res = await run_run( myshell(cmds, src=src) , False)
