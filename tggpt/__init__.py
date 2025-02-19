@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 from logging.handlers import TimedRotatingFileHandler
+import sys
 from sys import stdout, stderr, exit
 
 
@@ -14,8 +15,23 @@ LOG_FILE = PARENT_DIR / 'last_run.log'
 LOG_FILE = WORK_DIR / 'last_run.log'
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
+#  LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
+#  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
+
+
+# 创建一个自定义的日志格式
+class CustomFormatter(logging.Formatter):
+  def format(self, record):
+    # 获取调用栈中的前一个帧
+    #  caller_frame = sys._getframe(2)  # 获取上级调用的帧
+    #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
+    #  record.funcName = caller_function  # 修改 LogRecord 的 funcName
+    record.funcName = sys._getframe(2).f_code.co_name
+    return super().format(record)
+
+FORMATTER: logging.Formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
+
+
 
 LOGGER = logging.getLogger()
 logger=LOGGER

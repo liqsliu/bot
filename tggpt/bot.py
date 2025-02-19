@@ -212,8 +212,8 @@ def get_lineno(tb):
   #    else:
   #      break
   #  return lineno
-  if tb.f_back is not None:
-    tb = tb.f_back
+  #  if tb.f_back is not None:
+  #    tb = tb.f_back
   return f"{tb.f_code.co_name} {tb.f_lineno}"
 
 def info0(s):
@@ -260,7 +260,6 @@ def err(text, no_send=False):
   else:
     send_log(text)
 
-
 def warn(text, more=False, no_send=True):
   if type(text) is not str:
     text = f"{text=}"
@@ -275,22 +274,21 @@ def warn(text, more=False, no_send=True):
     logger.warning(text)
   send_log(text)
 
-def info(*args, tb=None):
-  if len(args) == 1:
-    text = args[0]
-    if type(text) is not str:
-      text = f"{text=}"
-  else:
-    text = " ".join(f"{x}" for x in args)
-  if tb is None:
-    tb=sys._getframe()
+  #  if len(args) == 1:
+  #    text = args[0]
+  #    if type(text) is not str:
+  #      text = f"{text=}"
+  #  else:
   #  lineno = sys._getframe(1).f_lineno
   #  tb = sys._getframe()
   #  text = f"W: {tb.f_lineno} {tb.f_code.co_name}: {text}"
-  lineno = get_lineno(tb)
-  text = f"{lineno} {text}"
-
-  logger.info(text)
+  #  lineno = get_lineno(tb)
+  #  text = f"{lineno} {text}"
+def info(*args, tb=None):
+  text = " ".join(f"{x}" for x in args)
+  if tb is None:
+    tb=sys._getframe(1)
+  logger.info(f"{tb.f_code.co_name} {tb.f_lineno} {text}")
 
 
 def log(text):
