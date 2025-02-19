@@ -3918,9 +3918,10 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
             current = last_time[1]
             total = last_time[2]
             if current == total:
+              await send("上传完成", src)
               break
-            await send("{:.1f}M".format((total-current)/1024/1024), src)
-          if time.time() - last_time[0] > download_media_time_max:
+            await send("{:.1f}M".format((total-current)/1024/1024), src, correct=True)
+          if time.time() - last_time[0] > max_time:
             await send("超时", src, correct=True)
             break
       if src:
@@ -4017,7 +4018,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
           break
         #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
         #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
-        await send("{:.1f}M".format((total-current)/1024/1024), src)
+        await send("{:.1f}M".format((total-current)/1024/1024), src, correct=True)
         last_time[0] = time.time()
         #  last_current = current
 
@@ -5345,7 +5346,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         ress[0] = now
         ress[1] += len(data)
         #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
-        asyncio.create_task( send("{:.1f}M".format((length-ress[1])/1024/1024), src) )
+        asyncio.create_task( send("{:.1f}M".format((length-ress[1])/1024/1024), src, correct=True) )
       else:
         ress[1] += len(data)
       #  print(f"{len(data)}")
@@ -5368,6 +5369,8 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       file.readline = wrap_read(file.readline)
       #  await sleep(5)
       res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
+      info(f"res: {res}\nslot: {slot}")
+      await send("上传完成", src)
       #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
       #  coro = _sendme("测试进程间通信 res: {}".format(res))
       #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
@@ -5381,7 +5384,6 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     #      t.cancel()
   #  res = await run_run(coro(slot, fp, timeout, headers))
   #  res = await run_run(coro())
-  info(f"res: {res}\nslot: {slot}")
 
   #  else:
   #    # 流式上传需要手动设置Length
