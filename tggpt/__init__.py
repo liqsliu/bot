@@ -16,7 +16,7 @@ LOG_FILE = WORK_DIR / 'last_run.log'
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
-FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
+#  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 
 
 # 创建一个自定义的日志格式
