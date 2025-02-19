@@ -26,8 +26,9 @@ class CustomFormatter(logging.Formatter):
     #  caller_frame = sys._getframe(8)  # 获取上级调用的帧
     #  if caller_frame.f_back is not None:
     #    caller_frame = caller_frame.f_back
-    caller_frame = sys._getframe(9)  # 获取上级调用的帧
-    if caller_frame.f_code.co_name == "wrapper":
+    caller_frame = sys._getframe(8)  # 获取上级调用的帧
+    #  if caller_frame.f_code.co_name == "wrapper":
+    if caller_frame.f_back.f_code.co_name != "wrapper":
       caller_frame = caller_frame.f_back
 
     #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
