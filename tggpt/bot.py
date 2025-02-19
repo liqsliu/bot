@@ -3912,7 +3912,7 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
         if sent == length:
           asyncio.create_task(send("上传完成", src))
         else:
-          info("剩余 {:.1f}M".format((length-send)/1024/1024))
+          info("剩余 {:.1f}M".format((length-sent)/1024/1024))
           now = time.time()
           if now - last_time[0] > interval:
             last_time[0] = now
