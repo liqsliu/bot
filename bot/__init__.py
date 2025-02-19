@@ -48,10 +48,10 @@ class CustomFormatter(colorlog.ColoredFormatter):
     #  if caller_frame.f_code.co_name == "wrapper":
     if caller_frame.f_back.f_code.co_name != "wrapper":
       caller_frame = caller_frame.f_back
-    if record.name == "bot.m":
-      record.name = " "
-    else:
-      record.name = f" {record.name} "
+    #  if record.name == "bot.m":
+    #    record.name = " "
+    #  else:
+    #    record.name = f" {record.name} "
     #  record.levelname = levelname_map.get(record.levelname, record.levelname)
     record.levelname = levelname_map.get(record.levelname)
 
@@ -71,7 +71,7 @@ class CustomFormatter(colorlog.ColoredFormatter):
 #  formatter = colorlog.ColoredFormatter(
 formatter = CustomFormatter(
     #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
-"%(log_color)s%(levelname)s %(asctime)s%(name)s[%(module)s.%(funcName)s:%(lineno)d]%(reset)s %(message)s",
+"%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s",
     datefmt='%m-%d %H:%M:%S',
     log_colors={
         'DEBUG': 'blue',
