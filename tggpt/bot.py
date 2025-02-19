@@ -1599,9 +1599,13 @@ async def _init_myshell():
   #      t2.cancel()
   return True
 
+@exceptions_handler
+async def myshell(*args,  **kwargs):
+  return await run_run(*args,  **kwargs) , False)
+
 #  async def myshell(cmd, max_time=interval, src=None):
 @exceptions_handler
-async def myshell(cmd, max_time=run_shell_time_max, src=None):
+async def _myshell(cmds, max_time=run_shell_time_max, src=None):
   # 有个问题，不知道何时运行结束，目前想到两种方案：bash -i和最后发送echo end然后等出现end提示。
   #  if await init_myshell():
   #    pass
@@ -1647,16 +1651,21 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
   d = None
   #  try:
   #    async with asyncio.timeout(interval) as cm:
-  info(f"cmds: {cmd}")
-  cmd.append("echo $?\n")
+  info(f"cmds: {cmds}")
+  if isinstance(cmds, str):
+    cmds = get_cmd(cmds)
+  cmds = list(shlex.quote(x) for x in cmds)
+  cmds = ' '.join(cmds)
+  cmds = list(f"{x}\n" for x in cmds.splitlines())
+  cmds.append("echo $?\n")
   eof = generand(16) + "\n"
   #  cmd.append(f"echo EOF\n")
-  cmd.append(f"echo "+eof)
+  cmds.append(f"echo "+eof)
   eof = eof.encode()
-  k =  len(cmd)
+  k =  len(cmds)
   start_time = time.time()
   async with myshell_lock:
-    for c in cmd:
+    for c in cmds:
       p.stdin.write( c.encode() )
       info(f"send ok: {c}")
       k -= 1
@@ -1681,7 +1690,8 @@ async def myshell(cmd, max_time=run_shell_time_max, src=None):
             break
         #  n, d = await myshell_queue.get()
         try:
-          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
+          #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
+          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time/(k+1))
           if n == 1:
             if k == 0:
               #  if d == b'EOF\n':
@@ -2163,7 +2173,8 @@ async def send_cmd_to_bash(gateway, name, text):
   #  await my_popen(shell_cmd, shell=False)
   #  await my_popen(" ".join(shell_cmd))
   #  res = await my_popen(shell_cmd, shell=False, src=gateway)
-  r, o, e = await my_sexec(shell_cmd, src=gateway)
+  #  r, o, e = await my_sexec(shell_cmd, src=gateway)
+  r, o, e = await myshell(shell_cmd, src=gateway)
   if r == 0:
     if o:
       return re.sub(shell_color_re,  "", o)
@@ -2460,8 +2471,8 @@ async def backup(path, src=None, delete=False):
 @exceptions_handler
 async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
-  #  shell_cmd.append(url)
-  shell_cmd.append(shlex.quote(url))
+  shell_cmd.append(url)
+  #  shell_cmd.append(shlex.quote(url))
   #  while opts:
   #    shell_cmd.append(opts.pop(0))
   shell_cmd.extend(opts)
@@ -2479,10 +2490,8 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   #    max_time = 60
   #  r, o, e = await my_sexec(shell_cmd, src=src, max_time=max_time)
   #  if r == 0:
-  cmds = ' '.join(shell_cmd)
-  cmds = list(f"{x}\n" for x in cmds.splitlines())
-  r, o, e = await run_run(myshell(cmds, src=src, max_time=max_time) , False)
   #  res = await run_run(myshell(cmds, src=src) , False)
+  r, o, e = await myshell(cmds, src=src, max_time=max_time)
   #  if res:
   #    o = res
   if r == 0:
@@ -6587,7 +6596,8 @@ async def add_cmd():
     async def _(cmds, src):
       cmds = cmds[0]
       cmds = list(f"{x}\n" for x in cmds.splitlines())
-      await run_run( myshell(cmds, src=src) , False)
+      #  await run_run( myshell(cmds, src=src) , False)
+      await myshell(cmds, src=src)
     cmd_funs[i] = _
 
   async def _(cmds, src):
