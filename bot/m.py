@@ -289,11 +289,12 @@ def warn(text, more=False, no_send=True):
   #  text = f"{lineno} {text}"
 #  def info(*args, tb=None):
 #    text = " ".join(f"{x}" for x in args)
-def info(text, tb=None):
-  logger.info(text)
+#  def info(text, tb=None):
+#    logger.info(text)
   #  if tb is None:
   #    tb=sys._getframe(1)
   #  info(f"{tb.f_code.co_name} {tb.f_lineno} {text}")
+info = logger.info
 
 
 def log(text):

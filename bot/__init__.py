@@ -42,9 +42,12 @@ class CustomFormatter(colorlog.ColoredFormatter):
       # 获取调用栈中的前一个帧
       #  if caller_frame.f_back is not None:
       #    caller_frame = caller_frame.f_back
-      caller_frame = sys._getframe(9)  # 获取上级调用的帧
-      if caller_frame.f_code.co_name == "wrapper":
+      caller_frame = sys._getframe(8)  # 获取上级调用的帧
+      #  if caller_frame.f_code.co_name == "wrapper":
+      if caller_frame.f_code.co_name == "warn":
       #  if caller_frame.f_back.f_code.co_name != "wrapper":
+        caller_frame = caller_frame.f_back
+      elif caller_frame.f_code.co_name == "err":
         caller_frame = caller_frame.f_back
       #  if record.name == "bot.m":
       #  else:
