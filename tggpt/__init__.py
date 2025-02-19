@@ -15,8 +15,8 @@ LOG_FILE = PARENT_DIR / 'last_run.log'
 LOG_FILE = WORK_DIR / 'last_run.log'
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-#  LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-#  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
+LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
+FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 
 
 # 创建一个自定义的日志格式
@@ -30,8 +30,9 @@ class CustomFormatter(logging.Formatter):
     record.lineno = caller_frame.f_lineno
     return super().format(record)
 
-formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
-logging.Formatter = formatter
+#  formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
+
+logging.Formatter = CustomFormatter
 
 
 LOGGER = logging.getLogger()
@@ -44,7 +45,8 @@ if debug:
   #  handler = logging.StreamHandler()
   #  handler.setFormatter(formatter)
   #  logger.addHandler(handler)
-  logging.basicConfig()
+  #  logging.basicConfig()
+  logging.basicConfig(format=LOG_FORMAT)
   LOGGER.setLevel(logging.INFO)
   OUT = None
   ERR = None
