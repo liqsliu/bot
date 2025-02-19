@@ -4873,32 +4873,32 @@ async def tg_msg_out(event):
   info(f"tg out msg: {chat_id}: {text}")
   if text.startswith("$"):
     cmds = get_cmd(text)
-    if cmds[1] == "$get":
-      if cmds[2] == "id":
+    if cmds[0] == "$get":
+      if cmds[1] == "id":
         #  await UB.send_message('me', f"{event.chat_id}")
         sendme(f"{event.chat_id}")
-      elif cmds[2] == "event":
+      elif cmds[1] == "event":
         sendme(f"{event.stringify()}")
-      elif cmds[2] == "msg":
+      elif cmds[1] == "msg":
         sendme(f"{msg.stringify()}")
-      elif cmds[2] == "chat":
+      elif cmds[1] == "chat":
         e = await event.get_chat()
         sendme(f"{e.stringify()}")
-      elif cmds[2] == "reply":
+      elif cmds[1] == "reply":
         if event.is_reply:
           sendme(event.reply_to.stringify())
           e = await msg.get_reply_message()
           sendme(f"{e.stringify()}")
         else:
           sendme(f"not a reply: {msg.stringify()}")
-      elif cmds[2] == "sender":
+      elif cmds[1] == "sender":
         if event.is_reply:
           e = await msg.get_reply_message()
           e = await e.get_sender()
           sendme(f"{e.stringify()}")
         else:
           sendme(f"not a reply: {msg.stringify()}")
-      elif cmds[2] == "file":
+      elif cmds[1] == "file":
         e = await msg.get_reply_message()
         tmsg = e
         opts = 0
