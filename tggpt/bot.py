@@ -3903,9 +3903,12 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
       last_time = [time.time(), 0]
       def cb(sent, total):
         last_time[1] = sent
+        total = last_time[2]
         if len(last_time) == 2:
           last_time.append(total)
           asyncio.create_task(send("开始上传: {:.1f}MB {}".format(total/1024/1024, fp.name), src))
+        else:
+          info("剩余{:.1f}M".format((total-send)/1024/1024))
       async def update_tmp_msg():
         while True:
           await sleep(interval)
@@ -3921,9 +3924,9 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
               await send("上传完成", src)
               break
             await send("{:.1f}M".format((total-current)/1024/1024), src, correct=True)
-          if time.time() - last_time[0] > max_time:
-            await send("超时", src, correct=True)
-            break
+          #  if time.time() - last_time[0] > max_time:
+          #    await send("超时", src, correct=True)
+          #    break
       if src:
         t = asyncio.create_task(update_tmp_msg())
     h = await UB.upload_file(path, progress_callback=cb)
@@ -4760,7 +4763,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         res = None
         url = None
         if opts < 4:
-          await send("下载完成，正在上传到xmpp...", src, correct=True)
+          await send("上传到xmpp...", src, correct=True)
           try:
             url = await upload(path)
             info(url)
