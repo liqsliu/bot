@@ -3909,7 +3909,7 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
           last_time.append(total)
           asyncio.create_task(send("开始上传: {:.1f}MB".format(total-sent/1024/1024), src, correct=True))
         elif current == total:
-          await send("上传完成", src)
+          asyncio.create_task(send("上传完成", src))
         else:
           info("剩余 {:.1f}M".format((total-send)/1024/1024))
           now = time.time()
