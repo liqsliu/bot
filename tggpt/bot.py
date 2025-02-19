@@ -8458,9 +8458,9 @@ async def amain():
 
       @UB.on(events.NewMessage(outgoing=True))
       async def _(event):
-        if not allright.is_set():
-          #  logger.info("skip msg: allright is not ok")
-          return
+        #  if not allright.is_set():
+        #    #  logger.info("skip msg: allright is not ok")
+        #    return
         asyncio.create_task(parse_tg_out_msg(event))
 
       UB.parse_mode = 'md'
