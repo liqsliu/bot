@@ -3881,7 +3881,7 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
 #      print("me: %s" % text)
 
 
-async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_memory=False, max_wait_time=download_media_time_max):
+async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_memory=False, max_time=download_media_time_max):
   if path is None:
     err(f"need file path: {path}")
     return
@@ -4617,6 +4617,8 @@ async def parse_tg_msg(event):
 async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
   if opts == "fast":
     opts = 1
+  elif opts == "tg":
+    opts = 1
   elif opts == "direct":
     opts = 2
   elif opts == "xmpp":
@@ -4625,6 +4627,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     opts = 4
   elif opts == "raw":
     opts = 9
+  else:
+    opts = 0
 
   if opts == 9:
     await _sendme(tmsg.stringify(), chat_id)
@@ -4661,7 +4665,10 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       if opts == 1:
         return
     except rpcerrorlist.ChatForwardsRestrictedError as e:
-      err(f"fixme: {e=} {file=}")
+      if e.args[0] == "You can't forward messages from a protected chat (caused by SendMediaRequest)":
+        info("内容被保护，无法直接转发")
+      else:
+        err(f"fixme: {e=} {file=}")
     except AttributeError as e:
       err(f"fixme: {e=} {file=}")
 
