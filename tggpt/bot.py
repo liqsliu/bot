@@ -4648,6 +4648,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
   if opts == 9:
     await _sendme(tmsg.stringify(), chat_id)
   elif tmsg.file:
+    direct = False
     file = tmsg.file
     file_size = file.size
     await _sendme(f"file: {type(file)} {file.name} {file.size}", chat_id)
@@ -4670,12 +4671,16 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         file = tmsg.file
       info(f"file type: {type(file)}")
       res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+      direct = True
       if tmsg.video:
         res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
+        direct = True
       elif tmsg.photo:
         res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
+        direct = True
       elif tmsg.media:
         res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
+        direct = True
 
       if opts == 1:
         return
@@ -4709,6 +4714,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             err(f"wtf: {tmsg.stringify()}")
             return
           res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+          direct = True
           if opts == 1:
             return
         except AttributeError as e:
@@ -4763,6 +4769,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if opts == 2 or res is None or opts == 0:
           try:
             res = await tg_upload_media(path, src, chat_id=chat_id, caption=url, max_time=get_timeout(file_size))
+            direct = True
             if opts == 2:
               return
           except Exception as e:
@@ -4808,7 +4815,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         except Exception as e:
           err(f"{e=} {url}")
 
-        if res is None and opts != 2:
+        if res is None and opts != 2 and not direct:
           try:
             res = await tg_upload_media(path, src, chat_id=chat_id, caption=url, max_time=get_timeout(file_size))
           except Exception as e:
@@ -5269,7 +5276,8 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     warn(f"获取mimetypes失败")
     #  return
     t = 'application/octet-stream'
-  print("upload to xmpp: ", XB,UPLOAD, filename, os.path.getsize(fp), t, file_path)
+  #  print("upload to xmpp: ", XB,UPLOAD, filename, os.path.getsize(fp), t, file_path)
+  info("upload to xmpp: ", XB,UPLOAD, filename, os.path.getsize(fp), t, file_path)
   slot = await aioxmpp.httpupload.request_slot(XB,UPLOAD, filename, length, content_type=t)
   #  slot = await XB.send(aioxmpp.IQ(
   #      type_=aioxmpp.IQType.GET,
@@ -5313,9 +5321,9 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
 
 
   headers["Content-Length"] = str(length)
-  if src:
-    info("开启进度刷新消息")
-    await send("开始上传 {:.1f}M {}".format(length/1024/1024, filename), src)
+  #  if src:
+  info("开启进度刷新消息")
+  await send("开始上传 {:.1f}M {}".format(length/1024/1024, filename), src)
 
     #  async def coro(slot, fp, timeout, headers):
   #  async def coro():
@@ -5358,6 +5366,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     @wraps(func)
     async def wrapper(*args, **kwargs):
       data = await func(*args, **kwargs)
+      info("剩余: {:.1f}M".format((length-ress[1])/1024/1024))
       now = time.time()
       if now - ress[0] > interval:
         ress[0] = now
