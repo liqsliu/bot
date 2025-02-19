@@ -8182,7 +8182,8 @@ async def join(jid=None, nick=None, client=None):
           if room.muc_joined is False:
             logger.info(f"等待进群: {get_jid(client.local_jid)} {jid}")
 
-            await fut
+            #  await fut
+            await asyncio.wait_for(fut, timeout=15)
             logger.info(f"进群成功: {myid} {jid}")
 
 
@@ -8206,7 +8207,7 @@ async def join(jid=None, nick=None, client=None):
         
         except TimeoutError as e:
           #  logger.warning(f"进群超时(废弃): {jid} {muc} {e=}")
-          warn(f"进群超时(废弃){sum_try}: {myid} {jid} {nick} {e=}")
+          warn(f"进群超时{sum_try}: {myid} {jid} {nick} {e=}")
         except errors.XMPPCancelError as e:
           # XMPPCancelError("{urn:ietf:params:xml:ns:xmpp-stanzas}remote-server-not-found ('Server-to-server connection failed: No route to host')")
           if e.args[0] == "{urn:ietf:params:xml:ns:xmpp-stanzas}remote-server-not-found ('Server-to-server connection failed: connection refused')":
