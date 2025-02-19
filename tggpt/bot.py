@@ -2469,12 +2469,22 @@ async def backup(path, src=None, delete=False):
 
 @exceptions_handler
 async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
+  # also download
   #  cmds = ["bash", f"{SH_PATH}/title.sh"]
-  cmds = [f"{SH_PATH}/title.sh", url]
+  if opts:
+    # for download
+    cmds = [f"{SH_PATH}/title.sh", url]
   #  cmds.append(shlex.quote(url))
   #  while opts:
   #    cmds.append(opts.pop(0))
-  cmds.extend(opts)
+    cmds.extend(opts)
+  elif url.startswith("https://x.com/"):
+    #  res = await send_cmd_to_bash(src, name, url)
+    #  res = await send_cmd_to_bash(None, name, url)
+    #  return res
+    cmds = [f"{SH_PATH}/twitter_to_text.sh", url]
+  elif url.startswith("https://twitter.com/"):
+    cmds = [f"{SH_PATH}/twitter_to_text.sh", url]
   #  if down:
   #    #  shell_cmd.append("%s" % (2**20*1000))
   #    while True:
@@ -6109,7 +6119,7 @@ async def xmpp_msg(msg):
   if j in last_outmsg:
     last_outmsg.pop(j)
 
-  info("original text: [text]")
+  info(f"original text: [text]")
   text0 = text
   if msg.type_ == MessageType.GROUPCHAT:
     if muc == acg_group:
@@ -6168,7 +6178,7 @@ async def xmpp_msg(msg):
         text = f"{text0}\n\n{qt}"
         qt2 = '\n> '.join(tmp)
         username = f"> {qt2}\n{username}"
-      info("delete qt: [text0]")
+      info(f"delete qt: [text0]")
     #    else:
     #      info(f"{tmp=} {qt=}")
     #  info(f"{text=} {text2=}")
@@ -7601,7 +7611,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       tt = textq
     else:
       tt = text
-    info("check url in: [text]")
+    info(f"check url in: [text]")
     for i in tt.splitlines():
       if not i.startswith("> ") and  i != ">":
         tmp += i+"\n"
@@ -7620,13 +7630,6 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         return
       if url.startswith("https://icq.im"):
         return
-      #  if url.startswith("https://x.com/"):
-      #    #  res = await send_cmd_to_bash(src, name, url)
-      #    res = await send_cmd_to_bash(None, name, url)
-      #    return res
-      #  if url.startswith("https://twitter.com/"):
-      #    res = await send_cmd_to_bash(None, name, url)
-      #    return res
       if not res:
         if len(urls) == 1:
           res="%s" % await get_title(url)
