@@ -6175,7 +6175,7 @@ async def xmpp_msg(msg):
   if j in last_outmsg:
     last_outmsg.pop(j)
 
-  info(f"original text: [text]")
+  info(f"original text: {text}")
   text0 = text
   if msg.type_ == MessageType.GROUPCHAT:
     if muc == acg_group:
