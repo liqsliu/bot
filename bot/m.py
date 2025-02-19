@@ -271,9 +271,9 @@ def warn(text, more=False, no_send=True):
   if more:
     logger.warning(text, exc_info=True, stack_info=True)
   else:
-    if tb is None:
-      tb=sys._getframe(1)
-    text = f"{tb.f_code.co_name} {tb.f_lineno} {text}"
+    #  if tb is None:
+    #    tb=sys._getframe(1)
+    #  text = f"{tb.f_code.co_name} {tb.f_lineno} {text}"
     logger.warning(text)
   send_log(text)
 
@@ -290,10 +290,10 @@ def warn(text, more=False, no_send=True):
 #  def info(*args, tb=None):
 #    text = " ".join(f"{x}" for x in args)
 def info(text, tb=None):
-  #  logger.info(text)
-  if tb is None:
-    tb=sys._getframe(1)
-  logger.info(f"{tb.f_code.co_name} {tb.f_lineno} {text}")
+  logger.info(text)
+  #  if tb is None:
+  #    tb=sys._getframe(1)
+  #  logger.info(f"{tb.f_code.co_name} {tb.f_lineno} {text}")
 
 
 def log(text):
