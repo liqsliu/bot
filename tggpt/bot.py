@@ -2470,12 +2470,12 @@ async def backup(path, src=None, delete=False):
 
 @exceptions_handler
 async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
-  shell_cmd = ["bash", f"{SH_PATH}/title.sh"]
-  shell_cmd.append(url)
-  #  shell_cmd.append(shlex.quote(url))
+  cmds = ["bash", f"{SH_PATH}/title.sh"]
+  cmds.append(url)
+  #  cmds.append(shlex.quote(url))
   #  while opts:
-  #    shell_cmd.append(opts.pop(0))
-  shell_cmd.extend(opts)
+  #    cmds.append(opts.pop(0))
+  cmds.extend(opts)
   #  if down:
   #    #  shell_cmd.append("%s" % (2**20*1000))
   #    while True:
