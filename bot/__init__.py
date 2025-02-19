@@ -21,7 +21,7 @@ LOG_FILE = WORK_DIR / 'last_run.log'
 
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-LOG_FORMAT = "%(levelname)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+#  LOG_FORMAT = "%(levelname)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 #  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 
 
@@ -33,52 +33,54 @@ LOG_FORMAT = "%(levelname)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(linen
 #      'CRITICAL': 'C'
 #  }
 
-#  # 创建一个自定义的日志格式
+# 创建一个自定义的日志格式
 #  class CustomFormatter(logging.Formatter):
-#  #  class CustomFormatter(colorlog.ColoredFormatter):
-#    def format(self, record):
-#      # 获取调用栈中的前一个帧
-#      #  caller_frame = sys._getframe(8)  # 获取上级调用的帧
-#      #  if caller_frame.f_back is not None:
-#      #    caller_frame = caller_frame.f_back
-#      caller_frame = sys._getframe(8)  # 获取上级调用的帧
-#      #  if caller_frame.f_code.co_name == "wrapper":
-#      if caller_frame.f_back.f_code.co_name != "wrapper":
-#        caller_frame = caller_frame.f_back
-#      if record.name == "bot.m":
-#        record.name = " "
-#      else:
-#        record.name = f" {record.name} "
-#      #  record.levelname = levelname_map.get(record.levelname, record.levelname)
-#      record.levelname = levelname_map.get(record.levelname)
-#
-#      #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
-#      #  record.funcName = caller_function  # 修改 LogRecord 的 funcName
-#      record.funcName = caller_frame.f_code.co_name
-#      record.lineno = caller_frame.f_lineno
-#      #  print(f"finally: {record}")
-#      return super().format(record)
-#
-#  #  formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
-#
-#  #  formatter = CustomFormatter(LOG_FORMAT, datefmt="%H:%M:%S")
+class CustomFormatter(colorlog.ColoredFormatter):
+  def format(self, record):
+    if record.name == "bot.m":
+      record.name = ""
+      # 获取调用栈中的前一个帧
+      #  if caller_frame.f_back is not None:
+      #    caller_frame = caller_frame.f_back
+      caller_frame = sys._getframe(9)  # 获取上级调用的帧
+      if caller_frame.f_code.co_name == "wrapper":
+      #  if caller_frame.f_back.f_code.co_name != "wrapper":
+        caller_frame = caller_frame.f_back
+      #  if record.name == "bot.m":
+      #  else:
+      #    record.name = f" {record.name} "
+      #  record.levelname = levelname_map.get(record.levelname, record.levelname)
+      #  record.levelname = levelname_map.get(record.levelname)
+
+      #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
+      #  record.funcName = caller_function  # 修改 LogRecord 的 funcName
+      record.funcName = caller_frame.f_code.co_name
+      record.lineno = caller_frame.f_lineno
+    #  print(f"finally: {record}")
+    return super().format(record)
+
+#  formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
+
+#  formatter = CustomFormatter(LOG_FORMAT, datefmt="%H:%M:%S")
 #  logging.Formatter = CustomFormatter
 
 
+#  LOG_FORMAT = "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s",
 
 #  formatter = colorlog.ColoredFormatter(
-#  formatter = CustomFormatter(
-#      #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
-#  "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s",
-#      datefmt='%m-%d %H:%M:%S',
-#      log_colors={
-#          'DEBUG': 'blue',
-#          'INFO': 'green',
-#          'WARNING': 'yellow',
-#          'ERROR': 'red',
-#          'CRITICAL': 'bold_red',
-#      }
-#  )
+formatter = CustomFormatter(
+    #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
+"%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s",
+    #  datefmt='%m-%d %H:%M:%S',
+    datefmt='%H:%M:%S',
+    log_colors={
+        'DEBUG': 'blue',
+        'INFO': 'green',
+        'WARNING': 'yellow',
+        'ERROR': 'red',
+        'CRITICAL': 'bold_red',
+    }
+)
 
 LOGGER = logging.getLogger()
 logger=LOGGER
@@ -88,20 +90,23 @@ debug = False
 debug = True
 
 if debug:
-  #  handler = logging.StreamHandler()
-  #  handler.setFormatter(formatter)
-  #  logger.addHandler(handler)
-  #  logging.basicConfig()
-  logging.basicConfig(format=LOG_FORMAT, datefmt="%H:%M:%S")
+  handler = logging.StreamHandler()
+  handler.setFormatter(formatter)
+  logger.addHandler(handler)
   LOGGER.setLevel(logging.INFO)
   OUT = None
   ERR = None
-
 elif False:
   handler = logging.StreamHandler()
   handler.setFormatter(formatter)
 
   logger.addHandler(handler)
+  LOGGER.setLevel(logging.INFO)
+  OUT = None
+  ERR = None
+
+elif False:
+  logging.basicConfig(format=LOG_FORMAT, datefmt="%H:%M:%S")
   LOGGER.setLevel(logging.INFO)
   OUT = None
   ERR = None
