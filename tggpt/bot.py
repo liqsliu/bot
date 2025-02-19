@@ -1683,7 +1683,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
     info(f"收到字符串命令: {cmds}")
     #  cmds = get_cmd(cmds)
   else:
-    cmds = list(shlex.quote(x) for x in cmds)
+    #  cmds = list(shlex.quote(x) for x in cmds)
     #  cmds = ' '.join(cmds)
     cmds = shlex.join(cmds)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
