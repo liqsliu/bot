@@ -1618,7 +1618,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
   #    return
   p = myshell_p
   if myshell_lock.locked():
-    warn(f"myshell is busy: {cmd=}")
+    warn(f"shell is busy: {cmds=}")
     await send("前一次任务还没结束", src, correct=True)
     #  o = b""
     #  e = b""
@@ -1705,6 +1705,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
         try:
           #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
           #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time/(k+1))
+          info("waiting...")
           n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time)
           if n == 1:
             if k == 0:
@@ -1723,6 +1724,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           info(f"got{n}: {d}")
         except TimeoutError:
           if k > 0:
+            info(f"fixme: timeout, skip: {c}")
             await p.stdin.drain()
             break
           #  if k > 0:
@@ -1769,7 +1771,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             tmp += d 
             print(f"got{n}: {d}")
         except TimeoutError:
-          info(f"no more: {d}")
+          info(f"附带消息no more: {d}")
           # 至少还有一条待执行的命令
         #  if k > 2:
         if k > 1:
@@ -7674,7 +7676,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       tt = textq
     else:
       tt = text
-    info(f"check url in: [tt]")
+    info(f"check url in: {tt}")
     for i in tt.splitlines():
       if not i.startswith("> ") and  i != ">":
         tmp += i+"\n"
