@@ -1768,8 +1768,9 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             #  info(f"send: {src} {type(ds)} {ds[:16]}")
             await send(ds, src)
             tmp = b""
-        if k == 1:
-          info(f"res {n}: {d}")
+        if k > 0:
+          if k == 1:
+            info(f"res {n}: {d}")
           break
         #  if k > 0:
           #  await p.stdin.drain()
