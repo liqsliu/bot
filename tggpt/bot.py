@@ -1670,6 +1670,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
   eof = eof.encode()
   k =  len(cmds)
   start_time = time.time()
+  last_send = 0
   async with myshell_lock:
     for c in cmds:
       p.stdin.write( c.encode() )
@@ -1730,33 +1731,42 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           # fixme: 不知道该设为多少
           r = 0
           break
-        if myshell_queue.empty():
-          await sleep(0.001)
+        #  if k > 1:
+        #    if myshell_queue.empty():
+        #      await sleep(0.001)
         #  info(time.time())
         # 0.0006s
-        while not myshell_queue.empty():
-          n, d = await myshell_queue.get()
-          if n == 1:
-            o += d
-            if k == 0:
-              if d == eof:
-                print(f"found EOF?")
-                o = o[:-(len(eof))]
-                tmp = tmp[:-(len(eof))]
-                r = True
-                break
-          else:
-            e += d
-          tmp += d 
-          await sleep(0.001)
-          print(f"got{n}: {d}")
+        #  while not myshell_queue.empty():
+        #    n, d = await myshell_queue.get()
+            #  await sleep(0.001)
+        try:
+          while True:
+            if len(tmp.encode()) > MAX_MSG_BYTES_TG:
+              warn(f"res is too loog: {len(tmp)} {tmp[:54]}")
+              break
+            n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
+            if n == 1:
+              o += d
+              if k == 0:
+                if d == eof:
+                  print(f"found EOF?")
+                  o = o[:-(len(eof))]
+                  tmp = tmp[:-(len(eof))]
+                  r = True
+                  break
+            else:
+              e += d
+            tmp += d 
+            print(f"got{n}: {d}")
+        except TimeoutError:
+          info(f"no more: {d}")
           # 至少还有一条待执行的命令
         #  if k > 2:
         if k > 1:
           if len(tmp) < 512:
-            if time.time() - start_time < 0.2:
+            if time.time() - last_send > 1:
               if not e:
-                  break
+                break
         if src is not None:
           ds = tmp.decode("utf-8", errors="ignore")
           #  info(f"got{n}: {ds[:16]}")
