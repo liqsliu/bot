@@ -622,25 +622,27 @@ def _exceptions_handler(e, *args, **kwargs):
   info("check __send: {}".format(__send.__name__ in fs))
   if _sendme.__name__ in fs:
     no_send = True
-    info(f"fixme: 要刷屏了 {fs} {res}")
+    info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
   elif __send.__name__ in fs:
     no_send = True
-    info(f"fixme: 要刷屏了 {fs} {res}")
+    info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
   elif _sendme.__name__ in res:
     no_send = True
-    info(f"fixme: 要刷屏了 {fs} {res}")
+    info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
   elif __send.__name__ in res:
     no_send = True
-    info(f"fixme: 要刷屏了 {fs} {res}")
-  if not no_send:
+    info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
+
+  if no_send:
+    if more:
+      logger.error(res, exc_info=True, stack_info=True)
+    else:
+      logger.warning(res)
+  else:
     logger.error(res, exc_info=True, stack_info=True)
     # wait is ok
     #  await sleep(5)
     send_log(res, 9)
-  elif more:
-    logger.error(res, exc_info=True, stack_info=True)
-  else:
-    logger.warning(res)
   return res
 
 
@@ -1741,7 +1743,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             #  await sleep(0.001)
         try:
           while True:
-            if len(tmp)) > MAX_MSG_BYTES_TG:
+            if len(tmp) > MAX_MSG_BYTES_TG:
               warn(f"res is too loog: {len(tmp)} {tmp[:54]}")
               break
             n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
