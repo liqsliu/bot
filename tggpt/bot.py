@@ -1713,9 +1713,9 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
                 info(f"found EOF")
                 r = True
                 break
-            elif k == 1:
-              if d == b'0\n':
-                info(f"found returncode")
+            #  elif k == 1:
+            #    if d == b'0\n':
+            #      info(f"found returncode")
             o += d
           else:
             e += d
@@ -1746,9 +1746,9 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             #  await sleep(0.001)
         try:
           while True:
-            if len(tmp) > MAX_MSG_BYTES_TG:
-              warn(f"res is too loog: {len(tmp)} {tmp[:54]}")
-              break
+            #  if len(tmp) > MAX_MSG_BYTES_TG:
+            #    warn(f"res is too loog: {len(tmp)} {tmp[:54]}")
+            #    break
             n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
             if n == 1:
               if k == 0:
@@ -1758,11 +1758,11 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
                   #  tmp = tmp[:-(len(eof))]
                   r = True
                   break
-              elif k == 1:
-                if d == b'0\n':
-                  print(f"found returncode?")
-                  #  r = int(d[:-1])
-                  #  break
+              #  elif k == 1:
+              #    if d == b'0\n':
+              #      print(f"found returncode?")
+              #      #  r = int(d[:-1])
+              #      #  break
               o += d
             else:
               e += d
@@ -1774,8 +1774,8 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
         #  if k > 2:
         if k > 1:
           if len(tmp) < 512:
-            if time.time() - last_send > 1:
-              if not e:
+            if time.time() - last_send < 1:
+              #  if not e:
                 break
         elif k == 1:
           if d == b"0\n":
