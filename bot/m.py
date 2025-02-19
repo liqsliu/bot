@@ -4660,7 +4660,6 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
   if opts == 9:
     await _sendme(tmsg.stringify(), chat_id)
   elif tmsg.file:
-    direct = False
     file = tmsg.file
     file_size = file.size
     await _sendme(f"file: {type(file)} {file.name} {file.size}", chat_id)
@@ -4681,18 +4680,14 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       else:
         info("use file")
         file = tmsg.file
-      info(f"file type: {type(file)}")
+      info(f"try send file type: {type(file)}")
       res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
-      direct = True
       if tmsg.video:
         res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
-        direct = True
       elif tmsg.photo:
         res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
-        direct = True
       elif tmsg.media:
         res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
-        direct = True
 
       if opts == 1:
         return
@@ -4700,7 +4695,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       if e.args[0] == "You can't forward messages from a protected chat (caused by SendMediaRequest)":
         warn("内容被保护，无法直接转发")
       else:
-        err(f"fixme: {e=} {file=}")
+        warn(f"fixme: {e=} {file=}")
     except AttributeError as e:
       err(f"fixme: {e=} {file=}")
 
@@ -4726,7 +4721,6 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             err(f"wtf: {tmsg.stringify()}")
             return
           res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
-          direct = True
           if opts == 1:
             return
         except AttributeError as e:
@@ -4741,7 +4735,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     path = await tg_download_media(tmsg, src=chat_id, max_wait_time=get_timeout(file_size))
     if path:
       if path.endswith(".tgs"):
-        info(f"found tgs file: {path}")
+        warn(f"found tgs file: {path}")
         fp = Path(path)
         filename = fp.name
         length = os.path.getsize(fp)
@@ -4761,7 +4755,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         #  else:
         #    warn(f"转换tgs文件失败: {path} {r=} {o=} {e=}")
         #  r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
-        r, _, _ = await my_sexec(shell_cmd, max_time=get_timeout(length)*3+30, src=chat_id)
+        #  r, _, _ = await my_sexec(shell_cmd, max_time=get_timeout(length)*3+30, src=chat_id)
+        r, _, _ = await myshell(shell_cmd, max_time=get_timeout(length)*3+30, src=chat_id)
         #  info(f"{r=}")
         if r == 0:
           #  shell_cmd = ["rm", path]
@@ -4778,7 +4773,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       t = asyncio.create_task(backup(path))
       try:
 
-        if opts == 2 or res is None or opts == 0:
+        #  if opts == 2 or res is None or opts == 0:
+        if opts != 4 and opts != 2 and res is None:
           try:
             res = await tg_upload_media(path, src, chat_id=chat_id, caption=url, max_time=get_timeout(file_size))
             direct = True
@@ -4788,29 +4784,34 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             err(f"上传失败 {e=}")
         else:
           if url:
-            await _sendme(url, chat_id)
+            await send(url, chat_id)
 
-        res = None
-        url = None
-        if opts < 4:
+
+        #  res = None
+        xmpp_url = None
+        if res is None and opts == 4:
           await send("上传到xmpp...", src, correct=True)
           try:
-            url = await upload(path)
-            info(url)
+            xmpp_url = await upload(path)
+            info(xmpp_url)
           except Exception as e:
             err(f"上传失败 {e=}")
-        try:
-          if url:
+
+        if xmpp_url:
+          try:
             #  res = await UB.send_file(chat_id, file=url, caption=url)
-            res = await tg_upload_media(url, src, chat_id=chat_id, caption=url)
+            res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=url)
             if opts == 3:
               return
-        except rpcerrorlist.WebpageCurlFailedError as e:
-          err(f"文件url有问题: {e=} {url}")
-        except rpcerrorlist.WebpageMediaEmptyError as e:
-          err(f"文件url有问题: {e=} {url}")
-        except Exception as e:
-          err(f"{e=} {url}")
+          except rpcerrorlist.WebpageCurlFailedError as e:
+            await send(xmpp_url, chat_id)
+            err(f"文件url有问题: {e=} {url}")
+          except rpcerrorlist.WebpageMediaEmptyError as e:
+            await send(xmpp_url, chat_id)
+            err(f"文件url有问题: {e=} {url}")
+          except Exception as e:
+            await send(xmpp_url, chat_id)
+            err(f"{e=} {url}")
 
         try:
           await t
@@ -4818,8 +4819,10 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             url = t.result()
             if url:
              info(url)
-             await sleep(2)
+             await sleep(1)
              res = await UB.send_file(chat_id, file=url, caption=url)
+          else:
+            err("wtf")
         except rpcerrorlist.WebpageCurlFailedError as e:
           err(f"文件url有问题: {e=} {url}")
         except rpcerrorlist.WebpageMediaEmptyError as e:
@@ -4827,7 +4830,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         except Exception as e:
           err(f"{e=} {url}")
 
-        if res is None and opts != 2 and not direct:
+        if res is None or opts == 2:
           try:
             res = await tg_upload_media(path, src, chat_id=chat_id, caption=url, max_time=get_timeout(file_size))
           except Exception as e:
@@ -4838,8 +4841,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if t.done():
           pass
         else:
-          err(f"backup failed: {path}")
-          await sleep(60)
+          err(f"备份失败，等600s再删除: {path}")
+          await sleep(600)
         asyncio.create_task(backup(path, delete=True))
 
 
