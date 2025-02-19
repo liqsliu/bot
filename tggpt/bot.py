@@ -6661,7 +6661,7 @@ async def add_cmd():
       ]:
     async def _(cmds, src):
       cmds = cmds[0]
-      cmds = list(f"{x}\n" for x in cmds.splitlines())
+      #  cmds = list(f"{x}\n" for x in cmds.splitlines())
       #  await run_run( myshell(cmds, src=src) , False)
       await myshell(cmds, src=src)
     cmd_funs[i] = _
