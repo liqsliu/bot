@@ -3976,9 +3976,9 @@ def get_timeout(size):
 
 def hbyte(size):
   if size > 512*1024:
-    return "{:.1}M".format(size/1024/1024)
+    return "{:.1f}M".format(size/1024/1024)
   else:
-    return "{:.0}K".format(size/1024)
+    return "{:.0f}K".format(size/1024)
 
 
 #  last_time = {}
