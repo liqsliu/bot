@@ -2152,7 +2152,7 @@ async def send_cmd_to_bash(gateway, name, text):
   #  shell_cmd = ["bash -l", SH_PATH + "/bcmd.sh"]
   #  shell_cmd = ["bash", SH_PATH + "/bcmd.sh"]
   #  shell_cmd = [SH_PATH + "/bcmd.sh"]
-  cmds = ["{SH_PATH}/bcmd.sh", str(gateway), name, text, repr(msg)]
+  cmds = [f"{SH_PATH}/bcmd.sh", str(gateway), name, text, repr(msg)]
 
   #  if shell_cmd[1] == "gateway1":
   #    #  if my_host_re.match(shell_cmd[3]):
@@ -2471,25 +2471,25 @@ async def backup(path, src=None, delete=False):
       await send(url, src)
   return url
 
+@exceptions_handler
+async def get_twitter(url, src=None, opts=[], max_time=run_shell_time_max):
+  #  elif url.startswith("https://x.com/"):
+  #  elif url.startswith("https://twitter.com/"):
+  cmds = [f"{SH_PATH}/twitter_to_text.sh", url]
+  return format_out_of_shell( await myshell(cmds, src=src, max_time=max_time))
 
 @exceptions_handler
 async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   # also download
   #  cmds = ["bash", f"{SH_PATH}/title.sh"]
-  if opts:
-    # for download
-    cmds = [f"{SH_PATH}/title.sh", url]
-  #  cmds.append(shlex.quote(url))
-  #  while opts:
-  #    cmds.append(opts.pop(0))
-    cmds.extend(opts)
-  elif url.startswith("https://x.com/"):
+  cmds = [f"{SH_PATH}/title.sh", url]
+#  cmds.append(shlex.quote(url))
+#  while opts:
+#    cmds.append(opts.pop(0))
+  cmds.extend(opts)
     #  res = await send_cmd_to_bash(src, name, url)
     #  res = await send_cmd_to_bash(None, name, url)
     #  return res
-    cmds = [f"{SH_PATH}/twitter_to_text.sh", url]
-  elif url.startswith("https://twitter.com/"):
-    cmds = [f"{SH_PATH}/twitter_to_text.sh", url]
   #  if down:
   #    #  shell_cmd.append("%s" % (2**20*1000))
   #    while True:
@@ -7616,7 +7616,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       tt = textq
     else:
       tt = text
-    info(f"check url in: [text]")
+    info(f"check url in: [tt]")
     for i in tt.splitlines():
       if not i.startswith("> ") and  i != ">":
         tmp += i+"\n"
