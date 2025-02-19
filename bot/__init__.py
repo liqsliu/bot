@@ -48,10 +48,10 @@ class CustomFormatter(logging.Formatter):
     #  if caller_frame.f_code.co_name == "wrapper":
     if caller_frame.f_back.f_code.co_name != "wrapper":
       caller_frame = caller_frame.f_back
-    #  if record.name == "bot.m":
-    #    record.name = " "
-    #  else:
-    #    record.name = f" {record.name} "
+    if record.name == "bot.m":
+      record.name = " "
+    else:
+      record.name = f" {record.name} "
     #  record.levelname = levelname_map.get(record.levelname, record.levelname)
     record.levelname = levelname_map.get(record.levelname)
 
