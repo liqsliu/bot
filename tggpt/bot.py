@@ -1689,12 +1689,8 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           if myshell_queue.empty():
             await sleep(0.01)
             if myshell_queue.empty():
-              #  if k == 1:
-              #    await sleep(0.1)
-              #    await p.stdin.drain()
-              #    if myshell_queue.empty():
-              #      break
-              if k > 0:
+              #  if k > 0:
+              if k > 1:
                 break
         #  n, d = await myshell_queue.get()
         try:
@@ -1714,12 +1710,15 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           tmp += d 
           info(f"got{n}: {d}")
         except TimeoutError:
+          if k > 0:
+            await p.stdin.drain()
+            break
           #  if k > 0:
           #    await sleep(0.001)
           #    await p.stdin.drain()
           #    info(f"fixme: timeout: {c=} {cmd}")
           #    break
-          warn(f"timeout: {cmd}")
+          warn(f"timeout: {cmds}")
           res = "结束"
           await send(res, src)
           # fixme: 不知道该设为多少
@@ -1736,7 +1735,8 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
           else:
             e += d
           tmp += d 
-          await sleep(0.001)
+          #  await sleep(0.001)
+          await sleep(0.01)
           print(f"got{n}: {d}")
         if k == 0:
           if d == eof:
@@ -1752,16 +1752,17 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             if time.time() - start_time < 0.2:
               if not e:
                   break
-        ds = tmp.decode("utf-8", errors="ignore")
-        #  info(f"got{n}: {ds[:16]}")
-        ds = re.sub(shell_color_re,  "", ds)
-        #  info(f"got{n}>: {ds[:16]}")
-        #  res += "\n" + ds
-        ds = ds.strip()
-        if ds:
-          #  info(f"send: {src} {type(ds)} {ds[:16]}")
-          await send(ds, src)
-          tmp = b""
+        if src is not None:
+          ds = tmp.decode("utf-8", errors="ignore")
+          #  info(f"got{n}: {ds[:16]}")
+          ds = re.sub(shell_color_re,  "", ds)
+          #  info(f"got{n}>: {ds[:16]}")
+          #  res += "\n" + ds
+          ds = ds.strip()
+          if ds:
+            #  info(f"send: {src} {type(ds)} {ds[:16]}")
+            await send(ds, src)
+            tmp = b""
         if k > 0:
           if k == 1:
             info(f"res {n}: {d}")
