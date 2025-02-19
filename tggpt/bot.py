@@ -1654,8 +1654,10 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
   info(f"cmds: {cmds}")
   if isinstance(cmds, str):
     cmds = get_cmd(cmds)
-  cmds = list(shlex.quote(x) for x in cmds)
-  cmds = ' '.join(cmds)
+  else:
+    #  cmds = list(shlex.quote(x) for x in cmds)
+    #  cmds = ' '.join(cmds)
+    cmds = shlex.join(cmds)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
   cmds.append("echo $?\n")
   eof = generand(16) + "\n"
@@ -2143,12 +2145,9 @@ async def send_cmd_to_bash(gateway, name, text):
   #  logger.info("msg_mt: {}".format(msg))
   #  shell_cmd="{} {} {} {}"
   #  shell_cmd = ["bash -l", SH_PATH + "/bcmd.sh"]
-  shell_cmd = ["bash", SH_PATH + "/bcmd.sh"]
+  #  shell_cmd = ["bash", SH_PATH + "/bcmd.sh"]
   #  shell_cmd = [SH_PATH + "/bcmd.sh"]
-  shell_cmd.append(str(gateway))
-  shell_cmd.append(name)
-  shell_cmd.append(text)
-  shell_cmd.append(repr(msg))
+  cmds = ["{SH_PATH}/bcmd.sh", str(gateway), name, text, repr(msg)]
 
   #  if shell_cmd[1] == "gateway1":
   #    #  if my_host_re.match(shell_cmd[3]):
@@ -2174,7 +2173,7 @@ async def send_cmd_to_bash(gateway, name, text):
   #  await my_popen(" ".join(shell_cmd))
   #  res = await my_popen(shell_cmd, shell=False, src=gateway)
   #  r, o, e = await my_sexec(shell_cmd, src=gateway)
-  r, o, e = await myshell(shell_cmd, src=gateway)
+  r, o, e = await myshell(cmds, src=gateway)
   if r == 0:
     if o:
       return re.sub(shell_color_re,  "", o)
@@ -2470,8 +2469,8 @@ async def backup(path, src=None, delete=False):
 
 @exceptions_handler
 async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
-  cmds = ["bash", f"{SH_PATH}/title.sh"]
-  cmds.append(url)
+  #  cmds = ["bash", f"{SH_PATH}/title.sh"]
+  cmds = [f"{SH_PATH}/title.sh", url]
   #  cmds.append(shlex.quote(url))
   #  while opts:
   #    cmds.append(opts.pop(0))
@@ -6110,6 +6109,7 @@ async def xmpp_msg(msg):
   if j in last_outmsg:
     last_outmsg.pop(j)
 
+  info("original text: [text]")
   text0 = text
   if msg.type_ == MessageType.GROUPCHAT:
     if muc == acg_group:
@@ -6168,6 +6168,7 @@ async def xmpp_msg(msg):
         text = f"{text0}\n\n{qt}"
         qt2 = '\n> '.join(tmp)
         username = f"> {qt2}\n{username}"
+      info("delete qt: [text0]")
     #    else:
     #      info(f"{tmp=} {qt=}")
     #  info(f"{text=} {text2=}")
@@ -6184,7 +6185,7 @@ async def xmpp_msg(msg):
   #  if msg.type_ == MessageType.GROUPCHAT:
   #    pass
   elif msg.type_ == MessageType.NORMAL:
-    warn(f"normal msg: {msg}")
+    warn(f"wtf: normal msg: {msg}")
     return
   elif msg.type_ == MessageType.CHAT:
     if text == "ping":
@@ -6195,7 +6196,7 @@ async def xmpp_msg(msg):
     if is_admin is False:
       logger.info("群内私聊: %s" % msg)
       #  await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
-      send_log(f"{msg.type_} {msg.from_}: {text}")
+      send_log(f"群内私聊: {msg.type_} {msg.from_}: {text}")
       return
     #  if get_jid(msg.to) in my_groups:
     #  if get_jid(msg.from_) in my_groups:
@@ -7600,6 +7601,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       tt = textq
     else:
       tt = text
+    info("check url in: [text]")
     for i in tt.splitlines():
       if not i.startswith("> ") and  i != ">":
         tmp += i+"\n"
@@ -7618,13 +7620,13 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         return
       if url.startswith("https://icq.im"):
         return
-      if url.startswith("https://x.com/"):
-        #  res = await send_cmd_to_bash(src, name, url)
-        res = await send_cmd_to_bash(None, name, url)
-        return res
-      if url.startswith("https://twitter.com/"):
-        res = await send_cmd_to_bash(None, name, url)
-        return res
+      #  if url.startswith("https://x.com/"):
+      #    #  res = await send_cmd_to_bash(src, name, url)
+      #    res = await send_cmd_to_bash(None, name, url)
+      #    return res
+      #  if url.startswith("https://twitter.com/"):
+      #    res = await send_cmd_to_bash(None, name, url)
+      #    return res
       if not res:
         if len(urls) == 1:
           res="%s" % await get_title(url)
