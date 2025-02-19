@@ -25,9 +25,9 @@ if __name__ == '__main__':
   logger.warning("test warn")
   logger.error("test err")
   #  main()
-  from . import bot
+  from . import m
   #  await bot.run()
-  bot.main()
+  m.main()
 
 elif __package__ == "":
   print('{} 运行, empty package'.format(__file__))

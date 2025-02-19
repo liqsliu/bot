@@ -15,9 +15,17 @@ LOG_FILE = PARENT_DIR / 'last_run.log'
 LOG_FILE = WORK_DIR / 'last_run.log'
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-LOG_FORMAT = "%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+LOG_FORMAT = "%(asctime)s [%(levelname)s]%(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 #  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 
+
+levelname_map = {
+    'DEBUG': 'D',
+    'INFO': 'I',
+    'WARNING': 'W',
+    'ERROR': 'E',
+    'CRITICAL': 'C'
+}
 
 # 创建一个自定义的日志格式
 class CustomFormatter(logging.Formatter):
@@ -30,6 +38,12 @@ class CustomFormatter(logging.Formatter):
     #  if caller_frame.f_code.co_name == "wrapper":
     if caller_frame.f_back.f_code.co_name != "wrapper":
       caller_frame = caller_frame.f_back
+    if record.name == "bot.m":
+      record.name = ""
+    else:
+      record.name = " {record.name} "
+    #  record.levelname = levelname_map.get(record.levelname, record.levelname)
+    record.levelname = levelname_map.get(record.levelname)
 
     #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
     #  record.funcName = caller_function  # 修改 LogRecord 的 funcName

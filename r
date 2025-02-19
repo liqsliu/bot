@@ -10,7 +10,8 @@ cd ~/bot
 while true
 do
 vgp && tgp && bash init.sh || break
-python3 -m tggpt && {
+# python3 -m tggpt && {
+python3 -m bot && {
   echo 'ok. stop ...'
   break
 } || r=$?
