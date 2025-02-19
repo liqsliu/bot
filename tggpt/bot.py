@@ -225,7 +225,7 @@ def info1(s):
 def info2(s):
   print("%s" % s.replace("\n", " "))
 
-def send_log(text, wait=5):
+def send_log(text, wait=1):
   t1 = asyncio.create_task(_send_log(text, wait=wait))
 
 async def _send_log(text, wait=1, to=0):
@@ -4666,7 +4666,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         return
     except rpcerrorlist.ChatForwardsRestrictedError as e:
       if e.args[0] == "You can't forward messages from a protected chat (caused by SendMediaRequest)":
-        info("内容被保护，无法直接转发")
+        warn("内容被保护，无法直接转发")
       else:
         err(f"fixme: {e=} {file=}")
     except AttributeError as e:
