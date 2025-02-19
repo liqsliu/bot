@@ -68,7 +68,8 @@ class CustomFormatter(colorlog.ColoredFormatter):
 
 
 
-formatter = colorlog.ColoredFormatter(
+#  formatter = colorlog.ColoredFormatter(
+formatter = CustomFormatter(
     #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
 "%(log_color)s%(levelname)s %(asctime)s%(name)s[%(module)s.%(funcName)s:%(lineno)d]%(reset)s %(message)s",
     datefmt='%m-%d %H:%M:%S',
