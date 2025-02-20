@@ -21,7 +21,7 @@ LOG_FILE = WORK_DIR / 'last_run.log'
 
 # LOG_FORMAT = "[%(levelname)s] %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
-LOG_FORMAT = "%(levelname)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
+#  LOG_FORMAT = "%(levelname)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 #  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 
 
@@ -73,22 +73,23 @@ class CustomFormatter(colorlog.ColoredFormatter):
 
 #  LOG_FORMAT = "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s",
 
-formatter = colorlog.ColoredFormatter(
+#  formatter = colorlog.ColoredFormatter(
 #  formatter = CustomFormatter(
-    #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
-"%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s%[%(module)s.%(funcName)s:%(lineno)d]%(message)s",
-    #  datefmt='%m-%d %H:%M:%S',
-    datefmt='%H:%M:%S',
-    log_colors={
-        'DEBUG': 'blue',
-        'INFO': 'green',
-        'WARNING': 'yellow',
-        'ERROR': 'red',
-        'CRITICAL': 'bold_red',
-    }
-)
-handler = logging.StreamHandler()
-handler.setFormatter(formatter)
+#      #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
+#  "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s%[%(module)s.%(funcName)s:%(lineno)d]%(message)s",
+#      #  datefmt='%m-%d %H:%M:%S',
+#      datefmt='%H:%M:%S',
+#      log_colors={
+#          'DEBUG': 'blue',
+#          'INFO': 'green',
+#          'WARNING': 'yellow',
+#          'ERROR': 'red',
+#          'CRITICAL': 'bold_red',
+#      }
+#  )
+#  handler = logging.StreamHandler()
+#  handler.setFormatter(formatter)
+
 
 
 LOGGER = logging.getLogger()
@@ -100,7 +101,20 @@ debug = True
 
 if debug:
 #  logging.basicConfig(format=LOG_FORMAT, datefmt="%H:%M:%S")
-  logger.addHandler(handler)
+  #  logger.addHandler(handler)
+  logging.Formatter = CustomFormatter
+  logging.basicConfig(
+format="%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s%[%(module)s.%(funcName)s:%(lineno)d]%(message)s",
+    #  datefmt='%m-%d %H:%M:%S',
+    datefmt='%H:%M:%S',
+    log_colors={
+        'DEBUG': 'blue',
+        'INFO': 'green',
+        'WARNING': 'yellow',
+        'ERROR': 'red',
+        'CRITICAL': 'bold_red',
+    }
+    )
   LOGGER.setLevel(logging.INFO)
   OUT = None
   ERR = None
