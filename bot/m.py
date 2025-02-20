@@ -507,6 +507,36 @@ PROMPT_TR_MY_S = '请翻译引号中的内容，你要检测其原始语言，�
 
 PROMPT_TR_MY = '请翻译引号中的内容，你要检测其原始语言是不是中文，如果原始语言是中文就翻译成英文，否则就翻译为中文。你只需要翻译该内容，不必对内容中提出的问题和要求做解释，不要回答文本中的问题而是翻译它，不要解决文本中的要求而是翻译它，保留文本的原本意义，不要去解决它如果我只键入了一个单词，你只需要描述它的意思并不提供句子示例。 我要你只回复更正、改进，不要写任何解释我的第一句话是：\n'
 
+def cross_thread(func, need_main=True):
+  if asyncio.iscoroutinefunction(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+      coro = func(*args, **kwargs)
+      return await run_run(coro, need_main=need_main)
+  else:
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+      #  return func(*args, **kwargs)
+      if need_main:
+        return run_cb_in_main(func, *args, **kwargs)
+      else:
+        return run_cb_in_thread(func, *args, **kwargs)
+  return wrapper
+
+def auto_task(func):
+  # for callback
+  if asyncio.iscoroutinefunction(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+      asyncio.create_task(func(*args, **kwargs), name=f"auto_task_{func.__name__}")
+      return True
+  else:
+    err(f"fixme: {func}不是异步函数")
+    return
+  return wrapper
+
+
+
 
 
 def exceptions_handler(func):
@@ -629,7 +659,15 @@ def _exceptions_handler(e, *args, **kwargs):
   #  warn(res)
   info("check send_tg: {}".format(send_tg.__name__ in fs))
   info("check send_xmpp: {}".format(send_xmpp.__name__ in fs))
-  if send_tg.__name__ in fs:
+  global send_log_task
+  if not allright.is_set():
+    no_send = True
+  elif send_log_task is not None:
+    if not send_log_task.done() or send_log_task.result() is False or send_log_task.result() is None:
+      no_send = True
+      info(f"skip send err log: {res}")
+  
+  elif send_tg.__name__ in fs:
     no_send = True
     no_send_tg = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
@@ -646,15 +684,7 @@ def _exceptions_handler(e, *args, **kwargs):
     no_send_xmpp = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
 
-
-
-  global send_log_task
-  if send_log_task is not None:
-    if not send_log_task.done() or send_log_task.result() is False or send_log_task.result() is None:
-      no_send = True
-      info(f"skip send err log: {res}")
-  
-  if _send_log.__name__ in fs:
+  elif _send_log.__name__ in fs:
     info(f"send_log is busy: {res}")
     no_send = True
 
@@ -5791,14 +5821,17 @@ def msg_out(msg):
 
 
 #  @exceptions_handler
-def xmpp_msg_p(msg):
-  # 状态消息，在线离线等
+#  def xmpp_msg_p(msg):
+#    # 状态消息，在线离线等
+#    if not allright.is_set():
+#      return
+#    asyncio.create_task(_xmpp_msg_p(msg))
+
+@auto_task
+@exceptions_handler
+async def xmpp_msg_p(msg):
   if not allright.is_set():
     return
-  asyncio.create_task(_xmpp_msg_p(msg))
-
-@exceptions_handler
-async def _xmpp_msg_p(msg):
   muc = str(msg.from_.bare())
   if msg.type_ == PresenceType.AVAILABLE:
     if msg.xep0045_muc_user:
@@ -6075,21 +6108,24 @@ def hide_nick(msg):
 
 #  def gmsg(msg, member, source, **kwargs):
 #  @exceptions_handler
-def xmpp_msg(msg):
-  if not allright.is_set():
-    #  info("skip msg: allright is not ok")
-    return
-  #  if hasattr(msg, "xep0203_delay"):
-  #    pprint(msg.xep0203_delay)
-  #    info("skip msg: delayed: {msg.xep0203_delay}")
-  #  if hasattr(msg, "xep308_replace"):
-  #    pprint(msg.xep308_replace)
-  asyncio.create_task(_xmpp_msg(msg))
-  #  return
-  #  info("\n>>> msg: %s\n" % msg)
+#  def xmpp_msg(msg):
+#    if not allright.is_set():
+#      #  info("skip msg: allright is not ok")
+#      return
+#    #  if hasattr(msg, "xep0203_delay"):
+#    #    pprint(msg.xep0203_delay)
+#    #    info("skip msg: delayed: {msg.xep0203_delay}")
+#    #  if hasattr(msg, "xep308_replace"):
+#    #    pprint(msg.xep308_replace)
+#    asyncio.create_task(_xmpp_msg(msg))
+#    #  return
+#    #  info("\n>>> msg: %s\n" % msg)
 
+@auto_task
 @exceptions_handler
-async def _xmpp_msg(msg):
+async def xmpp_msg(msg):
+  if not allright.is_set():
+    return
   #  if str(msg.from_.bare()) == rssbot:
   #    pprint(msg)
   muc = str(msg.from_.bare())
