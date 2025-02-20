@@ -13,11 +13,14 @@ python3 -m bot && {
   break
 } || r=$?
 echo "res: $r"
-
 pkill -x mt
 date
+if [[ "$r" -eq 1 ]]; then
+  echo stop by me
+else
 echo "restart ..."
 echo "wait ..."
 sleep 3
+fi
 done
 )

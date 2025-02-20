@@ -26,7 +26,7 @@ LOG_FILE = WORK_DIR / 'last_run.log'
 #  LOG_FORMAT = "%(levelname)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 #  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
 #  LOG_FORMAT = "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s",
-LOG_FORMAT="%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(lineno)d]%(message)s"
+LOG_FORMAT="%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s%(log_color)s[%(module)s.%(funcName)s:%(lineno)d]%(reset)s%(message)s"
 
 
 #  levelname_map = {
@@ -42,20 +42,20 @@ LOG_FORMAT="%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s[%(module)s.
 class CustomFormatter(colorlog.ColoredFormatter):
   def format(self, record):
     if record.name == "bot.m":
-      print("got log from my bot")
+      #  print("got log from my bot")
       record.name = ""
       # 获取调用栈中的前一个帧
       #  if caller_frame.f_back is not None:
       #    caller_frame = caller_frame.f_back
       caller_frame = sys._getframe(8)  # 获取上级调用的帧
-      if caller_frame:
+      #  if caller_frame:
         #  if caller_frame.f_code.co_name == "wrapper":
-        if caller_frame.f_code.co_name == "warn":
-        #  if caller_frame.f_back.f_code.co_name != "wrapper":
-          caller_frame = caller_frame.f_back
-        elif caller_frame.f_code.co_name == "err":
-          caller_frame = caller_frame.f_back
-      if caller_frame:
+      if caller_frame.f_code.co_name == "warn":
+      #  if caller_frame.f_back.f_code.co_name != "wrapper":
+        caller_frame = caller_frame.f_back
+      elif caller_frame.f_code.co_name == "err":
+        caller_frame = caller_frame.f_back
+      #  if caller_frame:
         #  if record.name == "bot.m":
         #  else:
         #    record.name = f" {record.name} "
@@ -64,8 +64,8 @@ class CustomFormatter(colorlog.ColoredFormatter):
 
         #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
         #  record.funcName = caller_function  # 修改 LogRecord 的 funcName
-        record.funcName = caller_frame.f_code.co_name
-        record.lineno = caller_frame.f_lineno
+      record.funcName = caller_frame.f_code.co_name
+      record.lineno = caller_frame.f_lineno
     #  print(f"finally: {record}")
     return super().format(record)
 
