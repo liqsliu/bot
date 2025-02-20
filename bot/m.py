@@ -351,7 +351,7 @@ async def split_long_text(text, msg_max_length=500, correct=False):
     if correct:
       if len(text.encode()) > 500:
         #  return [f"{text[:500]}..."]
-        return ["%s..." % await split_long_text(text, 500)[0] ]
+        return ["%s..." % (await split_long_text(text, 500))[0] ]
       else:
         return [text]
     else:
