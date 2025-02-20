@@ -7810,11 +7810,14 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
             bridges[pid] = src
           target = bridges[pid]
           if target != src:
-            await send("waiting", src)
-            if mtmsgs:
-              await sleep(5)
-            await send("bye", target)
-            await send("hi", src, correct=True)
+            if type(target) is not dict:
+              await send("waiting", src)
+              if mtmsgs:
+                await sleep(5)
+              info(f"stop link to {target}")
+              await send("bye", target)
+              info(f"link to {src}")
+              await send("hi", src, correct=True)
             mtmsgs.clear()
             bridges[pid] = src
           #  gid = await send_to_tg_bot(text, pid)
