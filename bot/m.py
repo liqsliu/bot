@@ -1869,6 +1869,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           if ds:
             #  info(f"send: {src} {type(ds)} {ds[:16]}")
             await send(ds, src)
+            last_send = time.time()
             tmp = b""
         if k > 0:
           #  if k == 1:
