@@ -4760,6 +4760,10 @@ async def msgt(event):
           else:
             k += 1
             text += f"\n{k}. {i.text}"
+        if type(i) is list:
+          info(f"button type: {i[0]=}")
+        else:
+          info(f"button type: {i=}")
 
 
       if msg.file:
