@@ -4583,10 +4583,10 @@ async def msgt(event):
     else:
       return
     #  try:
-    qid=msg.reply_to_msg_id
-    if qid not in bridge:
+    if chat_id not in bridges:
       info(f"not found src for {qid=}")
       return
+    qid=msg.reply_to_msg_id
     #  if qid not in gid_src:
     #  if qid not in bridges[chet_id]
       #  return
