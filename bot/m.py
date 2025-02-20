@@ -3021,7 +3021,7 @@ def send_log(text, to=1, wait=1):
       return False
     else:
       pass
-  send_log_task =  = asyncio.create_task(_send_log(text, to=to, wait=wait))
+  send_log_task = asyncio.create_task(_send_log(text, to=to, wait=wait))
   return send_log_task
 
 async def _send_log(text, to=0, wait=1):
