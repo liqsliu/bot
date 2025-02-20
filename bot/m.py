@@ -7608,10 +7608,10 @@ async def init_cmd():
   async def _(cmds, src):
     bot_name = "littleb_gptBOT"
     if len(cmds) == 1:
-      return f"gpt bot\n.{cmds[0]} $text\n--\nhttps://t.me/{bot_name}"
+      return f"B.AI\n.{cmds[0]} $text\n--\nhttps://t.me/{bot_name}"
     text = ' '.join(cmds[1:])
     return 3, bot_name, text
-  cmd_funs["gtg"] = _
+  cmd_funs["bai"] = _
 
   async def _(cmds, src):
     bot_name = "MishkaAI_bot"
