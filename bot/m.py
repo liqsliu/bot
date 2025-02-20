@@ -7823,9 +7823,10 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       if res:
         return res
   elif text.isnumeric():
-    if src not in mtmsgsg:
+    if src in mtmsgsg:
       mtmsgs = mtmsgsg[src]
     else:
+      info("not founc {src} in mtmsgsg")
       return
     bs = None
     for k, v in mtmsgs:
@@ -7833,6 +7834,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         bs = v[1]
         break
     if bs is None:
+      info("没找到按钮")
       return
     s = int(text)
     k = 0
@@ -7847,6 +7849,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
     if k is None:
       info(f"没找到：{text}")
       await send(f"没找到：{text}", src)
+    return
 
   elif text.isnumeric():
     if src in music_bot_state and music_bot_state[src] == 2 and bridges[music_bot] == src:
