@@ -884,7 +884,7 @@ async def compress(data, m="zst"):
       info(f"压缩成功: {m} {short(data)} -> {short(d)}")
       return d
     else:
-      info(f"压缩failed: {m} {short(data)]}")
+      info(f"压缩failed: {m} {short(data)}")
       return data
   err(f"unknown encoding: {m}")
     #  if m == "zst":
