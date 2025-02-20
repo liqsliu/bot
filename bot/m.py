@@ -7829,7 +7829,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       info("not founc {src} in mtmsgsg")
       return
     bs = None
-    for k, v in mtmsgs:
+    for k, v in mtmsgs.items():
       if len(v) > 1:
         bs = v[1]
         break
