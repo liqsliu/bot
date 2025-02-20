@@ -5852,8 +5852,8 @@ def msg_out(msg):
 #      return
 #    asyncio.create_task(_xmpp_msg_p(msg))
 
-#  @exceptions_handler
 @auto_task
+@exceptions_handler
 async def xmpp_msg_p(msg):
   if not allright.is_set():
     return
@@ -6145,10 +6145,11 @@ def hide_nick(msg):
 #    asyncio.create_task(_xmpp_msg(msg))
 #    #  return
 #    #  info("\n>>> msg: %s\n" % msg)
+#  @exceptions_handler
 
 @auto_task
-@exceptions_handler
 async def xmpp_msg(msg):
+  info(f"got a xmpp msg: {msg}")
   if not allright.is_set():
     return
   #  if str(msg.from_.bare()) == rssbot:
