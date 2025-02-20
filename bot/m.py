@@ -711,11 +711,11 @@ def _exceptions_handler(e, *args, **kwargs):
     #  send_log(res, 9)
     if not no_send_tg:
       #  t1 = asyncio.create_task(_send_log(res, wait=9, to=1))
-      send_log(red, 1, 9)
+      send_log(res, 1, 9)
       
     elif not no_send_xmpp:
       #  t1 = asyncio.create_task(_send_log(res, wait=9, to=2))
-      send_log(red, 2, 9)
+      send_log(res, 2, 9)
   return
   return res
 
@@ -2487,6 +2487,7 @@ async def load_config():
       if type(target) is dict:
         target.clear()
 
+    info(f"my_groups: {my_groups=}")
 
     return True
   except Exception as e:
