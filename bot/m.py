@@ -1852,7 +1852,8 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           # 至少还有一条待执行的命令
         #  if k > 2:
         if k > 1:
-          if len(tmp) < 512:
+          #  if len(tmp) < 512:
+          if len(tmp) < MAX_MSG_BYTES_TG:
             if time.time() - last_send < 1:
               info(f"等一下，合并后续消息")
               #  if not e:
