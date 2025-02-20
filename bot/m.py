@@ -711,11 +711,11 @@ def _exceptions_handler(e, *args, **kwargs):
     #  send_log(res, 9)
     if not no_send_tg:
       #  t1 = asyncio.create_task(_send_log(res, wait=9, to=1))
-      send_log(res, 1, 9)
+      send_log(res, CHAT_ID, 9)
       
     elif not no_send_xmpp:
       #  t1 = asyncio.create_task(_send_log(res, wait=9, to=2))
-      send_log(res, 2, 9)
+      send_log(res, log_group_private, 9)
   return
   return res
 
@@ -4587,6 +4587,7 @@ async def msgt(event):
       info(f"not found src for {qid=}")
       return
     qid=msg.reply_to_msg_id
+    gid = msg.id
     #  if qid not in gid_src:
     #  if qid not in bridges[chet_id]
       #  return
@@ -4641,8 +4642,8 @@ async def msgt(event):
       #  gid_src[msg.id] = src
 
       #  mtmsgs[qid].append(msg.buttons)
-      #  mtmsgs[msg.id] = mtmsgs[qid]
-      mtmsgs[msg.id].append(msg.buttons)
+      mtmsgs[gid] = mtmsgs[qid]
+      mtmsgs[gid].append(msg.buttons)
 
       #  gid_src.pop(qid)
       mtmsgs.pop(qid)
