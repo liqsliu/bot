@@ -639,9 +639,9 @@ def _exceptions_handler(e, *args, **kwargs):
   #  asyncio.create_task(mt_send(res))
   #  asyncio.create_task(send(res, ME))
   #  warn(res)
-  info("check _sendme: {}".format(_sendme.__name__ in fs))
+  info("check send_t: {}".format(send_t.__name__ in fs))
   info("check __send: {}".format(__send.__name__ in fs))
-  if _sendme.__name__ in fs:
+  if send_t.__name__ in fs:
     no_send = True
     no_send_tg = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
@@ -649,7 +649,7 @@ def _exceptions_handler(e, *args, **kwargs):
     no_send = True
     no_send_xmpp = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-  elif _sendme.__name__ in res:
+  elif send_t.__name__ in res:
     no_send = True
     no_send_tg = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
@@ -3002,29 +3002,33 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
       return False
 
 
-async def send(*args, **kwargs):
-  return await run_run(send_t(*args, **kwargs), need_main=True)
+async def send(text, jid=None, *args, **kwargs):
+  if isinstance(jid, int):
+    #  return await send_t(text, jid, *args, **kwargs)
+    return await run_run(send_t(text=text, jid=jid, *args, **kwargs), need_main=True)
+  if jid is None:
+    if isinstance(text, str):
+      return
+  return await run_run(send_x(text=text, jid=jid, *args, **kwargs), need_main=True)
   #  if threading.current_thread() is loop2_thread:
     #  asyncio.run_coroutine_threadsafe(coro, loop)
 
 
-async def send_t(text, jid=None, *args, **kwargs):
+async def send_x(text, jid=None, *args, **kwargs):
   #  if  type(jid) is int:
-  if isinstance(jid, int):
-    return await _sendme(text, jid, *args, **kwargs)
-    if jid == CHAT_ID:
-      #  await _sendme(text, *args, **kwargs)
-      sendme(text, *args, **kwargs)
-      jid = log_group_private
-    else:
-      return await _sendme(text, jid, *args, **kwargs)
-
+    #  if jid == CHAT_ID:
+    #    #  await send_t(text, *args, **kwargs)
+    #    sendme(text, *args, **kwargs)
+    #    jid = log_group_private
+    #  else:
+    #    return await send_t(text, jid, *args, **kwargs)
 
   if 'name' in kwargs:
     name = kwargs["name"]
     #  kwargs.pop("name")
   else:
     name = "**C bot:** "
+
   #  muc = None
   muc = jid
   if isinstance(text, aioxmpp.Message):
@@ -3033,7 +3037,7 @@ async def send_t(text, jid=None, *args, **kwargs):
       if text.type_ == MessageType.GROUPCHAT:
         muc = str(text.to.bare())
         #  jid = muc
-      #  await _sendme(text0, *args, **kwargs)
+      #  await send_t(text0, *args, **kwargs)
       #  sendme(text0, *args, **kwargs)
     #  info(f"该消息为xmpp专用，不能发往telegram, {text}")
     #  text0 = text.body[None]
@@ -3043,14 +3047,14 @@ async def send_t(text, jid=None, *args, **kwargs):
       text.body[i] = f"{name}{text0}"
       break
   else:
+    #  if jid is None:
+    #    return
     text0 = text
     text = f"{name}{text}"
     #  if jid is None:
-    #    #  await _sendme(text, *args, **kwargs)
+    #    #  await send_t(text, *args, **kwargs)
     #    sendme(text0, *args, **kwargs)
     #    jid = log_group_private
-    if jid is None:
-      return
 
   #  if 'correct' in kwargs:
   #    correct = kwargs["correct"]
@@ -3065,13 +3069,13 @@ async def send_t(text, jid=None, *args, **kwargs):
   #    #    if text:
   #    #      break
   #      text_any = text.body.any()
-  #      await _sendme(text_any, *args, **kwargs)
+  #      await send_t(text_any, *args, **kwargs)
   #      if text.type_ == MessageType.GROUPCHAT:
   #        muc = str(text.to.bare())
   #      else:
   #        pass
   #    else:
-  #      await _sendme(text, *args, **kwargs)
+  #      await send_t(text, *args, **kwargs)
   #      #  err(f"需要jid")
   #      #  return False
   #      jid = log_group_private
@@ -3137,6 +3141,7 @@ async def send_t(text, jid=None, *args, **kwargs):
     return await send1(text, jid=jid, *args, **kwargs)
 
 async def send1(text, jid=None, *args, **kwargs):
+  # for short msg
 
   if type(text) is str:
     #  if name:
@@ -3226,11 +3231,12 @@ async def send1(text, jid=None, *args, **kwargs):
 #    return await _send(msg, client, gpm=gpm)
 
 def sendme(*args, **kwargs):
-  asyncio.create_task(_sendme(*args, **kwargs))
-  #  asyncio.create_task(run_run(_sendme(text)))
+  asyncio.create_task(send_t(*args, **kwargs))
+  asyncio.create_task(send_x(*args, **kwargs))
+  #  asyncio.create_task(run_run(send_t(text)))
 
 
-async def _sendme(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
+async def send_t(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
   if chat_id in last_outmsg:
     omsg = last_outmsg[chat_id]
   else:
@@ -3275,7 +3281,7 @@ async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kw
   info(f"sending xmpp group msg: {jid} {text}")
   if jid is None:
     jid = log_group_private
-    asyncio.create_task(_sendme(text))
+    asyncio.create_task(send_t(text))
   recipient_jid = JID.fromstr(jid)
   msg = aioxmpp.Message(
       to=recipient_jid,  # recipient_jid must be an aioxmpp.JID
@@ -4665,11 +4671,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     opts = 0
 
   if opts == 9:
-    await _sendme(tmsg.stringify(), chat_id)
+    await send_t(tmsg.stringify(), chat_id)
   elif tmsg.file:
     file = tmsg.file
     file_size = file.size
-    await _sendme(f"file: {type(file)} {file.name} {file.size}", chat_id)
+    await send_t(f"file: {type(file)} {file.name} {file.size}", chat_id)
     res = None
     #  if tmsg.text:
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
@@ -4856,19 +4862,23 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
   elif tmsg.text:
     res = await UB.send_message(chat_id, tmsg.text)
   else:
-    await _sendme(tmsg.stringify(), chat_id)
+    await send_t(tmsg.stringify(), chat_id)
 
 
-
+delete_next_msg = False
 
 @exceptions_handler
 async def tg_msg_out(event):
+  msg = event.message
+  if delete_next_msg is True:
+    res = await msg.delete()
+    await send_t("delete ok")
+    return
   #  info(event.stringify())
   chat_id = event.chat_id
   if chat_id in last_outmsg:
     #  omsg = last_outmsg[chat_id]
     last_outmsg.pop(chat_id)
-  msg = event.message
   text = msg.text
   info(f"tg out msg: {chat_id}: {text}")
   if text.startswith("$"):
@@ -4905,6 +4915,8 @@ async def tg_msg_out(event):
         if len(cmds) == 3:
           opts = cmds[2]
         await save_tg_msg(tmsg, chat_id, opts)
+    res = await msg.delete()
+    info(f"delete userbot cmd: {res}")
     return
 
   #  if chat_id == MY_ID or chat_id == CHAT_ID:
@@ -4937,7 +4949,7 @@ async def tg_msg_out(event):
         return
       if res:
         #  await UB.send_message(CHAT_ID, res)
-        await _sendme(res, chat_id)
+        await send_t(res, chat_id)
         return
 
     if text == 'id':
@@ -4968,12 +4980,12 @@ async def tg_msg_out(event):
       url = cmds[1]
       if url:
         if url == "h":
-          await _sendme("msg url raw/fast/xmpp/direct/vps", chat_id)
+          await send_t("msg url raw/fast/xmpp/direct/vps", chat_id)
           return
         opts = 0
         peer = await get_entity(url)
         if peer:
-          #  await _sendme(peer.stringify(), chat_id)
+          #  await send_t(peer.stringify(), chat_id)
           ss = url.split('/')
           if len(ss) > 4:
             ids = int(ss[-1])
@@ -4984,12 +4996,12 @@ async def tg_msg_out(event):
                 opts = cmds[2]
               await save_tg_msg(tmsg, chat_id, opts, url)
             else:
-              await _sendme(f"error id: {ids}\nres: {msg}", chat_id)
+              await send_t(f"error id: {ids}\nres: {msg}", chat_id)
           return
         else:
-          await _sendme(f"error url: {url}\nres: {peer}", chat_id)
+          await send_t(f"error url: {url}\nres: {peer}", chat_id)
           return
-      await _sendme("error", chat_id)
+      await send_t("error", chat_id)
 
 
 
@@ -5420,7 +5432,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       info(f"res: {res}\nslot: {slot}")
       await send("上传完成", src)
       #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
-      #  coro = _sendme("测试进程间通信 res: {}".format(res))
+      #  coro = send_t("测试进程间通信 res: {}".format(res))
       #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
       #  await send("测试进程间通信 res: {}".format(res))
       #  return res
