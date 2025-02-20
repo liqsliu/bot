@@ -7847,7 +7847,6 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
     s = int(text)
     k = 0
     for i in get_buttons(bs):
-      k += 1
       if k == s:
         info(f"已找到：{text}")
         await i.click()
