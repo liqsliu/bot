@@ -3361,6 +3361,31 @@ async def send1(text, jid=None, *args, **kwargs):
 #    return await _send(msg, client, gpm=gpm)
 
 
+
+slow_mode_task = None
+
+async def _slow_mode(timeout=300):
+  global msg_delay_default, slow_mode_task
+  while msg_delay_default > 0:
+    msg_delay_default -= timeout/100/300*10
+    await sleep(10)
+  msg_delay_default = 0
+  slow_mode_task = None
+
+async def slow_mode(timeout=300):
+  global msg_delay_default, slow_mode_task
+  if slow_mode_task is not None:
+    slow_mode_task.cancel()
+  msg_delay_default = timeout/100
+  await sleep(timeout)
+  if slow_mode_task is not None:
+    slow_mode_task.cancel()
+  slow_mode_task = asyncio.create_task(_slow_mode(timeout))
+  return True
+
+
+
+
 @exceptions_handler
 @cross_thread(need_main=True)
 async def send_tg(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
@@ -3379,12 +3404,17 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
           last_outmsg.pop(chat_id)
         else:
           msg = await UB.send_message(chat_id, t)
+      except rpcerrorlist.FloodWaitError as e:
+        warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {text}")
+        #  await sleep(300)
+        await slow_mode()
+        return False
       except ValueError as e:
         if e.args[0] == 'Failed to parse message':
           err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
         return False
       except Exception as e:
-        err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
+        err(f"发送tg消息失败: {chat_id} {e=} {t=}")
         return False
         #  raise
       if correct:
