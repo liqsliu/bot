@@ -4187,16 +4187,16 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   #  if src and res:
   #    await send(res, src, xmpp_only=True, correct=True)
   #  last_time[src] = time.time()
-  last_time = [time.time(), 0]
+  last_time = [time.time(), 0, size]
 
   # Printing download progress
   def cb(current, total):
     #  last_time[0] = time.time()
     last_time[1] = current
     info("剩余 {}".format(hbyte(total)))
-    if len(last_time) == 2:
-      last_time.append(total)
-      asyncio.create_task(send("开始下载 {} {}".format(hbyte(size), res), src))
+    #  if len(last_time) == 2:
+    #    last_time.append(total)
+    #    asyncio.create_task(send("开始下载 {} {}".format(hbyte(size), res), src))
     #  print('Downloaded', current, 'out of', total,
     #    'bytes: {:.2%}'.format(current / total))
     #  if time.time() - last_time[src] > interval:
@@ -4212,26 +4212,15 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     while True:
       await sleep(interval)
       #  now = time.time()-start_time
-      #  if music_bot_state[src] != 3:
-      #    await send("取消：{}".format(now, res), src, correct=True)
-      #    break
-      if len(last_time) == 2:
-        #  if now > 60:
-        #    await send(f"等待超时: {res}", src, xmpp_only=True, correct=True)
-        #    break
-        #  await send("准备中({:.0f}s)：{}".format(now, res), src, xmpp_only=True, correct=True)
-        #  await send("准备中({:.0f}s)：{}".format(now, res), src, correct=True)
-        await send("准备中：{}".format(res), src, correct=True)
-      else:
-        current = last_time[1]
-        total = last_time[2]
-        if current == total:
-          await send("下载完成：{} 用时: {}s".format(res), src, int(time.time()-start_time))
-          break
-        #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
-        #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
-        await send(hbyte(total-current), src, correct=True)
-        last_time[0] = time.time()
+      current = last_time[1]
+      total = last_time[2]
+      if current == total:
+        await send("下载完成：{} 用时: {}s".format(res), src, int(time.time()-start_time), correct=True)
+        break
+      #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
+      #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
+      await send(hbyte(total-current), src, correct=True)
+      last_time[0] = time.time()
         #  last_current = current
 
 
@@ -4246,7 +4235,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   try:
     if src:
       while src in tg_download_tasks:
-        await send("下载任务排队中 {}".format(res), src, correct=True)
+        await send("下载任务排队中 {}".format(res), src)
         await sleep(interval)
       tg_download_tasks.add(src)
       t = asyncio.create_task(update_tmp_msg())
@@ -7998,7 +7987,6 @@ async def login(client=None):
       info(f"无需设置头像：{jid}")
 
 
-    await regisger_handler(client)
 
   except TimeoutError as e:
     warn(f"登录失败(超时)：{jid}, {e=}")
@@ -8742,6 +8730,7 @@ async def amain():
           continue
         allright.set()
         break
+      await regisger_handler(XB)
 
 
 
