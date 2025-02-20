@@ -26,7 +26,7 @@ from telethon import events, utils
 import telethon.errors
 from telethon.errors import rpcerrorlist
 
-#  import aioxmpp
+import aioxmpp
 from aioxmpp import stream, ibr, protocol, node, dispatcher, connector, JID, im, errors, MessageType, PresenceType, chatstates
 
 import aiofiles
@@ -327,18 +327,6 @@ def generand(N=4, M=None, *, no_uppercase=False):
 
 
 async def split_long_text(text, msg_max_length=500, correct=False):
-  if len(text.encode()) / msg_max_length > 2:
-    if correct:
-      if len(text.encode()) > 64:
-        #  return [f"{text[:500]}..."]
-        #  text_s = text.encode()[:500].decode(errors="ignore")
-        #  return ["%s ...%s/%s" % (text_s, len(text_s), len(text)) ]
-        return [short(text, 64)]
-      else:
-        return [text]
-    else:
-      url =await pastebin(text)
-      return ["文本过长，请打开链接查看: [{}]({})".format(short(text), url)]
   texts = []
   if len(text.encode()) > msg_max_length:
     ls = text.splitlines()
@@ -381,6 +369,23 @@ async def split_long_text(text, msg_max_length=500, correct=False):
       texts.append(tmp)
   else:
     texts = [text]
+  if len(texts) > 3:
+    url =await pastebin(text)
+    return ["文本过长，请打开链接查看: [{}]({})".format(short(text), url)]
+  if len(texts) > 1:
+    if correct:
+      url =await pastebin(text)
+      return ["文本过长，请打开链接查看: [{}]({})".format(short(text), url)]
+    #    if len(text.encode()) > 64:
+    #      #  return [f"{text[:500]}..."]
+    #      #  text_s = text.encode()[:500].decode(errors="ignore")
+    #      #  return ["%s ...%s/%s" % (text_s, len(text_s), len(text)) ]
+    #      return [short(text, 64)]
+    #    else:
+    #      return [text]
+    #  else:
+    #    url =await pastebin(text)
+    #    return ["文本过长，请打开链接查看: [{}]({})".format(short(text), url)]
   return texts
 
 
@@ -2999,13 +3004,14 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
       #  if gpm is False:
         if client is not None:
           # https://docs.zombofant.net/aioxmpp/devel/api/public/node.html?highlight=client#aioxmpp.Client.send
-          res = client.send(msg)
+          res = await client.send(msg)
         elif room:
           # https://docs.zombofant.net/aioxmpp/devel/api/public/muc.html?highlight=room#aioxmpp.muc.Room.send_message
+          # res=<StanzaToken id=0x00007f2a3083eca0>
           res = room.send_message(msg)
         else:
           client = XB
-          res = client.send(msg)
+          res = await client.send(msg)
       else:
         # https://docs.zombofant.net/aioxmpp/devel/api/public/im.html#aioxmpp.im.conversation.AbstractConversation.send_message
         if client is None:
@@ -3398,12 +3404,14 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
     for t in await split_long_text(text, MAX_MSG_BYTES_TG, correct):
       k += 1
       try:
-        if omsg is not None:
-          msg = await omsg.edit(t)
-          omsg = None
-          last_outmsg.pop(chat_id)
+        if omsg is not None and correct:
+            msg = await omsg.edit(t)
+          #  omsg = None
+          #  last_outmsg.pop(chat_id)
         else:
-          msg = await UB.send_message(chat_id, t)
+          msg = await UB.send_message(await get_entity(chat_id), t)
+        last_outmsg[chat_id] = msg
+        correct = False
       except rpcerrorlist.FloodWaitError as e:
         warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {text}")
         #  await sleep(300)
@@ -3417,12 +3425,8 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
         err(f"发送tg消息失败: {chat_id} {e=} {t=}")
         return False
         #  raise
-      if correct:
-        last_outmsg[chat_id] = msg
-        break
-      else:
-        if chat_id in last_outmsg:
-          last_outmsg.pop(chat_id)
+
+
       if k > 1:
         await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2+msg_delay_default)
       else:
@@ -3698,8 +3702,9 @@ async def parse_mt(msg):
 
 
 async def send_to_tg_bot(text, chat_id):
-  chat = await get_entity(chat_id, True)
-  msg = await UB.send_message(chat, text)
+  peer = await get_entity(bot_name)
+  #  chat = await get_entity(chat_id, True)
+  msg = await UB.send_message(peer, text)
   #  if src:
   #    mtmsgsg[src][msg.id] = []
   #  info(f"res of send: {msg.stringify()}")
@@ -4130,6 +4135,8 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
 
 
 def get_timeout(size):
+  if size is None:
+    return download_media_time_max
   #  timeout = size/1024/1024*1.5 + 15
   #  timeout = 11720/73-14553000/5329/(size/1024/1024+1250/73)
   #  if timeout > upload_media_time_max:
@@ -4184,7 +4191,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   last_time = [time.time(), 0]
 
   # Printing download progress
-  def download_media_callback(current, total):
+  def cb(current, total):
     #  last_time[0] = time.time()
     last_time[1] = current
     info("剩余 {}".format(hbyte(total)))
@@ -4231,7 +4238,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
 
   async def _download_media(msg, path):
     try:
-      return await asyncio.wait_for(msg.download_media(path, progress_callback=download_media_callback), timeout=timeout)
+      return await asyncio.wait_for(msg.download_media(path, progress_callback=cb), timeout=timeout)
     except TimeoutError as e:
       err(f"下载失败(超时): {e=}")
 
@@ -4526,7 +4533,7 @@ music_bot_state = {}
 
 
 @exceptions_handler
-async def tg_msg(event):
+async def msgt(event):
   msg = event.message
   chat_id = event.chat_id
   
@@ -4683,6 +4690,7 @@ async def tg_msg(event):
     if chat_id in bridges:
       target = bridges[chat_id]
       if type(target) is dict:
+        # 需要转发消息，约等于临时桥接通道
         gid = msg.id
         jid = None
         #  res, nick, delay = await print_tg_msg(event)
@@ -4721,12 +4729,15 @@ async def tg_msg(event):
           now = msg.date.timestamp()
 
           if msg.file:
-            path = await tg_download_media(msg)
+            #  path = await tg_download_media(msg)
+            path = await tg_download_media(msg, src=jid, max_wait_time=get_timeout(msg.file.size))
             if path is not None:
+              t = asyncio.create_task(backup(path))
+              url = await t
               if text:
-                text = f"{text} file: {path}"
+                text = f"{text} file: {url}"
               else:
-                text = f"file: {path}"
+                text = f"file: {url}"
                 await send(text, jid=jid)
                 return
 
@@ -4920,33 +4931,10 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         fp = Path(path)
         filename = fp.name
         length = os.path.getsize(fp)
-        #  shell_cmd = ["lottie_convert.py", path, (fp.parent / f"{filename[:-4]}.webp").as_posix()]
-        #  shell_cmd = ["lottie_convert.py", path, fp.parent / f"{filename[:-4]}.webp"]
-        #  shell_cmd = ["lottie_convert.py", path, f"{HOME}/t/{filename[:-4]}.webp"]
-        #  shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", path, f"{fp.parent.as_posix()}/{filename[:-4]}.webp"]
         shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", path, f"{fp.parent.as_posix()}/{filename[:-4]}.webp"]
-        #  shell_cmd = [f"{HOME}/.local/bin/lottie_convert.py", "-h"]
-        #  shell_cmd = ["cd", fp.parent.as_posix(), ";" , f"lottie_convert.py", filename, f"{filename[:-4]}.webp"]
-        #  shell_cmd = ["cd", fp.parent.as_posix(), ";" , f"echo", filename, f"{filename[:-4]}.webp"]
-        #  r, o, e = await my_popen(shell_cmd, shell=False, src=src, combine=False, max_time=get_timeout(length)*3+30)
-        #  r, o, e = await my_popen(shell_cmd, shell=False, combine=False, max_time=get_timeout(length)*3+30)
-        #  if r == 0:
-        #    info(f"转换tgs文件成功: {path} {r=} {o=} {e=}")
-        #    #  path = path[:-4]+".webp"
-        #  else:
-        #    warn(f"转换tgs文件失败: {path} {r=} {o=} {e=}")
-        #  r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
-        #  r, _, _ = await my_sexec(shell_cmd, max_time=get_timeout(length)*3+30, src=chat_id)
         r, _, _ = await myshell(shell_cmd, max_time=get_timeout(length)*3+30, src=chat_id)
-        #  info(f"{r=}")
         if r == 0:
-          #  shell_cmd = ["rm", path]
-          #  r = await run_my_bash(shell_cmd, shell=False, max_time=get_timeout(length)*3+30)
           asyncio.create_task(backup(path, delete=True))
-          #  if r:
-          #    info(f"删除失败 {path} {r}")
-          #  else:
-          #    info(f"删除成功 {path}")
           path = path[:-4]+".webp"
         else:
           info(f"转换失败 {path} {r}")
@@ -5036,7 +5024,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 delete_next_msg = False
 
 @exceptions_handler
-async def tg_msg_out(event):
+async def msgtout(event):
   msg = event.message
   if delete_next_msg is True:
     res = await msg.delete()
@@ -5664,7 +5652,7 @@ async def regisger_handler(client):
       #  aioxmpp.MessageType.GROUPCHAT,
       None,
       None,
-      xmpp_msg
+      msgx
   )
   #  message_dispatcher.register_callback(
   #      aioxmpp.MessageType.NORMAL,
@@ -5684,7 +5672,7 @@ async def regisger_handler(client):
   presence_dispatcher.register_callback(
       None,
       None,
-      xmpp_msg_p,
+      msgxp,
   )
 
 #  client.stream.register_iq_request_handler(
@@ -5702,10 +5690,11 @@ async def regisger_handler(client):
   #      request_handler,
   #  )
 
-  from aioxmpp.version.xso import Query
+  #  from aioxmpp.version.xso import Query
 
-  async def _(iq):
-      print("software version request from {!r}".format(iq.from_))
+  async def cb(iq):
+      #  print("software version request from {!r}".format(iq.from_))
+      warn("收到查看系统信息的请求: {!r}".format(iq.from_))
       result = Query()
       result.name = "xmppbot"
       result.version = f"xmpp:{main_group}?join"
@@ -5714,8 +5703,8 @@ async def regisger_handler(client):
 
   client.stream.register_iq_request_handler(
       aioxmpp.IQType.GET,
-      Query,
-      _,
+      aioxmpp.version.xso.Query,
+      cb,
   )
 
   #  pprint(client.stream)
@@ -5782,7 +5771,7 @@ def clear_msg_jid(msg):
     info(f"没找到msg记录: {j}")
 
 
-def add_id_to_msg(msg, correct):
+def __add_id_to_msg(msg, correct):
   j = get_msg_jid(msg)
   if j in last_outmsg:
     r = aioxmpp.misc.Replace()
@@ -5793,6 +5782,22 @@ def add_id_to_msg(msg, correct):
   if correct:
     msg.autoset_id()
     last_outmsg[j] = [msg, msg.id_]
+
+
+def add_id_to_msg(msg, correct):
+  j = get_msg_jid(msg)
+  if j in last_outmsg:
+    if correct:
+      r = aioxmpp.misc.Replace()
+      r.id_ = last_outmsg[j]
+      msg.xep0308_replace = r
+  else:
+    if correct:
+      info("not found old msg, can't correct")
+  msg.autoset_id()
+  last_outmsg[j] = msg.id_
+
+
 
 
 #  async def ___add_id_to_msg(msg, correct):
@@ -5905,7 +5910,7 @@ def msg_out(msg):
 
 @auto_task
 @exceptions_handler
-async def xmpp_msg_p(msg):
+async def msgxp(msg):
   dbg(f"got a xmpp p msg: {msg}")
   if not allright.is_set():
     return
@@ -6185,7 +6190,7 @@ def hide_nick(msg):
 
 #  def gmsg(msg, member, source, **kwargs):
 #  @exceptions_handler
-#  def xmpp_msg(msg):
+#  def x_msg(msg):
 #    if not allright.is_set():
 #      #  info("skip msg: allright is not ok")
 #      return
@@ -6200,7 +6205,7 @@ def hide_nick(msg):
 
 @auto_task
 @exceptions_handler
-async def xmpp_msg(msg):
+async def msgx(msg):
   dbg(f"got a xmpp msg: {msg}")
   if not allright.is_set():
     return
@@ -7697,9 +7702,17 @@ async def init_cmd():
     if text == "reset":
       text = "/reset"
     return 3, bot_name, text
-  cmd_funs["gm"] = _
   cmd_funs["ai"] = _
   cmd_funs["bd"] = _
+
+  async def _(cmds, src):
+    bot_name = "ChatGPT_General_Bot"
+    if len(cmds) == 1:
+      return f"Gemini\n.{cmds[0]} $text\n--\nhttps://t.me/{bot_name}"
+    text = ' '.join(cmds[1:])
+    return 3, bot_name, text
+  cmd_funs["gm"] = _
+
 
 
   async def _(cmds, src):
@@ -7821,7 +7834,8 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           mtmsgs = mtmsgsg[src]
           mtmsgs.clear()
           #  mtmsgs[mid][0] = name
-          mid = await send_to_tg_bot(res[2], res[1])
+          #  mid = await send_to_tg_bot(res[2], res[1])
+          mid = await send(res[2], res[1])
           mtmsgs[mid] = [name]
           gid_src[mid] = src
         #  elif res[0] == 2:
@@ -7841,8 +7855,9 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         elif res[0] == 3:
           bot_name = res[1]
           text = res[2]
-          e = await UB.get_input_entity(bot_name)
-          pid = await UB.get_peer_id(e)
+          #  e = await UB.get_input_entity(bot_name)
+          peer = await get_entity(bot_name)
+          pid = await UB.get_peer_id(peer)
 
           if src not in mtmsgsg:
             mtmsgsg[src] = {}
@@ -7878,7 +7893,9 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
 
           mtmsgs.clear()
 
-          mid = await send_to_tg_bot(text, pid)
+          #  mid = await send_to_tg_bot(text, pid)
+          #  mid = await send_to_tg_bot(text, bot_name)
+          mid = await send(text, bot_name)
           mtmsgs[mid] = [name]
           gid_src[mid] = src
           #  mid = res[1]
@@ -8752,14 +8769,14 @@ async def amain():
         if not allright.is_set():
           #  info("skip msg: allright is not ok")
           return
-        asyncio.create_task(tg_msg(event))
+        asyncio.create_task(msgt(event))
 
       @UB.on(events.NewMessage(outgoing=True))
       async def _(event):
         #  if not allright.is_set():
         #    #  info("skip msg: allright is not ok")
         #    return
-        asyncio.create_task(tg_msg_out(event))
+        asyncio.create_task(msgtout(event))
 
       await after_init()
       await init_cmd()
