@@ -6884,9 +6884,15 @@ async def init_cmd():
     if len(cmds) == 1:
       return f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
 
-    res = await get_title(cmds[1], src=src, opts=cmds[2:4])
+    res = await get_title(cmds[1], opts=cmds[2:4])
     return f"{res}"
   cmd_funs["tl"] = _
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
+    res = await get_title(cmds[1], src=src, opts=cmds[2:4])
+  cmd_funs["tl2"] = _
 
   async def _(cmds, src):
     if len(cmds) == 1:
