@@ -3366,6 +3366,7 @@ slow_mode_task = None
 
 async def _slow_mode(timeout=300):
   global msg_delay_default, slow_mode_task
+  msg_delay_default = timeout/100
   while msg_delay_default > 0:
     msg_delay_default -= timeout/100/300*10
     await sleep(10)
