@@ -20,10 +20,10 @@ logger = logging.getLogger(__name__)
 
 if __name__ == '__main__':
   print('{} 作为主程序运行'.format(__file__))
-  #  logger.debug("test debug")
-  #  logger.info("test info")
-  #  logger.warning("test warn")
-  #  logger.error("test err")
+  logger.debug("test debug")
+  logger.info("test info")
+  logger.warning("test warn")
+  logger.error("test err")
   #  main()
   from . import m
   #  await bot.run()
