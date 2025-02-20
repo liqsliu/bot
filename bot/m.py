@@ -349,7 +349,11 @@ async def split_long_text(text, msg_max_length=500, correct=False):
   if len(text.encode()) / msg_max_length > 2:
     url =await pastebin(text)
     if correct:
-      return [f"{text[:500]}..."]
+      if len(text.encode()) > 500:
+        #  return [f"{text[:500]}..."]
+        return ["%s..." % await split_long_text(text, 500)[0] ]
+      else:
+        return [text]
     else:
       return [f"文本过长，请打开链接查看: {url}"]
   texts = []
@@ -877,10 +881,10 @@ async def compress(data, m="zst"):
     fu = run_cb_in_thread(_compress_funcs[m], data)
     d = await fu
     if d:
-      info(f"压缩成功: {m} {data[:32]} -> {d[:32]}")
+      info(f"压缩成功: {m} {short(data)} -> {short(d)}")
       return d
     else:
-      info(f"压缩failed: {m} {data[:32]}")
+      info(f"压缩failed: {m} {short(data)]}")
       return data
   err(f"unknown encoding: {m}")
     #  if m == "zst":
@@ -908,10 +912,10 @@ async def decompress(data, m):
     fu = run_cb_in_thread(_decompress_funcs[m], data)
     d = await fu
     if d:
-      info(f"解压成功: {m} {data[:32]} -> {d[:32]}")
+      info(f"解压成功: {m} {short(data)} -> {short(d)}")
       return d
     else:
-      info(f"解压failed: {m} {data[:32]}")
+      info(f"解压failed: {m} {short(data)}")
       return data
   else:
     err(f"unknown encoding: {m}")
@@ -971,7 +975,7 @@ async def my_split(path, is_str=False):
   else:
     if os.path.exists(path):
       text = await read_file(path)
-      info(f"{path}: {text[:64]}...")
+      info(f"{path}: {short(text)}...")
     else:
       warn(f"文件不存在: {path}")
       return []
@@ -1713,7 +1717,7 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
   async with myshell_lock:
     for c in cmds:
       p.stdin.write( c.encode() )
-      info(f"send {k}: {c[:16]=}")
+      info(f"send {k}: {short(c)}")
       k -= 1
       while r is None:
         #  if time.time() - start_time > run_shell_time_max*10:
@@ -2199,7 +2203,7 @@ async def my_exec(cmd, src=None, client=None, **args):
 async def my_eval(cmd):
   res = eval(cmd)
   #  info("%s %s" % (res, type(res)))
-  info("%s %s" % (type(res), str(res)[:32]))
+  info("%s %s" % (type(res), short(res)))
   #  res = await cmd_answer(str(res), client=client, msg=msg, **args)
   return res
 
@@ -3768,10 +3772,10 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
         err(f"http connect error: {e=} {url=}")
 
       if data:
-        info(f"http body data: {len(data)} {data[:64]}")
+        info(f"http body data: {len(data)} {short(data)}")
         try:
           if "Content-Encoding" in res.headers:
-            info(f"start to decompress: %s {type(data)} {data[:64]}" % res.headers['Content-Encoding'])
+            info(f"start to decompress: %s {type(data)} {short(data)}" % res.headers['Content-Encoding'])
             b = await decompress(data, res.headers['Content-Encoding'])
             if b:
               data = b
@@ -3781,7 +3785,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
         #  except brotli.error as e:
         #    err(f"解压时出现错误: {e=} {res.headers=} {data[:512]}")
         except Exception as e:
-          err(f"解压时出现错误: {e=} {res.headers=} {data[:512]}")
+          err(f"解压时出现错误: {e=} {res.headers=} {short(data)}")
         try:
           # if "text/plain" in res.headers['content-type']:
           if "text" in res.headers['content-type']:
@@ -3791,9 +3795,9 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
             #  html = data.decode()
             #  html = data
             html = data.decode(errors='ignore')
-          info(f"http res: {html[:32]} url: {url}")
+          info(f"http res: {short(html)} url: {url}")
         except UnicodeDecodeError as e:
-          warn(f"{e=} res data: {data[:64]} 64/{len(data)}")
+          warn(f"{e=} res data: {short(data)}")
           html = data
   if return_headers:
     if res:
@@ -3992,6 +3996,15 @@ def hbyte(size):
   else:
     return "{:.0f}K".format(size/1024)
 
+def short(text):
+  # for log out
+  if not isinstance(text, str):
+    text = "{!r}".format(text)
+  text = text.replace("\n", "\\n")
+  if len(text) > 32:
+    return text[:32] + "..."
+  else:
+    return text
 
 #  last_time = {}
 
@@ -4353,7 +4366,7 @@ async def print_tg_msg(event, to_xmpp=False):
   #    #  await send(res2, jid=log_group, name="", nick=nick, delay=1)
   #    await send(res2, name="", nick=nick, delay=1)
   #  if not event.is_private:
-  print(f"{res1}: {res[:64]}")
+  print(f"{res1}: {short(res)}")
   #    return None, nick, delay
   return res, nick, delay
 
@@ -4592,7 +4605,7 @@ async def tg_msg(event):
               #  await send(text, jid=jid)
               await send(text, jid=jid, correct=correct)
             else:
-              info(f"忽略旧的临时消息: {text[:64]}")
+              info(f"忽略旧的临时消息: {short(text)}")
         else:
           info(f"skip msg: {gid} {target} {msg.stringify()}")
 
@@ -4603,7 +4616,7 @@ async def tg_msg(event):
         if res:
           #  info(f"sync: {chat_id} -> {bridges[chat_id]}: " + res.split('\n', 1)[0][:16] )
           #  info(f"sync: {chat_id} -> {bridges[chat_id]}: %s" % res.split('\n', 1)[0][:16] )
-          info(f"sync: {chat_id} -> {bridges[chat_id]}: %s" % res[:16] )
+          info(f"sync: {chat_id} -> {bridges[chat_id]}: {short(res)}")
           #  await send(msg.text, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
           await send(res, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
 
@@ -6120,13 +6133,13 @@ async def _xmpp_msg(msg):
     #  if str(msg.from_) == str(rooms[muc].me.conversation_jid.bare()):
     #  if msg.from_.resource == rooms[muc].me.nick:
     if room.me is not None and nick == room.me.nick:
-      info("跳过自消息1: %s %s %s" % (msg.from_, msg.to, text[:16]))
+      info("跳过自消息1: %s %s %s" % (msg.from_, msg.to, short(text)))
       return
 
     jids = users[muc]
     j = jids[myjid]
     if nick == j[0]:
-      info("跳过自消息2: %s %s %s" % (msg.from_, msg.to, text[:16]))
+      info("跳过自消息2: %s %s %s" % (msg.from_, msg.to, short(text)))
       return
 
     rejoin = False
@@ -6140,7 +6153,7 @@ async def _xmpp_msg(msg):
         if i.nick == nick:
           jid = str(i.direct_jid.bare())
           if jid == myjid:
-            info("跳过自消息3: %s %s %s" % (msg.from_, msg.to, text[:16]))
+            info("跳过自消息3: %s %s %s" % (msg.from_, msg.to, short(text)))
             return
           existed = True
 
@@ -6162,7 +6175,7 @@ async def _xmpp_msg(msg):
           #  if str(i.direct_jid.bare()) in me:
           if jid in me:
             is_admin = True
-            info(f"admin msg: {text[:16]}")
+            info(f"admin msg: {short(text)}")
           break
 
       if not existed:
@@ -6184,7 +6197,7 @@ async def _xmpp_msg(msg):
 
 
     if is_admin is False:
-      info(f"group msg: {text[:16]}")
+      info(f"group msg: {short(text)}")
 
     if not is_admin:
       j = jids[jid]
@@ -6199,9 +6212,9 @@ async def _xmpp_msg(msg):
       #  if score > wtf_limit:
       if score > wtf_limit/(9/(w[1]+8) +0.1):
         if type(j[2]) is str:
-          warn(f"fixme: 跳过已禁言用户的消息{int(j[2]-real_time)}: {muc} {nick} {text[:64]}")
+          warn(f"fixme: 跳过已禁言用户的消息{int(j[2]-real_time)}: {muc} {nick} {short(text)}")
         else:
-          info(f"跳过已禁言用户的消息{int(j[2]-real_time)}: {muc} {nick} {text[:64]}")
+          info(f"跳过已禁言用户的消息{int(j[2]-real_time)}: {muc} {nick} {short(text)}")
           j[2] = int(j[2] + wtf_ban_time)
       else:
         if score < wtf_limit/2:
@@ -6244,7 +6257,7 @@ async def _xmpp_msg(msg):
     return
   elif muc in me:
     is_admin = True
-    info(f"admin pm msg: {text[:16]}")
+    info(f"admin pm msg: {short(text)}")
     nick = msg.from_.localpart
   elif muc == rssbot:
     #  if msg.type_ == None:
