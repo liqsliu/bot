@@ -303,8 +303,9 @@ def log(text):
   info(text)
   send_log(text)
 
-def dbg(text):
-  logger.debug(text)
+#  def dbg(text):
+#    logger.debug(text)
+dbg=logger.debug
 
 def get_cmd(text):
   if text.endswith(": "):
@@ -3328,6 +3329,7 @@ async def mt_read():
   url = "http://" + MT_API + "/api/stream"
   #  session = await init_aiohttp_session()
   info("start read msg from mt api...")
+  line = None
   while True:
     try:
       async with aiohttp.ClientSession() as session:
@@ -3339,8 +3341,8 @@ async def mt_read():
           #    #  print(f"I: original msg: %s" % line)
           #    await mt2tg(line)
 
-        async with session.get(url, timeout=0, read_bufsize=2**18*4, chunked=True) as resp:
-          send_log("N: mt api init ok")
+        async with session.get(url, timeout=0, read_bufsize=2**20*4, chunked=True) as resp:
+          info("mt api init ok")
           #  await mt_send("N: tggpt: mt read: init ok")
           line = b""
           async for data, end_of_http_chunk in resp.content.iter_chunks():
@@ -3353,6 +3355,7 @@ async def mt_read():
               #  await mt2tg(line)
               #  asyncio.create_task(mt2tg(line))
               asyncio.create_task(parse_mt(line))
+              info(f"from mt: {len(line)}")
               line = b""
 
     except ClientPayloadError:
@@ -3369,14 +3372,13 @@ async def mt_read():
     except Exception as e:
       err(f"{e=} line: {line}")
       raise
-    await sleep(3)
+    await sleep(5)
 
 #  @exceptions_handler
 #  async def titlebot(msgd):
 #
 #    await sleep(5)
 #    text = msgd['text']
-
 
 @exceptions_handler
 async def parse_mt(msg):
@@ -3428,7 +3430,7 @@ async def parse_mt(msg):
   #    return
 
   if msgd["Extra"]:
-    logger.debug("original msg of mt_read: %s" % msgd)
+    dbg("original msg of mt_read: %s" % msgd)
     # file
     #,"id":"","Extra":{"file":[{"Name":"proxy-image.jpg","Data":"/9j/4AAQSkZJRgABAQAAAQABAAD/4gIoSUNDX1BST0ZJTEUAAQEAA ... 6P9ZgOT6tI33Ff5p/MAOfNnzPzQAN4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwAAAGQAAYAkAAGTGAAAAAAAAwsAAHLAAAK//9k=","Comment":"","URL":"https://liuu.tk/ddb833ad/proxy_image.jpg","Size":0,"Avatar":false,"SHA":"ddb833ad"}]}}\n\r\n'
     files = msgd["Extra"]["file"]
@@ -3453,11 +3455,11 @@ async def parse_mt(msg):
           break
       text += "[{}]({})".format(file["Name"], file["URL"])
     msgd.pop("Extra")
-    warn("removed file info from mt api(saved)")
     msgd['text'] = text
+    info("removed file info from mt api(saved url)")
   else:
       msgd.pop("Extra")
-      warn("removed file info from mt api")
+      info("removed file info from mt api(empty)")
 
   #  print(f"I: got msg: {name}: {text}")
   if not text:
@@ -3490,7 +3492,7 @@ async def parse_mt(msg):
   #    pass
   #  else:
   #    return
-  info("msg of mt_read: %s" % msgd)
+  info("msg from mt: %s" % msgd)
 
   #  info("got msg from mt: {}".format(msgd))
   #      if name == "C Telegram: ":
