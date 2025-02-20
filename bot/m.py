@@ -4749,9 +4749,17 @@ async def msgt(event):
         mtmsgs[gid] = t
         text = f"{text}\n--\n回复序号"
         k = 0
-        for i in get_buttons(msg.buttons):
-          k += 1
-          text += f"\n{k}. {i.text}"
+        #  for i in get_buttons(msg.buttons):
+        for i in msg.buttons:
+          if type(i) is list:
+            t = ""
+            for j in i:
+              k += 1
+              t += f"\t{k}. {j.text}"
+            text += f"\n{t.strip('\t')}"
+          else:
+            k += 1
+            text += f"\n{k}. {i.text}"
 
 
       if msg.file:
