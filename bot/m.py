@@ -4531,7 +4531,7 @@ async def print_tg_msg(event, to_xmpp=False):
 
 music_bot_state = {}
 
-def change_bridge(bot_name, src):
+async def change_bridge(bot_name, src):
   peer = await get_entity(bot_name)
   pid = await UB.get_peer_id(peer)
   if src not in mtmsgsg:
@@ -7809,7 +7809,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       if type(res) is tuple:
         if res[0] == 1:
           #  mid = res[1]
-          mtmsgs, pid = change_bridge(res[1], src)
+          mtmsgs, pid = await change_bridge(res[1], src)
           #  mtmsgs[mid][0] = name
           #  mid = await send_to_tg_bot(res[2], res[1])
           #  mid = await send(res[2], res[1])
@@ -7821,7 +7821,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           text = res[2]
           #  e = await UB.get_input_entity(bot_name)
 
-          mtmsgs, pid = change_bridge(res[1], src)
+          mtmsgs, pid = await change_bridge(res[1], src)
 
           #  gid = await send_to_tg_bot(text, pid)
           #  gid = await send_to_tg_bot(text, bot_name)
