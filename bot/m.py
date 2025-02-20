@@ -4756,7 +4756,7 @@ async def msgt(event):
             for j in i:
               k += 1
               t += f"\t{k}. {j.text}"
-            text += f"\n{t.strip('\t')}"
+            text += "\n%s" % t.strip("\t")
           else:
             k += 1
             text += f"\n{k}. {i.text}"
