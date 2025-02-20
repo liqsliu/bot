@@ -8657,8 +8657,14 @@ async def amain():
 
       mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
 
+      info(f"测试通过副线程发信息")
+      t = loop2.create_task(send("通过副线程发信息成功", jid=CHAT_ID))
+      #  res = await t
+      while not t.done():
+        info(f"通过副线程发信息，not done")
+        sleep(2)
+      info(f"通过副线程发信息: {t.result()}")
       info(f"初始化完成")
-      loop2.create_task(send("通过副线程发信息成功", jid=CHAT_ID))
       send_log(f"启动成功，用时: {int(time.time()-start_time)}s")
       #  await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
 
