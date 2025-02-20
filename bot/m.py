@@ -8657,13 +8657,14 @@ async def amain():
       info(f"测试通过副线程发信息")
       #  fu = t
       #  res = await t
+      t = loop2.create_task(send("通过副线程发信息成功(loop2)", jid=CHAT_ID))
+
       fu = asyncio.run_coroutine_threadsafe(send("通过副线程发信息成功", jid=CHAT_ID), loop2)
       while not fu.done():
         info(f"通过副线程发信息: not done, loop is_running: {loop2.is_running()}")
         await sleep(2)
       info(f"副线程发信息结果: {fu.result()}")
 
-      t = loop2.create_task(send("通过副线程发信息成功(loop2)", jid=CHAT_ID))
       while not t.done():
         info(f"通过副线程发信息(loop2): not done, loop is_running: {loop2.is_running()}")
         await sleep(2)
