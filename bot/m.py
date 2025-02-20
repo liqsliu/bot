@@ -7841,7 +7841,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       if res:
         return res
   elif text.isnumeric():
-    if src in music_bot_state and music_bot_state[src] == 2 bridges[chat_id] == src:
+    if src in music_bot_state and music_bot_state[src] == 2 and bridges[music_bot] == src:
       pass
     else:
       return
