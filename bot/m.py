@@ -3367,21 +3367,20 @@ slow_mode_task = None
 async def _slow_mode(timeout=300):
   global msg_delay_default, slow_mode_task
   msg_delay_default = timeout/100
+  await sleep(timeout)
+  k = timeout/100/300*10
   while msg_delay_default > 0:
-    msg_delay_default -= timeout/100/300*10
+    msg_delay_default -= k
     await sleep(10)
   msg_delay_default = 0
   slow_mode_task = None
 
 async def slow_mode(timeout=300):
-  global msg_delay_default, slow_mode_task
-  if slow_mode_task is not None:
-    slow_mode_task.cancel()
-  msg_delay_default = timeout/100
-  await sleep(timeout)
+  global slow_mode_task
   if slow_mode_task is not None:
     slow_mode_task.cancel()
   slow_mode_task = asyncio.create_task(_slow_mode(timeout))
+  await sleep(timeout)
   return True
 
 
