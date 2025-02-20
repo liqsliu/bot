@@ -241,7 +241,7 @@ def err(text, no_send=False):
   else:
     send_log(text)
 
-def warn(text, more=False, no_send=True):
+def warn(text, more=False):
   #  if type(text) is not str:
   #    text = f"{text=}"
   #  lineno = currentframe().f_back.f_lineno
@@ -465,7 +465,7 @@ tg_send_lock = asyncio.Lock()
 rss_lock = asyncio.Lock()
 
 
-gid_src = {}
+#  gid_src = {}
 mtmsgsg={}
 
 
@@ -3005,6 +3005,8 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
         if client is not None:
           # https://docs.zombofant.net/aioxmpp/devel/api/public/node.html?highlight=client#aioxmpp.Client.send
           res = await client.send(msg)
+          if res is None:
+            return True
         elif room:
           # https://docs.zombofant.net/aioxmpp/devel/api/public/muc.html?highlight=room#aioxmpp.muc.Room.send_message
           # res=<StanzaToken id=0x00007f2a3083eca0>
@@ -3012,6 +3014,8 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
         else:
           client = XB
           res = await client.send(msg)
+          if res is None:
+            return True
       else:
         # https://docs.zombofant.net/aioxmpp/devel/api/public/im.html#aioxmpp.im.conversation.AbstractConversation.send_message
         if client is None:
@@ -3051,7 +3055,7 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
           info(f"send xmpp msg: finally: {res=} {res2=}")
           return False
       else:
-        warn(f"send msg: res is not coroutine: {res=} {client=} {room=} {msg=}", no_send=True)
+        info(f"res is not coroutine: {res=} {client=} {room=} {msg=}")
       return False
   return True
 
@@ -3394,7 +3398,7 @@ async def slow_mode(timeout=300):
 
 @exceptions_handler
 @cross_thread(need_main=True)
-async def send_tg(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
+async def send_tg(text, chat_id=CHAT_ID, correct=False, return_id=False):
   if chat_id in last_outmsg:
     omsg = last_outmsg[chat_id]
   else:
@@ -3433,6 +3437,8 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
         await sleep(msg_delay_default)
     #  if correct:
     #    last_outmsg[chat_id] = msg
+  if return_id:
+    return res.id
   return True
   chat = await get_entity(CHAT_ID, True)
   await UB.send_message(chat, text)
@@ -3728,12 +3734,6 @@ async def clear_history(src=None):
   #  await sleep(1)
   #  for g in queues:
   if src:
-    tmp = []
-    for i in gid_src:
-      if gid_src[i] == src:
-        tmp.append(i)
-    for i in tmp:
-      gid_src.pop(i)
 
     if src in mtmsgsg:
       ms = mtmsgsg[src]
@@ -3743,8 +3743,6 @@ async def clear_history(src=None):
       mtmsgs = mtmsgsg[g]
       mtmsgs.clear()
     #  await mt_send(f"cleaned: {mtmsgsg=}", gateway="test")
-    gid_src.clear()
-    #  await mt_send(f"cleaned: {gid_src=}", gateway="test"):w
   allright.set()
   info("reset ok")
 
@@ -4417,7 +4415,8 @@ async def get_entity(chat_id, id_only=True):
       else:
         peer = url
     else:
-      return False
+      peer = url
+      #  return False
     if peer:
       entity = None
       info(f"search inputpeer: {peer}")
@@ -4534,7 +4533,6 @@ music_bot_state = {}
 
 @exceptions_handler
 async def msgt(event):
-  msg = event.message
   chat_id = event.chat_id
   
   #  if event.chat_id not in id2gateway:
@@ -4543,6 +4541,11 @@ async def msgt(event):
   #  if event.chat_id in id2gateway:
   #  if chat_id == gpt_bot:
   #    pass
+  if chat_id not in bridges:
+    info(f"not found src for {chat_id=}")
+    return
+  msg = event.message
+  target = bridges[chat_id]
 
   if chat_id == music_bot:
     #  print("I: music bot: chat_id: %s\nmsg: %s" % (event.chat_id, msg.stringify()))
@@ -4552,9 +4555,12 @@ async def msgt(event):
       return
     #  try:
     qid=msg.reply_to_msg_id
-    if qid not in gid_src:
-      err(f"E: not found src for {qid=}, {gid_src=} {msg.text=}")
+    if qid not in bridge:
+      info(f"not found src for {qid=}")
       return
+    #  if qid not in gid_src:
+    #  if qid not in bridges[chet_id]
+      #  return
     text = msg.text
     if not text:
       print(f"W: skip msg without text in chat with gpt bot, wtf: {msg.stringify()}")
@@ -4570,7 +4576,9 @@ async def msgt(event):
       info(text)
       return
 
-    src = gid_src[qid]
+    #  src = gid_src[qid]
+    #  src = target
+    src = bridges[chat_id]
 
     if text == '等待下载中...':
       #   message='等待下载中...',
@@ -4601,17 +4609,18 @@ async def msgt(event):
       #  await mt_send_for_long_text(res, src)
       await send(res, src)
 
-      gid_src[msg.id] = src
+      #  gid_src[msg.id] = src
 
-      mtmsgs[qid].append(msg.buttons)
-      mtmsgs[msg.id] = mtmsgs[qid]
+      #  mtmsgs[qid].append(msg.buttons)
+      #  mtmsgs[msg.id] = mtmsgs[qid]
+      mtmsgs[msg.id].append(msg.buttons)
 
-      gid_src.pop(qid)
+      #  gid_src.pop(qid)
       mtmsgs.pop(qid)
 
     elif music_bot_state[src] == 2:
-      warn(f"不应该出现: music bot: {gid_src=} {music_bot_state[src]}\nmsg:\n{msg.stringify()}")
-      gid_src.pop(qid)
+      warn(f"不应该出现: music bot: {music_bot_state[src]}\nmsg:\n{msg.stringify()}")
+      #  gid_src.pop(qid)
       mtmsgs.pop(qid)
       return
     elif music_bot_state[src] == 3:
@@ -4664,13 +4673,8 @@ async def msgt(event):
         await send(text, src, correct=True)
         music_bot_state[src] = 2
     else:
-      warn(f"未知状态，已忽略: music bot: {gid_src=} {music_bot_state[src]}\nmsg:\n{msg.stringify()}")
+      warn(f"未知状态，已忽略: music bot: {music_bot_state[src]}\nmsg:\n{msg.stringify()}")
       return
-
-
-    #  except Exception as e:
-    #    err(f"fixme: music bot: {gid_src=} {e=} line: {e.__traceback__.tb_lineno}")
-
     return
 
   #  elif event.chat_id == rss_bot:
@@ -4687,99 +4691,129 @@ async def msgt(event):
     #  print("N: skip: %s != %s" % (event.chat_id, gpt_bot))
   else:
     #  print("W: skip unknown chat_id: %s %s" % (event.chat_id, msg.text[:64]))
-    if chat_id in bridges:
-      target = bridges[chat_id]
-      if type(target) is dict:
-        # 需要转发消息，约等于临时桥接通道
-        gid = msg.id
-        jid = None
-        #  res, nick, delay = await print_tg_msg(event)
-        #  if gid-1 in target or gid > mid_max:
-        if len(target) == 0:
-          return
-        #  elif len(target) == 1:
-        else:
-          for mid, jid in target.items():
-            break
-        #  else:
-        #    mid_min = min(target.keys())
-        #    if msg.edit_date is None:
-        #      mid_max = max(target.keys())
-        #      if gid-1 > mid_max:
-        #        target.pop(mid_min)
-        #        mid_max = max(target.keys())
-        #    jid = target[gid_min]
-        #    mid = gid_min
-          #  if msg.edit_date is None:
-          #    target[gid] = target[gid-1]
-          #    target.pop(gid-1)
-          #  await send(msg.text, jid=target[gid-1], name=f"**{nick}:** ", nick=nick, correct=True)
-
-        if jid is not None:
-          text = msg.text
-          if jid not in mtmsgsg:
-            warn(f"{jid} not in {mtmsgsg}")
-            return
-          mtmsgs = mtmsgsg[jid]
-          if mid not in mtmsgs:
-            warn(f"{mid} not in {mtmsgs}")
-            return
-          l = mtmsgs[mid]
-          text = f"{l[0]}{text}"
-          now = msg.date.timestamp()
-
-          if msg.file:
-            #  path = await tg_download_media(msg)
-            path = await tg_download_media(msg, src=jid, max_wait_time=get_timeout(msg.file.size))
-            if path is not None:
-              t = asyncio.create_task(backup(path))
-              url = await t
-              if text:
-                text = f"{text} file: {url}"
-              else:
-                text = f"file: {url}"
-                await send(text, jid=jid)
-                return
-
-          if msg.edit_date:
-            correct = True
-          else:
-            correct = False
-          #  if msg.edit_date is None:
-          if len(l) == 1:
-            #  if type(l[0]) is str:
-            #  l[0] = now
-            l.append(now)
-            l.append(gid)
-            #  await send(text, jid=jid, correct=correct)
-            await send(text, jid=jid, correct=correct)
-          elif jid in bot_groups:
-            l[1] = now
-            l.append(gid)
-            await send(text, jid=jid, correct=correct)
-          else:
-            if now > l[1]:
-              l[1] = now
-              l.append(gid)
-            await sleep(3)
-            if mid in mtmsgsg[jid] and now == l[1]:
-              #  await send(text, jid=jid)
-              await send(text, jid=jid, correct=correct)
-            else:
-              info(f"忽略旧的临时消息: {short(text)}")
-        else:
-          info(f"skip msg: {gid} {target} {msg.stringify()}")
-
+    #  if chat_id in bridges:
+    #  if type(target) is dict:
+    #  if type(target) is str:
+    # mtmsgsg: {jid/gateway: mtmsgs}
+    # mtmsgs: {gid/qid: [name for reply, msg from tg, ...]}
+    if target in mtmsgsg:
+      jid = target
+      # target: {tg msg id: src}
+      # 需要转发消息，约等于临时桥接通道
+      gid = msg.id
+      #  jid = None
+      #  if event.is_reply:
+      #    omsg = await msg.get_reply_message()
+      #    ogid = omsg.id
+      #    if ogid in target:
+      #      jid = target[ogid]
+      #      target.pop(ogid)
+      #    else:
+      #      info(f"not found")
+      #      return
+      #
+      #  else:
+      #  #  res, nick, delay = await print_tg_msg(event)
+      #  #  if gid-1 in target or gid > mid_max:
+      #    if len(target) == 0:
+      #      return
+      #    #  elif len(target) == 1:
+      #    else:
+      #      gids = []
+      #      for ogid, jid in target.items():
+      #        if ogid < gid:
+      #          gids.append(ogid)
+      #      ogid = min(gids)
+      #      jid = target[ogid]
+          #  for i in gids:
+          #    target.pop(i)
+      #  if jid is not None:
+      text = msg.text
+      #  if jid not in mtmsgsg:
+      #    warn(f"{jid} not in {mtmsgsg}")
+      #    return
+      mtmsgs = mtmsgsg[jid]
+      #  if ogid not in mtmsgs:
+      #    warn(f"{ogid} not in {mtmsgs}")
+      #    return
+      if mtmsgs:
+        #  qid = list(mtmsgs.keys())[0]
+        ids = list(mtmsgs.keys())
+        qid = max(ids)
+        if len(ids) > 5:
+          while True:
+            m = min(ids)
+            mtmsgs.pop(m)
+            ids.remove(m)
+            if len(ids) < 5:
+              break
       else:
-        #  if msg.text:
-        res, nick, delay = await print_tg_msg(event)
-        #  info(f"转发桥接消息: {chat_id} -> {bridges[chat_id]}: {msg.text[:64]}")
-        if res:
-          #  info(f"sync: {chat_id} -> {bridges[chat_id]}: " + res.split('\n', 1)[0][:16] )
-          #  info(f"sync: {chat_id} -> {bridges[chat_id]}: %s" % res.split('\n', 1)[0][:16] )
-          info(f"sync: {chat_id} -> {bridges[chat_id]}: {short(res)}")
-          #  await send(msg.text, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
-          await send(res, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
+        return
+
+      l = mtmsgs[qid]
+      text = f"{l[0]}{text}"
+      #  now = msg.date.timestamp()
+
+      if msg.file:
+        #  path = await tg_download_media(msg)
+        path = await tg_download_media(msg, src=jid, max_wait_time=get_timeout(msg.file.size))
+        if path is not None:
+          try:
+            t = asyncio.create_task(backup(path))
+            xmpp_url = await upload(path)
+            url = await t
+            if xmpp_url:
+              url = f"{xmpp_url}\n{url}"
+
+            if text:
+              text = f"{text} file:\n{url}"
+            else:
+              text = f"file:\n{url}"
+              #  await send(text, jid=jid)
+              #  return
+          finally:
+            t = asyncio.create_task(backup(path, delete=True))
+
+      if msg.edit_date:
+        correct = True
+      else:
+        correct = False
+      await send(text, jid=jid, correct=correct)
+      #  #  if msg.edit_date is None:
+      #  if len(l) == 1:
+      #    #  if type(l[0]) is str:
+      #    #  l[0] = now
+      #    l.append(now)
+      #    l.append(gid)
+      #    #  await send(text, jid=jid, correct=correct)
+      #    await send(text, jid=jid, correct=correct)
+      #  elif jid in bot_groups:
+      #    l[1] = now
+      #    l.append(gid)
+      #    await send(text, jid=jid, correct=correct)
+      #  else:
+      #    if now > l[1]:
+      #      l[1] = now
+      #      l.append(gid)
+      #    await sleep(3)
+      #    if mid in mtmsgsg[jid] and now == l[1]:
+      #      #  await send(text, jid=jid)
+      #      await send(text, jid=jid, correct=correct)
+      #    else:
+      #      info(f"忽略旧的临时消息: {short(text)}")
+      #  else:
+      #    info(f"skip msg: {gid} {target} {msg.stringify()}")
+
+    else:
+      #  if msg.text:
+      res, nick, delay = await print_tg_msg(event)
+      #  info(f"转发桥接消息: {chat_id} -> {bridges[chat_id]}: {msg.text[:64]}")
+      if res:
+        #  info(f"sync: {chat_id} -> {bridges[chat_id]}: " + res.split('\n', 1)[0][:16] )
+        #  info(f"sync: {chat_id} -> {bridges[chat_id]}: %s" % res.split('\n', 1)[0][:16] )
+        info(f"sync: {chat_id} -> {bridges[chat_id]}: {short(res)}")
+        #  await send(msg.text, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
+        await send(res, jid=target, name=f"**{nick}:** ", nick=nick, delay=delay)
 
       #  elif event.is_private:
       #    pass
@@ -4791,47 +4825,6 @@ async def msgt(event):
 
     return
 
-  #  if msg.is_reply:
-  #    qid=msg.reply_to_msg_id
-  #    print(f"tg msg id: {msg.id=} {event.id=} {qid=}")
-  #    if qid not in gid_src:
-  #      err(f"E: not found src for {qid=}, {gid_src=} {msg.text=}")
-  #      return
-  #    #  await queues[gid_src[qid]].put( (id(msg), qid, msg) )
-  #    #  await queues[gid_src[qid]].put( (msg.date, qid, msg) )
-  #    #  await queues[gid_src[qid]].put( (msg.id, "test") )
-  #    #  await queues[gid_src[qid]].put( (id(msg), qid, msg) )
-  #    if msg.file:
-  #      return
-  #    text = msg.text
-  #    if not text:
-  #      print(f"W: skip msg without text in chat with gpt bot, wtf: {msg.stringify()}")
-  #      return
-  #    print(f"tg msg: {text}: {msg.id=} {event.id=} {qid=} {gid_src=} {mtmsgsg=}")
-  #    l = text.splitlines()
-  #    if l[-1] in loadings:
-  #      return
-  #    elif len(l) > 1 and f"{l[-2]}\n{l[-1]}" in loadings:
-  #      return
-  #    else:
-  #      src = gid_src[qid]
-  #      mtmsgs = mtmsgsg[src]
-  #      res = f"{mtmsgs[qid][0]}{text}"
-  #      #  await mt_send_for_long_text(res, src)
-  #      await send(res, src)
-  #      gid_src.pop(qid)
-  #      mtmsgs.pop(qid)
-  #
-  #    #  except Exception as e:
-  #    #    err(f"fixme: {qid=} {gid_src=} {queues=} {e=} line: {e.__traceback__.tb_lineno}")
-  #      #  raise e
-  #    return
-  #    await queues[gid_src[qid]].put( (msg.id, msg, qid) )
-  #    return
-  #
-  #  else:
-  #    print("W: skip: got a msg without reply: is_reply: %s\nmsg: %s" % (msg.is_reply, msg.stringify()))
-  #    return
 
 async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
   if opts == "fast":
@@ -5160,49 +5153,6 @@ async def msgtout(event):
       await send("error", chat_id)
 
 
-
-#  @UB.on(events.NewMessage(incoming=True))
-#  @UB.on(events.MessageEdited(incoming=True))
-#  @exceptions_handler
-#  async def read_res(event):
-#
-#    if not allright.is_set():
-#      return
-#    #  if event.chat_id in id2gateway:
-#    if event.chat_id == gpt_bot:
-#      pass
-#    elif event.chat_id == rss_bot:
-#      msg = event.message
-#      await mt_send(msg.text, id2gateway[rss_bot], "rss2tg_bot")
-#      return
-#      #  print("N: skip: %s != %s" % (event.chat_id, gpt_bot))
-#    else:
-#      return
-#    #  if not allright.is_set():
-#    #    print("W: skiped the msg because of reset is waiting")
-#    #    return
-#    #  elif event.chat_id not in gid_src:
-#    #    err(f"E: not found gateway for {event.chat_id}, {gid_src=}")
-#    #    return
-#    msg = event.message
-#
-#    if msg.is_reply:
-#      qid=msg.reply_to_msg_id
-#      print(f"msg id: {msg.id=} {event.id=} {qid=} {gid_src=} {mtmsgsg=}")
-#      if qid not in gid_src:
-#        err(f"E: not found gateway for {qid=}, {gid_src=} {msg.text=}")
-#        return
-#      try:
-#        #  await queues[gid_src[qid]].put( (id(msg), qid, msg) )
-#        #  await queues[gid_src[qid]].put( (msg.date, qid, msg) )
-#        await queues[gid_src[qid]].put( (id(msg), qid, msg) )
-#        #  await queues[gid_src[qid]].put( (msg.id, "test") )
-#      except Exception as e:
-#        info(f"E: fixme: {qid=} {gid_src=} {queues=} {e=}")
-#        #  raise e
-#      return
-#      await queues[gid_src[qid]].put( (msg.id, msg, qid) )
-#      return
 
 
 
@@ -5692,10 +5642,11 @@ async def regisger_handler(client):
 
   #  from aioxmpp.version.xso import Query
 
+  @exceptions_handler
   async def cb(iq):
       #  print("software version request from {!r}".format(iq.from_))
       warn("收到查看系统信息的请求: {!r}".format(iq.from_))
-      result = Query()
+      result = aioxmpp.version.xso.Query()
       result.name = "xmppbot"
       result.version = f"xmpp:{main_group}?join"
       result.os = f"by {ME}"
@@ -7772,8 +7723,8 @@ async def init_cmd():
       i += 1
       for j in mtmsgsg[g]:
         i += 1
-    for g in gid_src:
-      i += 1
+    #  for g in gid_src:
+    #    i += 1
     ii = i
 
     if cmds[1] == "all":
@@ -7785,8 +7736,8 @@ async def init_cmd():
       i += 1
       for j in mtmsgsg[g]:
         i += 1
-    for g in gid_src:
-      i += 1
+    #  for g in gid_src:
+    #    i += 1
     #  return "ok {ii} -> {i}"
     return f"清除状态\n.{cmds[0]} all\n--\n{ii} -> {i}"
   cmd_funs["clear"] = _
@@ -7835,23 +7786,10 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           mtmsgs.clear()
           #  mtmsgs[mid][0] = name
           #  mid = await send_to_tg_bot(res[2], res[1])
-          mid = await send(res[2], res[1])
-          mtmsgs[mid] = [name]
-          gid_src[mid] = src
-        #  elif res[0] == 2:
-        #    mid = res[1]
-        #    mtmsgsg[src][mid][0] = name
-        #    pid = res[2]
-        #    if pid not in bridges:
-        #      bridges[pid] = {}
-        #    target = bridges[pid]
-        #    need_delete = []
-        #    for i, j in target.items():
-        #      if j == src:
-        #        need_delete.append(i)
-        #    for i in need_delete:
-        #      target.pop(i)
-        #    target[mid] = src
+          #  mid = await send(res[2], res[1])
+          gid = await send_tg(res[2], res[1], return_id=True)
+          mtmsgs[gid] = [name]
+          #  gid_src[gid] = src
         elif res[0] == 3:
           bot_name = res[1]
           text = res[2]
@@ -7864,55 +7802,26 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           mtmsgs = mtmsgsg[src]
 
           if pid not in bridges:
-            bridges[pid] = {}
+            bridges[pid] = src
           target = bridges[pid]
+          if target != src:
+            await send("waiting", src)
+            if mtmsgs:
+              await sleep(5)
+            await send("bye", target)
+            await send("hi", src, correct=True)
+            mtmsgs.clear()
+            bridges[pid] = src
+          #  gid = await send_to_tg_bot(text, pid)
+          #  gid = await send_to_tg_bot(text, bot_name)
+          gid = await send_tg(text, peer, return_id=True)
 
-          i = 0
-          while True:
-            need_delete = []
-            for i in target:
-              if i in mtmsgs:
-                #  if len(mtsmgs[i]) > 1:
-                #  if type(mtmsgs[i][0]) is int:
-                if len(mtmsgs[i]) > 1:
-                  if time.time() - mtmsgs[i][1] > 6:
-                    need_delete.append(i)
-              else:
-                need_delete.append(i)
-            for i in need_delete:
-              target.pop(i)
-            if len(target) == 0:
-              break
-            i += 1
-            if i > 5:
-              warn(f"{bot_name} {src} {name}: bot太忙({len(target)}): {target}")
-              #  return f"bot太忙({len(target)}), 请重试"
-              target.clear()
-              break
-            await sleep(4)
-
-          mtmsgs.clear()
-
-          #  mid = await send_to_tg_bot(text, pid)
-          #  mid = await send_to_tg_bot(text, bot_name)
-          mid = await send(text, bot_name)
-          mtmsgs[mid] = [name]
-          gid_src[mid] = src
-          #  mid = res[1]
+          # 加name是为了处理tg in消息时可以知道该消息是回复谁的
+          mtmsgs[gid] = [name]
+          #  gid_src[gid] = src
+          #  gid = res[1]
           #  pid = res[2]
 
-          #  if pid not in bridges:
-          #    bridges[pid] = {}
-          #  target = bridges[pid]
-          #  need_delete = []
-          #  for i, j in target.items():
-          #    if j == src:
-          #      if i+1 < mid:
-          #        need_delete.append(i)
-          #  for i in need_delete:
-          #    target.pop(i)
-
-          target[mid] = src
         #  await send_typing(src)
         return True
       if res:
@@ -7927,22 +7836,34 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       res = await send_cmd_to_bash(src, name, text)
       if res:
         return res
-  elif text.isnumeric() and src in music_bot_state and music_bot_state[src] == 2:
+  elif text.isnumeric():
+    if src in music_bot_state and music_bot_state[src] == 2 bridges[chat_id] == src:
+      pass
+    else:
+      return
+    if src not in mtmsgsg:
+      return
     mtmsgs = mtmsgsg[src]
-    tmp = []
-    for i in gid_src:
-      if gid_src[i] == src:
-        tmp.append(i)
-    qid = max(tmp)
+    if mtmsgs:
+      pass
+    else:
+      return
+    #  tmp = []
+    #  for i in gid_src:
+    #    if gid_src[i] == src:
+    #      tmp.append(i)
+    #  qid = max(tmp)
+    ids = list(mtmsgs.keys())
+    qid = max(ids)
     #  info(f"尝试下载：{text} {qid}")
     bs = mtmsgs[qid][1]
     if bs is None:
-      warn(f"fixme: bs is None, 尝试下载：{text} {qid} msg: {mtmsgs[qid]}")
+      warn(f"fixme: bs is None")
       return
     if bs is float:
-      warn(f"fixme: bs is float, 尝试下载：{text} {qid} msg: {mtmsgs[qid]}")
+      warn(f"fixme: bs is float")
       return
-    info(f"尝试下载：{text} {qid} msg: {bs}")
+    info(f"尝试下载：{text} msg: {bs}")
     i = None
     for i in get_buttons(bs):
       #  if type(i) is list:
