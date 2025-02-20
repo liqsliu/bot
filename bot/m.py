@@ -8659,12 +8659,15 @@ async def amain():
       mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
 
       info(f"测试通过副线程发信息")
-      #  t = loop2.create_task(send("通过副线程发信息成功", jid=CHAT_ID)) # 不行，结果就是任务卡住，也没报错
-      #  res = await t
+      t = loop2.create_task(send("通过副线程发信息成功(loop2)", jid=CHAT_ID)) # 不行，结果就是任务卡住，也没报错
       #  fu = t
+      #  res = await t
       fu = asyncio.run_coroutine_threadsafe(send("通过副线程发信息成功", jid=CHAT_ID), loop2)
       while not fu.done():
         info(f"通过副线程发信息，not done")
+        await sleep(2)
+      while not t.done():
+        info(f"通过副线程发信息(loop2)，not done")
         await sleep(2)
       info(f"副线程发信息结果: {fu.result()}")
       info(f"初始化完成")
