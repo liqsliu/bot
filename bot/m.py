@@ -3062,12 +3062,12 @@ def sendme(*args, to=1, **kwargs):
 
 
 async def send(text, jid=None, *args, **kwargs):
-  if isinstance(jid, int):
-    #  return await send_t(text, jid, *args, **kwargs)
-    return await run_run(send_tg(text=text, jid=jid, *args, **kwargs), need_main=True)
   if jid is None:
     if isinstance(text, str):
-      return
+      return False
+  elif isinstance(jid, int):
+    #  return await send_t(text, jid, *args, **kwargs)
+    return await run_run(send_tg(text=text, jid=jid, *args, **kwargs), need_main=True)
   return await run_run(send_x(text=text, jid=jid, *args, **kwargs), need_main=True)
   #  if threading.current_thread() is loop2_thread:
     #  asyncio.run_coroutine_threadsafe(coro, loop)
@@ -8504,7 +8504,7 @@ async def after_init():
   #  info("判断是否在主线程，应该是True: %s" % str(main_thread.native_id == threading.get_native_id()))
   #  info("判断是否在副线程，应该是False: %s" % str(loop2_thread.native_id == threading.get_native_id()))
   #  info(f"ids: {main_thread.native_id} {loop2_thread.native_id} {threading.get_native_id()}")
-  
+
   if await init_myshell():
     info("启动常驻shell成功")
   else:
@@ -8658,6 +8658,7 @@ async def amain():
       mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
 
       info(f"初始化完成")
+      loop2.create_task(send("通过副线程发信息成功", jid=CHAT_ID))
       send_log(f"启动成功，用时: {int(time.time()-start_time)}s")
       #  await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
 
