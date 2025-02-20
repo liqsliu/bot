@@ -3439,7 +3439,7 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, return_id=False):
     #  if correct:
     #    last_outmsg[chat_id] = msg
   if return_id:
-    return res.id
+    return msg.id
   return True
   chat = await get_entity(CHAT_ID, True)
   await UB.send_message(chat, text)
@@ -8688,6 +8688,7 @@ async def amain():
     global MY_NAME, MY_ID
     #  await UB.start()
     async with UB:
+
       me = await UB.get_me()
       #  print(me.stringify())
       MY_ID = me.id
@@ -8695,35 +8696,10 @@ async def amain():
       print(f"{MY_NAME}: {MY_ID}")
       UB.parse_mode = 'md'
 
-      @UB.on(events.NewMessage(incoming=True))
-      @UB.on(events.MessageEdited(incoming=True))
-      async def _(event):
-        if not allright.is_set():
-          #  info("skip msg: allright is not ok")
-          return
-        asyncio.create_task(msgt(event))
 
-      @UB.on(events.NewMessage(outgoing=True))
-      async def _(event):
-        #  if not allright.is_set():
-        #    #  info("skip msg: allright is not ok")
-        #    return
-        asyncio.create_task(msgtout(event))
 
       await after_init()
       await init_cmd()
-
-      #  await mt_send("gpt start")
-      while True:
-        if allright_task > 0:
-          info(f"等待初始化完成，剩余任务数：{allright_task}")
-          await sleep(1)
-          continue
-        allright.set()
-        break
-
-      mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
-
       info(f"测试通过副线程发信息")
       #  fu = t
       #  res = await t
@@ -8741,10 +8717,39 @@ async def amain():
       info(f"副线程发信息结果(loop2): {t.result()}")
 
 
+      @UB.on(events.NewMessage(incoming=True))
+      @UB.on(events.MessageEdited(incoming=True))
+      async def _(event):
+        if not allright.is_set():
+          #  info("skip msg: allright is not ok")
+          return
+        asyncio.create_task(msgt(event))
+
+      @UB.on(events.NewMessage(outgoing=True))
+      async def _(event):
+        #  if not allright.is_set():
+        #    #  info("skip msg: allright is not ok")
+        #    return
+        asyncio.create_task(msgtout(event))
+
+
+      #  await mt_send("gpt start")
+      while True:
+        if allright_task > 0:
+          info(f"等待初始化完成，剩余任务数：{allright_task}")
+          await sleep(1)
+          continue
+        allright.set()
+        break
+
+
+
       info(f"初始化完成")
       send_log(f"启动成功，用时: {int(time.time()-start_time)}s", CHAT_ID)
       send_log(f"启动成功，用时: {int(time.time()-start_time)}s", log_group_private)
       #  await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
+
+      mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
 
       try:
         #  while True:
