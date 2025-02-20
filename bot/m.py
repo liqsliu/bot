@@ -3068,10 +3068,10 @@ def send_log(text, jid=CHAT_ID, wait=1):
       #  wait += 5
       wait = send_log_task
     elif send_log_task.result() is False:
-      warn(f"send_log is not work({send_log_task.result()}): {text}")
+      info(f"send_log is not work({send_log_task.result()}): {text}")
       return False
     elif send_log_task.result() is None:
-      warn(f"send_log is not work({send_log_task.result()}): {text}")
+      info(f"send_log is not work({send_log_task.result()}): {text}")
       return False
     else:
       pass
