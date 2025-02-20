@@ -4720,41 +4720,8 @@ async def msgt(event):
       # target: {tg msg id: src}
       # 需要转发消息，约等于临时桥接通道
       gid = msg.id
-      #  jid = None
-      #  if event.is_reply:
-      #    omsg = await msg.get_reply_message()
-      #    ogid = omsg.id
-      #    if ogid in target:
-      #      jid = target[ogid]
-      #      target.pop(ogid)
-      #    else:
-      #      info(f"not found")
-      #      return
-      #
-      #  else:
-      #  #  res, nick, delay = await print_tg_msg(event)
-      #  #  if gid-1 in target or gid > mid_max:
-      #    if len(target) == 0:
-      #      return
-      #    #  elif len(target) == 1:
-      #    else:
-      #      gids = []
-      #      for ogid, jid in target.items():
-      #        if ogid < gid:
-      #          gids.append(ogid)
-      #      ogid = min(gids)
-      #      jid = target[ogid]
-          #  for i in gids:
-          #    target.pop(i)
-      #  if jid is not None:
       text = msg.text
-      #  if jid not in mtmsgsg:
-      #    warn(f"{jid} not in {mtmsgsg}")
-      #    return
       mtmsgs = mtmsgsg[jid]
-      #  if ogid not in mtmsgs:
-      #    warn(f"{ogid} not in {mtmsgs}")
-      #    return
       if mtmsgs:
         #  qid = list(mtmsgs.keys())[0]
         ids = list(mtmsgs.keys())
@@ -4773,6 +4740,20 @@ async def msgt(event):
       text = f"{l[0]}{text}"
       #  now = msg.date.timestamp()
 
+      if msg.buttons:
+        #  mtmsgs[gid] = mtmsgs[qid]
+        #  mtmsgs.pop(qid)
+        t = mtmsgs[qid]
+        mtmsgs.clear()
+        t.append(msg.buttons)
+        mtmsgs[gid] = t
+        text = f"{text}\n--\n回复序号"
+        k = 0
+        for i in get_buttons(msg.buttons):
+          k += 1
+          text += "\n{k}. {i.text}"
+
+
       if msg.file:
         #  path = await tg_download_media(msg)
         path = await tg_download_media(msg, src=jid, max_wait_time=get_timeout(msg.file.size))
@@ -4785,7 +4766,7 @@ async def msgt(event):
               url = f"{xmpp_url}\n{url}"
 
             if text:
-              text = f"{text} file:\n{url}"
+              text = f"{text}\n--\nfile:\n{url}"
             else:
               text = f"file:\n{url}"
               #  await send(text, jid=jid)
@@ -7800,29 +7781,19 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         if res[0] == 1:
           #  mid = res[1]
           mtmsgs, pid = await change_bridge(res[1], src)
-          #  mtmsgs[mid][0] = name
-          #  mid = await send_to_tg_bot(res[2], res[1])
-          #  mid = await send(res[2], res[1])
           gid = await send_tg(res[2], pid, return_id=True)
           mtmsgs[gid] = [name]
-          #  gid_src[gid] = src
         elif res[0] == 3:
           #  bot_name = res[1]
           text = res[2]
-          #  e = await UB.get_input_entity(bot_name)
-
           mtmsgs, pid = await change_bridge(res[1], src)
-
           #  gid = await send_to_tg_bot(text, pid)
           #  gid = await send_to_tg_bot(text, bot_name)
           gid = await send_tg(text, pid, return_id=True)
-
           # 加name是为了处理tg in消息时可以知道该消息是回复谁的
           mtmsgs[gid] = [name]
-          #  gid_src[gid] = src
           #  gid = res[1]
           #  pid = res[2]
-
         #  await send_typing(src)
         return True
       if res:
@@ -7837,6 +7808,32 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       res = await send_cmd_to_bash(src, name, text)
       if res:
         return res
+  elif text.isnumeric():
+    if src not in mtmsgsg:
+      mtmsgs = mtmsgsg[src]
+    else:
+      return
+    bs = None
+    for k, v in mtmsgs:
+      if len(v) > 1:
+        bs = v[1]
+        break
+    if bs is None:
+      return
+    s = int(text)
+    k = 0
+    for i in get_buttons(bs):
+      k += 1
+      if k == s:
+        info(f"已找到：{text}")
+        await i.click()
+        await send(f"命中：{text}", src, correct=True)
+        break
+      k = None
+    if k is None:
+      info(f"没找到：{text}")
+      await send(f"没找到：{text}", src)
+
   elif text.isnumeric():
     if src in music_bot_state and music_bot_state[src] == 2 and bridges[music_bot] == src:
       pass
