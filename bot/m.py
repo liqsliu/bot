@@ -4546,6 +4546,10 @@ async def msgt(event):
     return
   msg = event.message
   target = bridges[chat_id]
+  if isinstance(target, dict):
+    bridges.pop(target)
+    info(f"delete old bridge: {target}")
+    return
 
   if chat_id == music_bot:
     #  print("I: music bot: chat_id: %s\nmsg: %s" % (event.chat_id, msg.stringify()))
