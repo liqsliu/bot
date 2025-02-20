@@ -3006,7 +3006,7 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
 
 send_log_task = None
 
-def send_log(text, to=1, wait=1):
+def send_log(text, jid=CHAT_ID, wait=1):
   global send_log_task
   if send_log_task is not None:
     if not send_log_task.done():
@@ -3021,22 +3021,18 @@ def send_log(text, to=1, wait=1):
       return False
     else:
       pass
-  send_log_task = asyncio.create_task(_send_log(text, to=to, wait=wait))
+  send_log_task = asyncio.create_task(_send_log(text, jid=jid, wait=wait))
   return send_log_task
 
-async def _send_log(text, to=0, wait=1):
+async def _send_log(text, jid=CHAT_ID, wait=1):
   if isinstance(wait, int):
     await sleep(wait)
   else:
     await wait
   #  t = asyncio.create_task(send(text, jid=CHAT_ID))
   ts = []
-  if to != 1:
-    t = asyncio.create_task(send(text, jid=CHAT_ID))
-    ts.append(t)
-  if to != 2:
-    t = asyncio.create_task(send(text, jid=log_group_private))
-    ts.append(t)
+  t = asyncio.create_task(send(text, jid=jid))
+  ts.append(t)
   done, pending = await asyncio.wait(ts, timeout=60)
   if pending:
     info(f"send_log timeout: send log: {text}")
@@ -8659,15 +8655,15 @@ async def amain():
       mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
 
       info(f"测试通过副线程发信息")
-      t = loop2.create_task(send("通过副线程发信息成功(loop2)", jid=CHAT_ID)) # 不行，结果就是任务卡住，也没报错
-      #  fu = t
-      #  res = await t
       fu = asyncio.run_coroutine_threadsafe(send("通过副线程发信息成功", jid=CHAT_ID), loop2)
       while not fu.done():
-        info(f"通过副线程发信息，not done")
+        info(f"通过副线程发信息: not done")
         await sleep(2)
+      t = loop2.create_task(send("通过副线程发信息成功(loop2)", jid=CHAT_ID))
+      #  fu = t
+      #  res = await t
       while not t.done():
-        info(f"通过副线程发信息(loop2)，not done")
+        info(f"通过副线程发信息(loop2): not done")
         await sleep(2)
       info(f"副线程发信息结果: {fu.result()}")
       info(f"初始化完成")
