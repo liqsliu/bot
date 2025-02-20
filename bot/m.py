@@ -3002,6 +3002,12 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
       return False
 
 
+def sendme(*args, **kwargs):
+  asyncio.create_task(send_t(*args, **kwargs))
+  asyncio.create_task(send_x(*args, **kwargs))
+  #  asyncio.create_task(run_run(send_t(text)))
+
+
 async def send(text, jid=None, *args, **kwargs):
   if isinstance(jid, int):
     #  return await send_t(text, jid, *args, **kwargs)
@@ -3229,11 +3235,6 @@ async def send1(text, jid=None, *args, **kwargs):
 #      client = XB
 #    #  return await client.send(msg)
 #    return await _send(msg, client, gpm=gpm)
-
-def sendme(*args, **kwargs):
-  asyncio.create_task(send_t(*args, **kwargs))
-  asyncio.create_task(send_x(*args, **kwargs))
-  #  asyncio.create_task(run_run(send_t(text)))
 
 
 async def send_t(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):

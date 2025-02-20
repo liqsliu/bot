@@ -43,22 +43,24 @@ class CustomFormatter(colorlog.ColoredFormatter):
       #  if caller_frame.f_back is not None:
       #    caller_frame = caller_frame.f_back
       caller_frame = sys._getframe(8)  # 获取上级调用的帧
-      #  if caller_frame.f_code.co_name == "wrapper":
-      if caller_frame.f_code.co_name == "warn":
-      #  if caller_frame.f_back.f_code.co_name != "wrapper":
-        caller_frame = caller_frame.f_back
-      elif caller_frame.f_code.co_name == "err":
-        caller_frame = caller_frame.f_back
-      #  if record.name == "bot.m":
-      #  else:
-      #    record.name = f" {record.name} "
-      #  record.levelname = levelname_map.get(record.levelname, record.levelname)
-      #  record.levelname = levelname_map.get(record.levelname)
+      if caller_frame:
+        #  if caller_frame.f_code.co_name == "wrapper":
+        if caller_frame.f_code.co_name == "warn":
+        #  if caller_frame.f_back.f_code.co_name != "wrapper":
+          caller_frame = caller_frame.f_back
+        elif caller_frame.f_code.co_name == "err":
+          caller_frame = caller_frame.f_back
+      if caller_frame:
+        #  if record.name == "bot.m":
+        #  else:
+        #    record.name = f" {record.name} "
+        #  record.levelname = levelname_map.get(record.levelname, record.levelname)
+        #  record.levelname = levelname_map.get(record.levelname)
 
-      #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
-      #  record.funcName = caller_function  # 修改 LogRecord 的 funcName
-      record.funcName = caller_frame.f_code.co_name
-      record.lineno = caller_frame.f_lineno
+        #  caller_function = caller_frame.f_code.co_name  # 获取前一个函数名
+        #  record.funcName = caller_function  # 修改 LogRecord 的 funcName
+        record.funcName = caller_frame.f_code.co_name
+        record.lineno = caller_frame.f_lineno
     #  print(f"finally: {record}")
     return super().format(record)
 
