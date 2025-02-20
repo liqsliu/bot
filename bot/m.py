@@ -6115,10 +6115,10 @@ async def _xmpp_msg(msg):
     #  await sleep(1)
     real_time = delay.stamp.timestamp()
     if time.time() - real_time > 60:
-      info("跳过旧消息: %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body, delay))
+      info("跳过旧消息: %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, short(msg.body), delay))
       return
     else:
-      info("旧消息: %s %s %s %s %s 延迟%ss" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body, time.time() - delay.stamp.timestamp()))
+      info("旧消息: %s %s %s %s %s 延迟%ss" % (msg.type_, msg.id_,  str(msg.from_), msg.to, short(msg.body), time.time() - delay.stamp.timestamp()))
   else:
     #  info(f"假定消息无延迟: {msg}")
     real_time = time.time()
