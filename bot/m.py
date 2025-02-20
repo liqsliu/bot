@@ -225,25 +225,6 @@ def info1(s):
 def info2(s):
   print("%s" % s.replace("\n", " "))
 
-def send_log(text, wait=1):
-  t1 = asyncio.create_task(_send_log(text, wait=wait))
-
-async def _send_log(text, wait=1, to=0):
-  await sleep(wait)
-  if to == 1:
-    t1 = asyncio.create_task(send(text, jid=CHAT_ID))
-    return await t1
-  if to == 2:
-    t2 = asyncio.create_task(send(text, jid=log_group_private))
-    return await t2
-  else:
-    t1 = asyncio.create_task(send(text, jid=CHAT_ID))
-    t2 = asyncio.create_task(send(text, jid=log_group_private))
-    await t1
-    await t2
-  return t1, t2
-  #  asyncio.create_task(mt_send_for_long_text(text))
-  #  asyncio.create_task(sendg(text))
 
 def err(text, no_send=False):
   #  if type(text) is not str:
@@ -347,15 +328,17 @@ def generand(N=4, M=None, *, no_uppercase=False):
 
 async def split_long_text(text, msg_max_length=500, correct=False):
   if len(text.encode()) / msg_max_length > 2:
-    url =await pastebin(text)
     if correct:
-      if len(text.encode()) > 500:
+      if len(text.encode()) > 64:
         #  return [f"{text[:500]}..."]
-        return ["%s..." % (await split_long_text(text, 500))[0] ]
+        #  text_s = text.encode()[:500].decode(errors="ignore")
+        #  return ["%s ...%s/%s" % (text_s, len(text_s), len(text)) ]
+        return [short(text, 64)]
       else:
         return [text]
     else:
-      return [f"文本过长，请打开链接查看: {url}"]
+      url =await pastebin(text)
+      return ["文本过长，请打开链接查看: [{}]({})".format(short(text), url)]
   texts = []
   if len(text.encode()) > msg_max_length:
     ls = text.splitlines()
@@ -644,29 +627,36 @@ def _exceptions_handler(e, *args, **kwargs):
   #  asyncio.create_task(mt_send(res))
   #  asyncio.create_task(send(res, ME))
   #  warn(res)
-  info("check send_t: {}".format(send_t.__name__ in fs))
-  info("check __send: {}".format(__send.__name__ in fs))
-  if send_t.__name__ in fs:
+  info("check send_tg: {}".format(send_tg.__name__ in fs))
+  info("check send_xmpp: {}".format(send_xmpp.__name__ in fs))
+  if send_tg.__name__ in fs:
     no_send = True
     no_send_tg = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-  elif __send.__name__ in fs:
+  elif send_xmpp.__name__ in fs:
     no_send = True
     no_send_xmpp = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-  elif send_t.__name__ in res:
+  elif send_tg.__name__ in res:
     no_send = True
     no_send_tg = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-  elif __send.__name__ in res:
+  elif send_xmpp.__name__ in res:
     no_send = True
     no_send_xmpp = True
     info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
 
 
+
+  global send_log_task
+  if send_log_task is not None:
+    if not send_log_task.done() or send_log_task.result() is False or send_log_task.result() is None:
+      no_send = True
+      info(f"skip send err log: {res}")
+  
   if _send_log.__name__ in fs:
+    info(f"send_log is busy: {res}")
     no_send = True
-
 
   if no_send:
     if more:
@@ -679,9 +669,13 @@ def _exceptions_handler(e, *args, **kwargs):
     #  await sleep(5)
     #  send_log(res, 9)
     if not no_send_tg:
-      t1 = asyncio.create_task(_send_log(res, wait=9, to=1))
+      #  t1 = asyncio.create_task(_send_log(res, wait=9, to=1))
+      send_log(red, 1, 9)
+      
     elif not no_send_xmpp:
-      t1 = asyncio.create_task(_send_log(res, wait=9, to=2))
+      #  t1 = asyncio.create_task(_send_log(res, wait=9, to=2))
+      send_log(red, 2, 9)
+  return
   return res
 
 
@@ -2846,11 +2840,12 @@ send_locks = {}
 
 async def _send(*args, **kwargs):
   #  info(f"{args=} {kwargs=}")
-  asyncio.create_task(__send(*args, **kwargs))
+  t = asyncio.create_task(send_xmpp(*args, **kwargs))
+  return await t
   return True
 
 @exceptions_handler
-async def __send(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False):
+async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False):
   #  info(f"{msg}")
   muc = str(msg.to.bare())
   #  if muc not in rooms:
@@ -2992,7 +2987,7 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
           err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
           return False
         if res2 is None:
-          dbg(f"send msg: finally: {res=}")
+          info(f"send xmpp msg: finally: {res=}")
         #  elif hasattr(res, "stanza") and res.stanza and res.stanza.error is None:
         #    # 群内私聊
         #    info(f"send gpm msg: finally: {res=}")
@@ -3002,23 +2997,74 @@ async def __send(msg, client=None, room=None, name=None, correct=False, fromname
             await sleep(delay)
           return True
         else:
-          info(f"send msg: finally: {res=} {res2=}")
+          info(f"send xmpp msg: finally: {res=} {res2=}")
           return False
       else:
         warn(f"send msg: res is not coroutine: {res=} {client=} {room=} {msg=}", no_send=True)
       return False
+  return True
+
+send_log_task = None
+
+def send_log(text, to=1, wait=1):
+  global send_log_task
+  if send_log_task is not None:
+    if not send_log_task.done():
+      #  wait += 5
+      wait = send_log_task
+      info(f"send_log is busy: {text}")
+    elif send_log_task.result() is False:
+      info(f"send_log is not work({send_log_task.result()}): {text}")
+      return False
+    elif send_log_task.result() is None:
+      info(f"send_log is not work({send_log_task.result()}): {text}")
+      return False
+    else:
+      pass
+  send_log_task =  = asyncio.create_task(_send_log(text, to=to, wait=wait))
+  return send_log_task
+
+async def _send_log(text, to=0, wait=1):
+  if isinstance(wait, int):
+    await sleep(wait)
+  else:
+    await wait
+  #  t = asyncio.create_task(send(text, jid=CHAT_ID))
+  ts = []
+  if to != 1:
+    t = asyncio.create_task(send(text, jid=CHAT_ID))
+    ts.append(t)
+  if to != 2:
+    t = asyncio.create_task(send(text, jid=log_group_private))
+    ts.append(t)
+  done, pending = await asyncio.wait(ts, timeout=60)
+  if pending:
+    info(f"send_log timeout: send log: {text}")
+    return False
+  else:
+    for t in done:
+      if t.result() is False or t.result() is None:
+        info(f"send_log is bad: {t.result()}")
+        return False
+      else:
+        info(f"send_log is ok: {t.result()}")
+    return True
+  #  asyncio.create_task(mt_send_for_long_text(text))
+  #  asyncio.create_task(sendg(text))
 
 
-def sendme(*args, **kwargs):
-  asyncio.create_task(send_t(*args, **kwargs))
-  asyncio.create_task(send_x(*args, **kwargs))
+def sendme(*args, to=1, **kwargs):
+  if to != 2:
+    asyncio.create_task(send(jid=CHAT_ID, *args, **kwargs))
+  if to != 1:
+    asyncio.create_task(send(jid=ME, *args, **kwargs))
   #  asyncio.create_task(run_run(send_t(text)))
 
 
 async def send(text, jid=None, *args, **kwargs):
   if isinstance(jid, int):
     #  return await send_t(text, jid, *args, **kwargs)
-    return await run_run(send_t(text=text, jid=jid, *args, **kwargs), need_main=True)
+    return await run_run(send_tg(text=text, jid=jid, *args, **kwargs), need_main=True)
   if jid is None:
     if isinstance(text, str):
       return
@@ -3160,7 +3206,8 @@ async def send1(text, jid=None, *args, **kwargs):
     #  if name:
     #    text = f"{name}{text}"
     if jid is None:
-      jid = ME
+      #  jid = ME
+      jid = log_group_private
     else:
       if type(jid) is JID:
         jid = get_jid(jid, True)
@@ -3244,7 +3291,7 @@ async def send1(text, jid=None, *args, **kwargs):
 #    return await _send(msg, client, gpm=gpm)
 
 
-async def send_t(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
+async def send_tg(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
   if chat_id in last_outmsg:
     omsg = last_outmsg[chat_id]
   else:
@@ -3262,9 +3309,12 @@ async def send_t(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
           msg = await UB.send_message(chat_id, t)
       except ValueError as e:
         if e.args[0] == 'Failed to parse message':
-          err(f"发送tg消息失败: {chat_id} {type(t)} {t=} {e=}")
-          return
-        raise
+          err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
+        return False
+      except Exception as e:
+        err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
+        return False
+        #  raise
       if correct:
         last_outmsg[chat_id] = msg
         break
@@ -3277,7 +3327,6 @@ async def send_t(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
         await sleep(msg_delay_default)
     #  if correct:
     #    last_outmsg[chat_id] = msg
-
   return True
   chat = await get_entity(CHAT_ID, True)
   await UB.send_message(chat, text)
@@ -3289,7 +3338,6 @@ async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kw
   info(f"sending xmpp group msg: {jid} {text}")
   if jid is None:
     jid = log_group_private
-    asyncio.create_task(send_t(text))
   recipient_jid = JID.fromstr(jid)
   msg = aioxmpp.Message(
       to=recipient_jid,  # recipient_jid must be an aioxmpp.JID
@@ -3996,13 +4044,13 @@ def hbyte(size):
   else:
     return "{:.0f}K".format(size/1024)
 
-def short(text):
+def short(text, length=32):
   # for log out
   if not isinstance(text, str):
     text = "{!r}".format(text)
   text = text.replace("\n", "\\n")
-  if len(text) > 32:
-    return text[:32] + "..."
+  if len(text) > length:
+    return "{} ...{}/{}".format(text[:length], length, len(text))
   else:
     return text
 
@@ -4689,11 +4737,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     opts = 0
 
   if opts == 9:
-    await send_t(tmsg.stringify(), chat_id)
+    await send(tmsg.stringify(), chat_id)
   elif tmsg.file:
     file = tmsg.file
     file_size = file.size
-    await send_t(f"file: {type(file)} {file.name} {file.size}", chat_id)
+    await send(f"file: {type(file)} {file.name} {file.size}", chat_id)
     res = None
     #  if tmsg.text:
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
@@ -4880,7 +4928,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
   elif tmsg.text:
     res = await UB.send_message(chat_id, tmsg.text)
   else:
-    await send_t(tmsg.stringify(), chat_id)
+    await send(tmsg.stringify(), chat_id)
 
 
 delete_next_msg = False
@@ -4890,7 +4938,7 @@ async def tg_msg_out(event):
   msg = event.message
   if delete_next_msg is True:
     res = await msg.delete()
-    await send_t("delete ok")
+    await send("delete ok")
     return
   #  info(event.stringify())
   chat_id = event.chat_id
@@ -4967,7 +5015,7 @@ async def tg_msg_out(event):
         return
       if res:
         #  await UB.send_message(CHAT_ID, res)
-        await send_t(res, chat_id)
+        await send(res, chat_id)
         return
 
     if text == 'id':
@@ -4998,12 +5046,12 @@ async def tg_msg_out(event):
       url = cmds[1]
       if url:
         if url == "h":
-          await send_t("msg url raw/fast/xmpp/direct/vps", chat_id)
+          await send("msg url raw/fast/xmpp/direct/vps", chat_id)
           return
         opts = 0
         peer = await get_entity(url)
         if peer:
-          #  await send_t(peer.stringify(), chat_id)
+          #  await send(peer.stringify(), chat_id)
           ss = url.split('/')
           if len(ss) > 4:
             ids = int(ss[-1])
@@ -5014,12 +5062,12 @@ async def tg_msg_out(event):
                 opts = cmds[2]
               await save_tg_msg(tmsg, chat_id, opts, url)
             else:
-              await send_t(f"error id: {ids}\nres: {msg}", chat_id)
+              await send(f"error id: {ids}\nres: {msg}", chat_id)
           return
         else:
-          await send_t(f"error url: {url}\nres: {peer}", chat_id)
+          await send(f"error url: {url}\nres: {peer}", chat_id)
           return
-      await send_t("error", chat_id)
+      await send("error", chat_id)
 
 
 
@@ -5450,7 +5498,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       info(f"res: {res}\nslot: {slot}")
       await send("上传完成", src)
       #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
-      #  coro = send_t("测试进程间通信 res: {}".format(res))
+      #  coro = send("测试进程间通信 res: {}".format(res))
       #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
       #  await send("测试进程间通信 res: {}".format(res))
       #  return res
