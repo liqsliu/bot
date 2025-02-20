@@ -4561,7 +4561,7 @@ async def msgt(event):
     return
   target = bridges[chat_id]
   if isinstance(target, dict):
-    bridges.pop(target)
+    bridges.pop(chat_id)
     info(f"delete old bridge: {target}")
     return
 
@@ -4751,7 +4751,7 @@ async def msgt(event):
         k = 0
         for i in get_buttons(msg.buttons):
           k += 1
-          text += "\n{k}. {i.text}"
+          text += f"\n{k}. {i.text}"
 
 
       if msg.file:
@@ -7630,17 +7630,25 @@ async def init_cmd():
   async def _(cmds, src):
     bot_name = "gpt3_unlim_chatbot"
     if len(cmds) == 1:
-      return f"GPT-3.5-turbo\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n--\nhttps://t.me/{bot_name}"
+      return f"ChatGPT4 | Midjourney\n.{cmds[0]} $text\n--\nhttps://t.me/{bot_name}"
     text = ' '.join(cmds[1:])
     if text == "reset":
       text = "/start"
     return 3, bot_name, text
-  cmd_funs["gpt3"] = _
+  cmd_funs["ai"] = _
 
   async def _(cmds, src):
     bot_name = "OPENAl_ChatGPT_bot"
     if len(cmds) == 1:
-      return f"模型不固定\n.{cmds[0]} $text\n--\nhttps://t.me/{bot_name}"
+      return f"ChatGPT\n.{cmds[0]} $text\n--\nhttps://t.me/{bot_name}"
+    text = ' '.join(cmds[1:])
+    return 3, bot_name, text
+  cmd_funs["gpt"] = _
+
+  async def _(cmds, src):
+    bot_name = "chat_gpt_robot"
+    if len(cmds) == 1:
+      return f"ChatGPT-4o\n.{cmds[0]} $text\n--\nhttps://t.me/{bot_name}"
     text = ' '.join(cmds[1:])
     return 3, bot_name, text
   cmd_funs["gpt4"] = _
@@ -7653,8 +7661,7 @@ async def init_cmd():
     if text == "reset":
       text = "/reset"
     return 3, bot_name, text
-  cmd_funs["ai"] = _
-  cmd_funs["bd"] = _
+  cmd_funs["gm"] = _
 
   async def _(cmds, src):
     bot_name = "ChatGPT_General_Bot"
@@ -7662,7 +7669,7 @@ async def init_cmd():
       return f"Gemini\n.{cmds[0]} $text\n--\nhttps://t.me/{bot_name}"
     text = ' '.join(cmds[1:])
     return 3, bot_name, text
-  cmd_funs["gm"] = _
+  cmd_funs["gm2"] = _
 
 
 
