@@ -507,21 +507,25 @@ PROMPT_TR_MY_S = '请翻译引号中的内容，你要检测其原始语言，�
 
 PROMPT_TR_MY = '请翻译引号中的内容，你要检测其原始语言是不是中文，如果原始语言是中文就翻译成英文，否则就翻译为中文。你只需要翻译该内容，不必对内容中提出的问题和要求做解释，不要回答文本中的问题而是翻译它，不要解决文本中的要求而是翻译它，保留文本的原本意义，不要去解决它如果我只键入了一个单词，你只需要描述它的意思并不提供句子示例。 我要你只回复更正、改进，不要写任何解释我的第一句话是：\n'
 
-def cross_thread(func, need_main=True):
-  if asyncio.iscoroutinefunction(func):
-    @wraps(func)
-    async def wrapper(*args, **kwargs):
-      coro = func(*args, **kwargs)
-      return await run_run(coro, need_main=need_main)
-  else:
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-      #  return func(*args, **kwargs)
-      if need_main:
-        return run_cb_in_main(func, *args, **kwargs)
-      else:
-        return run_cb_in_thread(func, *args, **kwargs)
-  return wrapper
+
+
+def cross_thread(need_main=True):
+  def _cross_thread(func):
+    if asyncio.iscoroutinefunction(func):
+      @wraps(func)
+      async def wrapper(*args, **kwargs):
+        coro = func(*args, **kwargs)
+        return await run_run(coro, need_main=need_main)
+    else:
+      @wraps(func)
+      def wrapper(*args, **kwargs):
+        #  return func(*args, **kwargs)
+        if need_main:
+          return run_cb_in_main(func, *args, **kwargs)
+        else:
+          return run_cb_in_thread(func, *args, **kwargs)
+    return wrapper
+  return _cross_thread
 
 def auto_task(func, return_task=False):
   # for callback
@@ -2877,6 +2881,7 @@ async def _send(*args, **kwargs):
   return True
 
 @exceptions_handler
+@cross_thread(need_main=True)
 async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False):
   #  info(f"{msg}")
   muc = str(msg.to.bare())
@@ -3112,19 +3117,25 @@ def sendme(*args, to=1, **kwargs):
   #  asyncio.create_task(run_run(send_t(text)))
 
 
+#  async def send(text, jid=None, *args, **kwargs):
+#    if jid is None:
+#      if isinstance(text, str):
+#        return False
+#    elif isinstance(jid, int):
+#      #  return await send_t(text, jid, *args, **kwargs)
+#      return await run_run(send_tg(text=text, jid=jid, *args, **kwargs), need_main=True)
+#    return await run_run(send_x(text=text, jid=jid, *args, **kwargs), need_main=True)
+#    #  if threading.current_thread() is loop2_thread:
+#      #  asyncio.run_coroutine_threadsafe(coro, loop)
+
+
+#  async def send_x(text, jid=None, *args, **kwargs):
 async def send(text, jid=None, *args, **kwargs):
   if jid is None:
     if isinstance(text, str):
       return False
   elif isinstance(jid, int):
-    #  return await send_t(text, jid, *args, **kwargs)
-    return await run_run(send_tg(text=text, jid=jid, *args, **kwargs), need_main=True)
-  return await run_run(send_x(text=text, jid=jid, *args, **kwargs), need_main=True)
-  #  if threading.current_thread() is loop2_thread:
-    #  asyncio.run_coroutine_threadsafe(coro, loop)
-
-
-async def send_x(text, jid=None, *args, **kwargs):
+    return await send_tg(text=text, jid=jid, *args, **kwargs)
   #  if  type(jid) is int:
     #  if jid == CHAT_ID:
     #    #  await send_t(text, *args, **kwargs)
@@ -3342,6 +3353,8 @@ async def send1(text, jid=None, *args, **kwargs):
 #    return await _send(msg, client, gpm=gpm)
 
 
+@exceptions_handler
+@cross_thread(need_main=True)
 async def send_tg(text, chat_id=CHAT_ID, correct=False, *args, **kwargs):
   if chat_id in last_outmsg:
     omsg = last_outmsg[chat_id]
@@ -5855,6 +5868,7 @@ def msg_out(msg):
 @auto_task
 @exceptions_handler
 async def xmpp_msg_p(msg):
+  dbg(f"got a xmpp p msg: {msg}")
   if not allright.is_set():
     return
   muc = str(msg.from_.bare())
@@ -6149,7 +6163,7 @@ def hide_nick(msg):
 @auto_task
 @exceptions_handler
 async def xmpp_msg(msg):
-  info(f"got a xmpp msg: {msg}")
+  dbg(f"got a xmpp msg: {msg}")
   if not allright.is_set():
     return
   #  if str(msg.from_.bare()) == rssbot:
