@@ -8657,7 +8657,7 @@ async def amain():
       info(f"测试通过副线程发信息")
       #  fu = t
       #  res = await t
-      t = loop2.create_task(send("通过副线程发信息成功(loop2)", jid=CHAT_ID))
+      t = loop2.create_task(send("通过副线程发信息成功(loop2)", jid=CHAT_ID)) # 测试结果: 必须放在下面这行代码上面，不然就无法执行task
 
       fu = asyncio.run_coroutine_threadsafe(send("通过副线程发信息成功", jid=CHAT_ID), loop2)
       while not fu.done():
