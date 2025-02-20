@@ -132,6 +132,9 @@ fi
       "image/gif")
           ext="gif"
           ;;
+      "image/webp")
+          ext="webp"
+          ;;
       "text/plain")
           ext="txt"
           ;;
@@ -171,6 +174,11 @@ fi
     else
       fno=${fno%.${ext}}
     fi
+    if [[ ${#fno} -gt 4 ]]; then
+      fno=${fno::4}
+      mv "$fn" "$HOME/t/$fno$fe"
+      fn="$HOME/t/$fno$fe"
+    fi
   fi
 
 
@@ -179,11 +187,6 @@ fi
     ft=$(file -i -b -- "$fn") 
     ft3=$(file -b -- "$fn") 
 
-    if [[ ${#fno} -gt 4 ]]; then
-      fno=${fno::4}
-      mv "$fn" "$HOME/t/$fno$fe"
-      fn="$HOME/t/$fno$fe"
-    fi
 
     # fe=$(file --extension -- "${fn}" | grep -o -P "[^\s/]+$")
     # fe=$(echo "$html" | file --extension -b -- -)
