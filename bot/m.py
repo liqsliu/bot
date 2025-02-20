@@ -1844,6 +1844,8 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
               e += d
             tmp += d 
             print(f"got{n}: {d}")
+          if d == eof:
+            break
           info(f"附带消息: {d}")
         except TimeoutError:
           info(f"no more")
