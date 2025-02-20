@@ -5028,6 +5028,13 @@ async def msgtout(event):
   if chat_id in last_outmsg:
     #  omsg = last_outmsg[chat_id]
     last_outmsg.pop(chat_id)
+  if chat_id in bridges:
+    src = bridges[chat_id]
+    if src in mtmsgsg:
+      mtmsgs = mtmsgsg[src]
+      if mtmsgs:
+        bridges.pop(chat_id)
+        mtmsgs.clear()
   text = msg.text
   info(f"tg out msg: {chat_id}: {text}")
   if text.startswith("$"):
