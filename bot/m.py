@@ -4765,14 +4765,16 @@ async def msgt(event):
       if msg.file:
         #  path = await tg_download_media(msg)
         path = await tg_download_media(msg, src=jid, max_wait_time=get_timeout(msg.file.size))
+        file_name = msg.file.name
         if path is not None:
           try:
             t = asyncio.create_task(backup(path))
             xmpp_url = await upload(path)
             url = await t
             if xmpp_url:
-              url = f"{xmpp_url}\n{url}"
-
+              url = f"- {xmpp_url}\n- {url}"
+            if file_name:
+              url = f" {file_name}\n{url}"
             if text:
               text = f"{text}\n--\nfile:\n{url}"
             else:
