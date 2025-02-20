@@ -2479,7 +2479,7 @@ async def save_data():
     return True
   else:
     #  warn("保存失败")
-    warn("保存失败", exc_info=True, stack_info=True)
+    info("保存失败", exc_info=True, stack_info=True)
 
 
 
@@ -8385,29 +8385,45 @@ async def stop_sub(p=None):
     if "myshell_p" in globals():
       p = myshell_p
     else:
+      warn("没找到需要停止的进程")
       return True
   if p.returncode is None:
-    if p.stdin is not None:
-      warn(f"尝试关闭stream stdin: {p.stdin}")
-      p.stdin.close()
-      await p.stdin.wait_closed()
-      await sleep(0.2)
-    p.terminate()
-    warn(f"尝试停止: {p}")
-    await sleep(1)
+    info(f"已经停止: {p}")
+    return
+  try:
+    if p is myshell_p:
+      info("clean out of myshell")
+      async with myshell_lock:
+        while not myshell_queue.empty():
+          res = await myshell_queue.get()
+          info(f"clean out from myshell: {res}")
+    if p.returncode is None:
+      if p.stdin is not None:
+        info(f"尝试关闭stream stdin: {p.stdin}")
+        p.stdin.close()
+        await p.stdin.wait_closed()
+        #  await sleep(0.5)
+    if p.returncode is None:
+      p.terminate()
+      info(f"尝试停止: {p}")
+      try:
+        await asyncio.wait_for(p.wait(), timeout=2)
+        return
+      except Exception as e:
+        info("timeout")
     if p.returncode is None:
       p.kill()
-      warn(f"强制停止: {p}")
-      await sleep(1)
-      if p.returncode is None:
-        err(f"强制停止失败: {p}")
-        return False
-      else:
-        err(f"强制停止成功: {p}")
-        return False
+      info(f"强制停止: {p}")
+      try:
+        await asyncio.wait_for(p.kill(), timeout=5)
+      except Exception as e:
+        info("timeout")
+  finally:
+    if p.returncode is None:
+      info(f"停止成功: {p} {p.returncode=}")
+      return True
     else:
-      err(f"已停止: {p} {p.returncode=}")
-  return True
+      warn(f"停止失败: {p}")
 
 
 async def after_init():
@@ -8584,21 +8600,28 @@ async def amain():
       send_log(f"启动成功，用时: {int(time.time()-start_time)}s")
       #  await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
 
-      #  while True:
-      #    if XB.running:
-      while XB.running:
-        await sleep(60)
-        continue
-      warn("xmppbot is not running, restart...")
-      await stop()
-      await save_data()
-      sys.exit(2)
+      try:
+        #  while True:
+        #    if XB.running:
+        while XB.running:
+          await sleep(60)
+          continue
+        warn("xmppbot is not running, restart...")
+        await stop()
+        await save_data()
+        sys.exit(2)
 
-      await UB.run_until_disconnected()
+        
+        await UB.run_until_disconnected()
+      finally:
+        info("断开bot连接前需要清理")
+        await stop()
+        await stop_sub()
+        info("清理完成")
 
     info("主程序结束")
   finally:
-    info("正在收尾...")
+    info("开始关闭")
     #  for j in asyncio.all_tasks(loop):
     #    if not j.done():
     #      if "@" in j.get_name():
@@ -8618,12 +8641,10 @@ async def amain():
     #  except Exception as e:
     #    pass
     #  await save_data()
-    await stop()
-    await stop_sub()
     #  loop.run_until_complete(stop())
     #  loop.run_until_complete(loop.shutdown_asyncgens())
     #  loop.close()
-    info("正在退出...")
+    info("bye")
 
 
 start_time=time.time()
