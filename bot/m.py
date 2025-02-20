@@ -8401,11 +8401,12 @@ async def join(jid=None, nick=None, client=None):
             return False
 
           elif e.args[0] == "{urn:ietf:params:xml:ns:xmpp-stanzas}conflict ('That nickname is already in use by another occupant')" or e.args[0] == '{urn:ietf:params:xml:ns:xmpp-stanzas}conflict' or '{urn:ietf:params:xml:ns:xmpp-stanzas}conflict' in e.args[0]:
+            onick = nick
             if '_' in nick:
               nick = f"{nick}%s" % generand(1)
             else:
               nick = f"{nick}_%s" % generand(1)
-            warn(f"群名字冲突{sum_try}: {myid} {jid} {nick} {e=}")
+            info(f"群名字冲突{sum_try}: {myid} {jid} {onick}->{nick} {e=}")
 
           else:
             info(f"进群失败{e.args}: {myid} {jid} {e=}")
