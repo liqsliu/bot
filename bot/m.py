@@ -1602,14 +1602,15 @@ def format_byte(num):
 #        #  info("close stdin ok")
 #      await send("结束", src)
 
-async def init_myshell():
-  return await run_run(_init_myshell(), False)
-  #  asyncio.create_task( run_run(_init_myshell(), False) )
-  #  await sleep(1)
-  #  if myshell_p.returncode is None:
-  #    return True
+#  async def init_myshell():
+#    return await run_run(_init_myshell(), False)
+#    #  asyncio.create_task( run_run(_init_myshell(), False) )
+#    #  await sleep(1)
+#    #  if myshell_p.returncode is None:
+#    #    return True
 
-async def _init_myshell():
+@cross_thread(need_main=False)
+async def init_myshell():
   #  if "myshell_p" not in globals():
   info("start my shell...")
   global myshell_p, myshell_lock, myshell_queue
@@ -1673,13 +1674,14 @@ async def _init_myshell():
   #      t2.cancel()
   return True
 
-@exceptions_handler
-async def myshell(*args,  **kwargs):
-  return await run_run(_myshell(*args,  **kwargs) , False)
+#  @exceptions_handler
+#  async def myshell(*args,  **kwargs):
+#    return await run_run(_myshell(*args,  **kwargs) , False)
 
 #  async def myshell(cmd, max_time=interval, src=None):
 @exceptions_handler
-async def _myshell(cmds, max_time=run_shell_time_max, src=None):
+@cross_thread(need_main=False)
+async def myshell(cmds, max_time=run_shell_time_max, src=None):
   # 有个问题，不知道何时运行结束，目前想到两种方案：bash -i和最后发送echo end然后等出现end提示。
   #  if await init_myshell():
   #    pass
@@ -1822,7 +1824,8 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
             #  if len(tmp) > MAX_MSG_BYTES_TG:
             #    warn(f"res is too loog: {len(tmp)} {tmp[:54]}")
             #    break
-            n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
+            #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
+            n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.01)
             if n == 1:
               if k == 0:
                 if d == eof:
@@ -1841,8 +1844,9 @@ async def _myshell(cmds, max_time=run_shell_time_max, src=None):
               e += d
             tmp += d 
             print(f"got{n}: {d}")
+          info(f"附带消息: {d}")
         except TimeoutError:
-          info(f"附带消息no more: {d}")
+          info(f"no more")
           # 至少还有一条待执行的命令
         #  if k > 2:
         if k > 1:
@@ -5350,7 +5354,7 @@ async def run_run(coro, need_main=False):
     if in_main_thread():
       return await coro
     elif loop2_thread.native_id == threading.get_native_id():
-      info(f"在副线程执行: {coro}")
+      #  info(f"在副线程执行: {coro}")
       fu = asyncio.run_coroutine_threadsafe(coro, loop)
       oloop = loop2
     else:
