@@ -4002,17 +4002,17 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     else:
       res = ''
     size = msg.file.size
-    await send("准备下载：{} {}".format(hbyte(size), res), src)
+    await send("准备下载：{} {}".format(hbyte(size), res), src, correct=True)
     timeout = get_timeout(size)
     if max_wait_time > timeout:
       timeout = max_wait_time
   else:
-    err(f"no file: {msg}")
+    warn(f"no file: {msg}")
     return
   #  await mt_send(f"{res} 下载中...", gateway=gateway)
   #  res = f"{res} 下载中..."
-  if src and res:
-    await send(res, src, xmpp_only=True, correct=True)
+  #  if src and res:
+  #    await send(res, src, xmpp_only=True, correct=True)
   #  last_time[src] = time.time()
   last_time = [time.time(), 0]
 
@@ -4749,7 +4749,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     path = await tg_download_media(tmsg, src=chat_id, max_wait_time=get_timeout(file_size))
     if path:
       if path.endswith(".tgs"):
-        warn(f"found tgs file: {path}")
+        await send(f"found tgs file: {path}", src, correct=True)
         fp = Path(path)
         filename = fp.name
         length = os.path.getsize(fp)
