@@ -526,15 +526,15 @@ def cross_thread(func, need_main=True):
 def auto_task(func, return_task=False):
   # for callback
   if asyncio.iscoroutinefunction(func):
+    err(f"fixme: {func}不是异步函数")
+    return
+  else:
     @wraps(func)
-    async def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs):
       t = asyncio.create_task(func(*args, **kwargs), name=f"auto_task_{func.__name__}")
       if return_task:
         return t
       return True
-  else:
-    err(f"fixme: {func}不是异步函数")
-    return
   return wrapper
 
 
@@ -6145,9 +6145,9 @@ def hide_nick(msg):
 #    asyncio.create_task(_xmpp_msg(msg))
 #    #  return
 #    #  info("\n>>> msg: %s\n" % msg)
-#  @exceptions_handler
 
 @auto_task
+@exceptions_handler
 async def xmpp_msg(msg):
   info(f"got a xmpp msg: {msg}")
   if not allright.is_set():
