@@ -4175,7 +4175,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     else:
       res = ''
     size = msg.file.size
-    await send("准备下载：{} {}".format(hbyte(size), res), src, correct=True)
+    await send("准备下载：{} {}".format(hbyte(size), res), src)
     timeout = get_timeout(size)
     if max_wait_time > timeout:
       timeout = max_wait_time
