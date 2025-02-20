@@ -5852,8 +5852,8 @@ def msg_out(msg):
 #      return
 #    asyncio.create_task(_xmpp_msg_p(msg))
 
+#  @exceptions_handler
 @auto_task
-@exceptions_handler
 async def xmpp_msg_p(msg):
   if not allright.is_set():
     return
