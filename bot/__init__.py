@@ -89,8 +89,6 @@ formatter = colorlog.ColoredFormatter(
 )
 handler = logging.StreamHandler()
 handler.setFormatter(formatter)
-logger.addHandler(handler)
-#  logging.basicConfig(format=LOG_FORMAT, datefmt="%H:%M:%S")
 
 
 LOGGER = logging.getLogger()
@@ -101,6 +99,8 @@ debug = False
 debug = True
 
 if debug:
+#  logging.basicConfig(format=LOG_FORMAT, datefmt="%H:%M:%S")
+  logger.addHandler(handler)
   LOGGER.setLevel(logging.INFO)
   OUT = None
   ERR = None
