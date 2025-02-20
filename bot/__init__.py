@@ -38,6 +38,7 @@ LOG_FORMAT = "%(levelname)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(linen
 class CustomFormatter(colorlog.ColoredFormatter):
   def format(self, record):
     if record.name == "bot.m":
+      print("got log from my bot")
       record.name = ""
       # 获取调用栈中的前一个帧
       #  if caller_frame.f_back is not None:
@@ -81,24 +82,24 @@ debug = False
 debug = True
 
 if debug:
-  #  #  formatter = colorlog.ColoredFormatter(
-  #  formatter = CustomFormatter(
-  #      #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
-  #  "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s%[%(module)s.%(funcName)s:%(lineno)d]%(message)s",
-  #      #  datefmt='%m-%d %H:%M:%S',
-  #      datefmt='%H:%M:%S',
-  #      log_colors={
-  #          'DEBUG': 'blue',
-  #          'INFO': 'green',
-  #          'WARNING': 'yellow',
-  #          'ERROR': 'red',
-  #          'CRITICAL': 'bold_red',
-  #      }
-  #  )
-  #  handler = logging.StreamHandler()
-  #  handler.setFormatter(formatter)
-  #  logger.addHandler(handler)
-  logging.basicConfig(format=LOG_FORMAT, datefmt="%H:%M:%S")
+  #  formatter = colorlog.ColoredFormatter(
+  formatter = CustomFormatter(
+      #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
+  "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s%[%(module)s.%(funcName)s:%(lineno)d]%(message)s",
+      #  datefmt='%m-%d %H:%M:%S',
+      datefmt='%H:%M:%S',
+      log_colors={
+          'DEBUG': 'blue',
+          'INFO': 'green',
+          'WARNING': 'yellow',
+          'ERROR': 'red',
+          'CRITICAL': 'bold_red',
+      }
+  )
+  handler = logging.StreamHandler()
+  handler.setFormatter(formatter)
+  logger.addHandler(handler)
+  #  logging.basicConfig(format=LOG_FORMAT, datefmt="%H:%M:%S")
   LOGGER.setLevel(logging.INFO)
   OUT = None
   ERR = None
