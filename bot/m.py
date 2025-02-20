@@ -526,15 +526,15 @@ def cross_thread(func, need_main=True):
 def auto_task(func, return_task=False):
   # for callback
   if asyncio.iscoroutinefunction(func):
-    err(f"fixme: {func}不是异步函数")
-    return
-  else:
     @wraps(func)
     def wrapper(*args, **kwargs):
       t = asyncio.create_task(func(*args, **kwargs), name=f"auto_task_{func.__name__}")
       if return_task:
         return t
       return True
+  else:
+    err(f"fixme: {func}不是异步函数")
+    return
   return wrapper
 
 
