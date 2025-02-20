@@ -7792,7 +7792,10 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           #  mtmsgs[mid][0] = name
           #  mid = await send_to_tg_bot(res[2], res[1])
           #  mid = await send(res[2], res[1])
-          gid = await send_tg(res[2], res[1], return_id=True)
+          bot_name = res[1]
+          peer = await get_entity(bot_name)
+          pid = await UB.get_peer_id(peer)
+          gid = await send_tg(res[2], pid, return_id=True)
           mtmsgs[gid] = [name]
           #  gid_src[gid] = src
         elif res[0] == 3:
@@ -7822,7 +7825,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
             bridges[pid] = src
           #  gid = await send_to_tg_bot(text, pid)
           #  gid = await send_to_tg_bot(text, bot_name)
-          gid = await send_tg(text, peer, return_id=True)
+          gid = await send_tg(text, pid, return_id=True)
 
           # 加name是为了处理tg in消息时可以知道该消息是回复谁的
           mtmsgs[gid] = [name]
