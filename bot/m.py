@@ -3153,7 +3153,7 @@ async def send(text, jid=None, *args, **kwargs):
     if isinstance(text, str):
       return False
   elif isinstance(jid, int):
-    return await send_tg(text=text, jid=jid, *args, **kwargs)
+    return await send_tg(text=text, chat_id=jid, *args, **kwargs)
   #  if  type(jid) is int:
     #  if jid == CHAT_ID:
     #    #  await send_t(text, *args, **kwargs)
