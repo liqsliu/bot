@@ -4531,6 +4531,30 @@ async def print_tg_msg(event, to_xmpp=False):
 
 music_bot_state = {}
 
+def change_bridge(bot_name, src):
+  peer = await get_entity(bot_name)
+  pid = await UB.get_peer_id(peer)
+  if src not in mtmsgsg:
+    mtmsgsg[src] = {}
+  mtmsgs = mtmsgsg[src]
+
+  if pid not in bridges:
+    bridges[pid] = src
+  target = bridges[pid]
+  if target != src:
+    if type(target) is not dict:
+      await send("waiting", src)
+      if mtmsgs:
+        await sleep(5)
+      info(f"stop link to {target}")
+      await send("bye", target)
+      info(f"link to {src}")
+      await send("hi", src, correct=True)
+    mtmsgs.clear()
+    bridges[pid] = src
+  return mtmsgs, pid
+
+
 
 @exceptions_handler
 async def msgt(event):
@@ -4542,10 +4566,10 @@ async def msgt(event):
   #  if event.chat_id in id2gateway:
   #  if chat_id == gpt_bot:
   #    pass
-  if chat_id not in bridges:
-    info(f"not found src for {chat_id=}")
-    return
   msg = event.message
+  if chat_id not in bridges:
+    info(f"not found src for {chat_id=} {short(msg.text)}")
+    return
   target = bridges[chat_id]
   if isinstance(target, dict):
     bridges.pop(target)
@@ -7785,44 +7809,20 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       if type(res) is tuple:
         if res[0] == 1:
           #  mid = res[1]
-          if src not in mtmsgsg:
-            mtmsgsg[src] = {}
-          mtmsgs = mtmsgsg[src]
-          mtmsgs.clear()
+          mtmsgs, pid = change_bridge(res[1], src)
           #  mtmsgs[mid][0] = name
           #  mid = await send_to_tg_bot(res[2], res[1])
           #  mid = await send(res[2], res[1])
-          bot_name = res[1]
-          peer = await get_entity(bot_name)
-          pid = await UB.get_peer_id(peer)
           gid = await send_tg(res[2], pid, return_id=True)
           mtmsgs[gid] = [name]
           #  gid_src[gid] = src
         elif res[0] == 3:
-          bot_name = res[1]
+          #  bot_name = res[1]
           text = res[2]
           #  e = await UB.get_input_entity(bot_name)
-          peer = await get_entity(bot_name)
-          pid = await UB.get_peer_id(peer)
 
-          if src not in mtmsgsg:
-            mtmsgsg[src] = {}
-          mtmsgs = mtmsgsg[src]
+          mtmsgs, pid = change_bridge(res[1], src)
 
-          if pid not in bridges:
-            bridges[pid] = src
-          target = bridges[pid]
-          if target != src:
-            if type(target) is not dict:
-              await send("waiting", src)
-              if mtmsgs:
-                await sleep(5)
-              info(f"stop link to {target}")
-              await send("bye", target)
-              info(f"link to {src}")
-              await send("hi", src, correct=True)
-            mtmsgs.clear()
-            bridges[pid] = src
           #  gid = await send_to_tg_bot(text, pid)
           #  gid = await send_to_tg_bot(text, bot_name)
           gid = await send_tg(text, pid, return_id=True)
