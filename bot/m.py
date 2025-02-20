@@ -523,12 +523,14 @@ def cross_thread(func, need_main=True):
         return run_cb_in_thread(func, *args, **kwargs)
   return wrapper
 
-def auto_task(func):
+def auto_task(func, return_task=False):
   # for callback
   if asyncio.iscoroutinefunction(func):
     @wraps(func)
     async def wrapper(*args, **kwargs):
-      asyncio.create_task(func(*args, **kwargs), name=f"auto_task_{func.__name__}")
+      t = asyncio.create_task(func(*args, **kwargs), name=f"auto_task_{func.__name__}")
+      if return_task:
+        return t
       return True
   else:
     err(f"fixme: {func}不是异步函数")
@@ -3042,26 +3044,46 @@ def send_log(text, jid=CHAT_ID, wait=1):
     if not send_log_task.done():
       #  wait += 5
       wait = send_log_task
-      info(f"send_log is busy: {text}")
     elif send_log_task.result() is False:
-      info(f"send_log is not work({send_log_task.result()}): {text}")
+      warn(f"send_log is not work({send_log_task.result()}): {text}")
       return False
     elif send_log_task.result() is None:
-      info(f"send_log is not work({send_log_task.result()}): {text}")
+      warn(f"send_log is not work({send_log_task.result()}): {text}")
       return False
     else:
       pass
   send_log_task = asyncio.create_task(_send_log(text, jid=jid, wait=wait))
   return send_log_task
 
+
 async def _send_log(text, jid=CHAT_ID, wait=1):
+  global send_log_task
   if isinstance(wait, int):
     await sleep(wait)
   else:
+    info(f"send_log is waiting: {text}")
     await wait
+    if send_log_task is not None:
+      send_log_task = None
+    else:
+      for i in range(9):
+        if i > 5:
+          warn("timeout: {text}")
+          return False
+        if send_log_task is not None:
+          if send_log_task.done():
+            if send_log_task.result() is not True:
+              return False
+          await sleep(wait+1)
+        else:
+          break
+        #  if send_log_task is not None:
+
   #  t = asyncio.create_task(send(text, jid=CHAT_ID))
   ts = []
   t = asyncio.create_task(send(text, jid=jid))
+  if send_log_task is None:
+    send_log_task = t
   ts.append(t)
   done, pending = await asyncio.wait(ts, timeout=60)
   if pending:
@@ -3070,9 +3092,12 @@ async def _send_log(text, jid=CHAT_ID, wait=1):
   else:
     for t in done:
       if t.result() is False or t.result() is None:
-        info(f"send_log is bad: {t.result()}")
+        send_log_task = t
+        warn(f"send_log is bad: {t.result()}")
         return False
       else:
+        if send_log_task is t:
+          send_log_task = None
         info(f"send_log is ok: {t.result()}")
     return True
   #  asyncio.create_task(mt_send_for_long_text(text))
