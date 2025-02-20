@@ -4538,7 +4538,7 @@ async def change_bridge(bot_name, src):
       info(f"stop link to {target}")
       await send("bye", target)
       info(f"link to {src}")
-      await send("hi", src, correct=True)
+      await send("ok", src, correct=True)
     mtmsgs.clear()
     bridges[pid] = src
   return mtmsgs, pid
@@ -7836,7 +7836,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       res = await send_cmd_to_bash(src, name, text)
       if res:
         return res
-  elif text.isnumeric():
+  elif text.isnumeric() and bridges[music_bot] != src:
     if src in mtmsgsg:
       mtmsgs = mtmsgsg[src]
     else:
