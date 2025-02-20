@@ -5286,6 +5286,7 @@ async def run_run(coro, need_main=False):
     if in_main_thread():
       return await coro
     elif loop2_thread.native_id == threading.get_native_id():
+      info(f"在副线程执行: {coro}")
       fu = asyncio.run_coroutine_threadsafe(coro, loop)
       oloop = loop2
     else:
@@ -8658,7 +8659,7 @@ async def amain():
       mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
 
       info(f"测试通过副线程发信息")
-      #  t = loop2.create_task(send("通过副线程发信息成功", jid=CHAT_ID))
+      #  t = loop2.create_task(send("通过副线程发信息成功", jid=CHAT_ID)) # 不行，结果就是任务卡住，也没报错
       #  res = await t
       #  fu = t
       fu = asyncio.run_coroutine_threadsafe(send("通过副线程发信息成功", jid=CHAT_ID), loop2)
