@@ -38,7 +38,7 @@ LOG_FILE = WORK_DIR / 'last_run.log'
 class CustomFormatter(colorlog.ColoredFormatter):
   def format(self, record):
     if record.name == "bot.m":
-      record.name = ""
+      #  record.name = ""
       # 获取调用栈中的前一个帧
       #  if caller_frame.f_back is not None:
       #    caller_frame = caller_frame.f_back
