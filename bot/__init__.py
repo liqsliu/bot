@@ -1,4 +1,6 @@
 import logging
+LOGGER = logging.getLogger()
+logger=LOGGER
 
 import colorlog
 from pathlib import Path
@@ -23,6 +25,8 @@ LOG_FILE = WORK_DIR / 'last_run.log'
 # LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(module)s.%(funcName)s:%(lineno)d]: %(message)s"
 #  LOG_FORMAT = "%(levelname)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(lineno)d] %(message)s"
 #  FORMATTER: logging.Formatter = logging.Formatter(LOG_FORMAT)
+#  LOG_FORMAT = "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s",
+LOG_FORMAT="%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s[%(module)s.%(funcName)s:%(lineno)d]%(message)s"
 
 
 #  levelname_map = {
@@ -66,17 +70,15 @@ class CustomFormatter(colorlog.ColoredFormatter):
     return super().format(record)
 
 #  formatter = CustomFormatter("%(asctime)s [%(levelname)s] %(name)s [%(module)s.%(funcName)s:%(lineno)d]: %(message)s")
-
 #  formatter = CustomFormatter(LOG_FORMAT, datefmt="%H:%M:%S")
 #  logging.Formatter = CustomFormatter
 
 
-#  LOG_FORMAT = "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s [%(module)s.%(funcName)s:%(lineno)d] %(message)s",
 
 #  formatter = colorlog.ColoredFormatter(
 formatter = CustomFormatter(
-    '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
-#  "%(log_color)s%(levelname)s%(reset)s %(asctime)s %(name)s%[%(module)s.%(funcName)s:%(lineno)d]%(message)s",
+    #  '%(asctime)s - %(log_color)s%(levelname)-8s%(reset)s - %(name)s - %(funcName)s - Line %(lineno)d - %(message)s',
+LOG_FORMAT,
     #  datefmt='%m-%d %H:%M:%S',
     datefmt='%H:%M:%S',
     log_colors={
@@ -92,8 +94,6 @@ handler.setFormatter(formatter)
 
 
 
-LOGGER = logging.getLogger()
-logger=LOGGER
 
 
 debug = False
@@ -105,29 +105,6 @@ if debug:
   LOGGER.setLevel(logging.INFO)
   OUT = None
   ERR = None
-elif False:
-  handler = logging.StreamHandler()
-  handler.setFormatter(formatter)
-
-  logger.addHandler(handler)
-  LOGGER.setLevel(logging.INFO)
-  OUT = None
-  ERR = None
-
-elif False:
-  logging.basicConfig(format=LOG_FORMAT, datefmt="%H:%M:%S")
-  LOGGER.setLevel(logging.INFO)
-  OUT = None
-  ERR = None
-
-
-
-elif False:
-  logging.basicConfig(format=LOG_FORMAT)
-  LOGGER.setLevel(logging.INFO)
-  OUT = None
-  ERR = None
-
 
 elif False:
   # https://docs.python.org/zh-cn/3/library/logging.html#logging.basicConfig
