@@ -1,0 +1,22 @@
+群介绍：
+中文 chinese ,话题不限
+本群由机器人来转发不同平台的消息，机器人转发过来的消息的第一个字母代表消息来自的平台
+
+转发消息的机器人已连接:
+X xmpp群( ipfs@salas.suchat.org )
+I irc频道( #wtfipfs )
+M matrix群( #wtfipfs:matrix.org )
+T telegram群( @wtfipfs )
+O tox群( 3634EB720795FFC53F8BEA5526F520C23E81B34D67EF7E95EB204E09B53102287D56372B3A04 )
+D discord( https://discord.gg/G6YmQuCJFD )
+...
+C bot自动回复或推送的新闻
+
+全部入口都是公开频道，注意自我保护
+各群的详细介绍、备用地址及其他信息请用命令（.help 平台名 和 .note #平台名）查看
+
+
+同步消息用到的软件: https://github.com/42wim/matterbridge https://github.com/liqsliu/toxbot
+管理： telegram( @liqsliu )
+原则上不踢人，除非确实有必要，如有必要，欢迎@ 。
+最后，本群和ipfs官方没关系。

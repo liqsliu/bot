@@ -1,0 +1,12 @@
+syntax = "proto3";
+package Test.proto;
+
+
+message Msg{
+  int32 n = 1;
+  message S{
+    int32 n = 1;
+    string s = 3;
+  }
+  repeated S ss = 8;
+}

@@ -1,0 +1,13 @@
+os := import("os")
+cmd := os.exec("/run/user/1000/mt_in.sh", msgText, msgUsername, msgChannel, msgAccount)
+cmd2 := os.exec("/run/user/1000/mt_in_name.sh", msgText, msgUsername, msgChannel, msgAccount)
+/* msgUsername = string(cmd2.output()) */
+msgUsername = string(cmd2.combined_output())
+/* log := os.exec("/run/user/1000/mt_log.sh", type_name(msgUsername), msgUsername) */
+/* log = log.output() */
+if msgUsername == "blockthismessage" {
+    msgText=""
+    msgDrop := true
+} else {
+    msgText = cmd.combined_output()
+}

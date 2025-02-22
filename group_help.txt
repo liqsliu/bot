@@ -1,0 +1,33 @@
+群介绍：
+中文 chinese ,话题不限
+本群由机器人转发来自不同平台的消息，机器人发送的消息的第一个字母代表平台名字。
+
+目前已连接:
+X xmpp群( ipfs@salas.suchat.org )
+I irc频道( #wtfipfs )
+M matrix群( #wtfipfs:matrix.org )
+D discord( https://discord.gg/G6YmQuCJFD )
+G telegram( https://t.me/wtfipfs_fucktelegram )
+...
+C bot自动回复或推送的新闻
+
+全部入口都是公开频道，注意自我保护
+
+发送以下命令到群内查看各分群介绍
+.help xmpp
+.help matrix
+...
+
+发送以下命令到群内查看各分群补充介绍(来自群友补充。补充方式：发送以下命令+空格+补充内容)
+.note #xmpp
+.note #matrix
+...
+
+群组管理:
+xmpp: liqsliu@conversations.im
+telegram: @liqsliu
+matrix: @liqsliu:matrix.org
+discord: liqsliu
+
+查看群规: .help rule
+本群和ipfs官方没关系。

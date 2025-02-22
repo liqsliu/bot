@@ -1,0 +1,10 @@
+X liqsliu: ipfs@salas.suchat.org #zh #中文 #多平台 #公开群 #发言无需申请 #有管理 话题不限 地址(地位相同，互为镜像频道):\nxmpp:ipfs@salas.suchat.org?join\nxmpp:wtfipfs@conference.conversations.im\nxmpp:wtfipfs@muc.pimux.de?join\nxmpp:wtfipfs@chat.yax.im?join\nxmpp:wtfipfs@conference.xmpp.jp?join\nadmin\nliqsliu@jabb3r.org
+X liqsliu: wtfipfs_rss@salas.suchat.org #rss #zh #中文 #公开群 #发言无需申请 #有管理 #bot RSS\n镜像 ipfsrss@chat.yax.im\nliqsliu@jabb3r.org
+X liqsliu: xmpp新手室@salas.suchat.org #zh #中文 #公开群 #发言无需申请 #有管理 xmpp新手群，维护了一个xmpp中文群列表\n管理 xmpp:tret9@muc.pimux.de?join
+X liqsliu: tret9@muc.pimux.de #zh #中文 #公开群 #发言无需申请 #有管理 linux 自由软件技术
+X liqsliu: 这就是大清朝议@conference.conversations.im #zh #中文 #公开群 #发言无需申请 这就是大清
+X liqsliu: acg@muc.pimux.de #rss #acg #zh #中文 #公开群 ACG rss
+X liqsliu: #wtfipfs#matrix.org@matrix.org #zh #中文 #多平台 #公开群 #发言无需申请 #jid公开 #无管理 话题不限 镜像:\nxmpp:#ipfs#mozilla.org@matrix.org?join\nxmpp:#wtfipfs#matrix.org@aria-net.org?join
+X liqsliu: wtfipfs_bot@salas.suchat.org #zh #中文 #公开群 #发言无需申请 #有管理 #bot bot测试 镜像 wtfipfs_bot@conference.conversations.im 管理 liqsliu@jabb3r.org 
+X liqsliu: loqgsv@conference.jabb3r.de 刷机经验交流聊天室，大家可以在这个聊天室讨论如何挑选刷机要用的手机型号，讨论如何刷机，以及挑选为刷机准备的电脑型号和电脑系统。
+X liqsliu_suchat: uisdjakd233@conference.conversations.im [11:32:24] <一个认真宣传XMPP的同志> 本群用于讨论编辑《XMPP宣传手册》的编辑和播相关内容。《XMPP宣传手册》需要教学如何刷自由软件系统、如何使用Tor匿名代理、如何使用匿名加密货币、如何使用自由软件虚拟机/虚拟容器、如何用匿名加密货币购买私有平台账号、如何注册使用匿名邮箱、如何有效的在私有平台上宣传XMPP(包括学会注册使用各类系统的XMPP客户端以便提供教学)，本手册的编辑工作没有任何报酬，欢迎广大同志的加入，为无产阶级革命事业贡献力量。\n群聊地址:

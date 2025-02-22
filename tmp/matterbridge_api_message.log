@@ -1,0 +1,70 @@
+
+
+curl -s http://localhost:4242/api/messages
+# api res:
+#
+
+#[
+# {
+#  "text": "bot还没好",
+#  "channel": "-1001137152439",
+#  "username": "[telegram - liqsliu] ",
+#  "userid": "113130580",
+#  "avatar": "",
+#  "account": "telegram.mytelegram",
+#  "event": "",
+#  "protocol": "telegram",
+#  "gateway": "gateway2",
+#  "parent_id": "",
+#  "timestamp": "2021-07-19T09:06:51.745092662+08:00",
+#  "id": "",
+#  "Extra": {}
+# }
+#]
+#
+
+
+
+cur http://localhost:4242/api/messages
+[
+ {
+  "text": "test",
+  "channel": "general",
+  "username": "wim",
+  "userid": "227183123686215680",
+  "avatar": "https://cdn.discordapp.com/avatars/227183947686215680/bd0e6c7fe63274597a4684884891b79d.jpg",
+  "account": "discord.mydiscord",
+  "event": "",
+  "protocol": "",
+  "gateway": "gateway1",
+  "parent_id": "",
+  "timestamp": "2019-01-09T22:37:18.647108348+01:00",
+  "id": "",
+  "Extra": null
+ }
+]
+
+
+
+
+[
+ {
+  "text": "bot还没好",
+  "channel": "-1001137152439",
+  "username": "[telegram - liqsliu] ",
+  "userid": "113130580",
+  "avatar": "",
+  "account": "telegram.mytelegram",
+  "event": "",
+  "protocol": "telegram",
+  "gateway": "gateway2",
+  "parent_id": "",
+  "timestamp": "2021-07-19T09:06:51.745092662+08:00",
+  "id": "",
+  "Extra": {}
+ }
+]
+
+
+
+curl -XPOST -H 'Content-Type: application/json'  -d '{"text":"test","username":"bot","gateway":"gateway3"}' http://localhost:4243/api/message

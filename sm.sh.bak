@@ -1,0 +1,324 @@
+#!/bin/bash
+#send msg of tox(change port for other app) to matterbridge api
+
+export SH_PATH=${SH_PATH:-$(cd $(dirname ${BASH_SOURCE[0]}) || exit; pwd )}
+MAX_BYTES=1371 #tox
+
+
+export LOG="$HOME/mt.log"
+[[ -e "$SH_PATH/DEBUG" ]] && export LOG_FILE=$LOG || export LOG_FILE=/dev/null
+
+LOG_FILE_E="$LOG"
+
+username=$1
+text=$2
+# [[ "$username" == "bot" || "$username" == "ToxBot" ]] && exit 0
+#api_port=${3:-4242}
+api_port=${3:-4241}
+gateway=${4-gateway1}
+[[ -z "$username" ]] && username="null"
+
+[[ -z "$text" ]] && exit 1
+#source /tmp/init.sh
+
+
+# if [[ "${username:0:2}" == "C " ]]
+# then
+#   :
+# elif [[ "${username:0:2}" == "T " ]]
+# then
+#   :
+# else
+#   :
+#   username="O $username"
+# fi
+
+# touch /tmp/test_sm.sh
+# echo "$*" > /tmp/test_sm.sh.txt
+
+wtf1(){
+  local text=$1
+text="$(echo "$text" | cut -d '\' --output-delimiter='\\' -f 1- )"
+echo "$text"
+}
+wtf(){
+  local text=$1
+text="$(echo "$text" | cut -d '\' --output-delimiter='\\' -f 1- )"
+  text=$(echo "$text" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g' -e 's/\r//g' -e 's/\t/\\t/g' | sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g")
+[[ $( echo "$text" | wc -l ) -gt 1 ]] && text=$(echo "$text" | awk '{printf "%s\\n", $0}' | sed "s/\\\\n$//g")
+echo "$text"
+}
+
+gene_res(){
+local text=$1
+local gateway=${2-gateway1}
+local username=${3-C bot: }
+# text=$(bash "$SH_PATH/change_long_text.sh" "$text" 4096)
+# text=$(bash "$SH_PATH/change_long_text.sh" "$text" 1371)
+# text=$(bash "$SH_PATH/change_long_text.sh" "$text" 1370)
+cat <<EOF
+{"text":"${text}","username":"${username}","gateway":"${gateway}"}
+EOF
+}
+
+_send(){
+  local text=$1
+  # local text_en=$(bash "$SH_PATH/"gene_res.sh "$text" "$gateway" "$username")
+  local text_en=$(gene_res "$text" "$gateway" "$username")
+  echo "sm.sh: text_en: $text_en" >> $LOG_FILE
+# res=$(curl -m 9 -s -XPOST -H 'Content-Type: application/json' -d "$text_en" http://127.0.0.1:$api_port/api/message)
+# curl -m 3 -s -XPOST -H 'Content-Type: application/json' -d "$text_en" http://127.0.0.1:$api_port/api/message || {
+#   echo "sm.sh: send return code: $?" >> $LOG_FILE
+#   export  >> $LOG_FILE
+# echo curl -m 9 -s -XPOST -H 'Content-Type: application/json' -d "$text_en" http://127.0.0.1:$api_port/api/message >> $LOG_FILE
+# } && echo "sm.sh: send return code: $?" >> $LOG_FILE
+  unset http_proxy https_proxy
+  curl -m 9 -s -XPOST -H 'Content-Type: application/json' -d "$text_en" http://127.0.0.1:$api_port/api/message || {
+  local e=$?
+    {
+    echo "E: $e"
+    echo "fail to send msg to mt: $text"
+    echo "username: $username"
+    echo "gateway: $gateway"
+    echo "api_port: $api_port"
+    # echo "export:"
+    # export
+
+    } &>> $LOG
+  return $e
+  }
+}
+
+
+
+send(){
+  # local MAX_BYTES=1371
+  # local MAX_BYTES=1024
+  local ulength=$(echo -n "$username"|wc -c)
+  local MAX_BYTES=$[MAX_BYTES-9-ulength]
+  local text=$1
+  # text=$(wtf1 "$text")
+  text_en=$(wtf "$text")
+  local length=$(echo -n "$text_en"|wc -c)
+  # if [[ ${#text} -le $MAX_BYTES ]]; then
+  if [[ $length -le $MAX_BYTES ]]; then
+echo "sm.sh: the length of msg is ok: $length:${text:0:256}..." &>> $LOG
+    _send "$text_en"
+    return $?
+  fi
+  echo "sm.sh: text is too long: $length:${text:0:128}..." &>> $LOG
+  # shift
+  local i=0
+  local now=0
+  local n=$[length/MAX_BYTES]
+  if [[ $[length%MAX_BYTES] -ne 0 ]]; then
+    let n++
+  fi
+  while true
+  do
+    # now=$[i*MAX_BYTES]
+    # if [[ $((i*MAX_BYTES)) -ge ${#text} ]]; then
+    if [[ $now -ge ${#text} ]]; then
+      return 0
+      break
+    fi
+    tmp=${text:$now:$MAX_BYTES}
+    tmp0=$tmp
+    local need_1=0
+    while true
+    do
+      if [[ "${tmp: -1}" != $'\n' ]]; then
+        if [[ "${tmp: -1}" != $'\t' ]]; then
+          # if [[ "${tmp: -1}" != " " ]]; then
+            if [[ -n "$(echo "$tmp"|sed -e '$d' -e '/^ *$/d')" ]]; then
+              tmp=$(echo "$tmp"|sed '$d')
+              need_1=1
+            fi
+          # fi
+        fi
+      fi
+      tmp1=$(wtf "$tmp")
+      # if [[ ${#tmp1} -gt $MAX_BYTES ]]; then
+      if [[ $(echo -n "$tmp1"|wc -c) -gt $MAX_BYTES ]]; then
+        tmp=${tmp::-1}
+        if [[ $need_1 -eq 1 ]]; then
+              need_1=0
+        fi
+      else
+        break
+      fi
+    done
+    if [[ $need_1 -eq 1 ]]; then
+      let now++
+    fi
+    now=$[now+${#tmp}]
+
+    let i++
+    echo "send...$i/$n" &>> $LOG
+
+    local res=$(_send "$tmp1") || {
+      echo "E: $?" >> $LOG
+      echo "fail to send msg to mt$i/$n: $tmp" >> $LOG
+      echo "res: $res" >> $LOG
+      if [[ -n "$res" ]]; then
+        echo "$res"
+      fi
+      return $?
+    }
+
+    # sleep 1
+    username=""
+    if [[ $i -ge 16 ]]; then
+      echo "E: msg is too long, stop sending...$i/$n" &>> $LOG
+      _send "E: msg is too long, stop sending, now $i/$n" &>> $LOG
+      return 1
+    fi
+  done
+}
+
+_push_err(){
+  local res=$1
+  if [[ "$(echo "$res" | jq ".message")" != "null" ]]; then
+    date &>> $LOG_FILE
+    echo "res :|$res|" >> $LOG
+    msg=$(echo "$res" | jq ".message") && {
+      echo "E: mt api res msg: $msg" &>> $LOG
+      send "E: mt api res msg: $msg"
+      return $?
+    }
+    # res=$(send "E: mt api: $res") && return $?
+    if [[ "$(send "E: mt api: $msg res: $res" | jq ".message")" != "null" ]]; then
+      if [[ "$(send "E: mt api: $msg res_b64: $(echo "$res"|base64)" | jq ".message")" != "null" ]]; then
+        if [[ "$(send "E: can't send res to mt api: $msg" | jq ".message")" != "null" ]]; then
+          if [[ "$(send "E: can't send res to mt api, msg_b64: $(echo "$msg"|base64)" | jq ".message")" != "null" ]]; then
+            echo "E: can't send text and err msg to mt api: |$msg|$res|" >> $LOG_FILE
+            if [[ "$(send "E: can't send res and err msg to mt api" | jq ".message")" != "null" ]]; then
+              exit 1
+            fi
+          fi
+        fi
+      fi
+    fi
+  fi
+}
+
+
+push_err(){
+  local res=$1
+
+  if [[ -z "$res" ]]; then
+    echo "res is empty" &>> $LOG_FILE
+    return
+  elif ! echo "$res" | jq ".message" &>/dev/null; then
+    echo "E: $res" &>> $LOG_FILE
+    res=$(send "$res") || {
+      send "wtf: failed to send res"
+    }
+  elif [[ "$(echo "$res" | jq ".message")" != "null" ]]; then
+    _push_err "$res"
+    # send "E: $(echo "$res" | jq ".message")"
+  else
+    if [[ -z "$(echo "$res" | jq -r ".text")" ]]; then
+      echo "the content of last msg is empty" &>> $LOG_FILE
+      send "the content of last msg is empty"
+    fi
+  fi
+
+}
+
+
+# send "$text"
+# exit 0
+username=$(wtf "$username")
+
+
+
+_send(){
+
+local t=0
+res=$(__send "$text" 2>"$SH_PATH/error") && push_err "$res" || {
+  e=$?
+  let t++
+  echo "E: fail to send text(1)" &>> $LOG
+# [[ -f "$SH_PATH/error" ]] && {
+[[ -f "$SH_PATH/error" ]] && [[ -n "$(cat $SH_PATH/error)" ]] && {
+  set -x
+  __send "$text (E: $e)" 2>"$SH_PATH/error" 1>"$SH_PATH/out"
+  set +x
+  err=$(cat "$SH_PATH/error") && rm "$SH_PATH/error"
+  out=$(cat "$SH_PATH/out") && rm "$SH_PATH/out"
+  echo "E: $e" &>> $LOG
+  echo "err: $err" &>> $LOG
+  echo "out: $out" &>> $LOG
+  echo "res: $res" &>> $LOG
+#   echo "E: $e
+# fail to run cmd
+# text=$text
+# error=$err
+# out=$out
+# " >> $LOG
+[[ -n "$err" ]] && {
+  let t++
+}
+
+}
+  # send "E: failed to send text: ${text:0:10}...|$e|$r"
+}
+# echo "res: $res"
+# echo "json: $text"
+# echo "res :|$res|" >> ~/tera/mt_msg.log
+[[ $t -eq 2 ]] && {
+_send "E: $e: ${text:0:64}...|$r|$res" 2>> $LOG 1>> $LOG_FILE
+}
+if [[ "$(echo "$res" | jq ".message")" != "null" ]]; then
+_send "E: $e: ${text:0:64}...|$r|$res" 2>> $LOG 1>> $LOG_FILE
+fi
+
+}
+
+
+
+
+
+send "$text"
+exit 0
+
+t=0
+res=$(send "$text" 2>"$SH_PATH/error") && push_err "$res" || {
+  e=$?
+  let t++
+  echo "E: fail to send text(1)" &>> $LOG
+# [[ -f "$SH_PATH/error" ]] && {
+[[ -f "$SH_PATH/error" ]] && [[ -n "$(cat $SH_PATH/error)" ]] && {
+  set -x
+  send "$text (E: $e)" 2>"$SH_PATH/error" 1>"$SH_PATH/out"
+  set +x
+  err=$(cat "$SH_PATH/error") && rm "$SH_PATH/error"
+  out=$(cat "$SH_PATH/out") && rm "$SH_PATH/out"
+  echo "E: $e" &>> $LOG
+  echo "err: $err" &>> $LOG
+  echo "out: $out" &>> $LOG
+  echo "res: $res" &>> $LOG
+#   echo "E: $e
+# fail to run cmd
+# text=$text
+# error=$err
+# out=$out
+# " >> $LOG
+[[ -n "$err" ]] && {
+  let t++
+}
+
+}
+  # send "E: failed to send text: ${text:0:10}...|$e|$r"
+}
+# echo "res: $res"
+# echo "json: $text"
+# echo "res :|$res|" >> ~/tera/mt_msg.log
+[[ $t -eq 2 ]] && {
+push_err "E: $e: ${text:0:64}...|$r|$res" 2>> $LOG 1>> $LOG_FILE
+}
+
+if [[ -n "$res" ]]; then
+  push_err "$res" 2>> $LOG 1>> $LOG_FILE
+fi

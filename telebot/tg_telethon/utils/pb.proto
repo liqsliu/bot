@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+message MSG{
+  //required bool raw = 1 [default = true];
+  optional string text = 1;
+  optional bytes data = 2;
+  optional int64 uid = 3;
+  optional int64 cid = 4;
+  optional int64 mid = 5;
+}
+
+message Button{
+  //required bool raw = 1 [default = true];
+  enum TYPE {
+    RAW = 0;
+    URL = 1;
+    IPFS = 2;
+    TG = 3;
+    BS = 4;
+    MS = 5;
+  }
+  TYPE type = 1;
+  optional MSG msg = 2;
+
+}
+
+message DATA{
+  optional string text = 1;
+  optional int64 num = 2;
+}

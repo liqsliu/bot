@@ -1,0 +1,5 @@
+#!/bin/bash
+
+mosquitto_sub -L mqtt://test.mosquitto.org:1883/wtfipfs "$@"
+# mosquitto_sub -d --tls-use-os-certs -L mqtts://test.mosquitto.org:8883/wtfipfs "$@"
+# mosquitto_sub -d --cafile /data/data/com.termux/files/usr/etc/tls/cert.pem --capath /data/data/com.termux/files/usr/etc/tls/certs -L mqtts://test.mosquitto.org:8883/wtfipfs "$@"

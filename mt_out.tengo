@@ -1,0 +1,15 @@
+if msgUsername != "blockthismessage" {
+os := import("os")
+cmd := os.exec("/run/user/1000/mt_out.sh", msgText, msgUsername, inAccount, inProtocol, inChannel, inGateway, inEvent, outAccount, outProtocol, outChannel, outGateway, outEvent)
+cmd2 := os.exec("/run/user/1000/mt_out_name.sh", msgText, msgUsername, inAccount, inProtocol, inChannel, inGateway, inEvent, outAccount, outProtocol, outChannel, outGateway, outEvent)
+msgUsername = string(cmd2.output())
+if msgUsername != "blockthismessage" {
+msgText = cmd.combined_output()
+} else {
+msgDrop = true
+msgText = ""
+}
+} else {
+msgDrop = true
+msgText = ""
+}

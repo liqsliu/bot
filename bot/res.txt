@@ -1,0 +1,1442 @@
+msg: Message(
+        id=17678,
+        peer_id=PeerUser(
+                user_id=1404457467
+        ),
+        date=datetime.datetime(2024, 5, 6, 7, 11, 13, tzinfo=datetime.timezone.utc),
+        message='「Romance」- 石凯\n专辑: Romance\n#网易云音乐 #flac 37.64MB 1734.42kbps\nvia @Music163bot',
+        out=False,
+        mentioned=False,
+        media_unread=False,
+        silent=False,
+        post=False,
+        from_scheduled=False,
+        legacy=False,
+        edit_hide=False,
+        pinned=False,
+        noforwards=False,
+        invert_media=False,
+        offline=False,
+        from_id=None,
+        from_boosts_applied=None,
+        saved_peer_id=None,
+        fwd_from=None,
+        via_bot_id=None,
+        via_business_bot_id=None,
+        reply_to=MessageReplyHeader(
+                reply_to_scheduled=False,
+                forum_topic=False,
+                quote=False,
+                reply_to_msg_id=17676,
+                reply_to_peer_id=None,
+                reply_from=None,
+                reply_media=None,
+                reply_to_top_id=None,
+                quote_text=None,
+                quote_entities=[
+                ],
+                quote_offset=None
+        ),
+        media=MessageMediaDocument(
+                nopremium=False,
+                spoiler=False,
+                video=False,
+                round=False,
+                voice=False,
+                document=Document(
+                        id=6179437501959113960,
+                        access_hash=-7095912533692541239,
+                        file_reference=b'\x01\x00\x00E\x0ef8\x82\x91\xd33\xc6Y\xfft\xc5\xd1\x8e\xa3\xd4}\xc7\xcf$\x9d',
+                        date=datetime.datetime(2024, 5, 5, 23, 17, 32, tzinfo=datetime.timezone.utc),
+                        mime_type='audio/x-flac',
+                        size=39470286,
+                        dc_id=5,
+                        attributes=[
+                                DocumentAttributeAudio(
+                                        duration=182,
+                                        voice=False,
+                                        title='Romance',
+                                        performer='石凯',
+                                        waveform=None
+                                ),
+                                DocumentAttributeFilename(
+                                        file_name='石凯 - Romance.flac'
+                                ),
+                        ],
+                        thumbs=[
+                                PhotoStrippedSize(
+                                        type='i',
+                                        bytes=b'\x01((\xd2\xa3\x14\x94Ph.(\xc57\xe6\xdc\x068\xf5\xa7P\x01E%\x14\x00\xbbO]\xd4\x11\xb4d\xf6\xa6d\xabm\xcd8\xb8\xdb\x8f\xe7@\x0cY2\xe3\xe9\xc5K\x82O5\x1a\xae\x0eGjs1\x034\x81\xf9\x0e*h\xa6y\x87\x81\xde\x8aa\xa9\x01`\xbds\xbb\xbeh\xdcH\xf7\xa2\x8aF\x96\x1c[+\x90I\xa7.\xc2\x99\x04\xee\xc7J(\xa0\x963z\x85\xe7;\xbbQE\x14\x15c'
+                                ),
+                                PhotoSize(
+                                        type='m',
+                                        w=320,
+                                        h=320,
+                                        size=12846
+                                ),
+                        ],
+                        video_thumbs=[
+                        ]
+                ),
+                alt_document=None,
+                ttl_seconds=None
+        ),
+        reply_markup=ReplyInlineMarkup(
+                rows=[
+                        KeyboardButtonRow(
+                                buttons=[
+                                        KeyboardButtonUrl(
+                                                text='Romance- 石凯',
+                                                url='https://music.163.com/song?id=2073858299'
+                                        ),
+                                ]
+                        ),
+                        KeyboardButtonRow(
+                                buttons=[
+                                        KeyboardButtonSwitchInline(
+                                                text='Send me to...',
+                                                query='https://music.163.com/song?id=2073858299',
+                                                same_peer=False,
+                                                peer_types=[
+                                                ]
+                                        ),
+                                ]
+                        ),
+                ]
+        ),
+        entities=[
+                MessageEntityHashtag(
+                        offset=26,
+                        length=6
+                ),
+                MessageEntityHashtag(
+                        offset=33,
+                        length=5
+                ),
+                MessageEntityMention(
+                        offset=63,
+                        length=12
+                ),
+        ],
+        views=None,
+        forwards=None,
+        replies=None,
+        edit_date=None,
+        post_author=None,
+        grouped_id=None,
+        reactions=None,
+        restriction_reason=[
+        ],
+        ttl_period=None,
+        quick_reply_shortcut_id=None
+)
+
+
+
+
+# serch
+
+W: skip: got a unknown: chat_id: 1404457467
+msg: Message(
+        id=17680,
+        peer_id=PeerUser(
+                user_id=1404457467
+        ),
+        date=datetime.datetime(2024, 5, 6, 7, 17, 58, tzinfo=datetime.timezone.utc),
+        message='搜索中...',
+        out=False,
+        mentioned=False,
+        media_unread=False,
+        silent=False,
+        post=None,
+        from_scheduled=None,
+        legacy=None,
+        edit_hide=None,
+        pinned=None,
+        noforwards=None,
+        invert_media=None,
+        offline=None,
+        from_id=PeerUser(
+                user_id=1404457467
+        ),
+        from_boosts_applied=None,
+        saved_peer_id=None,
+        fwd_from=None,
+        via_bot_id=None,
+        via_business_bot_id=None,
+        reply_to=MessageReplyHeader(
+                reply_to_scheduled=False,
+                forum_topic=False,
+                quote=False,
+                reply_to_msg_id=17679,
+                reply_to_peer_id=None,
+                reply_from=None,
+                reply_media=None,
+                reply_to_top_id=None,
+                quote_text=None,
+                quote_entities=[
+                ],
+                quote_offset=None
+        ),
+        media=None,
+        reply_markup=None,
+        entities=[
+        ],
+        views=None,
+        forwards=None,
+        replies=None,
+        edit_date=None,
+        post_author=None,
+        grouped_id=None,
+        reactions=None,
+        restriction_reason=[
+        ],
+        ttl_period=None,
+        quick_reply_shortcut_id=None
+)
+2024-05-06 15:17:58,603 [INFO] httpx [_client._send_single_request:1026]: HTTP Request: GET https://qwen-qwen1-5-72b-chat.hf.space/--replicas/3kh1x/heartbeat/6d1d29ef-1349-4b8d-9e82-1b53368fdcc2 "HTTP/1.1 404 Not Found"
+W: skip: got a unknown: chat_id: -1001294489931
+W: skip: got a unknown: chat_id: 1404457467
+msg: Message(
+        id=17680,
+        peer_id=PeerUser(
+                user_id=1404457467
+        ),
+        date=datetime.datetime(2024, 5, 6, 7, 17, 58, tzinfo=datetime.timezone.utc),
+        message='1.「Romance」 - 石凯\n2.「romance」 - Baq5\n3.「Romance」 - Richard Clayderman\n4.「Romance」 - October\n5.「Romance」 - Bayza\n6.「Romance」 - DGTO\n7.「Romance」 - Pablo Casals/Charles Albert Baker\n8.「Romance」 - Ólafur Arnalds',
+        out=False,
+        mentioned=False,
+        media_unread=False,
+        silent=False,
+        post=False,
+        from_scheduled=False,
+        legacy=False,
+        edit_hide=True,
+        pinned=False,
+        noforwards=False,
+        invert_media=False,
+        offline=False,
+        from_id=None,
+        from_boosts_applied=None,
+        saved_peer_id=None,
+        fwd_from=None,
+        via_bot_id=None,
+        via_business_bot_id=None,
+        reply_to=MessageReplyHeader(
+                reply_to_scheduled=False,
+                forum_topic=False,
+                quote=False,
+                reply_to_msg_id=17679,
+                reply_to_peer_id=None,
+                reply_from=None,
+                reply_media=None,
+                reply_to_top_id=None,
+                quote_text=None,
+                quote_entities=[
+                ],
+                quote_offset=None
+        ),
+        media=None,
+        reply_markup=ReplyInlineMarkup(
+                rows=[
+                        KeyboardButtonRow(
+                                buttons=[
+                                        KeyboardButtonCallback(
+                                                text='1',
+                                                data=b'music 2073858299',
+                                                requires_password=False
+                                        ),
+                                        KeyboardButtonCallback(
+                                                text='2',
+                                                data=b'music 417953208',
+                                                requires_password=False
+                                        ),
+                                        KeyboardButtonCallback(
+                                                text='3',
+                                                data=b'music 562913429',
+                                                requires_password=False
+                                        ),
+                                        KeyboardButtonCallback(
+                                                text='4',
+                                                data=b'music 1470004472',
+                                                requires_password=False
+                                        ),
+                                        KeyboardButtonCallback(
+                                                text='5',
+                                                data=b'music 1390291265',
+                                                requires_password=False
+                                        ),
+                                        KeyboardButtonCallback(
+                                                text='6',
+                                                data=b'music 1927948946',
+                                                requires_password=False
+                                        ),
+                                        KeyboardButtonCallback(
+                                                text='7',
+                                                data=b'music 464740161',
+                                                requires_password=False
+                                        ),
+                                        KeyboardButtonCallback(
+                                                text='8',
+                                                data=b'music 1807757',
+                                                requires_password=False
+                                        ),
+                                ]
+                        ),
+                ]
+        ),
+        entities=[
+        ],
+        views=None,
+        forwards=None,
+        replies=None,
+        edit_date=datetime.datetime(2024, 5, 6, 7, 17, 58, tzinfo=datetime.timezone.utc),
+        post_author=None,
+        grouped_id=None,
+        reactions=None,
+        restriction_reason=[
+        ],
+        ttl_period=None,
+        quick_reply_shortcut_id=None
+)
+
+
+
+2024-05-06 16:43:01,178 [INFO] tggpt.bot [bot.info:128]: [[<telethon.tl.custom.messagebutton.MessageButton object at 0x7f1870cc3850>, <telethon.tl.custom.messagebutton.MessageButton object at 0x7f1870ce56d0>, <telethon.tl.custom.messagebutton.MessageButton object at 0x7f1870cb5e90>, <telethon.tl.custom.messagebutton.MessageButton object at 0x7f1870cb5790>, <telethon.tl.custom.messagebutton.MessageButton object at 0x7f1870cb6410>, <telethon.tl.custom.messagebutton.MessageButton object at 0x7f1870cb49d0>, <telethon.tl.custom.messagebutton.MessageButton object at 0x7f1870cb5390>, <telethon.tl.custom.messagebutton.MessageButton object at 0x7f1870cb5f50>]]
+2024-05-06 16:43:01,181 [ERROR] tggpt.bot [bot.parse_msg:1775]: E: not found gateway for qid=17682, gateways={} msg.text='1.「Romance」 - 石凯\n2.「romance」 - Baq5\n3.「Romance」 - Richard Clayderman\n4.「Romance」 - October\n5.「Romance」 - Bayza\n6.「Bad Romance (Radio Edit)」 - Lady Gaga\n7.「Romance」 - Pablo Casals/Charles Albert Baker\n8.「Romance」 - Ólafur Arnalds'
+
+
+
+
+
+
+
+file msg:
+
+I: music bot: chat_id: 1404457467
+msg: Message(
+        id=17836,
+        peer_id=PeerUser(
+                user_id=1404457467
+        ),
+        date=datetime.datetime(2024, 5, 7, 1, 21, 3, tzinfo=datetime.timezone.utc),
+        message='「暗里着迷(中文dj版)」- DJ阿诺\n专辑: 走在冷风中\n#网易云音乐 #flac 35.94MB 1014.33kbps\nvia @Music163bot',
+        out=False,
+        mentioned=False,
+        media_unread=False,
+        silent=False,
+        post=False,
+        from_scheduled=False,
+        legacy=False,
+        edit_hide=False,
+        pinned=False,
+        noforwards=False,
+        invert_media=False,
+        offline=False,
+        from_id=None,
+        from_boosts_applied=None,
+        saved_peer_id=None,
+        fwd_from=None,
+        via_bot_id=None,
+        via_business_bot_id=None,
+        reply_to=MessageReplyHeader(
+                reply_to_scheduled=False,
+                forum_topic=False,
+                quote=False,
+                reply_to_msg_id=17834,
+                reply_to_peer_id=None,
+                reply_from=None,
+                reply_media=None,
+                reply_to_top_id=None,
+                quote_text=None,
+                quote_entities=[
+                ],
+                quote_offset=None
+        ),
+        media=MessageMediaDocument(
+                nopremium=False,
+                spoiler=False,
+                video=False,
+                round=False,
+                voice=False,
+                document=Document(
+                        id=6183835011599306223,
+                        access_hash=7522590536470051616,
+                        file_reference=b'\x01\x00\x00E\xacf9\x81\xff}\xe6\xee\x1c}b\xd4xo\xe1\x80\xdaZ\xfc\x0f\x07',
+                        date=datetime.datetime(2024, 5, 7, 1, 21, 3, tzinfo=datetime.timezone.utc),
+                        mime_type='audio/x-flac',
+                        size=37687116,
+                        dc_id=5,
+                        attributes=[
+                                DocumentAttributeAudio(
+                                        duration=296,
+                                        voice=False,
+                                        title='暗里着迷(中文dj版)',
+                                        performer='DJ阿诺',
+                                        waveform=None
+                                ),
+                                DocumentAttributeFilename(
+                                        file_name='DJ阿诺 - 暗里着迷(中文dj版).flac'
+                                ),
+                        ],
+                        thumbs=[
+                                PhotoStrippedSize(
+                                        type='i',
+                                        bytes=b"\x01((\xaa\xce\xc4\xf7&\x94e\x95\x89\xed\xda\x93+\x90;R\xc9  \x80\x00\x1d\x80\xa5pH\x85\x98\x1e\x94\x83\xa5 \x0cz\x02@\xf4\xa3\xbd0%\x90\xc7\xb0\x04\xc6{\xd1Q\x8e\xfcsE\x03\x96\xa5\xc1\x1e\xc7\r \x1bA\xa8\x95\xe1\x13\xc8\x1c\x02\xa5~S\xcf\x14\\\xdc\x86b\xa0p;\xd41\xae\xf0[\xd2\x90\x1a\x11\x14\x8a%\x8c\x01\x93\xd4\xd5y\xccip\x84F6\x81\xca\xfe4\xec\xee@\xc3\xa8\xea).\x07\xc9\xe6\x0e\xa3\xbd$2\xab0gf\x03h'\x81E#;\x11\x82h\xaa$|p\x16\x94\x89\x01\x00u\xa7;\xaa\x00\xa9\xd0QE!\x91,\x8c\x8f\xbc\x1e}*\xe2:\xc9\x13\x01\xd0\xd1E\x0c\x11O\x93\xc6\x06h\xa2\x8a\x00"
+                                ),
+                                PhotoSize(
+                                        type='m',
+                                        w=320,
+                                        h=320,
+                                        size=19649
+                                ),
+                        ],
+                        video_thumbs=[
+                        ]
+                ),
+                alt_document=None,
+                ttl_seconds=None
+        ),
+        reply_markup=ReplyInlineMarkup(
+                rows=[
+                        KeyboardButtonRow(
+                                buttons=[
+                                        KeyboardButtonUrl(
+                                                text='暗里着迷(中文dj版)- DJ阿诺',
+                                                url='https://music.163.com/song?id=1911311091'
+                                        ),
+                                ]
+                        ),
+                        KeyboardButtonRow(
+                                buttons=[
+                                        KeyboardButtonSwitchInline(
+                                                text='Send me to...',
+                                                query='https://music.163.com/song?id=1911311091',
+                                                same_peer=False,
+                                                peer_types=[
+                                                ]
+                                        ),
+                                ]
+                        ),
+                ]
+        ),
+        entities=[
+                MessageEntityHashtag(
+                        offset=30,
+                        length=6
+                ),
+                MessageEntityHashtag(
+                        offset=37,
+                        length=5
+                ),
+                MessageEntityMention(
+                        offset=67,
+                        length=12
+                ),
+        ],
+        views=None,
+        forwards=None,
+        replies=None,
+        edit_date=None,
+        post_author=None,
+        grouped_id=None,
+        reactions=None,
+        restriction_reason=[
+        ],
+        ttl_period=None,
+        quick_reply_shortcut_id=None
+)
+
+
+
+
+
+
+MessageType.GROUPCHAT bebat@muc.pimux.de/liqsliu wtfipfs@pimux.de/ywyhB7k0EY3z {}
+2024-05-08 18:49:35,539 [INFO] tggpt.bot [bot.info:163]: 进群失败('{urn:ietf:params:xml:ns:xmpp-stanzas}conflict',): wtfipfs@pimux.de nagonuqo@chat.yax.im e=XMPPCancelError('{urn:ietf:params:xml:ns:xmpp-stanzas}conflict')
+2024-05-08 18:49:35,541 [INFO] tggpt.bot [bot.join:2696]: 等待进群: wtfipfs@pimux.de wtfipfs@salas.suchat.org
+MessageType.GROUPCHAT bebat@muc.pimux.de/bot wtfipfs@pimux.de/ywyhB7k0EY3z {<aioxmpp.structs.LanguageTag.fromstr('en')>: 'pong'}
+2024-05-08 18:49:35,859 [INFO] tggpt.bot [bot.info:163]: 进群失败("{urn:ietf:params:xml:ns:xmpp-stanzas}conflict ('That nickname is registered by another person')",): wtfipfs@pimux.de wtfipfs@salas.suchat.org e=XMPPCancelError("{urn:ietf:params:xml:ns:xmpp-stanzas}conflict ('That nickname is registered by another person')")
+2024-05-08 18:49:35,860 [INFO] tggpt.bot [bot.join:2696]: 等待进群: wtfipfs@pimux.de ipfs@salas.suchat.org
+2024-05-08 18:49:36,021 [WARNING] aioxmpp.StanzaStream [stream._process_incoming_iq:1012]: unhandleable IQ request: from=JID(localpart='wtfipfs', domain='conversations.im', resource='profanity.kSh4'), type_=<IQType.GET: 'get'>, payload=<aioxmpp.pubsub.xso.Request object at 0x7f5128625f00>
+2024-05-08 18:49:36,181 [INFO] tggpt.bot [bot.info:163]: 进群失败("{urn:ietf:params:xml:ns:xmpp-stanzas}conflict ('That nickname is registered by another person')",): wtfipfs@pimux.de ipfs@salas.suchat.org e=XMPPCancelError("{urn:ietf:params:xml:ns:xmpp-stanzas}conflict ('That nickname is registered by another person')")
+
+
+
+
+
+4-05-09 09:58:20,213 [DEBUG] telethon.network.mtprotosender [mtprotosender._handle_gzip_packed:667]: Handling gzipped data
+2024-05-09 09:58:20,215 [DEBUG] telethon.network.mtprotosender [mtprotosender._handle_update:683]: Handling update Updates
+2024-05-09 09:58:20,215 [DEBUG] telethon.network.mtprotosender [mtprotosender._recv_loop:505]: Receiving items from the network...
+2024-05-09 09:58:21,268 [DEBUG] telethon.network.mtprotosender [mtprotosender._handle_update:683]: Handling update UpdateShort
+2024-05-09 09:58:21,269 [DEBUG] telethon.network.mtprotosender [mtprotosender._recv_loop:505]: Receiving items from the network...
+2024-05-09 09:58:22,217 [DEBUG] telethon.network.mtprotosender [mtprotosender._handle_update:683]: Handling update UpdateShort
+2024-05-09 09:58:22,219 [DEBUG] telethon.network.mtprotosender [mtprotosender._recv_loop:505]: Receiving items from the network...
+2024-05-09 09:58:23,408 [DEBUG] aioxmpp.node.PresenceManagedClient.XMLStream [protocol.data_received:552]: RECV b"<presence type='subscribe' from='liqsliu@conversations.im' to='wtfipfs@pimux.de' xml:lang='en'/>"
+2024-05-09 09:58:23,413 [DEBUG] aioxmpp.StanzaStream [stream._process_incoming_presence:1080]: incoming presence: <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>
+2024-05-09 09:58:23,415 [DEBUG] aioxmpp.node.PresenceManagedClient.im.dispatcher.IMDispatcher [dispatcher.dispatch_presence:146]: presence was not processed by any IM handler: <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>
+2024-05-09 09:58:23,610 [DEBUG] aioxmpp.node.PresenceManagedClient.XMLStream [protocol.data_received:552]: RECV b"<r xmlns='urn:xmpp:sm:3'/>"
+2024-05-09 09:58:23,612 [DEBUG] aioxmpp.StanzaStream [stream._process_incoming:1163]: received SM request: <aioxmpp.nonza.SMRequest object at 0x7f3a943f8a60>
+2024-05-09 09:58:23,612 [DEBUG] aioxmpp.StanzaStream [stream._process_incoming:1169]: sending SM ack: <aioxmpp.nonza.SMAcknowledgement counter=793 at 0x7f3a943fa4a0>
+2024-05-09 09:58:23,616 [DEBUG] aioopenssl.trace.fd=8 [__init__._write_ready:577]: _write_ready: nothing more to write, removing writer
+2024-05-09 09:58:25,291 [DEBUG] telethon.network.mtprotosender [mtprotosender._handle_update:683]: Handling update UpdateShort
+
+
+
+||<class 'aioxmpp.stanza.Presence'>: <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>
+---
+  ATTR_MAP: <class 'dict'>: {(None, 'from'): <aioxmpp.xso.model.Attr object at 0x7f9772f8fbd0>, (None, 'to'): <aioxmpp.xso.model.Attr object at 0x7f9772f8fd10>, ('http://www.w3.org/XML/1998/namespace', 'lang'): <aioxmpp.xso.model.LangAttr object at 0x7f9772f8fb50>, (None, 'id'): <aioxmpp.xso.model.Attr object at 0x7f9772fa2b50>, (None, 'type'): <aioxmpp.xso.model.Attr object at 0x7f9772fa2c50>}
+  CHILD_MAP: <class 'dict'>: {('jabber:client', 'error'): <aioxmpp.xso.model.Child object at 0x7f9772f8fd50>, ('jabber:client', 'show'): <aioxmpp.xso.model.ChildText object at 0x7f9772fa2cd0>, ('jabber:client', 'status'): <aioxmpp.xso.model.ChildTextMap object at 0x7f9772fa2c90>, ('jabber:client', 'priority'): <aioxmpp.xso.model.ChildText object at 0x7f9772fa2d90>, ('http://jabber.org/protocol/caps', 'c'): <aioxmpp.xso.model.Child object at 0x7f9771747c10>, ('urn:xmpp:caps', 'c'): <aioxmpp.xso.model.Child object at 0x7f9771747c50>, ('urn:xmpp:pars:0', 'preauth'): <aioxmpp.xso.model.Child object at 0x7f9771616390>, ('http://jabber.org/protocol/muc', 'x'): <aioxmpp.xso.model.Child object at 0x7f9771636510>, ('http://jabber.org/protocol/muc#user', 'x'): <aioxmpp.xso.model.Child object at 0x7f9771643a90>, ('http://jabber.org/protocol/shim', 'header'): <aioxmpp.xso.model.Child object at 0x7f9771658890>, ('vcard-temp:x:update', 'x'): <aioxmpp.xso.model.Child object at 0x7f9771691290>}
+  CHILD_PROPS: <class 'sortedcollections.recipes.OrderedSet'>: OrderedSet([<aioxmpp.xso.model.Child object at 0x7f9772f8fd50>, <aioxmpp.xso.model.ChildText object at 0x7f9772fa2cd0>, <aioxmpp.xso.model.ChildTextMap object at 0x7f9772fa2c90>, <aioxmpp.xso.model.ChildText object at 0x7f9772fa2d90>, <aioxmpp.xso.model.Child object at 0x7f9771747c10>, <aioxmpp.xso.model.Child object at 0x7f9771747c50>, <aioxmpp.xso.model.Child object at 0x7f9771616390>, <aioxmpp.xso.model.Child object at 0x7f9771636510>, <aioxmpp.xso.model.Child object at 0x7f9771643a90>, <aioxmpp.xso.model.Child object at 0x7f9771658890>, <aioxmpp.xso.model.Child object at 0x7f9771691290>])
+  COLLECTOR_PROPERTY: <class 'lxml.etree._Element'>: <Element {jabber:client}presence at 0x7f976e786000>
+  DECLARE_NS: <class 'dict'>: {}
+  TAG: <class 'tuple'>: ('jabber:client', 'presence')
+  TEXT_PROPERTY: <class 'NoneType'>: None
+  UNKNOWN_ATTR_POLICY: <enum 'UnknownAttrPolicy'>: UnknownAttrPolicy.DROP
+  UNKNOWN_CHILD_POLICY: <enum 'UnknownChildPolicy'>: UnknownChildPolicy.DROP
+  __abstractmethods__: <class 'frozenset'>: frozenset()
+  __class__: <class 'aioxmpp.xso.model.XMLStreamClass'>: <class 'aioxmpp.stanza.Presence'>
+  __copy__: <class 'method'>: <bound method XSO.__copy__ of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  __deepcopy__: <class 'method'>: <bound method XSO.__deepcopy__ of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  __delattr__: <class 'method-wrapper'>: <method-wrapper '__delattr__' of Presence object at 0x7f976f896f20>
+  __dir__: <class 'builtin_function_or_method'>: <built-in method __dir__ of Presence object at 0x7f976f896f20>
+  __doc__: <class 'str'>:
+    An XMPP presence stanza. The keyword arguments can be used to initialize
+    the attributes of the :class:`Presence`.
+
+    .. attribute:: id_
+
+       The optional ID of the stanza.
+
+    .. attribute:: type_
+
+       The type attribute of the stanza. The allowed values are enumerated in
+       :class:`~.PresenceType`.
+
+       .. versionchanged:: 0.7
+
+          Starting with 0.7, the enumeration :class:`~.PresenceType` is
+          used. Before, strings equal to the XML attribute value character data
+          were used (``"probe"``, ``"unavailable"``, and so on, as well as
+          :data:`None` to indicate the absence of the attribute and thus
+          "available" presence).
+
+          As of 0.7, setting the string equivalents and :data:`None` is still
+          supported. However, reading from the attribute always returns the
+          corresponding enumeration members (which still compare equal to their
+          string equivalents).
+
+       .. deprecated:: 0.7
+
+          The use of the aforementioned string values (and :data:`None`) is
+          deprecated and will lead to :exc:`TypeError` and/or :exc:`ValueError`
+          being raised when they are written to this attribute. See the
+          Changelog for :ref:`api-changelog-0.7` for further details on how to
+          upgrade your code efficiently.
+
+    .. attribute:: show
+
+       The ``show`` value of the stanza, or :data:`None` if no ``show`` element
+       is present.
+
+    .. attribute:: priority
+
+       The ``priority`` value of the presence. The default here is ``0`` and
+       corresponds to an absent ``priority`` element.
+
+    .. attribute:: status
+
+       A :class:`~.structs.LanguageMap` mapping the languages of the different
+       status elements to their text.
+
+       .. versionchanged:: 0.5
+
+          Before 0.5, this was a :class:`~aioxmpp.xso.model.XSOList`.
+
+    Note that some attributes are inherited from :class:`StanzaBase`:
+
+    ========================= =======================================
+    :attr:`~StanzaBase.from_` sender :class:`~aioxmpp.JID`
+    :attr:`~StanzaBase.to`    recipient :class:`~aioxmpp.JID`
+    :attr:`~StanzaBase.lang`  ``xml:lang`` value
+    :attr:`~StanzaBase.error` :class:`Error` instance
+    ========================= =======================================
+
+
+  __eq__: <class 'method-wrapper'>: <method-wrapper '__eq__' of Presence object at 0x7f976f896f20>
+  __format__: <class 'builtin_function_or_method'>: <built-in method __format__ of Presence object at 0x7f976f896f20>
+  __ge__: <class 'method-wrapper'>: <method-wrapper '__ge__' of Presence object at 0x7f976f896f20>
+  __getattribute__: <class 'method-wrapper'>: <method-wrapper '__getattribute__' of Presence object at 0x7f976f896f20>
+  __getstate__: <class 'builtin_function_or_method'>: <built-in method __getstate__ of Presence object at 0x7f976f896f20>
+  __gt__: <class 'method-wrapper'>: <method-wrapper '__gt__' of Presence object at 0x7f976f896f20>
+  __hash__: <class 'method-wrapper'>: <method-wrapper '__hash__' of Presence object at 0x7f976f896f20>
+  __init__: <class 'method'>: <bound method Presence.__init__ of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  __init_subclass__: <class 'builtin_function_or_method'>: <built-in method __init_subclass__ of XMLStreamClass object at 0x21a34b0>
+  __le__: <class 'method-wrapper'>: <method-wrapper '__le__' of Presence object at 0x7f976f896f20>
+  __lt__: <class 'method-wrapper'>: <method-wrapper '__lt__' of Presence object at 0x7f976f896f20>
+  __module__: <class 'str'>: aioxmpp.stanza
+  __ne__: <class 'method-wrapper'>: <method-wrapper '__ne__' of Presence object at 0x7f976f896f20>
+  __new__: <class 'function'>: <function XSO.__new__ at 0x7f9772f5a0c0>
+  __reduce__: <class 'builtin_function_or_method'>: <built-in method __reduce__ of Presence object at 0x7f976f896f20>
+  __reduce_ex__: <class 'builtin_function_or_method'>: <built-in method __reduce_ex__ of Presence object at 0x7f976f896f20>
+  __repr__: <class 'method'>: <bound method Presence.__repr__ of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  __setattr__: <class 'method-wrapper'>: <method-wrapper '__setattr__' of Presence object at 0x7f976f896f20>
+  __sizeof__: <class 'builtin_function_or_method'>: <built-in method __sizeof__ of Presence object at 0x7f976f896f20>
+  __slots__: <class 'tuple'>: ()
+  __str__: <class 'method-wrapper'>: <method-wrapper '__str__' of Presence object at 0x7f976f896f20>
+  __subclasshook__: <class 'builtin_function_or_method'>: <built-in method __subclasshook__ of XMLStreamClass object at 0x21a34b0>
+  __weakref__: <class 'NoneType'>: None
+  _abc_impl: <class '_abc._abc_data'>: <_abc._abc_data object at 0x7f9772fa3640>
+  _make_reply: <class 'method'>: <bound method StanzaBase._make_reply of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  _xso_contents: <class 'dict'>: {<aioxmpp.xso.model.Attr object at 0x7f9772fa2c50>: <PresenceType.SUBSCRIBE: 'subscribe'>, <aioxmpp.xso.model.Attr object at 0x7f9772f8fbd0>: JID(localpart='liqsliu', domain='conversations.im', resource=None), <aioxmpp.xso.model.Attr object at 0x7f9772f8fd10>: JID(localpart='wtfipfs', domain='pimux.de', resource=None), <aioxmpp.xso.model.LangAttr object at 0x7f9772f8fb50>: <aioxmpp.structs.LanguageTag.fromstr('en')>, <aioxmpp.xso.model.ChildTextMap object at 0x7f9772fa2c90>: {}, <aioxmpp.xso.model.Collector object at 0x7f9772fa2e10>: <Element {jabber:client}presence at 0x7f976e786000>}
+  autoset_id: <class 'method'>: <bound method StanzaBase.autoset_id of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  error: <class 'NoneType'>: None
+  from_: <class 'aioxmpp.structs.JID'>: liqsliu@conversations.im
+  id_: <class 'NoneType'>: None
+  lang: <class 'aioxmpp.structs.LanguageTag'>: en
+  make_error: <class 'method'>: <bound method StanzaBase.make_error of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  priority: <class 'int'>: 0
+  show: <enum 'PresenceShow'>: PresenceShow.NONE
+  status: <class 'aioxmpp.structs.LanguageMap'>: {}
+  to: <class 'aioxmpp.structs.JID'>: wtfipfs@pimux.de
+  type_: <enum 'PresenceType'>: PresenceType.SUBSCRIBE
+  unhandled_children: <class 'lxml.etree._Element'>: <Element {jabber:client}presence at 0x7f976e786000>
+  unparse_to_node: <class 'method'>: <bound method XSO.unparse_to_node of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  validate: <class 'method'>: <bound method XSO.validate of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  xep0045_muc: <class 'NoneType'>: None
+  xep0045_muc_user: <class 'NoneType'>: None
+  xep0115_caps: <class 'NoneType'>: None
+  xep0131_headers: <class 'NoneType'>: None
+  xep0153_x: <class 'NoneType'>: None
+  xep0379_preauth: <class 'NoneType'>: None
+  xep0390_caps: <class 'NoneType'>: None
+  xso_after_load: <class 'method'>: <bound method XSO.xso_after_load of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  xso_error_handler: <class 'method'>: <bound method StanzaBase.xso_error_handler of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+  xso_serialise_to_sax: <class 'method'>: <bound method XSO.xso_serialise_to_sax of <presence from='liqsliu@conversations.im' to='wtfipfs@pimux.de' id=None type=<PresenceType.SUBSCRIBE: 'subscribe'>>>
+===
+2024-05-09 10:18:54,770 [DEBUG] aioxmpp.node.PresenceManagedClient.XMLStream [protocol.data_received:552]: RECV b"<r xmlns='urn:xmpp:sm:3'/>"
+
+
+
+
+
+---
+||<class 'aioxmpp.roster.service.RosterClient'>: <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>
+---
+  ORDER_AFTER: <class 'frozenset'>: frozenset({<class 'aioxmpp.dispatcher.SimplePresenceDispatcher'>})
+  ORDER_BEFORE: <class 'frozenset'>: frozenset()
+  PATCHED_ORDER_AFTER: <class 'frozenset'>: frozenset({<class 'aioxmpp.dispatcher.SimplePresenceDispatcher'>})
+  SERVICE_HANDLERS: <class 'tuple'>: (((<function _apply_iq_handler at 0x7f5a76510ea0>, (<IQType.SET: 'set'>, <class 'aioxmpp.roster.xso.Query'>)), <function RosterClient.handle_roster_push at 0x7f5a765363e0>, {'with_send_reply': False}), ((<function _apply_presence_handler at 0x7f5a76525620>, (<PresenceType.SUBSCRIBE: 'subscribe'>, None)), <function RosterClient.handle_subscribe at 0x7f5a76536520>, {}), ((<function _apply_presence_handler at 0x7f5a76525620>, (<PresenceType.SUBSCRIBED: 'subscribed'>, None)), <function RosterClient.handle_subscribed at 0x7f5a76536660>, {}), ((<function _apply_presence_handler at 0x7f5a76525620>, (<PresenceType.UNSUBSCRIBED: 'unsubscribed'>, None)), <function RosterClient.handle_unsubscribed at 0x7f5a765367a0>, {}), ((<function _apply_presence_handler at 0x7f5a76525620>, (<PresenceType.UNSUBSCRIBE: 'unsubscribe'>, None)), <function RosterClient.handle_unsubscribe at 0x7f5a765368e0>, {}))
+  _RosterClient__roster_lock: <class 'asyncio.locks.Lock'>: <asyncio.locks.Lock object at 0x7f5a7340f850 [unlocked]>
+  _Service__client: <class 'aioxmpp.node.PresenceManagedClient'>: <aioxmpp.node.PresenceManagedClient object at 0x7f5a745b6190>
+  _Service__context: <class 'contextlib.ExitStack'>: <contextlib.ExitStack object at 0x7f5a7340f390>
+  _Service__dependencies: <class 'dict'>: {<class 'aioxmpp.dispatcher.SimplePresenceDispatcher'>: <aioxmpp.dispatcher.SimplePresenceDispatcher object at 0x7f5a745d4310>}
+  _Service__service_order_index: <class 'int'>: 4
+  __abstractmethods__: <class 'frozenset'>: frozenset()
+  __class__: <class 'aioxmpp.service.Meta'>: <class 'aioxmpp.roster.service.RosterClient'>
+  __delattr__: <class 'method-wrapper'>: <method-wrapper '__delattr__' of RosterClient object at 0x7f5a745f7d90>
+  __dict__: <class 'dict'>: {'logger': <Logger aioxmpp.node.PresenceManagedClient.roster.RosterClient (DEBUG)>, '_Service__context': <contextlib.ExitStack object at 0x7f5a7340f390>, '_Service__client': <aioxmpp.node.PresenceManagedClient object at 0x7f5a745b6190>, '_Service__dependencies': {<class 'aioxmpp.dispatcher.SimplePresenceDispatcher'>: <aioxmpp.dispatcher.SimplePresenceDispatcher object at 0x7f5a745d4310>}, '_Service__service_order_index': 4, '_bse_token': <object object at 0x7f5a755a5bc0>, '_RosterClient__roster_lock': <asyncio.locks.Lock object at 0x7f5a7340f850 [unlocked]>, 'items': {}, 'groups': {}, 'version': None}
+  __dir__: <class 'builtin_function_or_method'>: <built-in method __dir__ of RosterClient object at 0x7f5a745f7d90>
+  __doc__: <class 'str'>:
+    A roster client :class:`aioxmpp.service.Service`.
+
+    The interaction with a roster service happens mainly by accessing the
+    attributes holding the state and using the events to be notified of state
+    changes:
+
+    Attributes for accessing the roster:
+
+    .. attribute:: items
+
+       A dictionary mapping :class:`~aioxmpp.JID` instances to corresponding
+       :class:`Item` instances.
+
+    .. attribute:: groups
+
+       A dictionary which allows group-based access to :class:`Item`
+       instances. The dictionaries keys are the names of the groups, the values
+       are :class:`set` instances, which hold the :class:`Item` instances in
+       that group.
+
+       At no point one can observe empty :class:`set` instances in this
+       dictionary.
+
+    The :class:`Item` instances stay the same, as long as they represent the
+    identical roster entry on the remote side. That is, if the name or
+    subscription state are changed in the server side roster, the :class:`Item`
+    instance stays the same, but the attributes are mutated. However, if the
+    entry is removed from the server roster and re-added later for the same
+    JID, it will be a different :class:`Item` instance.
+
+    Signals:
+
+    .. signal:: on_initial_roster_received()
+
+       Fires when the initial roster has been received. Note that if roster
+       versioning is used, the initial roster may not be up-to-date. The server
+       is allowed to tell the client to re-use its local state and deliver
+       changes using roster pushes. In that case, the
+       :meth:`on_initial_roster_received` event fires immediately, so that the
+       user sees whatever roster has been set up for versioning before the
+       stream was established; updates pushed by the server are delivered using
+       the normal events.
+
+       The roster data has already been imported at the time the callback is
+       fired.
+
+       Note that the initial roster is diffed against whatever is in the local
+       store and events are fired just like for normal push updates. Thus, in
+       general, you won’t need this signal; it might be better to listen for
+       the events below.
+
+    .. signal:: on_entry_added(item)
+
+       Fires when an `item` has been added to the roster. The attributes of the
+       `item` are up-to-date when this callback fires.
+
+       When the event fires, the bookkeeping structures are already updated.
+       This implies that :meth:`on_group_added` is called before
+       :meth:`on_entry_added` if the entry adds a new group.
+
+    .. signal:: on_entry_name_changed(item)
+
+       Fires when a roster update changed the name of the `item`. The new name
+       is already applied to the `item`.
+
+    .. signal:: on_entry_subscription_state_changed(item)
+
+       Fires when a roster update changes any of the :attr:`Item.subscription`,
+       :attr:`Item.ask` or :attr:`Item.approved` attributes. The new values are
+       already applied to `item`.
+
+       The event always fires once per update, even if the update changes
+       more than one of the above attributes.
+
+    .. signal:: on_entry_added_to_group(item, group_name)
+
+       Fires when an update adds an `item` to a group. The :attr:`Item.groups`
+       attribute is already updated (not only with this, but also other group
+       updates, including removals) when this event is fired.
+
+       The event fires for each added group in an update, thus it may fire more
+       than once per update.
+
+       The name of the new group is in `group_name`.
+
+       At the time the event fires, the bookkeeping structures for the group
+       are already updated; this implies that :meth:`on_group_added` fires
+       *before* :meth:`on_entry_added_to_group` if the entry added a new group.
+
+    .. signal:: on_entry_removed_from_group(item, group_name)
+
+       Fires when an update removes an `item` from a group. The
+       :attr:`Item.groups` attribute is already updated (not only with this,
+       but also other group updates, including additions) when this event is
+       fired.
+
+       The event fires for each removed group in an update, thus it may fire
+       more than once per update.
+
+       The name of the new group is in `group_name`.
+
+       At the time the event fires, the bookkeeping structures are already
+       updated; this implies that :meth:`on_group_removed` fires *before*
+       :meth:`on_entry_removed_from_group` if the removal of an entry from a
+       group causes the group to vanish.
+
+    .. signal:: on_entry_removed(item)
+
+       Fires after an entry has been removed from the roster. The entry is
+       already removed from all bookkeeping structures, but the values on the
+       `item` object are the same as right before the removal.
+
+       This implies that :meth:`on_group_removed` fires *before*
+       :meth:`on_entry_removed` if the removal of an entry causes a group to
+       vanish.
+
+    .. signal:: on_group_added(group)
+
+        Fires after a new group has been added to the bookkeeping structures.
+
+        :param group: Name of the new group.
+        :type group: :class:`str`
+
+        At the time the event fires, the group is empty.
+
+        .. versionadded:: 0.9
+
+    .. signal:: on_group_removed(group)
+
+        Fires after a new group has been removed from the bookkeeping
+        structures.
+
+        :param group: Name of the old group.
+        :type group: :class:`str`
+
+        At the time the event fires, the group is empty.
+
+        .. versionadded:: 0.9
+
+    Modifying roster contents:
+
+    .. automethod:: set_entry
+
+    .. automethod:: remove_entry
+
+    Managing presence subscriptions:
+
+    .. automethod:: approve
+
+    .. automethod:: subscribe
+
+    .. signal:: on_subscribe(stanza)
+
+       Fires when a peer requested a subscription. The whole stanza received is
+       included as `stanza`.
+
+       .. seealso::
+
+          To approve a subscription request, use :meth:`approve`.
+
+    .. signal:: on_subscribed(stanza)
+
+       Fires when a peer has confirmed a previous subscription request. The
+       ``"subscribed"`` stanza is included as `stanza`.
+
+    .. signal:: on_unsubscribe(stanza)
+
+       Fires when a peer cancelled their subscription for our presence. As per
+       :rfc:`6121`, the server forwards the ``"unsubscribe"`` presence stanza
+       (which is included as `stanza` argument) *before* sending the roster
+       push.
+
+       Unless your application is interested in the specific cause of a
+       subscription state change, it is not necessary to use this signal; the
+       subscription state change will be covered by
+       :meth:`on_entry_subscription_state_changed`.
+
+    .. signal:: on_unsubscribed(stanza)
+
+       Fires when a peer cancelled our subscription. As per :rfc:`6121`, the
+       server forwards the ``"unsubscribed"`` presence stanza (which is
+       included as `stanza` argument) *before* sending the roster push.
+
+       Unless your application is interested in the specific cause of a
+       subscription state change, it is not necessary to use this signal; the
+       subscription state change will be covered by
+       :meth:`on_entry_subscription_state_changed`.
+
+    Import/Export of roster data:
+
+    .. automethod:: export_as_json
+
+    .. automethod:: import_from_json
+
+    To make use of roster versioning, use the above two methods. The general
+    workflow is to :meth:`export_as_json` the roster after disconnecting and
+    storing it for the next connection attempt. **Before** connecting, the
+    stored data needs to be loaded using :meth:`import_from_json`. This only
+    needs to happen after a new :class:`Service` has been created, as roster
+    services won’t delete roster contents between two connections on the same
+    :class:`.Client` instance.
+
+    .. versionchanged:: 0.8
+
+       This class was formerly known as :class:`aioxmpp.roster.Service`. It
+       is still available under that name, but the alias will be removed in
+       1.0.
+
+  __eq__: <class 'method-wrapper'>: <method-wrapper '__eq__' of RosterClient object at 0x7f5a745f7d90>
+  __format__: <class 'builtin_function_or_method'>: <built-in method __format__ of RosterClient object at 0x7f5a745f7d90>
+  __ge__: <class 'method-wrapper'>: <method-wrapper '__ge__' of RosterClient object at 0x7f5a745f7d90>
+  __getattribute__: <class 'method-wrapper'>: <method-wrapper '__getattribute__' of RosterClient object at 0x7f5a745f7d90>
+  __getstate__: <class 'builtin_function_or_method'>: <built-in method __getstate__ of RosterClient object at 0x7f5a745f7d90>
+  __gt__: <class 'method-wrapper'>: <method-wrapper '__gt__' of RosterClient object at 0x7f5a745f7d90>
+  __hash__: <class 'method-wrapper'>: <method-wrapper '__hash__' of RosterClient object at 0x7f5a745f7d90>
+  __init__: <class 'method'>: <bound method RosterClient.__init__ of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  __init_subclass__: <class 'builtin_function_or_method'>: <built-in method __init_subclass__ of Meta object at 0x4038580>
+  __le__: <class 'method-wrapper'>: <method-wrapper '__le__' of RosterClient object at 0x7f5a745f7d90>
+  __lt__: <class 'method-wrapper'>: <method-wrapper '__lt__' of RosterClient object at 0x7f5a745f7d90>
+  __module__: <class 'str'>: aioxmpp.roster.service
+  __ne__: <class 'method-wrapper'>: <method-wrapper '__ne__' of RosterClient object at 0x7f5a745f7d90>
+  __new__: <class 'builtin_function_or_method'>: <built-in method __new__ of type object at 0x9563c0>
+  __reduce__: <class 'builtin_function_or_method'>: <built-in method __reduce__ of RosterClient object at 0x7f5a745f7d90>
+  __reduce_ex__: <class 'builtin_function_or_method'>: <built-in method __reduce_ex__ of RosterClient object at 0x7f5a745f7d90>
+  __repr__: <class 'method-wrapper'>: <method-wrapper '__repr__' of RosterClient object at 0x7f5a745f7d90>
+  __setattr__: <class 'method-wrapper'>: <method-wrapper '__setattr__' of RosterClient object at 0x7f5a745f7d90>
+  __sizeof__: <class 'builtin_function_or_method'>: <built-in method __sizeof__ of RosterClient object at 0x7f5a745f7d90>
+  __str__: <class 'method-wrapper'>: <method-wrapper '__str__' of RosterClient object at 0x7f5a745f7d90>
+  __subclasshook__: <class 'builtin_function_or_method'>: <built-in method __subclasshook__ of Meta object at 0x4038580>
+  __weakref__: <class 'NoneType'>: None
+  _abc_impl: <class '_abc._abc_data'>: <_abc._abc_data object at 0x7f5a76543d00>
+  _bse_token: <class 'object'>: <object object at 0x7f5a755a5bc0>
+  _remove_from_groups: <class 'method'>: <bound method RosterClient._remove_from_groups of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  _request_initial_roster: <class 'method'>: <bound method RosterClient._request_initial_roster of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  _shutdown: <class 'method'>: <bound method Service._shutdown of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  _update_entry: <class 'method'>: <bound method RosterClient._update_entry of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  approve: <class 'method'>: <bound method RosterClient.approve of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  client: <class 'aioxmpp.node.PresenceManagedClient'>: <aioxmpp.node.PresenceManagedClient object at 0x7f5a745b6190>
+  dependencies: <class 'dict'>: {<class 'aioxmpp.dispatcher.SimplePresenceDispatcher'>: <aioxmpp.dispatcher.SimplePresenceDispatcher object at 0x7f5a745d4310>}
+  derive_logger: <class 'method'>: <bound method Service.derive_logger of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  export_as_json: <class 'method'>: <bound method RosterClient.export_as_json of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  groups: <class 'dict'>: {}
+  handle_roster_push: <class 'method'>: <bound method RosterClient.handle_roster_push of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  handle_subscribe: <class 'method'>: <bound method RosterClient.handle_subscribe of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  handle_subscribed: <class 'method'>: <bound method RosterClient.handle_subscribed of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  handle_unsubscribe: <class 'method'>: <bound method RosterClient.handle_unsubscribe of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  handle_unsubscribed: <class 'method'>: <bound method RosterClient.handle_unsubscribed of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  import_from_json: <class 'method'>: <bound method RosterClient.import_from_json of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  items: <class 'dict'>: {}
+  logger: <class 'logging.Logger'>: <Logger aioxmpp.node.PresenceManagedClient.roster.RosterClient (DEBUG)>
+  on_entry_added: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a745e25d0>
+  on_entry_added_to_group: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a7340c810>
+  on_entry_name_changed: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a7340c750>
+  on_entry_removed: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a7340f890>
+  on_entry_removed_from_group: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a7340f910>
+  on_entry_subscription_state_changed: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a7340f8d0>
+  on_group_added: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a745e2e50>
+  on_group_removed: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a734243d0>
+  on_initial_roster_received: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a73424410>
+  on_subscribe: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a745e2a10>
+  on_subscribed: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a745e2ed0>
+  on_unsubscribe: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a745e2d50>
+  on_unsubscribed: <class 'aioxmpp.callbacks.AdHocSignal'>: <aioxmpp.callbacks.AdHocSignal object at 0x7f5a745f6350>
+  remove_entry: <class 'method'>: <bound method RosterClient.remove_entry of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  service_order_index: <class 'int'>: 4
+  set_entry: <class 'method'>: <bound method RosterClient.set_entry of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  shutdown: <class 'method'>: <bound method Service.shutdown of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  subscribe: <class 'method'>: <bound method RosterClient.subscribe of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  unsubscribe: <class 'method'>: <bound method RosterClient.unsubscribe of <aioxmpp.roster.service.RosterClient object at 0x7f5a745f7d90>>
+  version: <class 'NoneType'>: None
+===
+
+
+
+
+MessageType.CHAT liqsliu@conversations.im/Conversations.CONk wtfipfs@pimux.de {<aioxmpp.structs.LanguageTag.fromstr('en')>: 'disco'}
+---
+||<class 'aioxmpp.disco.xso.InfoQuery'>: <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>
+---
+  ATTR_MAP: <class 'dict'>: {(None, 'node'): <aioxmpp.xso.model.Attr object at 0x7f040b2f7290>}
+  CHILD_MAP: <class 'dict'>: {('http://jabber.org/protocol/disco#info', 'identity'): <aioxmpp.xso.model.ChildList object at 0x7f040b2f7250>, ('http://jabber.org/protocol/disco#info', 'feature'): <aioxmpp.xso.model.ChildValueList object at 0x7f040b2f7350>, ('jabber:x:data', 'x'): <aioxmpp.xso.model.ChildList object at 0x7f040b2f7390>}
+  CHILD_PROPS: <class 'sortedcollections.recipes.OrderedSet'>: OrderedSet([<aioxmpp.xso.model.ChildList object at 0x7f040b2f7250>, <aioxmpp.xso.model.ChildValueList object at 0x7f040b2f7350>, <aioxmpp.xso.model.ChildList object at 0x7f040b2f7390>])
+  COLLECTOR_PROPERTY: <class 'NoneType'>: None
+  DECLARE_NS: <class 'dict'>: {None: 'http://jabber.org/protocol/disco#info'}
+  TAG: <class 'tuple'>: ('http://jabber.org/protocol/disco#info', 'query')
+  TEXT_PROPERTY: <class 'NoneType'>: None
+  UNKNOWN_ATTR_POLICY: <enum 'UnknownAttrPolicy'>: UnknownAttrPolicy.DROP
+  UNKNOWN_CHILD_POLICY: <enum 'UnknownChildPolicy'>: UnknownChildPolicy.DROP
+  __abstractmethods__: <class 'frozenset'>: frozenset()
+  __class__: <class 'aioxmpp.xso.model.CapturingXMLStreamClass'>: <class 'aioxmpp.disco.xso.InfoQuery'>
+  __copy__: <class 'method'>: <bound method XSO.__copy__ of <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>>
+  __deepcopy__: <class 'method'>: <bound method XSO.__deepcopy__ of <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>>
+  __delattr__: <class 'method-wrapper'>: <method-wrapper '__delattr__' of InfoQuery object at 0x7f0403f78fc0>
+  __dir__: <class 'builtin_function_or_method'>: <built-in method __dir__ of InfoQuery object at 0x7f0403f78fc0>
+  __doc__: <class 'str'>:
+    A query for features and identities of an entity. The keyword arguments to
+    the constructor can be used to initialize the attributes. Note that
+    `identities` and `features` must be iterables of :class:`Identity` and
+    :class:`Feature`, respectively; these iterables are evaluated and the items
+    are stored in the respective attributes.
+
+    .. attribute:: node
+
+       The node at which the query is directed.
+
+    .. attribute:: identities
+
+       The identities of the entity, as :class:`Identity` instances. Each
+       entity has at least one identity.
+
+    .. attribute:: features
+
+       The features of the entity, as a set of strings. Each string represents
+       a :class:`Feature` instance with the corresponding :attr:`~.Feature.var`
+       attribute.
+
+    .. attribute:: captured_events
+
+       If the object was created by parsing an XML stream, this attribute holds
+       a list of events which were used when parsing it.
+
+       Otherwise, this is :data:`None`.
+
+       .. versionadded:: 0.5
+
+    .. automethod:: to_dict
+
+
+  __eq__: <class 'method-wrapper'>: <method-wrapper '__eq__' of InfoQuery object at 0x7f0403f78fc0>
+  __format__: <class 'builtin_function_or_method'>: <built-in method __format__ of InfoQuery object at 0x7f0403f78fc0>
+  __ge__: <class 'method-wrapper'>: <method-wrapper '__ge__' of InfoQuery object at 0x7f0403f78fc0>
+  __getattribute__: <class 'method-wrapper'>: <method-wrapper '__getattribute__' of InfoQuery object at 0x7f0403f78fc0>
+  __getstate__: <class 'builtin_function_or_method'>: <built-in method __getstate__ of InfoQuery object at 0x7f0403f78fc0>
+  __gt__: <class 'method-wrapper'>: <method-wrapper '__gt__' of InfoQuery object at 0x7f0403f78fc0>
+  __hash__: <class 'method-wrapper'>: <method-wrapper '__hash__' of InfoQuery object at 0x7f0403f78fc0>
+  __init__: <class 'method'>: <bound method InfoQuery.__init__ of <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>>
+  __init_subclass__: <class 'builtin_function_or_method'>: <built-in method __init_subclass__ of CapturingXMLStreamClass object at 0x23ac280>
+  __le__: <class 'method-wrapper'>: <method-wrapper '__le__' of InfoQuery object at 0x7f0403f78fc0>
+  __lt__: <class 'method-wrapper'>: <method-wrapper '__lt__' of InfoQuery object at 0x7f0403f78fc0>
+  __module__: <class 'str'>: aioxmpp.disco.xso
+  __ne__: <class 'method-wrapper'>: <method-wrapper '__ne__' of InfoQuery object at 0x7f0403f78fc0>
+  __new__: <class 'function'>: <function XSO.__new__ at 0x7f040c9760c0>
+  __reduce__: <class 'builtin_function_or_method'>: <built-in method __reduce__ of InfoQuery object at 0x7f0403f78fc0>
+  __reduce_ex__: <class 'builtin_function_or_method'>: <built-in method __reduce_ex__ of InfoQuery object at 0x7f0403f78fc0>
+  __repr__: <class 'method-wrapper'>: <method-wrapper '__repr__' of InfoQuery object at 0x7f0403f78fc0>
+  __setattr__: <class 'method-wrapper'>: <method-wrapper '__setattr__' of InfoQuery object at 0x7f0403f78fc0>
+  __sizeof__: <class 'builtin_function_or_method'>: <built-in method __sizeof__ of InfoQuery object at 0x7f0403f78fc0>
+  __slots__: <class 'tuple'>: ('captured_events',)
+  __str__: <class 'method-wrapper'>: <method-wrapper '__str__' of InfoQuery object at 0x7f0403f78fc0>
+  __subclasshook__: <class 'builtin_function_or_method'>: <built-in method __subclasshook__ of CapturingXMLStreamClass object at 0x23ac280>
+  __weakref__: <class 'NoneType'>: None
+  _abc_impl: <class '_abc._abc_data'>: <_abc._abc_data object at 0x7f040b2f7cc0>
+  _set_captured_events: <class 'method'>: <bound method InfoQuery._set_captured_events of <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>>
+  _xso_contents: <class 'dict'>: {<aioxmpp.xso.model.ChildList object at 0x7f040b2f7250>: [aioxmpp.disco.xso.Identity(category='pubsub', type_='pep', name=None, lang=<aioxmpp.structs.LanguageTag.fromstr('en')>), aioxmpp.disco.xso.Identity(category='account', type_='registered', name=None, lang=<aioxmpp.structs.LanguageTag.fromstr('en')>)], <aioxmpp.xso.model.ChildValueList object at 0x7f040b2f7350>: {'http://jabber.org/protocol/rsm', 'http://jabber.org/protocol/pubsub#delete-items', 'http://jabber.org/protocol/commands', 'http://jabber.org/protocol/pubsub#auto-subscribe', 'http://jabber.org/protocol/pubsub#auto-create', 'http://jabber.org/protocol/pubsub#publish', 'urn:xmpp:bookmarks-conversion:0', 'http://jabber.org/protocol/offline', 'http://jabber.org/protocol/pubsub#create-nodes', 'http://jabber.org/protocol/pubsub#subscribe', 'http://jabber.org/protocol/pubsub', 'http://jabber.org/protocol/pubsub#filtered-notifications', 'http://jabber.org/protocol/pubsub#persistent-items', 'http://jabber.org/protocol/disco#items', 'msgoffline', 'http://jabber.org/protocol/pubsub#outcast-affiliation', 'http://jabber.org/protocol/pubsub#delete-nodes', 'http://jabber.org/protocol/pubsub#retrieve-items', 'http://jabber.org/protocol/pubsub#retrieve-subscriptions', 'http://jabber.org/protocol/pubsub#retrieve-affiliations', 'http://jabber.org/protocol/pubsub#retract-items', 'http://jabber.org/protocol/pubsub#publish-options', 'http://jabber.org/protocol/pubsub#modify-affiliations', 'http://jabber.org/protocol/disco#info', 'urn:xmpp:pep-vcard-conversion:0', 'http://jabber.org/protocol/pubsub#purge-nodes', 'vcard-temp'}, <aioxmpp.xso.model.ChildList object at 0x7f040b2f7390>: []}
+  captured_events: <class 'list'>: [('start', 'http://jabber.org/protocol/disco#info', 'query', {}), ('start', 'http://jabber.org/protocol/disco#info', 'identity', {(None, 'type'): 'pep', (None, 'category'): 'pubsub'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'identity', {(None, 'type'): 'registered', (None, 'category'): 'account'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/disco#info'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/disco#items'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'vcard-temp'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'urn:xmpp:bookmarks-conversion:0'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'urn:xmpp:pep-vcard-conversion:0'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'msgoffline'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/offline'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/rsm'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#create-nodes'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#auto-create'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#auto-subscribe'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#delete-nodes'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#delete-items'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#filtered-notifications'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#modify-affiliations'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#outcast-affiliation'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#persistent-items'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#publish'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#publish-options'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#purge-nodes'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#retract-items'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#retrieve-affiliations'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#retrieve-items'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#retrieve-subscriptions'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/pubsub#subscribe'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/commands'}), ('end',), ('end',)]
+  exts: <class 'aioxmpp.xso.model.XSOList'>: []
+  features: <class 'set'>: {'http://jabber.org/protocol/rsm', 'http://jabber.org/protocol/pubsub#delete-items', 'http://jabber.org/protocol/commands', 'http://jabber.org/protocol/pubsub#auto-subscribe', 'http://jabber.org/protocol/pubsub#auto-create', 'http://jabber.org/protocol/pubsub#publish', 'urn:xmpp:bookmarks-conversion:0', 'http://jabber.org/protocol/offline', 'http://jabber.org/protocol/pubsub#create-nodes', 'http://jabber.org/protocol/pubsub#subscribe', 'http://jabber.org/protocol/pubsub', 'http://jabber.org/protocol/pubsub#filtered-notifications', 'http://jabber.org/protocol/pubsub#persistent-items', 'http://jabber.org/protocol/disco#items', 'msgoffline', 'http://jabber.org/protocol/pubsub#outcast-affiliation', 'http://jabber.org/protocol/pubsub#delete-nodes', 'http://jabber.org/protocol/pubsub#retrieve-items', 'http://jabber.org/protocol/pubsub#retrieve-subscriptions', 'http://jabber.org/protocol/pubsub#retrieve-affiliations', 'http://jabber.org/protocol/pubsub#retract-items', 'http://jabber.org/protocol/pubsub#publish-options', 'http://jabber.org/protocol/pubsub#modify-affiliations', 'http://jabber.org/protocol/disco#info', 'urn:xmpp:pep-vcard-conversion:0', 'http://jabber.org/protocol/pubsub#purge-nodes', 'vcard-temp'}
+  identities: <class 'aioxmpp.xso.model.XSOList'>: [aioxmpp.disco.xso.Identity(category='pubsub', type_='pep', name=None, lang=<aioxmpp.structs.LanguageTag.fromstr('en')>), aioxmpp.disco.xso.Identity(category='account', type_='registered', name=None, lang=<aioxmpp.structs.LanguageTag.fromstr('en')>)]
+  node: <class 'NoneType'>: None
+  to_dict: <class 'method'>: <bound method InfoQuery.to_dict of <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>>
+  unparse_to_node: <class 'method'>: <bound method XSO.unparse_to_node of <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>>
+  validate: <class 'method'>: <bound method XSO.validate of <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>>
+  xso_after_load: <class 'method'>: <bound method XSO.xso_after_load of <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>>
+  xso_error_handler: <class 'method'>: <bound method XSO.xso_error_handler of <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>>
+  xso_serialise_to_sax: <class 'method'>: <bound method XSO.xso_serialise_to_sax of <aioxmpp.disco.xso.InfoQuery object at 0x7f0403f78fc0>>
+===
+
+
+
+
+
+
+
+
+
+
+MessageType.CHAT liqsliu@conversations.im/Conversations.CONk wtfipfs@pimux.de {}
+MessageType.CHAT liqsliu@conversations.im/Conversations.CONk wtfipfs@pimux.de {<aioxmpp.structs.LanguageTag.fromstr('en')>: 'disco'}
+---
+||<class 'aioxmpp.disco.xso.InfoQuery'>: <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>
+---
+  ATTR_MAP: <class 'dict'>: {(None, 'node'): <aioxmpp.xso.model.Attr object at 0x7f61f2bbb310>}
+  CHILD_MAP: <class 'dict'>: {('http://jabber.org/protocol/disco#info', 'identity'): <aioxmpp.xso.model.ChildList object at 0x7f61f2bbb2d0>, ('http://jabber.org/protocol/disco#info', 'feature'): <aioxmpp.xso.model.ChildValueList object at 0x7f61f2bbb3d0>, ('jabber:x:data', 'x'): <aioxmpp.xso.model.ChildList object at 0x7f61f2bbb410>}
+  CHILD_PROPS: <class 'sortedcollections.recipes.OrderedSet'>: OrderedSet([<aioxmpp.xso.model.ChildList object at 0x7f61f2bbb2d0>, <aioxmpp.xso.model.ChildValueList object at 0x7f61f2bbb3d0>, <aioxmpp.xso.model.ChildList object at 0x7f61f2bbb410>])
+  COLLECTOR_PROPERTY: <class 'NoneType'>: None
+  DECLARE_NS: <class 'dict'>: {None: 'http://jabber.org/protocol/disco#info'}
+  TAG: <class 'tuple'>: ('http://jabber.org/protocol/disco#info', 'query')
+  TEXT_PROPERTY: <class 'NoneType'>: None
+  UNKNOWN_ATTR_POLICY: <enum 'UnknownAttrPolicy'>: UnknownAttrPolicy.DROP
+  UNKNOWN_CHILD_POLICY: <enum 'UnknownChildPolicy'>: UnknownChildPolicy.DROP
+  __abstractmethods__: <class 'frozenset'>: frozenset()
+  __class__: <class 'aioxmpp.xso.model.CapturingXMLStreamClass'>: <class 'aioxmpp.disco.xso.InfoQuery'>
+  __copy__: <class 'method'>: <bound method XSO.__copy__ of <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>>
+  __deepcopy__: <class 'method'>: <bound method XSO.__deepcopy__ of <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>>
+  __delattr__: <class 'method-wrapper'>: <method-wrapper '__delattr__' of InfoQuery object at 0x7f61f026f200>
+  __dir__: <class 'builtin_function_or_method'>: <built-in method __dir__ of InfoQuery object at 0x7f61f026f200>
+  __doc__: <class 'str'>:
+    A query for features and identities of an entity. The keyword arguments to
+    the constructor can be used to initialize the attributes. Note that
+    `identities` and `features` must be iterables of :class:`Identity` and
+    :class:`Feature`, respectively; these iterables are evaluated and the items
+    are stored in the respective attributes.
+
+    .. attribute:: node
+
+       The node at which the query is directed.
+
+    .. attribute:: identities
+
+       The identities of the entity, as :class:`Identity` instances. Each
+       entity has at least one identity.
+
+    .. attribute:: features
+
+       The features of the entity, as a set of strings. Each string represents
+       a :class:`Feature` instance with the corresponding :attr:`~.Feature.var`
+       attribute.
+
+    .. attribute:: captured_events
+
+       If the object was created by parsing an XML stream, this attribute holds
+       a list of events which were used when parsing it.
+
+       Otherwise, this is :data:`None`.
+
+       .. versionadded:: 0.5
+
+    .. automethod:: to_dict
+
+
+  __eq__: <class 'method-wrapper'>: <method-wrapper '__eq__' of InfoQuery object at 0x7f61f026f200>
+  __format__: <class 'builtin_function_or_method'>: <built-in method __format__ of InfoQuery object at 0x7f61f026f200>
+  __ge__: <class 'method-wrapper'>: <method-wrapper '__ge__' of InfoQuery object at 0x7f61f026f200>
+  __getattribute__: <class 'method-wrapper'>: <method-wrapper '__getattribute__' of InfoQuery object at 0x7f61f026f200>
+  __getstate__: <class 'builtin_function_or_method'>: <built-in method __getstate__ of InfoQuery object at 0x7f61f026f200>
+  __gt__: <class 'method-wrapper'>: <method-wrapper '__gt__' of InfoQuery object at 0x7f61f026f200>
+  __hash__: <class 'method-wrapper'>: <method-wrapper '__hash__' of InfoQuery object at 0x7f61f026f200>
+  __init__: <class 'method'>: <bound method InfoQuery.__init__ of <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>>
+  __init_subclass__: <class 'builtin_function_or_method'>: <built-in method __init_subclass__ of CapturingXMLStreamClass object at 0x4292300>
+  __le__: <class 'method-wrapper'>: <method-wrapper '__le__' of InfoQuery object at 0x7f61f026f200>
+  __lt__: <class 'method-wrapper'>: <method-wrapper '__lt__' of InfoQuery object at 0x7f61f026f200>
+  __module__: <class 'str'>: aioxmpp.disco.xso
+  __ne__: <class 'method-wrapper'>: <method-wrapper '__ne__' of InfoQuery object at 0x7f61f026f200>
+  __new__: <class 'function'>: <function XSO.__new__ at 0x7f61f42420c0>
+  __reduce__: <class 'builtin_function_or_method'>: <built-in method __reduce__ of InfoQuery object at 0x7f61f026f200>
+  __reduce_ex__: <class 'builtin_function_or_method'>: <built-in method __reduce_ex__ of InfoQuery object at 0x7f61f026f200>
+  __repr__: <class 'method-wrapper'>: <method-wrapper '__repr__' of InfoQuery object at 0x7f61f026f200>
+  __setattr__: <class 'method-wrapper'>: <method-wrapper '__setattr__' of InfoQuery object at 0x7f61f026f200>
+  __sizeof__: <class 'builtin_function_or_method'>: <built-in method __sizeof__ of InfoQuery object at 0x7f61f026f200>
+  __slots__: <class 'tuple'>: ('captured_events',)
+  __str__: <class 'method-wrapper'>: <method-wrapper '__str__' of InfoQuery object at 0x7f61f026f200>
+  __subclasshook__: <class 'builtin_function_or_method'>: <built-in method __subclasshook__ of CapturingXMLStreamClass object at 0x4292300>
+  __weakref__: <class 'NoneType'>: None
+  _abc_impl: <class '_abc._abc_data'>: <_abc._abc_data object at 0x7f61f2bbbd40>
+  _set_captured_events: <class 'method'>: <bound method InfoQuery._set_captured_events of <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>>
+  _xso_contents: <class 'dict'>: {<aioxmpp.xso.model.ChildValueList object at 0x7f61f2bbb3d0>: {'jabber:iq:register', 'http://jabber.org/protocol/muc#stable_id', 'vcard-temp', 'muc_hidden', 'muc_persistent', 'muc_nonanonymous', 'http://jabber.org/protocol/muc#self-ping-optimization', 'muc_membersonly', 'urn:xmpp:mam:2#extended', 'muc_unmoderated', 'muc_unsecured', 'urn:xmpp:sid:0', 'http://jabber.org/protocol/muc', 'http://jabber.org/protocol/muc#request', 'urn:xmpp:occupant-id:0', 'urn:xmpp:mam:2'}, <aioxmpp.xso.model.ChildList object at 0x7f61f2bbb2d0>: [aioxmpp.disco.xso.Identity(category='conference', type_='text', name='bot', lang=<aioxmpp.structs.LanguageTag.fromstr('en')>)], <aioxmpp.xso.model.ChildList object at 0x7f61f2bbb410>: [<aioxmpp.forms.xso.Data object at 0x7f61f0248b80>]}
+  captured_events: <class 'list'>: [('start', 'http://jabber.org/protocol/disco#info', 'query', {}), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'urn:xmpp:occupant-id:0'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'vcard-temp'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'muc_membersonly'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'muc_unsecured'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/muc#request'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'muc_unmoderated'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'muc_hidden'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'muc_persistent'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'urn:xmpp:mam:2'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'urn:xmpp:mam:2#extended'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'urn:xmpp:sid:0'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'jabber:iq:register'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'muc_nonanonymous'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/muc'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/muc#stable_id'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'feature', {(None, 'var'): 'http://jabber.org/protocol/muc#self-ping-optimization'}), ('end',), ('start', 'http://jabber.org/protocol/disco#info', 'identity', {(None, 'type'): 'text', (None, 'name'): 'bot', (None, 'category'): 'conference'}), ('end',), ('start', 'jabber:x:data', 'x', {(None, 'type'): 'result'}), ('start', 'jabber:x:data', 'field', {(None, 'type'): 'hidden', (None, 'var'): 'FORM_TYPE'}), ('start', 'jabber:x:data', 'value', {}), ('text', 'http://jabber.org/protocol/muc#roominfo'), ('end',), ('end',), ('start', 'jabber:x:data', 'field', {(None, 'type'): 'text-single', (None, 'var'): '{http://modules.prosody.im/mod_vcard_muc}avatar#sha1'}), ('start', 'jabber:x:data', 'value', {}), ('text', '65d3be24a752e17ed891920795a114e3a403ae7c'), ('end',), ('end',), ('start', 'jabber:x:data', 'field', {(None, 'type'): 'boolean', (None, 'var'): '{http://prosody.im/protocol/muc}roomconfig_allowmemberinvites', (None, 'label'): 'Allow members to invite new members'}), ('start', 'jabber:x:data', 'value', {}), ('text', '1'), ('end',), ('end',), ('start', 'jabber:x:data', 'field', {(None, 'type'): 'boolean', (None, 'var'): 'muc#roomconfig_allowinvites', (None, 'label'): 'Allow users to invite other users'}), ('start', 'jabber:x:data', 'value', {}), ('text', '1'), ('end',), ('end',), ('start', 'jabber:x:data', 'field', {(None, 'type'): 'text-single', (None, 'var'): 'muc#roominfo_occupants', (None, 'label'): 'Number of occupants'}), ('start', 'jabber:x:data', 'value', {}), ('text', '4'), ('end',), ('end',), ('start', 'jabber:x:data', 'field', {(None, 'type'): 'boolean', (None, 'var'): 'muc#roomconfig_changesubject'}), ('end',), ('start', 'jabber:x:data', 'field', {(None, 'type'): 'text-single', (None, 'var'): 'muc#roominfo_lang'}), ('start', 'jabber:x:data', 'value', {}), ('text', 'en'), ('end',), ('end',), ('start', 'jabber:x:data', 'field', {(None, 'type'): 'text-single', (None, 'var'): 'muc#roomconfig_roomname', (None, 'label'): 'Title'}), ('start', 'jabber:x:data', 'value', {}), ('text', 'bot'), ('end',), ('end',), ('start', 'jabber:x:data', 'field', {(None, 'type'): 'text-single', (None, 'var'): 'muc#roominfo_description', (None, 'label'): 'Description'}), ('start', 'jabber:x:data', 'value', {}), ('text', 'for test'), ('end',), ('end',), ('end',), ('end',)]
+  exts: <class 'aioxmpp.xso.model.XSOList'>: [<aioxmpp.forms.xso.Data object at 0x7f61f0248b80>]
+  features: <class 'set'>: {'jabber:iq:register', 'http://jabber.org/protocol/muc#stable_id', 'vcard-temp', 'muc_hidden', 'muc_persistent', 'muc_nonanonymous', 'http://jabber.org/protocol/muc#self-ping-optimization', 'muc_membersonly', 'urn:xmpp:mam:2#extended', 'muc_unmoderated', 'muc_unsecured', 'urn:xmpp:sid:0', 'http://jabber.org/protocol/muc', 'http://jabber.org/protocol/muc#request', 'urn:xmpp:occupant-id:0', 'urn:xmpp:mam:2'}
+  identities: <class 'aioxmpp.xso.model.XSOList'>: [aioxmpp.disco.xso.Identity(category='conference', type_='text', name='bot', lang=<aioxmpp.structs.LanguageTag.fromstr('en')>)]
+  node: <class 'NoneType'>: None
+  to_dict: <class 'method'>: <bound method InfoQuery.to_dict of <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>>
+  unparse_to_node: <class 'method'>: <bound method XSO.unparse_to_node of <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>>
+  validate: <class 'method'>: <bound method XSO.validate of <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>>
+  xso_after_load: <class 'method'>: <bound method XSO.xso_after_load of <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>>
+  xso_error_handler: <class 'method'>: <bound method XSO.xso_error_handler of <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>>
+  xso_serialise_to_sax: <class 'method'>: <bound method XSO.xso_serialise_to_sax of <aioxmpp.disco.xso.InfoQuery object at 0x7f61f026f200>>
+===
+{'identities': [{'category': 'conference', 'type': 'text', 'lang': 'en', 'name': 'bot'}], 'features': ['http://jabber.org/protocol/muc', 'http://jabber.org/protocol/muc#request', 'http://jabber.org/protocol/muc#self-ping-optimization', 'http://jabber.org/protocol/muc#stable_id', 'jabber:iq:register', 'muc_hidden', 'muc_membersonly', 'muc_nonanonymous', 'muc_persistent', 'muc_unmoderated', 'muc_unsecured', 'urn:xmpp:mam:2', 'urn:xmpp:mam:2#extended', 'urn:xmpp:occupant-id:0', 'urn:xmpp:sid:0', 'vcard-temp'], 'forms': [{'FORM_TYPE': ['http://jabber.org/protocol/muc#roominfo'], '{http://modules.prosody.im/mod_vcard_muc}avatar#sha1': ['65d3be24a752e17ed891920795a114e3a403ae7c'], '{http://prosody.im/protocol/muc}roomconfig_allowmemberinvites': ['1'], 'muc#roomconfig_allowinvites': ['1'], 'muc#roominfo_occupants': ['4'], 'muc#roomconfig_changesubject': [], 'muc#roominfo_lang': ['en'], 'muc#roomconfig_roomname': ['bot'], 'muc#roominfo_description': ['for test']}]}
+
+
+
+wtfipfs_bot@conference.conversations.im {'identities': [{'category': 'conference', 'type': 'text', 'lang': 'en', 'name': 'wtfipfs_bot'}], 'features': ['http://jabber.org/protocol/disco#info', 'http://jabber.org/protocol/disco#items', 'http://jabber.org/protocol/muc', 'muc_moderated', 'muc_open', 'muc_persistent', 'muc_public', 'muc_semianonymous', 'muc_unsecured', 'vcard-temp'], 'forms': [{'FORM_TYPE': ['http://jabber.org/protocol/muc#roominfo'], 'muc#roominfo_occupants': ['5'], 'muc#roomconfig_roomname': ['wtfipfs_bot'], 'muc#roominfo_description': ['hello bot'], 'muc#roominfo_contactjid': ['wtfipfs@pimux.de', 'liqsliu@suchat.org', 'liqsliu@pimux.de', 'liqsliu@monocles.eu', 'liqsliu@jabb3r.org', 'liqsliu@conversations.im'], 'muc#roominfo_changesubject': ['0'], 'muc#roomconfig_allowinvites': ['0'], 'muc#roomconfig_allowpm': ['participants'], 'muc#roominfo_lang': ['zh']}]}
+
+
+MessageType.CHAT liqsliu@conversations.im/Conversations.CONk wtfipfs@pimux.de {<aioxmpp.structs.LanguageTag.fromstr('en')>: 'disco'}
+conference.conversations.im {'identities': [{'category': 'conference', 'type': 'text', 'lang': 'en', 'name': 'Chatrooms'}], 'features': ['http://jabber.org/protocol/disco#info', 'http://jabber.org/protocol/disco#items', 'http://jabber.org/protocol/muc', 'http://jabber.org/protocol/muc#unique', 'http://jabber.org/protocol/rsm', 'jabber:iq:register', 'urn:xmpp:mam:0', 'urn:xmpp:mam:1', 'urn:xmpp:mam:2', 'urn:xmpp:mam:tmp', 'urn:xmpp:mucsub:0', 'vcard-temp'], 'forms': [{'FORM_TYPE': ['http://jabber.org/network/serverinfo'], 'abuse-addresses': ['mailto:abuse@conversations.im'], 'admin-addresses': ['mailto:admin@conversations.im'], 'support-addresses': ['mailto:support@conversations.im']}]}
+
+
+
+
+MessageType.CHAT liqsliu@conversations.im/Conversations.CONk wtfipfs@pimux.de {<aioxmpp.structs.LanguageTag.fromstr('en')>: 'ping'}
+---
+||<class 'aioxmpp.stanza.Message'>: <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>
+---
+  ATTR_MAP: <class 'dict'>: {(None, 'from'): <aioxmpp.xso.model.Attr object at 0x7fefffec7d90>, (None, 'to'): <aioxmpp.xso.model.Attr object at 0x7fefffec7ed0>, ('http://www.w3.org/XML/1998/namespace', 'lang'): <aioxmpp.xso.model.LangAttr object at 0x7fefffec7d10>, (None, 'id'): <aioxmpp.xso.model.Attr object at 0x7fefff715c10>, (None, 'type'): <aioxmpp.xso.model.Attr object at 0x7fefffffc510>}
+  CHILD_MAP: <class 'dict'>: {('jabber:client', 'error'): <aioxmpp.xso.model.Child object at 0x7fefffec7f10>, ('jabber:client', 'body'): <aioxmpp.xso.model.ChildTextMap object at 0x7fefff715d10>, ('jabber:client', 'subject'): <aioxmpp.xso.model.ChildTextMap object at 0x7fefff715c90>, ('jabber:client', 'thread'): <aioxmpp.xso.model.Child object at 0x7fefff715dd0>, ('jabber:x:data', 'x'): <aioxmpp.xso.model.ChildList object at 0x7feffe0afa10>, ('urn:xmpp:delay', 'delay'): <aioxmpp.xso.model.ChildList object at 0x7feffdf8f410>, ('urn:xmpp:message-correct:0', 'replace'): <aioxmpp.xso.model.Child object at 0x7feffdf8fd50>, ('jabber:x:oob', 'x'): <aioxmpp.xso.model.Child object at 0x7feffdfa1210>, ('urn:xmpp:chat-markers:0', 'received'): <aioxmpp.xso.model.Child object at 0x7feffdfa3310>, ('urn:xmpp:chat-markers:0', 'displayed'): <aioxmpp.xso.model.Child object at 0x7feffdfa3310>, ('urn:xmpp:chat-markers:0', 'acknowledged'): <aioxmpp.xso.model.Child object at 0x7feffdfa3310>, ('urn:xmpp:chat-markers:0', 'markable'): <aioxmpp.xso.model.ChildFlag object at 0x7fefff716450>, ('http://jabber.org/protocol/pubsub', 'pubsub'): <aioxmpp.xso.model.Child object at 0x7feffdfd9510>, ('http://jabber.org/protocol/pubsub#event', 'event'): <aioxmpp.xso.model.Child object at 0x7feffdfe8610>, ('jabber:x:encrypted', 'x'): <aioxmpp.xso.model.Child object at 0x7feffde15310>, ('jabber:x:signed', 'x'): <aioxmpp.xso.model.Child object at 0x7feffde15350>, ('urn:xmpp:sid:0', 'stanza-id'): <aioxmpp.xso.model.ChildList object at 0x7feffde165d0>, ('urn:xmpp:sid:0', 'origin-id'): <aioxmpp.xso.model.Child object at 0x7feffe0bb590>, ('urn:xmpp:carbons:2', 'sent'): <aioxmpp.xso.model.Child object at 0x7feffde20550>, ('urn:xmpp:carbons:2', 'received'): <aioxmpp.xso.model.Child object at 0x7feffde20590>, ('http://jabber.org/protocol/muc', 'x'): <aioxmpp.xso.model.Child object at 0x7feffe0bb450>, ('http://jabber.org/protocol/muc#user', 'x'): <aioxmpp.xso.model.Child object at 0x7fefff717690>, ('jabber:x:conference', 'x'): <aioxmpp.xso.model.Child object at 0x7feffde509d0>, ('http://jabber.org/protocol/shim', 'header'): <aioxmpp.xso.model.Child object at 0x7feffde5e3d0>, ('urn:xmpp:receipts', 'request'): <aioxmpp.xso.model.ChildFlag object at 0x7feffdec5b10>, ('urn:xmpp:receipts', 'received'): <aioxmpp.xso.model.Child object at 0x7feffdec6610>}
+  CHILD_PROPS: <class 'sortedcollections.recipes.OrderedSet'>: OrderedSet([<aioxmpp.xso.model.Child object at 0x7fefffec7f10>, <aioxmpp.xso.model.ChildTextMap object at 0x7fefff715d10>, <aioxmpp.xso.model.ChildTextMap object at 0x7fefff715c90>, <aioxmpp.xso.model.Child object at 0x7fefff715dd0>, <aioxmpp.xso.model.ChildList object at 0x7feffe0afa10>, <aioxmpp.xso.model.ChildList object at 0x7feffdf8f410>, <aioxmpp.xso.model.Child object at 0x7feffdf8fd50>, <aioxmpp.xso.model.Child object at 0x7feffdfa1210>, <aioxmpp.xso.model.Child object at 0x7feffdfa3310>, <aioxmpp.xso.model.ChildFlag object at 0x7fefff716450>, <aioxmpp.xso.model.Child object at 0x7feffdfd9510>, <aioxmpp.xso.model.Child object at 0x7feffdfe8610>, <aioxmpp.xso.model.Child object at 0x7feffde15310>, <aioxmpp.xso.model.Child object at 0x7feffde15350>, <aioxmpp.xso.model.ChildList object at 0x7feffde165d0>, <aioxmpp.xso.model.Child object at 0x7feffe0bb590>, <aioxmpp.xso.model.Child object at 0x7feffde20550>, <aioxmpp.xso.model.Child object at 0x7feffde20590>, <aioxmpp.xso.model.Child object at 0x7feffe0bb450>, <aioxmpp.xso.model.Child object at 0x7fefff717690>, <aioxmpp.xso.model.Child object at 0x7feffde509d0>, <aioxmpp.xso.model.Child object at 0x7feffde5e3d0>, <aioxmpp.xso.model.ChildFlag object at 0x7feffdec5b10>, <aioxmpp.xso.model.Child object at 0x7feffdec6610>])
+  COLLECTOR_PROPERTY: <class 'NoneType'>: None
+  DECLARE_NS: <class 'dict'>: {}
+  TAG: <class 'tuple'>: ('jabber:client', 'message')
+  TEXT_PROPERTY: <class 'NoneType'>: None
+  UNKNOWN_ATTR_POLICY: <enum 'UnknownAttrPolicy'>: UnknownAttrPolicy.DROP
+  UNKNOWN_CHILD_POLICY: <enum 'UnknownChildPolicy'>: UnknownChildPolicy.DROP
+  __abstractmethods__: <class 'frozenset'>: frozenset()
+  __class__: <class 'aioxmpp.xso.model.XMLStreamClass'>: <class 'aioxmpp.stanza.Message'>
+  __copy__: <class 'method'>: <bound method XSO.__copy__ of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  __deepcopy__: <class 'method'>: <bound method XSO.__deepcopy__ of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  __delattr__: <class 'method-wrapper'>: <method-wrapper '__delattr__' of Message object at 0x7feffaba4520>
+  __dir__: <class 'builtin_function_or_method'>: <built-in method __dir__ of Message object at 0x7feffaba4520>
+  __doc__: <class 'str'>:
+    An XMPP message stanza. The keyword arguments can be used to initialize the
+    attributes of the :class:`Message`.
+
+    .. attribute:: id_
+
+       The optional ID of the stanza.
+
+    .. attribute:: type_
+
+       The type attribute of the stanza. The allowed values are enumerated in
+       :class:`~.MessageType`.
+
+       .. versionchanged:: 0.7
+
+          Starting with 0.7, the enumeration :class:`~.MessageType` is
+          used. Before, strings equal to the XML attribute value character data
+          were used (``"chat"``, ``"headline"``, and so on).
+
+          As of 0.7, setting the string equivalents is still supported.
+          However, reading from the attribute always returns the corresponding
+          enumeration members (which still compare equal to their string
+          equivalents).
+
+       .. deprecated:: 0.7
+
+          The use of the aforementioned string values is deprecated and will
+          lead to :exc:`TypeError` and/or :exc:`ValueError` being raised when
+          they are written to this attribute. See the Changelog for
+          :ref:`api-changelog-0.7` for further details on how to upgrade your
+          code efficiently.
+
+    .. attribute:: body
+
+       A :class:`~.structs.LanguageMap` mapping the languages of the different
+       body elements to their text.
+
+       .. versionchanged:: 0.5
+
+          Before 0.5, this was a :class:`~aioxmpp.xso.model.XSOList`.
+
+    .. attribute:: subject
+
+       A :class:`~.structs.LanguageMap` mapping the languages of the different
+       subject elements to their text.
+
+       .. versionchanged:: 0.5
+
+          Before 0.5, this was a :class:`~aioxmpp.xso.model.XSOList`.
+
+    .. attribute:: thread
+
+       A :class:`Thread` instance representing the threading information
+       attached to the message or :data:`None` if no threading information is
+       attached.
+
+    Note that some attributes are inherited from :class:`StanzaBase`:
+
+    ========================= =======================================
+    :attr:`~StanzaBase.from_` sender :class:`~aioxmpp.JID`
+    :attr:`~StanzaBase.to`    recipient :class:`~aioxmpp.JID`
+    :attr:`~StanzaBase.lang`  ``xml:lang`` value
+    :attr:`~StanzaBase.error` :class:`Error` instance
+    ========================= =======================================
+
+    .. automethod:: make_reply
+
+
+  __eq__: <class 'method-wrapper'>: <method-wrapper '__eq__' of Message object at 0x7feffaba4520>
+  __format__: <class 'builtin_function_or_method'>: <built-in method __format__ of Message object at 0x7feffaba4520>
+  __ge__: <class 'method-wrapper'>: <method-wrapper '__ge__' of Message object at 0x7feffaba4520>
+  __getattribute__: <class 'method-wrapper'>: <method-wrapper '__getattribute__' of Message object at 0x7feffaba4520>
+  __getstate__: <class 'builtin_function_or_method'>: <built-in method __getstate__ of Message object at 0x7feffaba4520>
+  __gt__: <class 'method-wrapper'>: <method-wrapper '__gt__' of Message object at 0x7feffaba4520>
+  __hash__: <class 'method-wrapper'>: <method-wrapper '__hash__' of Message object at 0x7feffaba4520>
+  __init__: <class 'method'>: <bound method Message.__init__ of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  __init_subclass__: <class 'builtin_function_or_method'>: <built-in method __init_subclass__ of XMLStreamClass object at 0x2937400>
+  __le__: <class 'method-wrapper'>: <method-wrapper '__le__' of Message object at 0x7feffaba4520>
+  __lt__: <class 'method-wrapper'>: <method-wrapper '__lt__' of Message object at 0x7feffaba4520>
+  __module__: <class 'str'>: aioxmpp.stanza
+  __ne__: <class 'method-wrapper'>: <method-wrapper '__ne__' of Message object at 0x7feffaba4520>
+  __new__: <class 'function'>: <function XSO.__new__ at 0x7fefffe865c0>
+  __reduce__: <class 'builtin_function_or_method'>: <built-in method __reduce__ of Message object at 0x7feffaba4520>
+  __reduce_ex__: <class 'builtin_function_or_method'>: <built-in method __reduce_ex__ of Message object at 0x7feffaba4520>
+  __repr__: <class 'method'>: <bound method Message.__repr__ of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  __setattr__: <class 'method-wrapper'>: <method-wrapper '__setattr__' of Message object at 0x7feffaba4520>
+  __sizeof__: <class 'builtin_function_or_method'>: <built-in method __sizeof__ of Message object at 0x7feffaba4520>
+  __slots__: <class 'tuple'>: ()
+  __str__: <class 'method-wrapper'>: <method-wrapper '__str__' of Message object at 0x7feffaba4520>
+  __subclasshook__: <class 'builtin_function_or_method'>: <built-in method __subclasshook__ of XMLStreamClass object at 0x2937400>
+  __weakref__: <class 'NoneType'>: None
+  _abc_impl: <class '_abc._abc_data'>: <_abc._abc_data object at 0x7fefff716680>
+  _make_reply: <class 'method'>: <bound method StanzaBase._make_reply of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  _xso_contents: <class 'dict'>: {<aioxmpp.xso.model.Attr object at 0x7fefffffc510>: <MessageType.CHAT: 'chat'>, <aioxmpp.xso.model.Attr object at 0x7fefffec7d90>: JID(localpart='wtfipfs', domain='pimux.de', resource=None), <aioxmpp.xso.model.Attr object at 0x7fefffec7ed0>: JID(localpart='liqsliu', domain='conversations.im', resource='Conversations.CONk'), <aioxmpp.xso.model.Attr object at 0x7fefff715c10>: ':aECRaKVNe6YUel9jWMlu', <aioxmpp.xso.model.ChildTextMap object at 0x7fefff715d10>: {None: 'pong'}, <aioxmpp.xso.model.ChildTextMap object at 0x7fefff715c90>: {}, <aioxmpp.xso.model.ChildList object at 0x7feffe0afa10>: [], <aioxmpp.xso.model.ChildList object at 0x7feffdf8f410>: [], <aioxmpp.xso.model.ChildList object at 0x7feffde165d0>: []}
+  autoset_id: <class 'method'>: <bound method StanzaBase.autoset_id of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  body: <class 'aioxmpp.structs.LanguageMap'>: {None: 'pong'}
+  error: <class 'NoneType'>: None
+  from_: <class 'aioxmpp.structs.JID'>: wtfipfs@pimux.de
+  id_: <class 'str'>: :aECRaKVNe6YUel9jWMlu
+  lang: <class 'NoneType'>: None
+  make_error: <class 'method'>: <bound method StanzaBase.make_error of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  make_reply: <class 'method'>: <bound method Message.make_reply of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  subject: <class 'aioxmpp.structs.LanguageMap'>: {}
+  thread: <class 'NoneType'>: None
+  to: <class 'aioxmpp.structs.JID'>: liqsliu@conversations.im/Conversations.CONk
+  type_: <enum 'MessageType'>: MessageType.CHAT
+  unparse_to_node: <class 'method'>: <bound method XSO.unparse_to_node of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  validate: <class 'method'>: <bound method XSO.validate of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  xep0004_data: <class 'aioxmpp.xso.model.XSOList'>: []
+  xep0027_encrypted: <class 'NoneType'>: None
+  xep0027_signed: <class 'NoneType'>: None
+  xep0045_muc: <class 'NoneType'>: None
+  xep0045_muc_user: <class 'NoneType'>: None
+  xep0060_event: <class 'NoneType'>: None
+  xep0060_request: <class 'NoneType'>: None
+  xep0066_oob: <class 'NoneType'>: None
+  xep0131_headers: <class 'NoneType'>: None
+  xep0184_received: <class 'NoneType'>: None
+  xep0184_request_receipt: <class 'bool'>: False
+  xep0203_delay: <class 'aioxmpp.xso.model.XSOList'>: []
+  xep0249_direct_invite: <class 'NoneType'>: None
+  xep0280_received: <class 'NoneType'>: None
+  xep0280_sent: <class 'NoneType'>: None
+  xep0308_replace: <class 'NoneType'>: None
+  xep0333_markable: <class 'bool'>: False
+  xep0333_marker: <class 'NoneType'>: None
+  xep0359_origin_id: <class 'NoneType'>: None
+  xep0359_stanza_ids: <class 'aioxmpp.xso.model.XSOList'>: []
+  xso_after_load: <class 'method'>: <bound method XSO.xso_after_load of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  xso_error_handler: <class 'method'>: <bound method StanzaBase.xso_error_handler of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+  xso_serialise_to_sax: <class 'method'>: <bound method XSO.xso_serialise_to_sax of <message from='wtfipfs@pimux.de' to='liqsliu@conversations.im/Conversations.CONk' id=':aECRaKVNe6YUel9jWMlu' type=<MessageType.CHAT: 'chat'>>>
+===
+
+
+
+
+||<class 'aioxmpp.stanza.Message'>: <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>
+---
+  ATTR_MAP: <class 'dict'>: {(None, 'from'): <aioxmpp.xso.model.Attr object at 0x7fa4c6b14b50>, (None, 'to'): <aioxmpp.xso.model.Attr object at 0x7fa4c6b14c90>, ('http://www.w3.org/XML/1998/namespace', 'lang'): <aioxmpp.xso.model.LangAttr object at 0x7fa4c6b14ad0>, (None, 'id'): <aioxmpp.xso.model.Attr object at 0x7fa4c6b169d0>, (None, 'type'): <aioxmpp.xso.model.Attr object at 0x7fa4c6b16a50>}
+  CHILD_MAP: <class 'dict'>: {('jabber:client', 'error'): <aioxmpp.xso.model.Child object at 0x7fa4c6b14cd0>, ('jabber:client', 'body'): <aioxmpp.xso.model.ChildTextMap object at 0x7fa4c6b16b10>, ('jabber:client', 'subject'): <aioxmpp.xso.model.ChildTextMap object at 0x7fa4c6b16ad0>, ('jabber:client', 'thread'): <aioxmpp.xso.model.Child object at 0x7fa4c6b16bd0>, ('jabber:x:data', 'x'): <aioxmpp.xso.model.ChildList object at 0x7fa4c54b0910>, ('urn:xmpp:delay', 'delay'): <aioxmpp.xso.model.ChildList object at 0x7fa4c53a4250>, ('urn:xmpp:message-correct:0', 'replace'): <aioxmpp.xso.model.Child object at 0x7fa4c53a4b50>, ('jabber:x:oob', 'x'): <aioxmpp.xso.model.Child object at 0x7fa4c53a5fd0>, ('urn:xmpp:chat-markers:0', 'received'): <aioxmpp.xso.model.Child object at 0x7fa4c53b0110>, ('urn:xmpp:chat-markers:0', 'displayed'): <aioxmpp.xso.model.Child object at 0x7fa4c53b0110>, ('urn:xmpp:chat-markers:0', 'acknowledged'): <aioxmpp.xso.model.Child object at 0x7fa4c53b0110>, ('urn:xmpp:chat-markers:0', 'markable'): <aioxmpp.xso.model.ChildFlag object at 0x7fa4c7327350>, ('http://jabber.org/protocol/pubsub', 'pubsub'): <aioxmpp.xso.model.Child object at 0x7fa4c53de210>, ('http://jabber.org/protocol/pubsub#event', 'event'): <aioxmpp.xso.model.Child object at 0x7fa4c53ed2d0>, ('jabber:x:encrypted', 'x'): <aioxmpp.xso.model.Child object at 0x7fa4c53bded0>, ('jabber:x:signed', 'x'): <aioxmpp.xso.model.Child object at 0x7fa4c53bdf10>, ('urn:xmpp:sid:0', 'stanza-id'): <aioxmpp.xso.model.ChildList object at 0x7fa4c53bf1d0>, ('urn:xmpp:sid:0', 'origin-id'): <aioxmpp.xso.model.Child object at 0x7fa4c53bf210>, ('urn:xmpp:carbons:2', 'sent'): <aioxmpp.xso.model.Child object at 0x7fa4c5229190>, ('urn:xmpp:carbons:2', 'received'): <aioxmpp.xso.model.Child object at 0x7fa4c52291d0>, ('http://jabber.org/protocol/muc', 'x'): <aioxmpp.xso.model.Child object at 0x7fa4c523ce50>, ('http://jabber.org/protocol/muc#user', 'x'): <aioxmpp.xso.model.Child object at 0x7fa4c6b18450>, ('jabber:x:conference', 'x'): <aioxmpp.xso.model.Child object at 0x7fa4c5259790>, ('http://jabber.org/protocol/shim', 'header'): <aioxmpp.xso.model.Child object at 0x7fa4c52631d0>, ('urn:xmpp:receipts', 'request'): <aioxmpp.xso.model.ChildFlag object at 0x7fa4c52c2a90>, ('urn:xmpp:receipts', 'received'): <aioxmpp.xso.model.Child object at 0x7fa4c52c3510>}
+  CHILD_PROPS: <class 'sortedcollections.recipes.OrderedSet'>: OrderedSet([<aioxmpp.xso.model.Child object at 0x7fa4c6b14cd0>, <aioxmpp.xso.model.ChildTextMap object at 0x7fa4c6b16b10>, <aioxmpp.xso.model.ChildTextMap object at 0x7fa4c6b16ad0>, <aioxmpp.xso.model.Child object at 0x7fa4c6b16bd0>, <aioxmpp.xso.model.ChildList object at 0x7fa4c54b0910>, <aioxmpp.xso.model.ChildList object at 0x7fa4c53a4250>, <aioxmpp.xso.model.Child object at 0x7fa4c53a4b50>, <aioxmpp.xso.model.Child object at 0x7fa4c53a5fd0>, <aioxmpp.xso.model.Child object at 0x7fa4c53b0110>, <aioxmpp.xso.model.ChildFlag object at 0x7fa4c7327350>, <aioxmpp.xso.model.Child object at 0x7fa4c53de210>, <aioxmpp.xso.model.Child object at 0x7fa4c53ed2d0>, <aioxmpp.xso.model.Child object at 0x7fa4c53bded0>, <aioxmpp.xso.model.Child object at 0x7fa4c53bdf10>, <aioxmpp.xso.model.ChildList object at 0x7fa4c53bf1d0>, <aioxmpp.xso.model.Child object at 0x7fa4c53bf210>, <aioxmpp.xso.model.Child object at 0x7fa4c5229190>, <aioxmpp.xso.model.Child object at 0x7fa4c52291d0>, <aioxmpp.xso.model.Child object at 0x7fa4c523ce50>, <aioxmpp.xso.model.Child object at 0x7fa4c6b18450>, <aioxmpp.xso.model.Child object at 0x7fa4c5259790>, <aioxmpp.xso.model.Child object at 0x7fa4c52631d0>, <aioxmpp.xso.model.ChildFlag object at 0x7fa4c52c2a90>, <aioxmpp.xso.model.Child object at 0x7fa4c52c3510>])
+  COLLECTOR_PROPERTY: <class 'NoneType'>: None
+  DECLARE_NS: <class 'dict'>: {}
+  TAG: <class 'tuple'>: ('jabber:client', 'message')
+  TEXT_PROPERTY: <class 'NoneType'>: None
+  UNKNOWN_ATTR_POLICY: <enum 'UnknownAttrPolicy'>: UnknownAttrPolicy.DROP
+  UNKNOWN_CHILD_POLICY: <enum 'UnknownChildPolicy'>: UnknownChildPolicy.DROP
+  __abstractmethods__: <class 'frozenset'>: frozenset()
+  __class__: <class 'aioxmpp.xso.model.XMLStreamClass'>: <class 'aioxmpp.stanza.Message'>
+  __copy__: <class 'method'>: <bound method XSO.__copy__ of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  __deepcopy__: <class 'method'>: <bound method XSO.__deepcopy__ of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  __delattr__: <class 'method-wrapper'>: <method-wrapper '__delattr__' of Message object at 0x7fa4c1e16a40>
+  __dir__: <class 'builtin_function_or_method'>: <built-in method __dir__ of Message object at 0x7fa4c1e16a40>
+  __doc__: <class 'str'>:
+    An XMPP message stanza. The keyword arguments can be used to initialize the
+    attributes of the :class:`Message`.
+
+    .. attribute:: id_
+
+       The optional ID of the stanza.
+
+    .. attribute:: type_
+
+       The type attribute of the stanza. The allowed values are enumerated in
+       :class:`~.MessageType`.
+
+       .. versionchanged:: 0.7
+
+          Starting with 0.7, the enumeration :class:`~.MessageType` is
+          used. Before, strings equal to the XML attribute value character data
+          were used (``"chat"``, ``"headline"``, and so on).
+
+          As of 0.7, setting the string equivalents is still supported.
+          However, reading from the attribute always returns the corresponding
+          enumeration members (which still compare equal to their string
+          equivalents).
+
+       .. deprecated:: 0.7
+
+          The use of the aforementioned string values is deprecated and will
+          lead to :exc:`TypeError` and/or :exc:`ValueError` being raised when
+          they are written to this attribute. See the Changelog for
+          :ref:`api-changelog-0.7` for further details on how to upgrade your
+          code efficiently.
+
+    .. attribute:: body
+
+       A :class:`~.structs.LanguageMap` mapping the languages of the different
+       body elements to their text.
+
+       .. versionchanged:: 0.5
+
+          Before 0.5, this was a :class:`~aioxmpp.xso.model.XSOList`.
+
+    .. attribute:: subject
+
+       A :class:`~.structs.LanguageMap` mapping the languages of the different
+       subject elements to their text.
+
+       .. versionchanged:: 0.5
+
+          Before 0.5, this was a :class:`~aioxmpp.xso.model.XSOList`.
+
+    .. attribute:: thread
+
+       A :class:`Thread` instance representing the threading information
+       attached to the message or :data:`None` if no threading information is
+       attached.
+
+    Note that some attributes are inherited from :class:`StanzaBase`:
+
+    ========================= =======================================
+    :attr:`~StanzaBase.from_` sender :class:`~aioxmpp.JID`
+    :attr:`~StanzaBase.to`    recipient :class:`~aioxmpp.JID`
+    :attr:`~StanzaBase.lang`  ``xml:lang`` value
+    :attr:`~StanzaBase.error` :class:`Error` instance
+    ========================= =======================================
+
+    .. automethod:: make_reply
+
+
+  __eq__: <class 'method-wrapper'>: <method-wrapper '__eq__' of Message object at 0x7fa4c1e16a40>
+  __format__: <class 'builtin_function_or_method'>: <built-in method __format__ of Message object at 0x7fa4c1e16a40>
+  __ge__: <class 'method-wrapper'>: <method-wrapper '__ge__' of Message object at 0x7fa4c1e16a40>
+  __getattribute__: <class 'method-wrapper'>: <method-wrapper '__getattribute__' of Message object at 0x7fa4c1e16a40>
+  __getstate__: <class 'builtin_function_or_method'>: <built-in method __getstate__ of Message object at 0x7fa4c1e16a40>
+  __gt__: <class 'method-wrapper'>: <method-wrapper '__gt__' of Message object at 0x7fa4c1e16a40>
+  __hash__: <class 'method-wrapper'>: <method-wrapper '__hash__' of Message object at 0x7fa4c1e16a40>
+  __init__: <class 'method'>: <bound method Message.__init__ of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  __init_subclass__: <class 'builtin_function_or_method'>: <built-in method __init_subclass__ of XMLStreamClass object at 0x3c51c50>
+  __le__: <class 'method-wrapper'>: <method-wrapper '__le__' of Message object at 0x7fa4c1e16a40>
+  __lt__: <class 'method-wrapper'>: <method-wrapper '__lt__' of Message object at 0x7fa4c1e16a40>
+  __module__: <class 'str'>: aioxmpp.stanza
+  __ne__: <class 'method-wrapper'>: <method-wrapper '__ne__' of Message object at 0x7fa4c1e16a40>
+  __new__: <class 'function'>: <function XSO.__new__ at 0x7fa4c721e7a0>
+  __reduce__: <class 'builtin_function_or_method'>: <built-in method __reduce__ of Message object at 0x7fa4c1e16a40>
+  __reduce_ex__: <class 'builtin_function_or_method'>: <built-in method __reduce_ex__ of Message object at 0x7fa4c1e16a40>
+  __repr__: <class 'method'>: <bound method Message.__repr__ of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  __setattr__: <class 'method-wrapper'>: <method-wrapper '__setattr__' of Message object at 0x7fa4c1e16a40>
+  __sizeof__: <class 'builtin_function_or_method'>: <built-in method __sizeof__ of Message object at 0x7fa4c1e16a40>
+  __slots__: <class 'tuple'>: ()
+  __str__: <class 'method-wrapper'>: <method-wrapper '__str__' of Message object at 0x7fa4c1e16a40>
+  __subclasshook__: <class 'builtin_function_or_method'>: <built-in method __subclasshook__ of XMLStreamClass object at 0x3c51c50>
+  __weakref__: <class 'NoneType'>: None
+  _abc_impl: <class '_abc._abc_data'>: <_abc._abc_data object at 0x7fa4c6b17440>
+  _make_reply: <class 'method'>: <bound method StanzaBase._make_reply of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  _xso_contents: <class 'dict'>: {<aioxmpp.xso.model.Attr object at 0x7fa4c6b169d0>: ':DlSTIpRNF4y24flxtTzN', <aioxmpp.xso.model.Attr object at 0x7fa4c6b16a50>: <MessageType.GROUPCHAT: 'groupchat'>, <aioxmpp.xso.model.Attr object at 0x7fa4c6b14b50>: JID(localpart='wtfipfs_bot', domain='conference.conversations.im', resource='bot'), <aioxmpp.xso.model.Attr object at 0x7fa4c6b14c90>: JID(localpart='wtfipfs', domain='pimux.de', resource='u4fvpAx8t4FJ'), <aioxmpp.xso.model.LangAttr object at 0x7fa4c6b14ad0>: <aioxmpp.structs.LanguageTag.fromstr('en')>, <aioxmpp.xso.model.ChildTextMap object at 0x7fa4c6b16b10>: {<aioxmpp.structs.LanguageTag.fromstr('en')>: '**C bot:** pong'}, <aioxmpp.xso.model.ChildTextMap object at 0x7fa4c6b16ad0>: {}, <aioxmpp.xso.model.ChildList object at 0x7fa4c54b0910>: [], <aioxmpp.xso.model.ChildList object at 0x7fa4c53a4250>: [], <aioxmpp.xso.model.ChildList object at 0x7fa4c53bf1d0>: []}
+  autoset_id: <class 'method'>: <bound method StanzaBase.autoset_id of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  body: <class 'aioxmpp.structs.LanguageMap'>: {<aioxmpp.structs.LanguageTag.fromstr('en')>: '**C bot:** pong'}
+  error: <class 'NoneType'>: None
+  from_: <class 'aioxmpp.structs.JID'>: wtfipfs_bot@conference.conversations.im/bot
+  id_: <class 'str'>: :DlSTIpRNF4y24flxtTzN
+  lang: <class 'aioxmpp.structs.LanguageTag'>: en
+  make_error: <class 'method'>: <bound method StanzaBase.make_error of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  make_reply: <class 'method'>: <bound method Message.make_reply of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  subject: <class 'aioxmpp.structs.LanguageMap'>: {}
+  thread: <class 'NoneType'>: None
+  to: <class 'aioxmpp.structs.JID'>: wtfipfs@pimux.de/u4fvpAx8t4FJ
+  type_: <enum 'MessageType'>: MessageType.GROUPCHAT
+  unparse_to_node: <class 'method'>: <bound method XSO.unparse_to_node of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  validate: <class 'method'>: <bound method XSO.validate of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  xep0004_data: <class 'aioxmpp.xso.model.XSOList'>: []
+  xep0027_encrypted: <class 'NoneType'>: None
+  xep0027_signed: <class 'NoneType'>: None
+  xep0045_muc: <class 'NoneType'>: None
+  xep0045_muc_user: <class 'NoneType'>: None
+  xep0060_event: <class 'NoneType'>: None
+  xep0060_request: <class 'NoneType'>: None
+  xep0066_oob: <class 'NoneType'>: None
+  xep0131_headers: <class 'NoneType'>: None
+  xep0184_received: <class 'NoneType'>: None
+  xep0184_request_receipt: <class 'bool'>: False
+  xep0203_delay: <class 'aioxmpp.xso.model.XSOList'>: []
+  xep0249_direct_invite: <class 'NoneType'>: None
+  xep0280_received: <class 'NoneType'>: None
+  xep0280_sent: <class 'NoneType'>: None
+  xep0308_replace: <class 'NoneType'>: None
+  xep0333_markable: <class 'bool'>: False
+  xep0333_marker: <class 'NoneType'>: None
+  xep0359_origin_id: <class 'NoneType'>: None
+  xep0359_stanza_ids: <class 'aioxmpp.xso.model.XSOList'>: []
+  xso_after_load: <class 'method'>: <bound method XSO.xso_after_load of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  xso_error_handler: <class 'method'>: <bound method StanzaBase.xso_error_handler of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+  xso_serialise_to_sax: <class 'method'>: <bound method XSO.xso_serialise_to_sax of <message from='wtfipfs_bot@conference.conversations.im/bot' to='wtfipfs@pimux.de/u4fvpAx8t4FJ' id=':DlSTIpRNF4y24flxtTzN' type=<MessageType.GROUPCHAT: 'groupchat'>>>
+===
+MessageType.GROUPCHAT :DlSTIpRNF4y24flxtTzN wtfipfs_bot@conference.conversations.im/bot wtfipfs@pimux.de/u4fvpAx8t4FJ {<aioxmpp.structs.LanguageTag.fromstr('en')>: '**C bot:** pong'}
+
+
+
+
+
+for i in msg.xep0045_muc_user.items:
+	pprint(i)
+
+ affiliation: <class 'str'>: member
+  bare_jid: <class 'aioxmpp.structs.JID'>: su@conversations.im
+  continue_: <class 'NoneType'>: None
+  jid: <class 'aioxmpp.structs.JID'>: su@conversations.im/Conversa.BY
+  nick: <class 'NoneType'>: None
+  reason: <class 'NoneType'>: None
+  role: <class 'str'>: participant
+

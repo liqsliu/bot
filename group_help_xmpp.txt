@@ -1,0 +1,35 @@
+xmpp群介绍：中文 zh cn chinese ，话题不限。
+
+频道地址(地位相同，互为镜像频道):
+xmpp:ipfs@salas.suchat.org?join
+xmpp:wtfipfs@conference.conversations.im
+xmpp:wtfipfs@muc.pimux.de?join
+xmpp:wtfipfs@chat.yax.im?join
+xmpp:wtfipfs@conference.xmpp.jp?join
+xmpp:wtfipfs@conference.jabb3r.de?join
+
+群组管理: xmpp:liqsliu@conversations.im?omemo-sid-1591830723=7ddacf77707b78fcd888f897423c04c7cc749ebadf28f5054286e7c1aedf7f04
+bot:  xmpp:wtfipfs@pimux.de (私聊消息会被转发给管理，不要开启加密，bot不支持)
+
+目前有个xmppbot在管理监视群组: 检测到刷屏会撤销其发言权并尝试撤回消息，不过检测很保守，禁言时间也不会很长，普通用户应该感觉不到影响
+
+分群/避难区(由于主群是公开群，难免会有机器人账号发送垃圾信息甚至进行消息轰炸，故特设此群。新人不能发言，我看到新人会手动给发言权): xmpp:wtfipfs@salas.suchat.org?join
+
+副频道(RSS):
+rss/news:
+  - xmpp:wtfipfs_rss@salas.suchat.org?join
+  - xmpp:ipfsrss@chat.yax.im?join
+acg:
+  - xmpp:acg@muc.pimux.de?join
+bot:
+  - xmpp:wtfipfs_bot@salas.suchat.org?join
+  - xmpp:wtfipfs_bot@conference.conversations.im?join
+  - xmpp:wtfipfs_bot@conference.jabb3r.de?join
+
+注意: 下面的xmpp频道, 进入后会暴漏自己的xmpp地址(jid), 在意这个的话请不要进入这些频道。
+第三方(非本频道管理)提供的本频道的镜像频道:
+xmpp:#wtfipfs#matrix.org@matrix.org?join 
+xmpp:#ipfs#mozilla.org@matrix.org?join 
+xmpp:#wtfipfs#matrix.org@aria-net.org?join 
+
+更多xmpp相关的内容: .note #xmpp

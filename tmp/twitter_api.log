@@ -1,0 +1,4 @@
+# curl --request GET "https://api.twitter.com/2/users?ids=$id&user.fields=created_at,description,entities,id,location,name,pinned_tweet_id,profile_image_url,protected,url,username,verified,withheld&expansions=pinned_tweet_id" --header "Authorization: Bearer $BEARER_TOKEN"  | jq '.data[0].username'
+
+
+  # local tw_res=$(curl -s --request GET "https://api.twitter.com/2/tweets?ids=$id&tweet.fields=text,author_id&expansions=referenced_tweets.id" --header "Authorization: Bearer $BEARER_TOKEN")

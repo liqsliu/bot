@@ -1,0 +1,31 @@
+
+XMPP客户端列表: https://xmpp.org/software/
+android平台:
+Conversations( https://f-droid.org/packages/eu.siacs.conversations ) 功能简陋，但运行稳定
+blabber( https://f-droid.org/app/de.pixart.messenger ) 功能稍多，bug也多
+monocles( https://f-droid.org/packages/de.monocles.chat ) 功能稍多，bug也多
+atalk( https://github.com/cmeng-git/atalk-android ) 不支持gpg，功能更多，但运行不太稳定
+cheogram( https://cheogram.com/ )支持管理员撤回，添加了一些其特有的功能，详情看官网
+PC推荐使用gajim，相比移动端，支持的功能最多
+无gui: profanity
+
+xmpp服务大部分都是免费的，建议从公共服务器列表里找一个自己喜欢的。
+公共XMPP服务器列表:
+https://providers.xmpp.net/ 
+https://list.jabber.at 
+https://www.freie-messenger.de/sys_xmpp/server/  
+https://compliance.conversations.im/old/
+建议忽略(这家xmpp的管理人品有问题) https://xmpp-servers.404.city/
+一些个人看法:
+- conversations.im 垃圾用户较多，刚免费不久。另外群主一直没注册成功，在上面注册小号倒是成功了。后来找别人帮忙注册大号，一下子就成功了，所以这家xmpp的潜规则(上不了台面的东西)应该挺多的
+- xmpp.jp 广告账户较多，延迟比较低，不过要注意它的文件大小限制应该是所有服务器中是最小的，只有1M
+- yax.im 有点卡
+- pimux.de 单个文件大小限制是1g
+- 07f.de 据说对文件的限制更宽容，但是我注册几十次都是失败。
+- suchat.org 目前综合来看最好，对新特性的支持很快，不过要注意它的文件大小限制只有15M
+发送大文件建议使用ffsend，群里发送“.note #ffsend”可以查看相关信息
+
+其他xmpp相关的东西：
+开始使用xmpp: https://xmpp.org/getting-started/
+rssbot: xmpp:jabrss@cmeerw.net
+rssbot: xmpp:jabrss@jotwewe.de

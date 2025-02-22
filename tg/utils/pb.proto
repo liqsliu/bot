@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+message MSG{
+    //required bool raw = 1 [default = true];
+    optional string text = 1;
+    optional bytes data = 2;
+    optional int64 uid = 3;
+    optional int64 cid = 4;
+    optional int64 mid = 5;
+}
+
+message Button{
+    //required bool raw = 1 [default = true];
+    enum TYPE {
+        RAW = 0;
+        URL = 1;
+        IPFS = 2;
+        TG = 3;
+        BS = 4;
+        MS = 5;
+    }
+    TYPE type = 1;
+    optional MSG msg_for_mt = 2;
+
+}
+
+message DATA{
+    optional string text = 1;
+    optional int64 num = 2;
+}
+
+
+
+message Peer{
+    int64 id = 1;
+    enum TYPE {
+        USER = 0;
+        GROUP = 1;
+        SUPERGROUP = 2;
+        CHANNEL = 3;
+        MEGAGROUP = 4;
+    }
+    optional TYPE type = 2;
+}
+message Peers{
+    repeated int64 ids = 1;
+    // repeated Peer peer = 1;
+}
+
+import public "google/protobuf/timestamp.proto";
+
+enum TAG {
+    NEWS = 0;
+    TECH = 1;
+    TOOLS = 2;
+    ALL = 3;
+    WTF = 4;
+    FUN = 5;
+}
+
+message RSS_STATUS{
+    // string url = 1;
+    optional bool enable = 2;
+    // google.protobuf.Timestamp time = 1;
+    // int64 time = 5;
+    int32 time = 5;
+    optional string etag = 6;
+    optional string last = 7;
+    // repeated Peer to = 9;
+    // optional repeated int64 to = 9;
+    // optional Peers end = 9;
+    repeated Peer send = 9;
+    optional TAG tag = 10;
+}
+
+message RSS{
+    map<string, RSS_STATUS> rss = 1;
+    optional Peers tg = 5;
+}
+
+message Forwarder{
+    map<int64, Peers> task = 1;
+}
+
+
+
+
+
+
+message CONFIG{
+    // map<int64, Peers> forwarder = 1;
+    optional Forwarder forwarder = 1;
+    optional RSS rss = 2;
+    optional string text = 5;
+    optional bytes data = 6;
+}
+
+
