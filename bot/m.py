@@ -3172,6 +3172,7 @@ async def _send_log(text, jid=CHAT_ID, wait=1):
         if i > 5:
           warn("send_log timeout: {text}")
           return False
+        await sleep(wait+1)
         if send_log_task is not None:
           if send_log_task.done():
             if send_log_task.result() is not True:
@@ -3182,7 +3183,6 @@ async def _send_log(text, jid=CHAT_ID, wait=1):
               break
           else:
             info(f"send log task is not done")
-          await sleep(wait+1)
         else:
           info(f"send log task is None")
           break
