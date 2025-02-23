@@ -4939,6 +4939,10 @@ async def msgt(event):
     else:
       correct = False
     text = f"{l[0]}{text}"
+    if parse_message_deleted_task is not None:
+      if not parse_message_deleted_task.done():
+        info(f"wait for mark tmp_msg_chats {parse_message_deleted_task}")
+        await parse_message_deleted_task
     await send(text, src, correct=correct)
 
   else:
@@ -9031,6 +9035,13 @@ async def amain():
         await sleep(1)
       info(f"副线程发信息结果(loop2): {t.result()}")
 
+      @UB.on(events.MessageDeleted)
+      async def _(event):
+        global parse_message_deleted_task
+        parse_message_deleted_task = asyncio.create_task(msgtd(event))
+      global parse_message_deleted_task
+      parse_message_deleted_task = None
+
       @UB.on(events.NewMessage(incoming=True))
       @UB.on(events.MessageEdited(incoming=True))
       async def _(event):
@@ -9046,10 +9057,6 @@ async def amain():
       @UB.on(events.UserUpdate)
       async def _(event):
         asyncio.create_task(msgtp(event))
-
-      @UB.on(events.MessageDeleted)
-      async def _(event):
-        asyncio.create_task(msgtd(event))
 
       mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
       #  await mt_send("gpt start")
