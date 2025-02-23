@@ -352,6 +352,7 @@ async def split_long_text(text, msg_max_length=500, tmp_msg=False):
   else:
     texts = [text]
   if len(texts) > max_list:
+    info(f"文本过长，使用pb: {short(text)}")
     url =await pastebin(text)
     return ["文本过长，请打开链接查看: {}\n{}".format(url, short(text))]
   if len(texts) > 1:
