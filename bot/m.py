@@ -7829,7 +7829,6 @@ async def init_cmd():
   add_tg_bot("chatGPTwrapperbot", "gm")
   add_tg_bot("Tech_GPT_Bot", "gm1")
   add_tg_bot("GPT4Telegrambot", "gm2")
-  add_tg_bot("GPT4Telegrambot", "dss")
   add_tg_bot("RussiaChatGPTBot", "ds1")
   add_tg_bot("DeepSeekBot", "ds")
   add_tg_bot("chat_gpt_robot", "gpt")
