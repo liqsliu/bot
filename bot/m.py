@@ -7753,11 +7753,13 @@ async def init_cmd():
         return bot_cmds[bot_name]
       else:
         return ""
-  def add_tg_bot(bot_name, cmd):
+  def add_tg_bot(bot_name, cmd, cmd2=None):
     #  @exceptions_handler
     async def _(cmds, src):
       name = await get_name(username=bot_name)
       cmds2 = await get_commands2(bot_name, cmds[0])
+      if cmd2 is not None:
+        cmds.insert(1, cmd2)
       if len(cmds) == 1:
         return f"{name}\n.{cmds[0]} $text\n---\n.{cmds[0]} /start\n.{cmds[0]} /help\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并回复指定内容\n---\nhttps://t.me/{bot_name}\n---\n{cmds2}"
       elif urlre.fullmatch(cmds[-1]):
@@ -7810,6 +7812,7 @@ async def init_cmd():
   add_tg_bot("stable_diffusion_bot", "sd")
   add_tg_bot("MishkaAI_bot", "mk")
   add_tg_bot("GLBetabot", "gl")
+  add_tg_bot("GLBetabot", "ai", "/gpt")
 
 
   async def _(cmds, src):
@@ -7823,7 +7826,7 @@ async def init_cmd():
     if text in short_cmds:
       text = short_cmds[text]
     return 3, bot_name, text
-  cmd_funs["bai"] = _
+  cmd_funs["bai5"] = _
 
   async def _(cmds, src):
     bot_name = "gpt3_unlim_chatbot"
