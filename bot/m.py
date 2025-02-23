@@ -660,7 +660,7 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
         no_send_xmpp = True
         info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
 
-      elif _send_log.__name__ in fs:
+      elif send_log.__name__ in fs:
         info(f"send_log is busy: {res}")
         no_send = True
 
@@ -3357,25 +3357,36 @@ async def slow_mode(timeout=300):
 
 @exceptions_handler(no_send=True)
 @cross_thread
-async def send_tg(text, chat_id=CHAT_ID, correct=False, return_id=False, tmp_msg=False):
-  if chat_id in last_outmsg:
-    omsg = last_outmsg[chat_id]
-  else:
-    omsg = None
-  k = 0
+async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False):
   async with tg_send_lock:
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
       tmp_msg = False
-    for t in ts:
-      k += 1
+    #  if chat_id in last_outmsg:
+    #    omsg = last_outmsg[chat_id]
+    #  else:
+    #    omsg = None
+    for text in ts:
+      await sleep(msg_delay_default)
       try:
-        if omsg is not None and ( correct is True or chat_id in tmp_msg_chats ):
+        # chat_id 此处可以不考虑符号
+        peer = await UB.get_input_entity(chat_id)
+        #  if omsg is not None and ( correct is True or chat_id in tmp_msg_chats ):
+        #      msg = await omsg.edit(t)
+        if chat_id in last_outmsg:
+          omsg = last_outmsg[chat_id]
+          if correct is True:
             msg = await omsg.edit(t)
+            correct = False
+          elif chat_id in tmp_msg_chats:
+            msg = await omsg.edit(t)
+          else:
+            msg = await UB.send_message(peer, text)
           #  omsg = None
           #  last_outmsg.pop(chat_id)
         else:
-          msg = await UB.send_message(await get_entity(chat_id), t)
+          msg = await UB.send_message(peer, text)
+          #  msg = await UB.send_message(await get_entity(chat_id), t)
         last_outmsg[chat_id] = msg
         if tmp_msg:
           tmp_msg_chats.add(chat_id)
@@ -3394,16 +3405,9 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, return_id=False, tmp_msg
         err(f"发送tg消息失败: {chat_id} {e=} {t=}")
         return False
         #  raise
-
-
-      if k > 1:
-        await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2+msg_delay_default)
-      else:
-        await sleep(msg_delay_default)
+      #  await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2+msg_delay_default)
     #  if correct:
     #    last_outmsg[chat_id] = msg
-  if return_id:
-    return msg.id
   return True
   chat = await get_entity(CHAT_ID, True)
   await UB.send_message(chat, text)
@@ -4587,39 +4591,39 @@ async def get_msg(url):
 
 
 
-music_bot_state = {}
+#  music_bot_state = {}
 
-async def change_bridge(bot_name, src, text):
-  peer = await get_entity(bot_name)
-  pid = await UB.get_peer_id(peer)
-  if src not in mtmsgsg:
-    mtmsgsg[src] = {}
-  mtmsgs = mtmsgsg[src]
-
-  #  if pid not in bridges:
-  #    bridges[pid] = src
-  #  target = bridges[pid]
-  if pic not in mtmsgs:
-    mtmsgs[pid] = [src]
-
-  if target != src:
-    if type(target) is dict:
-      bridges[pid] = src
-      target = src
-    await send("coming", src, tmp_msg=True)
-    await send("...", src, tmp_msg=True)
-    if mtmsgs:
-      await sleep(5)
-    info(f"stop link to {target}")
-    await send("bye", target, tmp_msg=True)
-    info(f"link to {src}")
-    await send("typing", src, tmp_msg=True)
-
-    mtmsgs.clear()
-    bridges[pid] = src
-
-  gid = await send_tg(text, pid, return_id=True)
-  return mtmsgs, gid
+#  async def change_bridge(bot_name, src, text):
+#    peer = await get_entity(bot_name)
+#    pid = await UB.get_peer_id(peer)
+#    if src not in mtmsgsg:
+#      mtmsgsg[src] = {}
+#    mtmsgs = mtmsgsg[src]
+#
+#    #  if pid not in bridges:
+#    #    bridges[pid] = src
+#    #  target = bridges[pid]
+#    if pic not in mtmsgs:
+#      mtmsgs[pid] = [src]
+#
+#    if target != src:
+#      if type(target) is dict:
+#        bridges[pid] = src
+#        target = src
+#      await send("coming", src, tmp_msg=True)
+#      await send("...", src, tmp_msg=True)
+#      if mtmsgs:
+#        await sleep(5)
+#      info(f"stop link to {target}")
+#      await send("bye", target, tmp_msg=True)
+#      info(f"link to {src}")
+#      await send("typing", src, tmp_msg=True)
+#
+#      mtmsgs.clear()
+#      bridges[pid] = src
+#
+#    gid = await send_tg(text, pid, return_id=True)
+#    return mtmsgs, gid
 
 @exceptions_handler
 async def msgtd(event):
