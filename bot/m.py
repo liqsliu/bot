@@ -9067,7 +9067,7 @@ async def amain():
       await init_cmd()
 
       info(f"初始化完成")
-      sendme(f"启动成功，用时: {int(time.time()-start_time)}s", 0)
+      sendme(f"启动成功，用时: {int(time.time()-start_time)}s", to=0)
       #  await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
 
       try:

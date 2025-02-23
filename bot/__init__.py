@@ -56,8 +56,6 @@ class CustomFormatter(colorlog.ColoredFormatter):
         caller_frame = caller_frame.f_back
       elif caller_frame.f_code.co_name == "err":
         caller_frame = caller_frame.f_back
-      if caller_frame.f_code.co_name == "wrapper":
-        caller_frame = caller_frame.f_back
       #  if caller_frame:
         #  if record.name == "bot.m":
         #  else:
