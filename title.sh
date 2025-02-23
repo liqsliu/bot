@@ -66,7 +66,7 @@ fi
     unset https_proxy
     # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
       # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
-      wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+      # wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
     # }
   else
     export http_proxy="http://127.0.0.1:6080"
