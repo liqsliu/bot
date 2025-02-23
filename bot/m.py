@@ -1667,7 +1667,7 @@ async def init_myshell():
       await myshell_queue1.put((n, d))
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
   
-  async def prr(f, n=1):
+  async def prr():
     tmp1 = b""
     tmp2 = b""
     while myshell_p.returncode is None:
