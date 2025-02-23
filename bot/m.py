@@ -7765,7 +7765,7 @@ async def init_cmd():
       name = await get_name(username=bot_name)
       cmds2 = await get_commands2(bot_name, cmds[0])
       if len(cmds) == 1:
-        return f"{name}\n.{cmds[0]} $text\n---\n.{cmds[0]} /start\n.{cmds[0]} /help\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并回复指定内容\n---\nhttps://t.me/{bot_name}{cmds2}"
+        return f"{name}\n.{cmds[0]} $text\n---\n.{cmds[0]} /start\n.{cmds[0]} /help\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并回复指定内容\n---\n其他ai接口命令：.gpt/.gpt4/.gm/gm2/.bai/.sd\n---\nhttps://t.me/{bot_name}{cmds2}"
       elif urlre.fullmatch(cmds[-1]):
         cmds2 = [f"{SH_PATH}/title.sh", cmds[-1]]
         cmds2.extend(["", "", "", "just_path"])
@@ -7823,7 +7823,7 @@ async def init_cmd():
     bot_name = "littleb_gptBOT"
     if len(cmds) == 1:
       cmds2 = await get_commands2(bot_name, cmds[0])
-      return f"B.AI\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n--\nhttps://t.me/{bot_name}\n---\n{cmds2}"
+      return f"B.AI\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n--\nhttps://t.me/{bot_name}{cmds2}"
     text = ' '.join(cmds[1:])
     if text == "reset":
       text = "/new_chat"
@@ -7836,7 +7836,7 @@ async def init_cmd():
     bot_name = "gpt3_unlim_chatbot"
     if len(cmds) == 1:
       cmds2 = await get_commands2(bot_name, cmds[0])
-      return f"ChatGPT4 | Midjourney\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n---\nhttps://t.me/{bot_name}\n---\n{cmds2}\n---\n其他ai接口命令：.gpt/.gpt4/.gm/gm2/.bai/.sd"
+      return f"ChatGPT4 | Midjourney\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n---\nhttps://t.me/{bot_name}{cmds2}"
     text = ' '.join(cmds[1:])
     if text == "reset":
       text = "Reset dialog history"
@@ -7849,7 +7849,7 @@ async def init_cmd():
     bot_name = "chatGPTwrapperbot"
     if len(cmds) == 1:
       cmds2 = await get_commands2(bot_name, cmds[0])
-      return f"Gemini\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n--\nhttps://t.me/{bot_name}\n---\n{cmds2}"
+      return f"Gemini\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n--\nhttps://t.me/{bot_name}{cmds2}"
     text = ' '.join(cmds[1:])
     if text == "reset":
       text = "/reset"
