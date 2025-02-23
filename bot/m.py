@@ -4500,6 +4500,9 @@ def parse_tg_url(url, wtf=1):
 async def get_commands(chat_id):
   res = await get_full_entity(chat_id)
   tmp = []
+  if res.full_user.bot_info is None:
+      info(f"not found commands: {res.stringify()}")
+      return
   for i in res.full_user.bot_info.commands:
     tmp.append(f"/{i.command}: {i.description}")
   return "\n".join(tmp)
@@ -7745,8 +7748,11 @@ async def init_cmd():
       peer = await get_entity(bot_name)
       chat_id = await UB.get_peer_id(peer)
       s = await get_commands(chat_id)
-      bot_cmds[bot_name] = "\n".join(f".{cmd} {x}" for x in s.splitlines())
-    return bot_cmds[bot_name]
+      if s:
+          bot_cmds[bot_name] = "\n".join(f".{cmd} {x}" for x in s.splitlines())
+        return bot_cmds[bot_name]
+      else:
+        return ""
   def add_tg_bot(bot_name, cmd):
     #  @exceptions_handler
     async def _(cmds, src):
