@@ -4758,7 +4758,7 @@ async def msgtd(event):
       #  for src in mtmsgsg:
       for chat_id in bridges.copy():
         if chat_id in tmp_msg_chats:
-          continue:
+          continue
         src = bridges[chat_id]
         if type(src) is dict:
           bridges.pop(chat_id)
