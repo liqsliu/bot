@@ -7808,57 +7808,32 @@ async def init_cmd():
     #  cmd_funs["ai4"] = _
     cmd_funs[cmd] = _
   add_tg_bot("Music163bot", "163")
-  add_tg_bot("OPENAl_ChatGPT_bot", "gpt")
-  add_tg_bot("chat_gpt_robot", "gpt4")
+  add_tg_bot("OPENAl_ChatGPT_bot", "ai")
+  add_tg_bot("chatGPTwrapperbot", "gm")
+  add_tg_bot("chat_gpt_robot", "gpt")
   add_tg_bot("GPT_TechSupport", "ai2")
   add_tg_bot("ChatGPT_General_Bot", "ai3")
   add_tg_bot("martii_chat_bot", "ai4")
+  add_tg_bot("gpt3_unlim_chatbot", "ai5")
   add_tg_bot("stable_diffusion_bot", "sd")
-  add_tg_bot("MishkaAI_bot", "mk")
   add_tg_bot("GLBetabot", "gl")
-  add_tg_bot("GLBetabot", "ai", "/gpt")
+  add_tg_bot("MishkaAI_bot", "mk")
+  add_tg_bot("GLBetabot", "glai", "/gpt")
+  add_tg_bot("littleb_gptBOT", "bai")
 
 
-  async def _(cmds, src):
-    bot_name = "littleb_gptBOT"
-    if len(cmds) == 1:
-      cmds2 = await get_commands2(bot_name, cmds[0])
-      return f"B.AI\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n--\nhttps://t.me/{bot_name}{cmds2}"
-    text = ' '.join(cmds[1:])
-    if text == "reset":
-      text = "/new_chat"
-    if text in short_cmds:
-      text = short_cmds[text]
-    return 3, bot_name, text
-  cmd_funs["bai"] = _
-
-  async def _(cmds, src):
-    bot_name = "gpt3_unlim_chatbot"
-    if len(cmds) == 1:
-      cmds2 = await get_commands2(bot_name, cmds[0])
-      return f"ChatGPT4 | Midjourney\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n---\nhttps://t.me/{bot_name}{cmds2}"
-    text = ' '.join(cmds[1:])
-    if text == "reset":
-      text = "Reset dialog history"
-    if text in short_cmds:
-      text = short_cmds[text]
-    return 3, bot_name, text
-  cmd_funs["ai5"] = _
-
-  async def _(cmds, src):
-    bot_name = "chatGPTwrapperbot"
-    if len(cmds) == 1:
-      cmds2 = await get_commands2(bot_name, cmds[0])
-      return f"Gemini\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n--\nhttps://t.me/{bot_name}{cmds2}"
-    text = ' '.join(cmds[1:])
-    if text == "reset":
-      text = "/reset"
-    if text in short_cmds:
-      text = short_cmds[text]
-    return 3, bot_name, text
-  cmd_funs["gm"] = _
-
-
+  #  async def _(cmds, src):
+  #    bot_name = "littleb_gptBOT"
+  #    if len(cmds) == 1:
+  #      cmds2 = await get_commands2(bot_name, cmds[0])
+  #      return f"B.AI\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n--\nhttps://t.me/{bot_name}{cmds2}"
+  #    text = ' '.join(cmds[1:])
+  #    if text == "reset":
+  #      text = "/new_chat"
+  #    if text in short_cmds:
+  #      text = short_cmds[text]
+  #    return 3, bot_name, text
+  #  cmd_funs["bai"] = _
 
   async def _(cmds, src):
     if len(cmds) == 1:
