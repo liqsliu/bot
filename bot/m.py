@@ -3941,24 +3941,20 @@ async def mt_send(*args, **kwargs):
 
 #  async def mt_send(text="null", name="bot", gateway="test", qt=None):
 async def _mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
-
-  # api.xmpp
-  MT_API_RES = "127.0.0.1:4247"
-  #  if gateway == 'me':
-  #    # api.xmpp
-  #    MT_API_RES = "127.0.0.1:4247"
-  #  else:
-  #    # api.cmdres
-  #    MT_API_RES = "127.0.0.1:4249"
-  # send msg to matterbridge
-  url = "http://" + MT_API_RES + "/api/message"
-
+  #  # api.xmpp
+  #  MT_API = "127.0.0.1:4247"
+  #  #  if gateway == 'me':
+  #  #    # api.xmpp
+  #  #    MT_API_RES = "127.0.0.1:4247"
+  #  #  else:
+  #  #    # api.cmdres
+  #  #    MT_API_RES = "127.0.0.1:4249"
+  #  # send msg to matterbridge
+  #  url = "http://127.0.0.1:4247/api/message"
   #nc -l -p 5555 # https://mika-s.github.io/http/debugging/2019/04/08/debugging-http-requests.html
   #  url="http://127.0.0.1:5555/api/message"
-
 #  if not username.startswith("C "):
 #    username = "T " + username
-
   if qt:
     name = "{}\n\n{}".format("> " + "\n> ".join(qt.splitlines()), name)
 #  gateway="gateway0"
@@ -3968,7 +3964,7 @@ async def _mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
     "gateway": "{}".format(gateway)
   }
   async with mt_send_lock:
-    res = await http(url, method="POST", json=data)
+    res = await http("http://127.0.0.1:4247/api/message", method="POST", json=data)
   #  info("res of mt_send: {}".format(res))
   return True
   return res
