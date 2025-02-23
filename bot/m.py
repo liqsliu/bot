@@ -256,15 +256,9 @@ def info1(s):
 def info2(s):
   print("%s" % s.replace("\n", " "))
 
+info = logger.info
 
 def err(text, no_send=False):
-  #  if type(text) is not str:
-  #    text = f"{text=}"
-  #  lineno = currentframe().f_back.f_lineno
-  #  lineno = sys._getframe(1).f_lineno
-  #  fm = sys._getframe()
-  #  lineno = get_lineno(fm)
-  #  text = f"{lineno} {text}"
   logger.error(text, exc_info=True, stack_info=True)
   #  raise ValueError
   if no_send:
@@ -273,50 +267,15 @@ def err(text, no_send=False):
     send_log(text)
 
 def warn(text, more=False, no_send=True):
-  #  if type(text) is not str:
-  #    text = f"{text=}"
-  #  lineno = currentframe().f_back.f_lineno
-  #  lineno = sys._getframe(1).f_lineno
-  #  fm = sys._getframe()
-  #  lineno = get_lineno(fm)
-  #  text = f"{lineno} {text}"
   if more:
     warn(text, exc_info=True, stack_info=True)
   else:
-    #  if fm is None:
-    #    fm=sys._getframe(1)
     #  text = f"{fm.f_code.co_name} {fm.f_lineno} {text}"
     logger.warning(text)
   if no_send:
     pass
   else:
     send_log(text)
-
-  #  if len(args) == 1:
-  #    text = args[0]
-  #    if type(text) is not str:
-  #      text = f"{text=}"
-  #  else:
-  #  lineno = sys._getframe(1).f_lineno
-  #  fm = sys._getframe()
-  #  text = f"W: {fm.f_lineno} {fm.f_code.co_name}: {text}"
-  #  lineno = get_lineno(fm)
-  #  text = f"{lineno} {text}"
-#  def info(*args, fm=None):
-#    text = " ".join(f"{x}" for x in args)
-#  def info(text, fm=None):
-#    logger.info(text)
-  #  if fm is None:
-  #    fm=sys._getframe(1)
-  #  info(f"{fm.f_code.co_name} {fm.f_lineno} {text}")
-info = logger.info
-
-
-def log(text):
-  #  fm = sys._getframe()
-  #  info(text, fm=fm)
-  info(text)
-  send_log(text)
 
 #  def dbg(text):
 #    logger.debug(text)
@@ -676,7 +635,6 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
 
     res = f"已忽略异常: {res}"
     if not no_send:
-      #  log(res)
       #  warn(res)
       #  asyncio.create_task(mt_send(res))
       #  asyncio.create_task(send(res, ME))
@@ -1796,7 +1754,6 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
       while r is None:
         #  if time.time() - start_time > run_shell_time_max*10:
         if time.time() - start_time > max_time:
-          #  log("end")
           res = "end"
           await send(res, src)
           r = 0
@@ -2010,7 +1967,6 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     #      ts[0].cancel()
     #    if not ts[1].done():
     #      ts[1].cancel()
-    #  log("end")
     #  return
     #
     #  #  cmd = list( x.encode()+b" " for x in cmd )
@@ -3138,18 +3094,19 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
 
 send_log_task = None
 
-@exceptions_handler(no_send=True)
 def send_log(text, jid=CHAT_ID, wait=1):
+  sendme(text, to=0)
+  return True
   global send_log_task
   if send_log_task is not None:
     if not send_log_task.done():
       #  wait += 5
       wait = send_log_task
     elif send_log_task.result() is False:
-      info(f"send_log is not work({send_log_task.result()}): {text}")
+      info(f"send_log is bad ({send_log_task.result()}), skip: {text}")
       return False
     elif send_log_task.result() is None:
-      info(f"send_log is not work({send_log_task.result()}): {text}")
+      info(f"send_log is bad ({send_log_task.result()}), skip: {text}")
       return False
     else:
       pass
@@ -6242,7 +6199,7 @@ async def msgxp(msg):
       #  print(f"结果：{res}")
       #  print(f"结果：{res}")
       await send("ok", msg.from_)
-      log(f"已同意状态订阅请求：{msg.from_} {res}")
+      warn(f"已同意状态订阅请求：{msg.from_} {res}")
       res = rc.subscribe(msg.from_)
     else:
       # https://docs.zombofant.net/aioxmpp/devel/api/public/roster.html#aioxmpp.RosterClient.remove_entry
@@ -6255,7 +6212,7 @@ async def msgxp(msg):
           info("多余的联系人删除，此段代码可以删掉")
         else:
           warn(f"未知错误，待修复的联系人删除: {msg.from_} {e=}")
-      log(f"已拒绝状态订阅请求：{msg.from_} {res=}")
+      warn(f"已拒绝状态订阅请求：{msg.from_} {res=}")
   elif msg.type_ == PresenceType.UNAVAILABLE:
     #  print(f"离线: {msg.from_} {msg.status}")
     info(f"离线: {msg.from_} {msg.status}")
@@ -6466,12 +6423,12 @@ async def msgx(msg):
           await room.leave()
           rejoin = True
           rooms.pop(muc)
-          send_log("检测到幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
+          sendme("检测到幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
           if await join(muc):
             room = rooms[muc]
             continue
         else:
-          send_log("忽略幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
+          sendme("忽略幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
           return
       break
 
@@ -6560,7 +6517,7 @@ async def msgx(msg):
     #  chat = await get_entity(CHAT_ID, True)
     #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
     #  await sendme(f"{msg.type_} {msg.from_}: {text}")
-    send_log(f"{msg.type_} {msg.from_}: {text}")
+    sendme(f"{msg.type_} {msg.from_}: {text}")
     return
     #  pprint(msg)
 
@@ -6659,7 +6616,7 @@ async def msgx(msg):
     if is_admin is False:
       info("群内私聊: %s" % msg)
       #  await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
-      send_log(f"群内私聊: {msg.type_} {msg.from_}: {text}")
+      sendme(f"群内私聊: {msg.type_} {msg.from_}: {text}")
       return
     #  if get_jid(msg.to) in my_groups:
     #  if get_jid(msg.from_) in my_groups:
@@ -6700,7 +6657,7 @@ async def msgx(msg):
     reply.body[None] = "ok"
     await send(reply)
   elif text == "ok":
-    log(f"got a msg: ok")
+    info(f"got a msg: ok")
   elif text == "correct":
     reply = msg.make_reply()
     reply.body[None] = generand(3)
@@ -7040,7 +6997,6 @@ async def init_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
-
     res = await get_title(cmds[1], opts=cmds[2:4])
     return f"{res}"
   cmd_funs["tl"] = _
@@ -7851,10 +7807,12 @@ async def init_cmd():
         bot_cmds[bot_name] = ""
         #  return ""
     return bot_cmds[bot_name]
-  def add_tg_bot(bot_name, cmd, cmd2=None):
+  def add_tg_bot(bot_name, cmd, cmd2=None, cmd1=None):
     #  @exceptions_handler
     async def _(cmds, src):
       if cmd2 is not None:
+        if len(cmds) == 1:
+          return f"{cmds[0]} 是 {cmd1} {cmds2} 的快捷方式，要查看用法，请发送 {cmd1} {cmds2}"
         cmds.insert(1, cmd2)
       if len(cmds) == 1:
         cmds2 = await get_commands2(bot_name, cmds[0])
@@ -7921,8 +7879,8 @@ async def init_cmd():
   add_tg_bot("stable_diffusion_bot", "sd")
   add_tg_bot("MishkaAI_bot", "mk")
   add_tg_bot("GLBetabot", "gl")
-  add_tg_bot("GLBetabot", "glai", "/gpt")
-  add_tg_bot("GLBetabot", "glimg", "/img")
+  add_tg_bot("GLBetabot", "glai", "/gpt", ".gl")
+  add_tg_bot("GLBetabot", "glimg", "/img", ".gl")
   add_tg_bot("littleb_gptBOT", "bai")
 
 
@@ -8582,9 +8540,9 @@ def on_muc_role_request(form, submission_future):
 
   #  await send(f"发言申请: {form}")
   if submission_future.done():
-    send_log(f"skip: 发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
+    sendme(f"skip: 发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
     return
-  send_log(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
+  sendme(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
   #默认拒绝
   form.request_allow=False
   submission_future.set_result(form)
@@ -8637,7 +8595,7 @@ async def join_all():
         warn(f"进群失败一次: {i.result()} {i.get_name()} {len(tasks)}/{len(groups)}")
   if tmp:
     async def f():
-      send_log("进群失败，会继续尝试：\n%s" % "\n".join(tmp))
+      warn("进群失败，会继续尝试：\n%s" % "\n".join(tmp))
       await sleep(300)
       asyncio.create_task(join_all())
     asyncio.create_task(f())
@@ -9108,12 +9066,9 @@ async def amain():
       await regisger_handler(XB)
       await init_cmd()
 
-
       info(f"初始化完成")
-      send_log(f"启动成功，用时: {int(time.time()-start_time)}s", CHAT_ID)
-      send_log(f"启动成功，用时: {int(time.time()-start_time)}s", log_group_private)
+      sendme(f"启动成功，用时: {int(time.time()-start_time)}s", 0)
       #  await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
-
 
       try:
         #  while True:
