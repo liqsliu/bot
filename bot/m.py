@@ -5107,7 +5107,10 @@ async def msgtout(event):
   if event.is_private:
     if chat_id in bridges:
       src = bridges[chat_id]
-      if src in mtmsgsg:
+      if type(src) is dict:
+        info(f"src is dict: {src}")
+        bridges.pop(chat_id)
+      elif src in mtmsgsg:
         mtmsgs = mtmsgsg[src]
         if mtmsgs:
           bridges.pop(chat_id)
