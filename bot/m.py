@@ -3173,9 +3173,9 @@ async def _send_log(text, jid=CHAT_ID, wait=1):
 @exceptions_handler(no_send=True)
 def sendme(*args, to=1, **kwargs):
   if to != 2:
-    asyncio.create_task(send(jid=CHAT_ID, *args, **kwargs))
+    asyncio.create_task(send(*args, jid=CHAT_ID, **kwargs))
   if to != 1:
-    asyncio.create_task(send(jid=ME, *args, **kwargs))
+    asyncio.create_task(send(*args, jid=ME, **kwargs))
   #  asyncio.create_task(run_run(send_t(text)))
 
 #  async def send(text, jid=None, *args, **kwargs):
