@@ -4938,8 +4938,10 @@ async def msgt(event):
     text = f"{l[0]}{text}"
     if len(l) == 2:
       l.append(set())
-    if chat_id == 5968721572:
-      await sleep(0.3)
+    else:
+      if len(l[2]) > 0:
+    #  if chat_id == 5968721572:
+        await sleep(0.5)
     if parse_message_deleted_task is not None:
       if not parse_message_deleted_task.done():
         info(f"等待处理完tg的消息删除事件 {parse_message_deleted_task}")
