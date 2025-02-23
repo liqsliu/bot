@@ -7754,7 +7754,8 @@ async def init_cmd():
       if s:
         bot_cmds[bot_name] = "\n---\n" + "\n".join(f".{cmd} {x}" for x in s.splitlines())
       else:
-        return ""
+        bot_cmds[bot_name] = ""
+        #  return ""
     return bot_cmds[bot_name]
   def add_tg_bot(bot_name, cmd, cmd2=None):
     #  @exceptions_handler
