@@ -109,6 +109,7 @@ fi
     cat "$fn" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
     echo
     rm "$fn"
+    exit
   else
 
     # echo "$html" > "$fn"
@@ -131,66 +132,66 @@ fi
     #   done
     # fi
     # grep -i "$mime_type" /etc/mime.types | awk '{for(i=2;i<=NF;i++) print $i}'
-  mime_type=$ft
-  # 定义 MIME 类型到扩展名的映射
-  case "$mime_type" in
-      "image/jpeg")
-          ext="jpg"
-          ;;
-      "image/png")
-          ext="png"
-          ;;
-      "image/gif")
-          ext="gif"
-          ;;
-      "image/webp")
-          ext="webp"
-          ;;
-      "text/plain")
-          ext="txt"
-          ;;
-      "text/html")
-          ext="html"
-          ;;
-      "application/pdf")
-          ext="pdf"
-          ;;
-      "application/zip")
-          ext="zip"
-          ;;
-      "application/msword")
-          ext="doc"
-          ;;
-      "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-          ext="docx"
-          ;;
-      "audio/mpeg")
-          ext="mp3"
-          ;;
-      "video/mp4")
-          ext="mp4"
-          ;;
-      *)
-          # echo "未知 MIME 类型: $mime_type"
-          # exit 1
-          ext=""
-          ;;
-  esac
-  unset fe
-  if [[ -n "$ext" ]]; then
-    fe=".$ext"
-    if [[ "${fno%.${ext}}" == "$fno" ]]; then
-      mv "$fn" "$HOME/t/$fno$fe"
-      fn="$HOME/t/$fno$fe"
-    else
-      fno=${fno%.${ext}}
+    mime_type=$ft
+    # 定义 MIME 类型到扩展名的映射
+    case "$mime_type" in
+        "image/jpeg")
+            ext="jpg"
+            ;;
+        "image/png")
+            ext="png"
+            ;;
+        "image/gif")
+            ext="gif"
+            ;;
+        "image/webp")
+            ext="webp"
+            ;;
+        "text/plain")
+            ext="txt"
+            ;;
+        "text/html")
+            ext="html"
+            ;;
+        "application/pdf")
+            ext="pdf"
+            ;;
+        "application/zip")
+            ext="zip"
+            ;;
+        "application/msword")
+            ext="doc"
+            ;;
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+            ext="docx"
+            ;;
+        "audio/mpeg")
+            ext="mp3"
+            ;;
+        "video/mp4")
+            ext="mp4"
+            ;;
+        *)
+            # echo "未知 MIME 类型: $mime_type"
+            # exit 1
+            ext=""
+            ;;
+    esac
+    unset fe
+    if [[ -n "$ext" ]]; then
+      fe=".$ext"
+      if [[ "${fno%.${ext}}" == "$fno" ]]; then
+        mv "$fn" "$HOME/t/$fno$fe"
+        fn="$HOME/t/$fno$fe"
+      else
+        fno=${fno%.${ext}}
+      fi
+      if [[ ${#fno} -gt 4 ]]; then
+        fno=${fno::4}
+        mv "$fn" "$HOME/t/$fno$fe"
+        fn="$HOME/t/$fno$fe"
+      fi
     fi
-    if [[ ${#fno} -gt 4 ]]; then
-      fno=${fno::4}
-      mv "$fn" "$HOME/t/$fno$fe"
-      fn="$HOME/t/$fno$fe"
-    fi
-  fi
 
 
     # fs=$(du -b -- "$fn" | cut -f1)
