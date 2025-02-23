@@ -7819,6 +7819,7 @@ async def init_cmd():
   add_tg_bot("GLBetabot", "gl")
   add_tg_bot("MishkaAI_bot", "mk")
   add_tg_bot("GLBetabot", "glai", "/gpt")
+  add_tg_bot("GLBetabot", "glimg", "/img")
   add_tg_bot("littleb_gptBOT", "bai")
 
 
