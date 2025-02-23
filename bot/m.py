@@ -4826,6 +4826,7 @@ async def msgtp(event):
     await send(f"{bot_name} ...", src, tmp_msg=True)
 
 bot_names = {}
+bot_cmds = {}
 
 async def get_name(chat_id=None, username=None):
   if chat_id not in bot_names:
@@ -7832,7 +7833,6 @@ async def init_cmd():
       "a": "/about",
       "r": "/reset",
       }
-  bot_cmds = {}
   async def get_commands2(bot_name, cmd):
     if bot_name not in bot_cmds:
       peer = await get_entity(bot_name)
@@ -7849,12 +7849,12 @@ async def init_cmd():
     async def _(cmds, src):
       if cmd2 is not None:
         cmds.insert(1, cmd2)
-      name = await get_name(username=bot_name)
       if len(cmds) == 1:
         cmds2 = await get_commands2(bot_name, cmds[0])
+        name = await get_name(username=bot_name)
         res = f"{name}\n.{cmds[0]} $text"
         if bot_name == "OPENAl_ChatGPT_bot":
-          res += "\n.{cmds[0]} /start: 更换ai模型(\"/start\"可以简写为\"s\")"
+          res += f"\n.{cmds[0]} /start: 更换ai模型(\"/start\"可以简写为\"s\")"
         res += "\n---\n.{cmds[0]} /start: 某些bot通过该命令找到额外选项\n.{cmds[0]} /help: 某些bot通过该命令找到额外选项\n.{cmds[0]} /reset: 某些bot通过该命令清空bot记住的上下文\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并针对文件回复指定内容\n---\n其他ai接口命令：.gpt/.gpt4/.gm/.gm1/.gm2/.bai/.sd/.ai2/.ai3/.ds/.ds1\n---\nhttps://t.me/{bot_name}{cmds2}"
         return res
       elif urlre.fullmatch(cmds[-1]):
