@@ -2662,6 +2662,7 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
           s.pop(-1)
         return "\n".join(s)
       else:
+        warn(f"need file path: {o=}")
         return o
     else:
       warn("failed: %s\n--\nE: %s\n%s" % (o, r, e))
