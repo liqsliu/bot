@@ -4946,7 +4946,7 @@ async def msgt(event):
       else:
         info("parse_message_deleted_task: done")
     else:
-      info(f"{parse_message_deleted_task=}")
+      info(f"None {parse_message_deleted_task=}")
     l[2].add(msg.id)
     await send(text, src, correct=correct)
 
