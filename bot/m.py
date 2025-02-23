@@ -327,7 +327,6 @@ async def split_long_text(text, msg_max_length=500, tmp_msg=False):
     ls = text.splitlines()
     tmp = None
     for l in ls:
-      print(f"texts: {len(texts)} len(tmp)")
       if tmp:
         if len((tmp+l).encode()) > msg_max_length:
           texts.append(tmp)
@@ -342,6 +341,7 @@ async def split_long_text(text, msg_max_length=500, tmp_msg=False):
           texts.append(tmp)
           l = l[len(tmp):]
         tmp = l
+      print(f"texts: {len(texts)} {len(tmp)}")
 
         #  if len(l.encode()) > msg_max_length:
         #    tmp = l[:msg_max_length]
