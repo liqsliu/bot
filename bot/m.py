@@ -321,7 +321,7 @@ def generand(N=4, M=None, *, no_uppercase=False):
 
 async def split_long_text(text, msg_max_length=500, tmp_msg=False):
 #  def split_long_text(text, msg_max_length=500, tmp_msg=False):
-  return [text[:msg_max_length]]
+  #  return [text[:msg_max_length]]
   texts = []
   if len(text.encode()) > msg_max_length:
     ls = text.splitlines()
@@ -335,19 +335,29 @@ async def split_long_text(text, msg_max_length=500, tmp_msg=False):
         else:
           tmp += '\n'+l
       else:
-        if len(l.encode()) > msg_max_length:
+        while len(l.encode()) > msg_max_length:
           tmp = l[:msg_max_length]
-          while True:
-            print(f"texts: {texts}")
-            if len(tmp.encode()) > msg_max_length:
-              tmp = tmp[:-int( (len(tmp.encode())-msg_max_length)/2 + 1 )]
-            else:
-              texts.append(tmp)
-              tmp = l[len(tmp):]
-              if len(tmp.encode()) < msg_max_length:
-                break
-        else:
-          tmp = l
+          while len(tmp.encode()) > msg_max_length:
+            tmp = tmp[:-int( (len(tmp.encode())-msg_max_length)/2 + 1 )]
+          texts.append(tmp)
+          l = l[len(tmp):]
+        tmp = l
+
+        #  if len(l.encode()) > msg_max_length:
+        #    tmp = l[:msg_max_length]
+        #    while True:
+        #      print(f"texts: {texts}")
+        #      if len(tmp.encode()) > msg_max_length:
+        #        tmp = tmp[:-int( (len(tmp.encode())-msg_max_length)/2 + 1 )]
+        #      else:
+        #        texts.append(tmp)
+        #        tmp = l[len(tmp):]
+        #        if len(tmp.encode()) < msg_max_length:
+        #          break
+        #        else:
+        #          l = tmp
+        #          tmp = l[:msg_max_length]
+
     if tmp:
       texts.append(tmp)
   else:
