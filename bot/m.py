@@ -4503,6 +4503,9 @@ async def get_commands(chat_id):
   if res.full_user.bot_info is None:
       info(f"not found commands: {res.stringify()}")
       return
+  if res.full_user.bot_info.commands is None:
+      info(f"not found commands: {res.stringify()}")
+      return
   for i in res.full_user.bot_info.commands:
     tmp.append(f"/{i.command}: {i.description}")
   return "\n".join(tmp)
