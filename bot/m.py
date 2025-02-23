@@ -7749,7 +7749,7 @@ async def init_cmd():
       chat_id = await UB.get_peer_id(peer)
       s = await get_commands(chat_id)
       if s:
-          bot_cmds[bot_name] = "\n".join(f".{cmd} {x}" for x in s.splitlines())
+        bot_cmds[bot_name] = "\n".join(f".{cmd} {x}" for x in s.splitlines())
         return bot_cmds[bot_name]
       else:
         return ""
