@@ -272,7 +272,7 @@ def err(text, no_send=False):
   else:
     send_log(text)
 
-def warn(text, more=False, no_send=False):
+def warn(text, more=False, no_send=True):
   #  if type(text) is not str:
   #    text = f"{text=}"
   #  lineno = currentframe().f_back.f_lineno
@@ -3196,7 +3196,6 @@ async def _send_log(text, jid=CHAT_ID, wait=1):
   #  asyncio.create_task(mt_send_for_long_text(text))
   #  asyncio.create_task(sendg(text))
 
-
 @exceptions_handler(no_send=True)
 def sendme(*args, to=1, **kwargs):
   if to != 2:
@@ -3204,7 +3203,6 @@ def sendme(*args, to=1, **kwargs):
   if to != 1:
     asyncio.create_task(send(jid=ME, *args, **kwargs))
   #  asyncio.create_task(run_run(send_t(text)))
-
 
 #  async def send(text, jid=None, *args, **kwargs):
 #    if jid is None:
@@ -4736,8 +4734,25 @@ async def change_bridge(bot_name, src, text):
   return mtmsgs, gid
 
 @exceptions_handler
+async def msgtd(event):
+  #  chat_id = event.sender_id
+  chat_id = event.chat_id
+  if chat_id is None:
+    warn(f"chat_id is None")
+  elif chat_id not in bridges:
+    return
+  info(f"delete msg: {chat_id} {event.deleted_id} {event.deleted_ids}")
+  src = bridges[chat_id]
+  #  if src in last_outmsg:
+  if src not in tmp_msg_chats:
+    tmp_msg_chats.add(j)
+
+
+
+@exceptions_handler
 async def msgtp(event):
   #  chat_id = event.sender_id
+  # 私聊这俩都一样
   chat_id = event.chat_id
   if chat_id not in bridges:
     return
@@ -4749,11 +4764,11 @@ async def msgtp(event):
   #  if not event.is_private:
   #    return
 
-  # 私聊这俩都一样
-  if chat_id in bridges:
-    src = bridges[chat_id]
-  else:
-    return
+  src = bridges[chat_id]
+  #  if chat_id in bridges:
+  #    src = bridges[chat_id]
+  #  else:
+  #    return
   bot_name = await get_name(chat_id)
   if event.photo:
     await send(f"{bot_name} is uploading photo", src, tmp_msg=True)
@@ -4826,7 +4841,7 @@ async def msgt(event):
   src = bridges[chat_id]
   if isinstance(src, dict):
     bridges.pop(chat_id)
-    info(f"delete old bridge: {src}")
+    warn(f"delete old bridge: {src}")
     return
 
   if src in mtmsgsg:
@@ -5111,14 +5126,15 @@ async def msgtout(event):
     if chat_id in bridges:
       src = bridges[chat_id]
       if type(src) is dict:
-        info(f"src is dict: {src}")
+        warn(f"src is dict: {src}")
         bridges.pop(chat_id)
       elif src in mtmsgsg:
         mtmsgs = mtmsgsg[src]
         if mtmsgs:
           bridges.pop(chat_id)
           mtmsgs.clear()
-          await send(f"unlink {src}", CHAT_ID)
+          #  await send(f"unlink {src}", CHAT_ID)
+          warn(f"unlink {src}")
   text = msg.text
   info(f"tg out msg: {chat_id}: {text}")
   if text == "/help":
@@ -8017,7 +8033,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
                 bridges.pop(i)
                 if i in mtmsgs:
                   mtmsgs.pop(i)
-                info(f"stop link for {src}: {i} -> {pid}")
+                warn(f"stop link for {src}: {i} -> {pid}")
 
           # 加name是为了处理tg in消息时可以知道该消息是回复谁的
           #  mtmsgs[src] = [name]
@@ -8983,6 +8999,10 @@ async def amain():
       @UB.on(events.UserUpdate)
       async def _(event):
         asyncio.create_task(msgtp(event))
+
+      @UB.on(events.MessageDeleted)
+      async def _(event):
+        asyncio.create_task(msgtd(event))
 
       mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
       #  await mt_send("gpt start")
