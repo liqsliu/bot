@@ -99,7 +99,7 @@ fi
     exit
   fi
 
-  if [[ -z "$2" ]]; then
+  if [[ -z "$4" ]]; then
     ft=$(file --mime-type -b -- "$fn") 
   fi
 
