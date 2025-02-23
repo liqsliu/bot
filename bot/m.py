@@ -3096,7 +3096,7 @@ send_log_task = None
 
 def send_log(text, jid=CHAT_ID, wait=1):
   #  sendme(text, to=0)
-  send_log_task = asyncio.create_task(send(text, jid=jid))
+  asyncio.create_task(send(text, jid=jid))
   return True
   global send_log_task
   if send_log_task is not None:
