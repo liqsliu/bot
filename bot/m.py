@@ -4747,8 +4747,12 @@ async def msgtd(event):
   if chat_id is None:
     for i in event.deleted_ids:
       #  for src in mtmsgsg:
-      for chat_id in bridges:
+      for chat_id in bridges.copy():
         src = bridges[chat_id]
+        if type(src) is dict:
+          bridges.pop(chat_id)
+          warn(f"delete old bridge: {src} - {chat_id}")
+          continue
         if src in mtmsgsg:
           mtmsgs = mtmsgsg[src]
           if chat_id in mtmsgs:
