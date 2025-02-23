@@ -7996,7 +7996,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
                   #  mtmsgsg.pop(osrc)
                   mtmsgsg[osrc].clear()
 
-          gid = await send_tg(text, pid, return_id=True)
+          await send_tg(text, pid)
           for i in bridges.copy():
             if i != pid:
               if bridges[i] == src:
