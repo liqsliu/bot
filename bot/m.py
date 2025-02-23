@@ -7760,6 +7760,8 @@ async def init_cmd():
   def add_tg_bot(bot_name, cmd, cmd2=None):
     #  @exceptions_handler
     async def _(cmds, src):
+      if cmd2 is not None:
+        cmds.insert(1, cmd2)
       name = await get_name(username=bot_name)
       cmds2 = await get_commands2(bot_name, cmds[0])
       if len(cmds) == 1:
@@ -7799,8 +7801,6 @@ async def init_cmd():
         else:
           info(f"下载失败")
         return "发送失败"
-      if cmd2 is not None:
-        cmds.insert(1, cmd2)
       text = ' '.join(cmds[1:])
       if text in short_cmds:
         text = short_cmds[text]
