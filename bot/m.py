@@ -4431,17 +4431,19 @@ async def get_entity(chat_id, id_only=True):
       #  if id_only:
       #    return peer
     elif type(chat_id) is str:
-      peer, _ = parse_tg_url(url)
-      if peer:
-        pass
-      elif url.startswith("@"):
-        peer = url[1:]
+      if url.startswith("@"):
+        #  peer = url[1:]
+        peer = url
       elif url.isnumeric():
         peer = int(url)
       elif url.startswith("-") and  url[1:].isnumeric():
         peer = int(url)
       else:
-        peer = url
+        p, _ = parse_tg_url(url)
+        if p:
+          peer = p
+        else:
+          peer = url
     elif chat_id is None:
       warn("chat_id is None")
       return
