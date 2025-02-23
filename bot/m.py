@@ -9035,6 +9035,16 @@ async def amain():
         info(f"通过副线程发信息(loop2): not done, loop is_running: {loop2.is_running()}")
         await sleep(1)
       info(f"副线程发信息结果(loop2): {t.result()}")
+      
+      while True:
+        if allright_task > 0:
+          info(f"等待初始化完成，剩余任务数：{allright_task}")
+          await sleep(1)
+          continue
+        allright.set()
+        break
+      mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
+      #  await mt_send("gpt start")
 
       @UB.on(events.MessageDeleted)
       async def _(event):
@@ -9046,9 +9056,9 @@ async def amain():
       @UB.on(events.NewMessage(incoming=True))
       @UB.on(events.MessageEdited(incoming=True))
       async def _(event):
-        if not allright.is_set():
-          #  info("skip msg: allright is not ok")
-          return
+        #  if not allright.is_set():
+        #    #  info("skip msg: allright is not ok")
+        #    return
         asyncio.create_task(msgt(event))
 
       @UB.on(events.NewMessage(outgoing=True))
@@ -9059,15 +9069,6 @@ async def amain():
       async def _(event):
         asyncio.create_task(msgtp(event))
 
-      mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
-      #  await mt_send("gpt start")
-      while True:
-        if allright_task > 0:
-          info(f"等待初始化完成，剩余任务数：{allright_task}")
-          await sleep(1)
-          continue
-        allright.set()
-        break
       await regisger_handler(XB)
       await init_cmd()
 
