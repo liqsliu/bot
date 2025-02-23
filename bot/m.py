@@ -905,7 +905,7 @@ async def compress(data, m="zst"):
     fu = run_cb_in_thread(_compress_funcs[m], data)
     d = await fu
     if d:
-      info(f"压缩成功: {m} {short(data)} -> {short(d)}")
+      info(f"压缩成功: {m} {len(data)} {short(data)} -> {len(d)} {short(d)}")
       return d
     else:
       info(f"压缩failed: {m} {short(data)}")
@@ -1611,8 +1611,8 @@ async def init_myshell():
   myshell_lock = asyncio.Lock()
   #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, preexec_fn=os.setpgrp)
   #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, limit=64000000)
+  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, limit=64000000)
   p = myshell_p
   #  def wrap_read(func):
   #    @wraps(func)
@@ -1625,7 +1625,33 @@ async def init_myshell():
   #    return wrapper
   #  p.stdout.readline = wrap_readline( p.stdout.readline)
   #  p.stderr.readline = wrap_readline( p.stderr.readline)
+  #  myshell_queue = asyncio.Queue()
+  #  async def pr(f, n=1):
+  #    await sleep(1)
+  #    #  if t1.done() or t2.done() or p.returncode is not None:
+  #    if p.returncode is not None:
+  #      warn(f"fixme: 管道无法保持开启")
+  #      if myshell_p.returncode is None:
+  #        await stop_sub(myshell_p)
+  #      return
+  #    info(f"myshell is ok, task of reading is running {f}")
+  #    #  while True:
+  #    while myshell_p.returncode is None:
+  #      d = await f()
+  #      await myshell_queue.put((n, d))
+  #    warn(f"myshell is killed, returncode: {myshell_p.returncode}")
+  #
+  #  #  myshell_p.stdin.close()
+  #  #  await myshell_p.stdin.wait_closed()
+  #  #  info("close stdin ok")
+  #  #  loop.add_signal_handler(signal.SIGINT, lambda: myshell_p.terminate())
+  #  #  info("wait for steam ok...")
+  #  #  t1 = asyncio.create_task(myshell_p.stdout.readline())
+  #  #  t2 = asyncio.create_task(myshell_p.stderr.readline())
+  #  t1 = asyncio.create_task(pr(p.stdout.readline, 1))
+  #  t2 = asyncio.create_task(pr(p.stderr.readline, 2))
   myshell_queue = asyncio.Queue()
+  myshell_queue1 = asyncio.Queue()
   async def pr(f, n=1):
     await sleep(1)
     #  if t1.done() or t2.done() or p.returncode is not None:
@@ -1637,8 +1663,30 @@ async def init_myshell():
     info(f"myshell is ok, task of reading is running {f}")
     #  while True:
     while myshell_p.returncode is None:
-      d = await f()
-      await myshell_queue.put((n, d))
+      d = await f(512000000)
+      await myshell_queue1.put((n, d))
+    warn(f"myshell is killed, returncode: {myshell_p.returncode}")
+  
+  async def pr(f, n=1):
+    tmp1 = b""
+    tmp2 = b""
+    while myshell_p.returncode is None:
+      n,d = await myshell_queue1.get()
+      while b"\n" in d:
+        d = d.split(b"\n", 1)
+        o = d[1]
+        d = d[0]
+        if n == 1:
+          tmp1 += d
+          await myshell_queue.put((n, tmp1))
+        else:
+          tmp2 += d
+          await myshell_queue.put((n, tmp2))
+        d = o
+      if n == 1:
+        tmp1 += d
+      else:
+        tmp2 += d
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
 
   #  myshell_p.stdin.close()
@@ -1648,8 +1696,10 @@ async def init_myshell():
   #  info("wait for steam ok...")
   #  t1 = asyncio.create_task(myshell_p.stdout.readline())
   #  t2 = asyncio.create_task(myshell_p.stderr.readline())
-  t1 = asyncio.create_task(pr(p.stdout.readline, 1))
-  t2 = asyncio.create_task(pr(p.stderr.readline, 2))
+  t1 = asyncio.create_task(pr(p.stdout.read, 1))
+  t2 = asyncio.create_task(pr(p.stderr.read, 2))
+
+  t3 = asyncio.create_task(prr())
   cmds = "source ~/.bash_profile"
   res = await myshell(cmds)
   info(f"init bash: {res}")
