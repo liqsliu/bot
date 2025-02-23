@@ -4805,23 +4805,23 @@ async def msgtp(event):
   #    return
   bot_name = await get_name(chat_id)
   if event.photo:
-    await send(f"{bot_name} is uploading photo", src, tmp_msg=True)
-  elif event.document:
-    await send(f"{bot_name} is uploading document", src, tmp_msg=True)
+    await send(f"{bot_name} 正在发送图片", src, tmp_msg=True)
   elif event.audio:
-    await send(f"{bot_name} is uploading audio", src, tmp_msg=True)
+    await send(f"{bot_name} 正在发送音频文件", src, tmp_msg=True)
   elif event.round:
-    await send(f"{bot_name} is uploading video", src, tmp_msg=True)
+    await send(f"{bot_name} 正在发送视频文件", src, tmp_msg=True)
   elif event.sticker:
-    await send(f"{bot_name} is uploading sticker", src, tmp_msg=True)
+    await send(f"{bot_name} 正在发送表情贴纸", src, tmp_msg=True)
   elif event.geo:
-    await send(f"{bot_name} is uploading geo", src, tmp_msg=True)
+    await send(f"{bot_name} 正在发送位置", src, tmp_msg=True)
+  elif event.document:
+    await send(f"{bot_name} 正在发送文档", src, tmp_msg=True)
   elif event.uploading:
-    await send(f"{bot_name} is uploading", src, tmp_msg=True)
+    await send(f"{bot_name} 正在上传文件", src, tmp_msg=True)
   elif event.typing:
-    await send(f"{bot_name} is typing", src, tmp_msg=True)
+    await send(f"{bot_name} 正在输入", src, tmp_msg=True)
   elif event.cancel:
-    await send(f"{bot_name} is cancelling", src, tmp_msg=True)
+    await send(f"{bot_name} 正在取消操作", src, tmp_msg=True)
   else:
     await send(f"{bot_name} ...", src, tmp_msg=True)
 
