@@ -4907,13 +4907,6 @@ async def msgt(event):
       l[1].extend(msg.buttons)
       text = f"{bot_name}\n{text}"
 
-    if len(l) == 2:
-      l.append(set())
-    if parse_message_deleted_task is not None:
-      if not parse_message_deleted_task.done():
-        info(f"等待处理完tg的消息删除事件 {parse_message_deleted_task}")
-        await parse_message_deleted_task
-    l[2].add(msg.id)
 
 
     if msg.file:
@@ -4943,6 +4936,18 @@ async def msgt(event):
     else:
       correct = False
     text = f"{l[0]}{text}"
+    if len(l) == 2:
+      l.append(set())
+    if parse_message_deleted_task is not None:
+      if not parse_message_deleted_task.done():
+        info(f"等待处理完tg的消息删除事件 {parse_message_deleted_task}")
+        await parse_message_deleted_task
+        info("处理完成 parse_message_deleted_task")
+      else:
+        info("parse_message_deleted_task: done")
+    else:
+      info(f"{parse_message_deleted_task=}")
+    l[2].add(msg.id)
     await send(text, src, correct=correct)
 
   else:
