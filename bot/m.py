@@ -320,32 +320,38 @@ def generand(N=4, M=None, *, no_uppercase=False):
 
 
 async def split_long_text(text, msg_max_length=500, tmp_msg=False):
+  max_list = 3
   texts = []
   if len(text.encode()) > msg_max_length:
-    ls = text.splitlines()
-    tmp = None
-    for l in ls:
-      if tmp:
-        if len((tmp+l).encode()) > msg_max_length:
+    def _():
+      ls = text.splitlines()
+      tmp = None
+      for l in ls:
+        if tmp is not None::
+          if len((tmp+l).encode()) > msg_max_length:
+            texts.append(tmp)
+            if len(texts) > max_list:
+              return
+            print(f"texts1: {len(texts)} {len(tmp)}")
+          else:
+            tmp += '\n'+l
+            continue
+        while len(l.encode()) > msg_max_length:
+          tmp = l[:msg_max_length]
+          while len(tmp.encode()) > msg_max_length:
+            tmp = tmp[:-int( (len(tmp.encode())-msg_max_length)/2 + 1 )]
           texts.append(tmp)
-          print(f"texts1: {len(texts)} {len(tmp)}")
-        else:
-          tmp += '\n'+l
-          continue
-      while len(l.encode()) > msg_max_length:
-        tmp = l[:msg_max_length]
-        while len(tmp.encode()) > msg_max_length:
-          tmp = tmp[:-int( (len(tmp.encode())-msg_max_length)/2 + 1 )]
+          if len(texts) > max_list:
+            return
+          print(f"texts2: {len(texts)} {len(tmp)}")
+          l = l[len(tmp):]
+        tmp = l
+      if tmp:
         texts.append(tmp)
-        print(f"texts2: {len(texts)} {len(tmp)}")
-        l = l[len(tmp):]
-      tmp = l
-
-    if tmp:
-      texts.append(tmp)
+    _()
   else:
     texts = [text]
-  if len(texts) > 3:
+  if len(texts) > max_list:
     url =await pastebin(text)
     return ["文本过长，请打开链接查看: {}\n{}".format(url, short(text))]
   if len(texts) > 1:
