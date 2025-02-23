@@ -3066,10 +3066,6 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
       await sleep(msg_delay_default)
       if text:
         #  info(f"{jid=} {text=} {tmp_msg=} {correct=}")
-        if parse_message_deleted_task is not None:
-          if not parse_message_deleted_task.done():
-            info(f"wait for mark tmp_msg_chats {parse_message_deleted_task}")
-            await parse_message_deleted_task
         add_id_to_msg(msg, correct, tmp_msg)
         msg.xep0085_chatstate = chatstates.ChatState.ACTIVE
       if msg.to.is_bare or msg.type_ == MessageType.GROUPCHAT or str(msg.to.bare()) not in my_groups:
@@ -4913,6 +4909,10 @@ async def msgt(event):
 
     if len(l) == 2:
       l.append(set())
+    if parse_message_deleted_task is not None:
+      if not parse_message_deleted_task.done():
+        info(f"等待处理完tg的消息删除事件 {parse_message_deleted_task}")
+        await parse_message_deleted_task
     l[2].add(msg.id)
 
 
