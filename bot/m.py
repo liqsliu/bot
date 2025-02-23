@@ -904,6 +904,7 @@ async def compress(data, m="zst"):
     #  d = await run_run(f(), False)
     fu = run_cb_in_thread(_compress_funcs[m], data)
     d = await fu
+    #  d =  _compress_funcs[m](data)
     if d:
       info(f"压缩成功: {m} {len(data)} {short(data)} -> {len(d)} {short(d)}")
       return d
@@ -935,6 +936,7 @@ async def decompress(data, m):
     #  d = await run_run(f(), False)
     fu = run_cb_in_thread(_decompress_funcs[m], data)
     d = await fu
+    #  d =  _decompress_funcs[m](data)
     if d:
       info(f"解压成功: {m} {short(data)} -> {short(d)}")
       return d
@@ -3459,6 +3461,10 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
         #  await sleep(300)
         await slow_mode()
         return False
+      except rpcerrorlist.MessageTooLongError as e:
+        warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(text)}")
+        await sleep(5)
+        return False
       except ValueError as e:
         if e.args[0] == 'Failed to parse message':
           err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {text=}")
@@ -5404,7 +5410,12 @@ def in_main_thread():
 def run_cb_in_main(cb, *args, **kwargs):
   # fixme: 不支持多线程
   if in_main_thread():
-    return cb(*args, **kwargs)
+    #  return cb(*args, **kwargs)
+    fu = asyncio.Future()
+    def cb():
+      fu.set_result(cb(*args, **kwargs))
+    loop.call_soon(cb)
+    return fu
   #  cb, fu = cb_for_future(cb, loop2, *args, **kwargs)
   cb, fu = cb_for_future(partial(cb, *args, **kwargs), loop2)
   loop.call_soon_threadsafe(cb)
@@ -5420,9 +5431,13 @@ def run_cb_in_thread(cb, *args, **kwargs):
     cb, fu = cb_for_future(partial(cb, *args, **kwargs), loop)
     loop2.call_soon_threadsafe(cb)
     return fu
-
-  return cb(*args, **kwargs)
-
+  #  return cb(*args, **kwargs)
+  fu = asyncio.Future()
+  @exceptions_handler
+  def cb():
+    fu.set_result(cb(*args, **kwargs))
+  loop.call_soon(cb)
+  return fu
 
 #  @exceptions_handler
 def cb_for_future(f2, oloop):
@@ -5432,6 +5447,7 @@ def cb_for_future(f2, oloop):
   def cb():
     oloop.call_soon_threadsafe(partial(fu.set_result, f2()))
   return cb, fu
+
 
 
 #  async def run_run(coro, *args, **kwargs, need_main=False):
