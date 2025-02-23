@@ -7761,8 +7761,6 @@ async def init_cmd():
     async def _(cmds, src):
       name = await get_name(username=bot_name)
       cmds2 = await get_commands2(bot_name, cmds[0])
-      if cmd2 is not None:
-        cmds.insert(1, cmd2)
       if len(cmds) == 1:
         return f"{name}\n.{cmds[0]} $text\n---\n.{cmds[0]} /start\n.{cmds[0]} /help\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并回复指定内容\n---\nhttps://t.me/{bot_name}\n---\n{cmds2}"
       elif urlre.fullmatch(cmds[-1]):
@@ -7800,6 +7798,8 @@ async def init_cmd():
         else:
           info(f"下载失败")
         return "发送失败"
+      if cmd2 is not None:
+        cmds.insert(1, cmd2)
       text = ' '.join(cmds[1:])
       if text in short_cmds:
         text = short_cmds[text]
@@ -7829,7 +7829,7 @@ async def init_cmd():
     if text in short_cmds:
       text = short_cmds[text]
     return 3, bot_name, text
-  cmd_funs["bai5"] = _
+  cmd_funs["bai"] = _
 
   async def _(cmds, src):
     bot_name = "gpt3_unlim_chatbot"
@@ -7842,7 +7842,7 @@ async def init_cmd():
     if text in short_cmds:
       text = short_cmds[text]
     return 3, bot_name, text
-  cmd_funs["ai"] = _
+  cmd_funs["ai5"] = _
 
   async def _(cmds, src):
     bot_name = "chatGPTwrapperbot"
