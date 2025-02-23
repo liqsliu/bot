@@ -3424,7 +3424,7 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
     #  else:
     #    omsg = None
     k = 0
-    for text in ts:
+    for t in ts:
       await sleep(msg_delay_default)
       try:
         # chat_id 此处可以不考虑符号
@@ -3439,11 +3439,11 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
           elif chat_id in tmp_msg_chats:
             msg = await omsg.edit(t)
           else:
-            msg = await UB.send_message(peer, text)
+            msg = await UB.send_message(peer, t)
           #  omsg = None
           #  last_outmsg.pop(chat_id)
         else:
-          msg = await UB.send_message(peer, text)
+          msg = await UB.send_message(peer, t)
           #  msg = await UB.send_message(await get_entity(chat_id), t)
         k += 1
         if k == len(ts):
@@ -3457,20 +3457,20 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
         if delay is not None:
           await sleep(delay)
       except rpcerrorlist.FloodWaitError as e:
-        warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {text}")
+        warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
         #  await sleep(300)
         await slow_mode()
         return False
       except rpcerrorlist.MessageTooLongError as e:
-        warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(text)}")
+        warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
         await sleep(5)
         return False
       except ValueError as e:
         if e.args[0] == 'Failed to parse message':
-          err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {text=}")
+          err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
         return False
       except Exception as e:
-        err(f"发送tg消息失败: {chat_id} {e=} {text=}")
+        err(f"发送tg消息失败: {chat_id} {e=} {t=}")
         return False
         #  raise
       #  await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2+msg_delay_default)
