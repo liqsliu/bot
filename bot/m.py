@@ -3066,6 +3066,10 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
       await sleep(msg_delay_default)
       if text:
         #  info(f"{jid=} {text=} {tmp_msg=} {correct=}")
+        if parse_message_deleted_task is not None:
+          if not parse_message_deleted_task.done():
+            info(f"wait for mark tmp_msg_chats {parse_message_deleted_task}")
+            await parse_message_deleted_task
         add_id_to_msg(msg, correct, tmp_msg)
         msg.xep0085_chatstate = chatstates.ChatState.ACTIVE
       if msg.to.is_bare or msg.type_ == MessageType.GROUPCHAT or str(msg.to.bare()) not in my_groups:
@@ -4939,10 +4943,6 @@ async def msgt(event):
     else:
       correct = False
     text = f"{l[0]}{text}"
-    if parse_message_deleted_task is not None:
-      if not parse_message_deleted_task.done():
-        info(f"wait for mark tmp_msg_chats {parse_message_deleted_task}")
-        await parse_message_deleted_task
     await send(text, src, correct=correct)
 
   else:
@@ -5884,7 +5884,7 @@ def add_id_to_msg(msg, correct, tmp_msg):
   j = get_msg_jid(msg)
   msg.autoset_id()
   if j in last_outmsg:
-    if j in tmp_msg_chats or correct:
+    if correct or j in tmp_msg_chats:
       r = aioxmpp.misc.Replace()
       r.id_ = last_outmsg[j]
       msg.xep0308_replace = r
