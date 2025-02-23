@@ -8014,7 +8014,7 @@ async def init_cmd():
     if len(cmds) == 1:
       return f"unicode decode\n.{cmds[0]} $text"
     s = ' '.join(cmds[1:])
-    return s.encode().decode()
+    return s.encode().decode("unicode-escape")
   cmd_funs["ud"] = _
 
 @exceptions_handler
