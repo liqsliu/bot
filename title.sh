@@ -99,12 +99,10 @@ fi
     exit
   fi
 
-  if [[ -z "$4" ]]; then
-    ft=$(file --mime-type -b -- "$fn") 
-  fi
 
+  ft=$(file --mime-type -b -- "$fn") 
   # ft=$(echo "$html" | file --mime-type -b -- -)
-  if [[ "$ft" == "text/html" ]]; then
+  if [[ -z "$4" && "$ft" == "text/html" ]]; then
     # echo "$html" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
     cat "$fn" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
     echo

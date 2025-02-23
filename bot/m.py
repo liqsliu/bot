@@ -2636,23 +2636,6 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   cmds = [f"{SH_PATH}/title.sh", url]
   cmds.extend(opts)
 #  cmds.append(shlex.quote(url))
-#  while opts:
-#    cmds.append(opts.pop(0))
-    #  res = await send_cmd_to_bash(src, name, url)
-    #  res = await send_cmd_to_bash(None, name, url)
-    #  return res
-  #  if down:
-  #    #  shell_cmd.append("%s" % (2**20*1000))
-  #    while True:
-  #      if len(shell_cmd) < 5:
-  #        shell_cmd.append("")
-  #      else:
-  #        break
-  #    shell_cmd.append("down")
-  #  if len(shell_cmd) == 6:
-  #    max_time = 600
-  #  else:
-  #    max_time = 60
   #  r, o, e = await my_sexec(shell_cmd, src=src, max_time=max_time)
   #  if r == 0:
   #  res = await run_run(myshell(cmds, src=src) , False)
