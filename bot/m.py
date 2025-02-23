@@ -1680,10 +1680,12 @@ async def init_myshell():
           tmp1 += d + b"\n"
           info(f"send data {tmp1}")
           await myshell_queue.put((n, tmp1))
+          tmp1 = b""
         else:
           tmp2 += d + b"\n"
           info(f"send data {tmp2}")
           await myshell_queue.put((n, tmp2))
+          tmp2 = b""
         d = o
       if n == 1:
         tmp1 += d
