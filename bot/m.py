@@ -641,14 +641,8 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
       #  warn(res)
       info("check send_tg: {}".format(send_tg.__name__ in fs))
       info("check send_xmpp: {}".format(send_xmpp.__name__ in fs))
-      global send_log_task
       if not allright.is_set():
         no_send = True
-      elif send_log_task is not None:
-        if not send_log_task.done() or send_log_task.result() is False or send_log_task.result() is None:
-          no_send = True
-          info(f"skip send err log: {res}")
-      
       elif send_tg.__name__ in fs:
         no_send = True
         no_send_tg = True
@@ -2999,7 +2993,6 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
 
     if text:
       #  if jid == log_group_private:
-      #    sendme(text)
       msgs = []
       for text in await split_long_text(text, MAX_MSG_BYTES, tmp_msg):
         if msgs:
@@ -3092,82 +3085,20 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
         await sleep(delay)
   return True
 
-send_log_task = None
 
 def send_log(text, jid=CHAT_ID, wait=1):
-  asyncio.create_task(send(text, jid=jid))
+  k = 0
+  # https://docs.python.org/zh-cn/3/library/asyncio-task.html#introspection
+  for j in asyncio.all_tasks(loop):
+    if j.get_name() == "send_log":
+      k += 1
+  if k > 0:
+    warn(f"send_log is busy: {len(k)} {short(text)}")
+  else:
+    info(f"send_log: {text}")
+  asyncio.create_task(send(text, jid=jid, delay=(delay+1)**k), name="send_log")
   return True
-  global send_log_task
-  if send_log_task is not None:
-    if not send_log_task.done():
-      #  wait += 5
-      wait = send_log_task
-    elif send_log_task.result() is False:
-      info(f"send_log is bad ({send_log_task.result()}), skip: {text}")
-      return False
-    elif send_log_task.result() is None:
-      info(f"send_log is bad ({send_log_task.result()}), skip: {text}")
-      return False
-    else:
-      pass
-  send_log_task = asyncio.create_task(_send_log(text, jid=jid, wait=wait))
-  return send_log_task
 
-
-@exceptions_handler(no_send=True)
-async def _send_log(text, jid=CHAT_ID, wait=1):
-  global send_log_task
-  if isinstance(wait, int):
-    await sleep(wait)
-  else:
-    info(f"send_log is waiting: {text}")
-    await wait
-    if send_log_task is not None:
-      send_log_task = None
-    else:
-      for i in range(9):
-        if i > 5:
-          warn("send_log timeout: {text}")
-          return False
-        await sleep(wait+1)
-        if send_log_task is not None:
-          if send_log_task.done():
-            if send_log_task.result() is not True:
-              warn(f"send_log is bad")
-              return False
-            else:
-              info(f"send log task is done")
-              break
-          else:
-            info(f"send log task is not done")
-        else:
-          info(f"send log task is None")
-          break
-        #  if send_log_task is not None:
-
-  #  t = asyncio.create_task(send(text, jid=CHAT_ID))
-  ts = []
-  t = asyncio.create_task(send(text, jid=jid))
-  if send_log_task is None:
-    send_log_task = t
-  ts.append(t)
-  done, pending = await asyncio.wait(ts, timeout=60)
-  if pending:
-    info(f"send_log timeout: send log: {text}")
-    return False
-  else:
-    for t in done:
-      if t.result() is False or t.result() is None:
-        send_log_task = t
-        warn(f"send_log is bad: {t.result()}")
-        return False
-      else:
-        if send_log_task is t:
-          send_log_task = None
-        info(f"send_log is ok: {t.result()}")
-    return True
-  #  asyncio.create_task(mt_send_for_long_text(text))
-  #  asyncio.create_task(sendg(text))
 
 @exceptions_handler(no_send=True)
 def sendme(*args, to=1, **kwargs):
@@ -6428,12 +6359,12 @@ async def msgx(msg):
           await room.leave()
           rejoin = True
           rooms.pop(muc)
-          sendme("检测到幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
+          send_log("检测到幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
           if await join(muc):
             room = rooms[muc]
             continue
         else:
-          sendme("忽略幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
+          send_log("忽略幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
           return
       break
 
@@ -6516,13 +6447,12 @@ async def msgx(msg):
       await send(reply)
       return
     if msg.type_ == MessageType.ERROR:
-      sendme("未知来源的消息(wtf) %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), f"{msg.from_=}", msg.to, msg.body))
+      send_log("未知来源的消息(wtf) %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), f"{msg.from_=}", msg.to, msg.body))
       return
     await send(f"暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
     #  chat = await get_entity(CHAT_ID, True)
     #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
-    #  await sendme(f"{msg.type_} {msg.from_}: {text}")
-    sendme(f"{msg.type_} {msg.from_}: {text}")
+    send_log(f"{msg.type_} {msg.from_}: {text}")
     return
     #  pprint(msg)
 
@@ -6621,7 +6551,7 @@ async def msgx(msg):
     if is_admin is False:
       info("群内私聊: %s" % msg)
       #  await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
-      sendme(f"群内私聊: {msg.type_} {msg.from_}: {text}")
+      send_log(f"群内私聊: {msg.type_} {msg.from_}: {text}")
       return
     #  if get_jid(msg.to) in my_groups:
     #  if get_jid(msg.from_) in my_groups:
@@ -8545,9 +8475,9 @@ def on_muc_role_request(form, submission_future):
 
   #  await send(f"发言申请: {form}")
   if submission_future.done():
-    sendme(f"skip: 发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
+    send_log(f"skip: 发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
     return
-  sendme(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
+  send_log(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
   #默认拒绝
   form.request_allow=False
   submission_future.set_result(form)
