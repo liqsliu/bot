@@ -4758,9 +4758,12 @@ async def msgtd(event):
           if chat_id in mtmsgs:
             l = mtmsgs[chat_id]
             if len(l) > 2:
-              if i in l[2]:
+              #  if i in l[2]:
+              if i == max(l[2]):
                 tmp_msg_chats.add(src)
                 info(f"set tmp_msg ok, found msg id {i} in chat {src} - {chat_id}")
+              else:
+                info(f"unsupported, ignore, found msg id {i} != max({l[2]}) in chat {src} - {chat_id}")
 
   #  if src in last_outmsg:
       #  tmp_msg_chats.add(j)
