@@ -4742,10 +4742,24 @@ async def msgtd(event):
   elif chat_id not in bridges:
     return
   info(f"delete msg: {chat_id} {event.deleted_id} {event.deleted_ids}")
-  src = bridges[chat_id]
+  #  src = bridges[chat_id]
+    #  if src not in tmp_msg_chats:
+  if chat_id is None:
+    for i in event.deleted_ids:
+      #  for src in mtmsgsg:
+      for chat_id in bridges:
+        src = bridges[chat_id]
+        if src in mtmsgsg:
+          mtmsgs = mtmsgsg[src]
+          if chat_id in mtmsgs:
+            l = mtmsgs[chat_id]
+            if len(l) > 2:
+              if i in l[2]:
+                tmp_msg_chats.add(src)
+                info(f"set tmp_msg ok, found msg id {i} in chat {src} - {chat_id}")
+
   #  if src in last_outmsg:
-  if src not in tmp_msg_chats:
-    tmp_msg_chats.add(j)
+      #  tmp_msg_chats.add(j)
 
 
 
@@ -4855,6 +4869,8 @@ async def msgt(event):
     text = f"{l[0]}{bot_name}\n{text}"
     #  now = msg.date.timestamp()
 
+    if len(l) == 1:
+      l.append([])
     if msg.buttons:
       k = 0
       #  for k, v in mtmsgs.items():
@@ -4867,10 +4883,13 @@ async def msgt(event):
       #    l.append(msg.buttons)
       mtmsgs.clear()
       mtmsgs[chat_id] = l
-      if len(l) == 1:
-        l.append([])
       text += print_buttons(msg.buttons, k=len(get_buttons(l[1])))
       l[1].extend(msg.buttons)
+
+    if len(l) == 2:
+      l.append(set())
+    l[2].add(msg.id)
+
 
     if msg.file:
       #  path = await tg_download_media(msg)
@@ -8034,6 +8053,12 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
                 if i in mtmsgs:
                   mtmsgs.pop(i)
                 warn(f"stop link for {src}: {i} -> {pid}")
+            else:
+              l = mtmsgs[i]
+              if len(l) > 1:
+                l[1].clear()
+                if len(l) > 2:
+                  l[2].clear()
 
           # 加name是为了处理tg in消息时可以知道该消息是回复谁的
           #  mtmsgs[src] = [name]
