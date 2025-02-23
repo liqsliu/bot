@@ -1818,7 +1818,8 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
             #    warn(f"res is too loog: {len(tmp)} {tmp[:54]}")
             #    break
             #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
-            n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.01)
+            #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.01)
+            n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.3)
             if n == 1:
               if k == 0:
                 if d == eof:
@@ -6922,7 +6923,7 @@ async def init_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
-    res = await get_title(cmds[1], opts=cmds[2:4])
+    res = await get_title(cmds[1], opts=cmds[2:4], src=src)
     return f"{res}"
   cmd_funs["tl"] = _
 
