@@ -4873,7 +4873,7 @@ async def msgt(event):
     #  l = mtmsgs[src]
     l = mtmsgs[chat_id]
     bot_name = await get_name(chat_id)
-    text = f"{l[0]}{bot_name}\n{text}"
+    #  text = f"{l[0]}{bot_name}\n{text}"
     #  now = msg.date.timestamp()
 
     if len(l) == 1:
@@ -4892,6 +4892,7 @@ async def msgt(event):
       mtmsgs[chat_id] = l
       text += print_buttons(msg.buttons, k=len(get_buttons(l[1])))
       l[1].extend(msg.buttons)
+      text = f"{bot_name}\n{text}"
 
     if len(l) == 2:
       l.append(set())
@@ -4924,6 +4925,7 @@ async def msgt(event):
       correct = True
     else:
       correct = False
+    text = f"{l[0]}{text}"
     await send(text, src, correct=correct)
 
   else:
