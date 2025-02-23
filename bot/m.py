@@ -506,6 +506,7 @@ mtmsgsg={}
 # mtmsgs: {gid/qid/chat_id: [name for reply, msg from tg, ...]}
 
 
+print_msg = False
 
 
 allright = asyncio.Event()
@@ -4680,7 +4681,8 @@ async def print_tg_msg(event, to_xmpp=False):
   #    await send(res2, name="", nick=nick, delay=1)
   #  if not event.is_private:
   #  print(f"{res1}: {short(res)}")
-  print(short(res))
+  if print_msg:
+    print(short(res))
   #    return None, nick, delay
   #  return res, nick, delay
   return msg.text, nick, delay
@@ -4816,7 +4818,8 @@ async def msgt(event):
   else:
     #  info(f"{chat_id=} {short(msg.text)}")
     #  res, nick, delay = await print_tg_msg(event)
-    await print_tg_msg(event)
+    if print_msg:
+      await print_tg_msg(event)
     #  if res:
     #    info(f"{nick}{res}")
     return
@@ -7603,6 +7606,17 @@ async def init_cmd():
     await send(f"结果：{res}", src)
   cmd_funs["connect"] = _
   cmd_for_admin.add('connect')
+
+  async def _(cmds, src):
+    await send(f"结果：{res}", src)
+    global print_msg
+    print_msg = not print_msg
+    if printmsg:
+      return "ok"
+    else:
+      return "not"
+  cmd_funs["printmsg"] = _
+  cmd_for_admin.add('printmsg')
 
   async def _(cmds, src):
     if len(cmds) == 1:
