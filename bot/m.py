@@ -7752,17 +7752,17 @@ async def init_cmd():
       chat_id = await UB.get_peer_id(peer)
       s = await get_commands(chat_id)
       if s:
-        bot_cmds[bot_name] = "\n".join(f".{cmd} {x}" for x in s.splitlines())
-        return bot_cmds[bot_name]
+        bot_cmds[bot_name] = "\n---\n" + "\n".join(f".{cmd} {x}" for x in s.splitlines())
       else:
         return ""
+    return bot_cmds[bot_name]
   def add_tg_bot(bot_name, cmd, cmd2=None):
     #  @exceptions_handler
     async def _(cmds, src):
       name = await get_name(username=bot_name)
       cmds2 = await get_commands2(bot_name, cmds[0])
       if len(cmds) == 1:
-        return f"{name}\n.{cmds[0]} $text\n---\n.{cmds[0]} /start\n.{cmds[0]} /help\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并回复指定内容\n---\nhttps://t.me/{bot_name}\n---\n{cmds2}"
+        return f"{name}\n.{cmds[0]} $text\n---\n.{cmds[0]} /start\n.{cmds[0]} /help\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并回复指定内容\n---\nhttps://t.me/{bot_name}{cmds2}"
       elif urlre.fullmatch(cmds[-1]):
         cmds2 = [f"{SH_PATH}/title.sh", cmds[-1]]
         cmds2.extend(["", "", "", "just_path"])
