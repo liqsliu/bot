@@ -3175,9 +3175,16 @@ async def _send_log(text, jid=CHAT_ID, wait=1):
         if send_log_task is not None:
           if send_log_task.done():
             if send_log_task.result() is not True:
+              warn(f"send_log is bad")
               return False
+            else:
+              info(f"send log task is done")
+              break
+          else:
+            info(f"send log task is not done")
           await sleep(wait+1)
         else:
+          info(f"send log task is None")
           break
         #  if send_log_task is not None:
 
@@ -8016,6 +8023,10 @@ async def init_cmd():
     s = ' '.join(cmds[1:])
     return s.encode().decode("unicode-escape")
   cmd_funs["ud"] = _
+
+
+
+
 
 @exceptions_handler
 async def run_cmd(*args, **kwargs):
