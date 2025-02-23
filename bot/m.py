@@ -3170,7 +3170,7 @@ async def _send_log(text, jid=CHAT_ID, wait=1):
     else:
       for i in range(9):
         if i > 5:
-          warn("timeout: {text}")
+          warn("send_log timeout: {text}")
           return False
         if send_log_task is not None:
           if send_log_task.done():
@@ -8002,6 +8002,20 @@ async def init_cmd():
     return f"清除状态\n.{cmds[0]} all\n--\n{ii} -> {i}"
   cmd_funs["clear"] = _
 
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"unicode encode\n.{cmds[0]} $text"
+    s = ' '.join(cmds[1:])
+    return s.encode("unicode-escape").decode()
+  cmd_funs["u"] = _
+  cmd_funs["ue"] = _
+  
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"unicode decode\n.{cmds[0]} $text"
+    s = ' '.join(cmds[1:])
+    return s.encode().decode()
+  cmd_funs["ud"] = _
 
 @exceptions_handler
 async def run_cmd(*args, **kwargs):
