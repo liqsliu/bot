@@ -320,25 +320,26 @@ def generand(N=4, M=None, *, no_uppercase=False):
 
 
 async def split_long_text(text, msg_max_length=500, tmp_msg=False):
+#  def split_long_text(text, msg_max_length=500, tmp_msg=False):
+  return [text[:msg_max_length]]
   texts = []
   if len(text.encode()) > msg_max_length:
     ls = text.splitlines()
     tmp = None
     for l in ls:
+      print(f"texts: {len(texts)} len(tmp)")
       if tmp:
         if len((tmp+l).encode()) > msg_max_length:
-          #  break
           texts.append(tmp)
           tmp = l
         else:
           tmp += '\n'+l
       else:
         if len(l.encode()) > msg_max_length:
-          #  tmp = l[:1300]
           tmp = l[:msg_max_length]
           while True:
+            print(f"texts: {texts}")
             if len(tmp.encode()) > msg_max_length:
-              #  tmp = tmp[:-1]
               tmp = tmp[:-int( (len(tmp.encode())-msg_max_length)/2 + 1 )]
             else:
               texts.append(tmp)
@@ -347,7 +348,6 @@ async def split_long_text(text, msg_max_length=500, tmp_msg=False):
                 break
         else:
           tmp = l
-
     if tmp:
       texts.append(tmp)
   else:
@@ -358,18 +358,6 @@ async def split_long_text(text, msg_max_length=500, tmp_msg=False):
   if len(texts) > 1:
     if tmp_msg:
       return [short(text, 500)]
-      #  url =await pastebin(text)
-      #  return ["文本过长，请打开链接查看: [{}]({})".format(short(text), url)]
-      #  if len(text.encode()) > 500:
-      #    #  return [f"{text[:500]}..."]
-      #    #  text_s = text.encode()[:500].decode(errors="ignore")
-      #    #  return ["%s ...%s/%s" % (text_s, len(text_s), len(text)) ]
-      #    return [short(text, 500)]
-      #  else:
-      #    return [text]
-    #  else:
-    #    url =await pastebin(text)
-    #    return ["文本过长，请打开链接查看: [{}]({})".format(short(text), url)]
   return texts
 
 
