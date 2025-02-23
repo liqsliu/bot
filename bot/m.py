@@ -3648,19 +3648,24 @@ async def parse_mt(msg):
     text2 = f"{name2}{text0}"
 
     for m in get_mucs(main_group):
-      if await send1(text2, m, nick=rname) is False:
-        return
+      #  if await send1(text2, m, nick=rname) is False:
+      #    warn(f"failed: {m} {text1}")
+      #    return
+      asyncio.create_task( send1(text2, m, nick=rname) )
 
     res = await run_cmd(text, gateway, name, textq=text0)
     if res is True:
       return
     if res:
-      await mt_send_for_long_text(res, gateway)
+      #  await mt_send_for_long_text(res, gateway)
+      asyncio.create_task( mt_send_for_long_text(res, gateway) )
       res = f"**C bot:** {res}"
 
       for m in get_mucs(main_group):
-        if await send1(res, m, nick="C bot") is False:
-          return
+        #  if await send1(res, m, nick="C bot") is False:
+        #    warn(f"failed: {m} {res}")
+        #    return
+        asyncio.create_task( send1(res, m, nick="C bot") )
     #    if await send1(f"{name}{text}", m, name) is False:
     #      return
     #    if res:
