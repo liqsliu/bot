@@ -5412,9 +5412,9 @@ def run_cb_in_main(cb, *args, **kwargs):
   if in_main_thread():
     #  return cb(*args, **kwargs)
     fu = asyncio.Future()
-    def cb():
+    def cb2():
       fu.set_result(cb(*args, **kwargs))
-    loop.call_soon(cb)
+    loop.call_soon(cb2)
     return fu
   #  cb, fu = cb_for_future(cb, loop2, *args, **kwargs)
   cb, fu = cb_for_future(partial(cb, *args, **kwargs), loop2)
@@ -5434,9 +5434,9 @@ def run_cb_in_thread(cb, *args, **kwargs):
   #  return cb(*args, **kwargs)
   fu = asyncio.Future()
   @exceptions_handler
-  def cb():
+  def cb2():
     fu.set_result(cb(*args, **kwargs))
-  loop.call_soon(cb)
+  loop.call_soon(cb2)
   return fu
 
 #  @exceptions_handler
