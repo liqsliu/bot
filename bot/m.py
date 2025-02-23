@@ -503,7 +503,7 @@ rss_lock = asyncio.Lock()
 #  gid_src = {}
 mtmsgsg={}
 # mtmsgsg: {jid/gateway: mtmsgs}
-# mtmsgs: {gid/qid/chat_id: [name for reply, msg from tg, ...]}
+# mtmsgs: {chat_id: [name for reply, buttons, set(tg msg.id), ...]}
 
 
 print_msg = False
@@ -3073,8 +3073,8 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
         if client is not None:
           # https://docs.zombofant.net/aioxmpp/devel/api/public/node.html?highlight=client#aioxmpp.Client.send
           res = await client.send(msg)
-          if res is None:
-            return True
+          #  if res is None:
+          #    return True
         elif room:
           # https://docs.zombofant.net/aioxmpp/devel/api/public/muc.html?highlight=room#aioxmpp.muc.Room.send_message
           # res=<StanzaToken id=0x00007f2a3083eca0>
@@ -3082,8 +3082,8 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
         else:
           client = XB
           res = await client.send(msg)
-          if res is None:
-            return True
+          #  if res is None:
+          #    return True
       else:
         # https://docs.zombofant.net/aioxmpp/devel/api/public/im.html#aioxmpp.im.conversation.AbstractConversation.send_message
         if client is None:
@@ -3095,7 +3095,9 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
         #  return False
       #  if isawaitable(res):
       #  info(f"{type(res)}: {res} {msg}")
-      if asyncio.iscoroutine(res) or type(res) is stream.StanzaToken:
+      if res is None:
+        info(f"res is not None: {res=} {client=} {room=} {msg=}")
+      elif asyncio.iscoroutine(res) or type(res) is stream.StanzaToken:
         #  dbg(f"client send: {res=}")
         try:
           res2 = await res
@@ -3115,16 +3117,23 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
         #    # 群内私聊
         #    info(f"send gpm msg: finally: {res=}")
         #    return True
-          if delay:
-            #  info(f"delay: {delay}s")
-            await sleep(delay)
           return True
         else:
           info(f"send xmpp msg: finally: {res=} {res2=}")
           return False
       else:
         info(f"res is not coroutine: {res=} {client=} {room=} {msg=}")
-      return False
+      #  return False
+      # 为了同步tg消息的删除，当tg删除消息时，这边会根据l[2]把xmpp这边的最后消息标记为临时待更正消息，但如果标记之前发送了别的xmpp正常消息，就不能进行该动作了，所以l[2]记录应该清除，而且对也确实没用了
+      if jid in mtmsgsg:
+        mtmsgs = mtmsgsg[jid]
+        for i in mtmsgs:
+          l = mtmsgs[i]
+          if len(l) > 2:
+            l[2] = set()
+      if delay:
+        #  info(f"delay: {delay}s")
+        await sleep(delay)
   return True
 
 send_log_task = None
@@ -4748,10 +4757,14 @@ async def msgtd(event):
     for i in event.deleted_ids:
       #  for src in mtmsgsg:
       for chat_id in bridges.copy():
+        if chat_id in tmp_msg_chats:
+          continue:
         src = bridges[chat_id]
         if type(src) is dict:
           bridges.pop(chat_id)
           warn(f"delete old bridge: {src} - {chat_id}")
+          continue
+        if src in tmp_msg_chats:
           continue
         if src in mtmsgsg:
           mtmsgs = mtmsgsg[src]
