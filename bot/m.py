@@ -3071,7 +3071,7 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
   return True
 
 
-def send_log(text, jid=CHAT_ID, wait=1):
+def send_log(text, jid=CHAT_ID, delay=1):
   k = 0
   # https://docs.python.org/zh-cn/3/library/asyncio-task.html#introspection
   for j in asyncio.all_tasks(loop):
