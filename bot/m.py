@@ -3120,8 +3120,7 @@ async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromn
           l = mtmsgs[i]
           if len(l) > 2:
             l[2] = set()
-      if delay:
-        #  info(f"delay: {delay}s")
+      if delay is not None:
         await sleep(delay)
   return True
 
@@ -3413,7 +3412,7 @@ async def slow_mode(timeout=300):
 
 @exceptions_handler(no_send=True)
 @cross_thread
-async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False):
+async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None):
   async with tg_send_lock:
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
@@ -3453,6 +3452,8 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False):
             tmp_msg_chats.remove(chat_id)
         elif len(ts) > 1:
           await sleep(0.5)
+        if delay is not None:
+          await sleep(delay)
       except rpcerrorlist.FloodWaitError as e:
         warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {text}")
         #  await sleep(300)
