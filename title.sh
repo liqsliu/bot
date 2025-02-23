@@ -104,8 +104,10 @@ fi
   # ft=$(echo "$html" | file --mime-type -b -- -)
   if [[ -z "$4" && "$ft" == "text/html" ]]; then
     # echo "$html" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
-    cat "$fn" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
-    echo
+    # cat "$fn" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
+    # echo
+    s=$(grep --binary-file=text -o '<title>.*</title>'  "$fn") || exit $?
+    echo "${s:7:-8}"
     rm "$fn"
     exit
   else
