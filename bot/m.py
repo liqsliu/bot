@@ -4645,8 +4645,8 @@ forwarded_tg_msg_ids = {}
 
 @exceptions_handler
 async def msgtd(event):
-  if not event.is_private:
-    return
+  #  if not event.is_private:
+  #    return
   #  chat_id = event.sender_id
   chat_id = event.chat_id
   if chat_id is None:
