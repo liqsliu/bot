@@ -3378,11 +3378,11 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
           elif chat_id in tmp_msg_chats:
             msg = await omsg.edit(t)
           else:
-            msg = await UB.send_message(peer, t)
+            msg = await UB.send_message(chat_id, t)
           #  omsg = None
           #  last_outmsg.pop(chat_id)
         else:
-          msg = await UB.send_message(peer, t)
+          msg = await UB.send_message(chat_id, t)
           #  msg = await UB.send_message(await get_entity(chat_id), t)
         k += 1
         if k == len(ts):
