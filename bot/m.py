@@ -2896,213 +2896,6 @@ async def qw2(text):
     res = f"{e=}"
   return res
 
-def get_src(msg):
-  if msg.type_ == MessageType.GROUPCHAT:
-    return str(msg.from_.bare())
-  if msg.from_.is_bare:
-    return str(msg.from_)
-  if str(msg.to.bare()) in my_groups:
-    return str(msg.from_)
-  return str(msg.from_.bare())
-
-#  async def set_nick(room, nick):
-  #  if msg.type_ == MessageType.GROUPCHAT:
-
-on_nick_changed_futures = {}
-
-def on_nick_changed(member, old_nick, new_nick, *, muc_status_codes=set(), **kwargs):
-  #  jid = str(member.conversation_jid)
-  #  jid = str(member.direct_jid.bare())
-  muc = str(member.conversation_jid.bare())
-  #  info(f"nick changed: {muc} {jid} {old_nick} -> {new_nick} {member.conversation_jid}")
-  #  if (jid, muc) in on_nick_changed_futures:
-  if muc in on_nick_changed_futures:
-    try:
-      on_nick_changed_futures[muc].set_result(new_nick)
-    except asyncio.exceptions.InvalidStateError as e:
-      info(f"无法保存nick到future: {muc} {on_nick_changed_futures[muc]} {e=}")
-      #  on_nick_changed_futures.pop(muc)
-  #  info(f"nick changed: {jid} {muc} {old_nick} -> {new_nick}")
-
-send_locks = {}
-
-#  @cross_thread(need_main=True)
-@exceptions_handler(no_send=True)
-async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False, tmp_msg=False):
-  #  info(f"{msg}")
-  muc = str(msg.to.bare())
-  #  if muc not in rooms:
-  #    info(f"not found room: {muc}")
-  #    return False
-
-  jid = str(msg.to)
-  if jid not in send_locks:
-    send_locks[jid] = asyncio.Lock()
-  async with send_locks[jid]:
-    msg.from_ = None
-    if msg.type_ == MessageType.GROUPCHAT:
-
-      if room is None:
-        if muc in rooms:
-          room = rooms[muc]
-
-      if nick is None:
-        if fromname is None:
-          if name is None:
-            pass
-          else:
-            nick = name
-        else:
-          nick = fromname
-
-      # https://stackoverflow.com/questions/69778194/how-can-i-check-whether-a-unicode-codepoint-is-assigned-or-not
-      if room is not None and nick is not None:
-      #  if None:
-        #  room = rooms[muc]
-        #  if muc in rooms:
-        #  if room is not None:
-        #  await set_nick(room, fromname)
-        nick = wtf_str(nick)
-        #  nick_old = room.me.nick
-
-        jids = users[muc]
-        if myjid in jids:
-          nick_old = jids[myjid][0]
-        else:
-          nick_old = room.me.nick
-          jids[myjid] = [nick_old, room.me.affiliation, room.me.role]
-          err(f"不存在nick记录，已添加: {muc} {myjid} {msg} {jids[myjid]}")
-        if nick_old != nick:
-          fu = asyncio.Future()
-          #  jid = str(room.me.direct_jid)
-          on_nick_changed_futures[muc] = fu
-          try:
-            await room.set_nick(nick)
-          except ValueError as e:
-            jids[myjid][0] = nick
-            warn(f"改名失败, 不支持特殊字符: {nick=} {e=}")
-          else:
-            #  await fu
-            try:
-              #  await asyncio.wait_for(await asyncio.shield(fu), timeout=8)
-              await asyncio.wait_for(fu, timeout=5)
-            #  except Exception as e:
-            except TimeoutError as e:
-              on_nick_changed_futures.pop(muc)
-              jids[myjid][0] = nick
-              info(f"改名失败(超时)：{muc} {nick_old} -> {nick} {e=}")
-            else:
-              on_nick_changed_futures.pop(muc)
-              jids[myjid][0] = fu.result()
-              if fu.result() != nick:
-                info(f"改名结果有问题: {muc} {fu.result()=} != {nick=}")
-              #  else:
-              #    info(f"set nick: {muc} {nick_old} -> {nick}")
-            #  else:
-            #    info(f"same nick: {str(msg.to.bare())} {room.me.nick} = {nick}")
-            #  else:
-            #    info(f"not found room: {msg.to}")
-
-    text = None
-    #  text = msg.body.any() # ValueError("any() on empty map")
-    for i in msg.body:
-      text = msg.body[i]
-      if text:
-        break
-
-    if text:
-      #  if jid == log_group_private:
-      msgs = []
-      for text in await split_long_text(text, MAX_MSG_BYTES, tmp_msg):
-        if msgs:
-          msg = aioxmpp.Message(
-              to=msg.to,
-              type_=msg.type_,
-          )
-        msg.body[None] = text
-        msgs.append(msg)
-        #  if correct:
-        if xmpp_only:
-          break
-    else:
-      msgs = [msg]
-
-    if len(msgs) > 1:
-      tmp_msg = False
-      info("没办法同时更正多条消息")
-    for msg in msgs:
-      await sleep(msg_delay_default)
-      if text:
-        #  info(f"{jid=} {text=} {tmp_msg=} {correct=}")
-        add_id_to_msg(msg, correct, tmp_msg)
-        msg.xep0085_chatstate = chatstates.ChatState.ACTIVE
-      if msg.to.is_bare or msg.type_ == MessageType.GROUPCHAT or str(msg.to.bare()) not in my_groups:
-      #  if gpm is False:
-        if client is not None:
-          # https://docs.zombofant.net/aioxmpp/devel/api/public/node.html?highlight=client#aioxmpp.Client.send
-          res = await client.send(msg)
-          #  if res is None:
-          #    return True
-        elif room:
-          # https://docs.zombofant.net/aioxmpp/devel/api/public/muc.html?highlight=room#aioxmpp.muc.Room.send_message
-          # res=<StanzaToken id=0x00007f2a3083eca0>
-          res = room.send_message(msg)
-        else:
-          client = XB
-          res = await client.send(msg)
-          #  if res is None:
-          #    return True
-      else:
-        # https://docs.zombofant.net/aioxmpp/devel/api/public/im.html#aioxmpp.im.conversation.AbstractConversation.send_message
-        if client is None:
-          client = XB
-        p2ps = client.summon(im.p2p.Service)
-        c = p2ps.get_conversation(msg.to)
-        #  stanza = c.send_message(msg)
-        res = c.send_message(msg)
-        #  return False
-      #  if isawaitable(res):
-      #  info(f"{type(res)}: {res} {msg}")
-      if res is None:
-        info(f"res is not None: {res=} {client=} {room=} {msg=}")
-      elif asyncio.iscoroutine(res) or type(res) is stream.StanzaToken:
-        #  dbg(f"client send: {res=}")
-        try:
-          res2 = await res
-        except ValueError as e:
-          if e.args[0] == 'control characters are not allowed in well-formed XML':
-            #  err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", exc_info=True, stack_info=True)
-            info(f"发送xmpp消息失败，不支持特殊字符: {e=} {jid=} [msg=] {text=}")
-          else:
-            err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
-          return False
-        except Exception as e:
-          err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
-          return False
-        if res2 is None:
-          info(f"send xmpp msg: finally: {res=}")
-        #  elif hasattr(res, "stanza") and res.stanza and res.stanza.error is None:
-        #    # 群内私聊
-        #    info(f"send gpm msg: finally: {res=}")
-        #    return True
-          return True
-        else:
-          info(f"send xmpp msg: finally: {res=} {res2=}")
-          return False
-      else:
-        info(f"res is not coroutine: {res=} {client=} {room=} {msg=}")
-      #  return False
-      # 为了同步tg消息的删除，当tg删除消息时，这边会根据l[2]把xmpp这边的最后消息标记为临时待更正消息，但如果标记之前发送了别的xmpp正常消息，就不能进行该动作了，所以l[2]记录应该清除，而且对也确实没用了
-      if jid in mtmsgsg:
-        mtmsgs = mtmsgsg[jid]
-        for i in mtmsgs:
-          l = mtmsgs[i]
-          if len(l) > 2:
-            l[2] = set()
-      if delay is not None:
-        await sleep(delay)
-  return True
-
 
 def send_log(text, jid=CHAT_ID, delay=1):
   k = 0
@@ -3233,7 +3026,6 @@ def send(text, jid=None, *args, **kwargs):
 @cross_thread
 async def send_xmpp(text, jid=None, *args, **kwargs):
   # for short msg
-
   if type(text) is str:
     #  if name:
     #    text = f"{name}{text}"
@@ -3244,9 +3036,6 @@ async def send_xmpp(text, jid=None, *args, **kwargs):
       if type(jid) is JID:
         jid = get_jid(jid, True)
 
-      #  if gpm and '/' not in jid:
-      #    err(f"无法群私聊，地址错误: {jid}")
-      #    return False
     #  texts = await split_long_text(text, 4096)
     #  for i in texts:
     if jid in my_groups:
@@ -3255,32 +3044,13 @@ async def send_xmpp(text, jid=None, *args, **kwargs):
           type_=MessageType.GROUPCHAT,
       )
     else:
-      #  if '/' in jid and jid.split('/', 1)[0] in my_groups:
       msg = aioxmpp.Message(
           to=JID.fromstr(jid),  # recipient_jid must be an aioxmpp.JID
           type_=MessageType.CHAT,
       )
-    #  j = get_msg_jid(msg)
-    #  if correct:
-    #    if j in last_outmsg:
-    #      #  msg.xep0308_replace = aioxmpp.misc.Replace(last_outmsg[get_jid(msg.to, True)])
-    #      r = aioxmpp.misc.Replace()
-    #      r.id_ = last_outmsg[j]
-    #      msg.xep0308_replace = r
-    #  else:
-    #    if j in last_outmsg:
-    #      last_outmsg.pop(j)
-    #  if len(texts) > 1:
-    #    await add_id_to_msg(msg, False)
-    #  else:
     msg.body[None] = text
     if await _send_xmpp(msg, *args, **kwargs) is not True:
       return False
-    #  if correct:
-    #  if msg.xep0308_replace:
-    #  if "correct" in kwargs and kwargs["correct"]:
-    #    break
-
     return True
   elif isinstance(text, aioxmpp.Message):
     #  info(f"send1: {jid=} {text=}")
@@ -3299,28 +3069,216 @@ async def send_xmpp(text, jid=None, *args, **kwargs):
         orig = msg.to
         msg.to = msg.to.bare()
         info(f"已修正地址错误: {orig} -> {msg=}")
-    #  elif gpm and msg.to.resource is None:
-    #    err(f"无法群私聊，地址错误: {msg.to}")
-    #    return False
-
-
     return await _send_xmpp(msg, *args, **kwargs)
   else:
     err(f"text类型不对: {type(text)}")
     return False
-    #  elif isinstance(text, aioxmpp.stanza.Message):
-    #    #  info(f"send2: {jid=} {text=}")
-    #    msg = text
 
-#  async def __send(msg, jid=None, client=None, gpm=False):
-#    #  if type(text) is str:
-#      #  info(f"send: {jid=} {text=}")
-#      # None is for "default language"
-#    #  info(f"send: {type(msg)} {msg=}")
-#    if client is None:
-#      client = XB
-#    #  return await client.send(msg)
-#    return await send_xmpp(msg, client, gpm=gpm)
+
+on_nick_changed_futures = {}
+
+def on_nick_changed(member, old_nick, new_nick, *, muc_status_codes=set(), **kwargs):
+  #  jid = str(member.conversation_jid)
+  #  jid = str(member.direct_jid.bare())
+  muc = str(member.conversation_jid.bare())
+  #  info(f"nick changed: {muc} {jid} {old_nick} -> {new_nick} {member.conversation_jid}")
+  #  if (jid, muc) in on_nick_changed_futures:
+  if muc in on_nick_changed_futures:
+    try:
+      on_nick_changed_futures[muc].set_result(new_nick)
+    except asyncio.exceptions.InvalidStateError as e:
+      info(f"无法保存nick到future: {muc} {on_nick_changed_futures[muc]} {e=}")
+      #  on_nick_changed_futures.pop(muc)
+  #  info(f"nick changed: {jid} {muc} {old_nick} -> {new_nick}")
+
+send_locks = {}
+#  @cross_thread(need_main=True)
+@exceptions_handler(no_send=True)
+async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False, tmp_msg=False):
+  #  info(f"{msg}")
+  muc = str(msg.to.bare())
+  #  if muc not in rooms:
+  #    info(f"not found room: {muc}")
+  #    return False
+  jid = str(msg.to)
+  if jid not in send_locks:
+    send_locks[jid] = asyncio.Lock()
+  async with send_locks[jid]:
+    msg.from_ = None
+    if msg.type_ == MessageType.GROUPCHAT:
+
+      if room is None:
+        if muc in rooms:
+          room = rooms[muc]
+
+      if nick is None:
+        if fromname is None:
+          if name is None:
+            pass
+          else:
+            nick = name
+        else:
+          nick = fromname
+
+      # https://stackoverflow.com/questions/69778194/how-can-i-check-whether-a-unicode-codepoint-is-assigned-or-not
+      if room is not None and nick is not None:
+      #  if None:
+        #  room = rooms[muc]
+        #  if muc in rooms:
+        #  if room is not None:
+        #  await set_nick(room, fromname)
+        nick = wtf_str(nick)
+        #  nick_old = room.me.nick
+
+        jids = users[muc]
+        if myjid not in jids:
+          #  jids[myjid] = [nick_old, room.me.affiliation, room.me.role]
+          #  j = []
+          #  jids[myjid] = []
+          #  set_default_value(j, room.me)
+          jids[myjid] = set_default_value(m=room.me)
+          warn(f"不存在nick记录，已添加: {muc} {myjid} {msg} {jids[myjid]}")
+        nick_old = jids[myjid][0]
+        if nick_old != nick:
+          fu = asyncio.Future()
+          #  jid = str(room.me.direct_jid)
+          on_nick_changed_futures[muc] = fu
+          try:
+            await room.set_nick(nick)
+          except ValueError as e:
+            jids[myjid][0] = nick
+            warn(f"改名失败, 不支持特殊字符: {nick=} {e=}")
+          else:
+            #  await fu
+            try:
+              #  await asyncio.wait_for(await asyncio.shield(fu), timeout=8)
+              await asyncio.wait_for(fu, timeout=5)
+            #  except Exception as e:
+            except TimeoutError as e:
+              on_nick_changed_futures.pop(muc)
+              jids[myjid][0] = nick
+              warn(f"改名失败(超时)：{muc} {nick_old} -> {nick} {e=}")
+            else:
+              on_nick_changed_futures.pop(muc)
+              jids[myjid][0] = fu.result()
+              if fu.result() != nick:
+                warn(f"改名结果有问题: {muc} {fu.result()=} != {nick=}")
+              #  else:
+              #    info(f"set nick: {muc} {nick_old} -> {nick}")
+            #  else:
+            #    info(f"same nick: {str(msg.to.bare())} {room.me.nick} = {nick}")
+            #  else:
+            #    info(f"not found room: {msg.to}")
+
+    text = None
+    #  text = msg.body.any() # ValueError("any() on empty map")
+    for i in msg.body:
+      text = msg.body[i]
+      if text:
+        break
+
+    if text:
+      #  if jid == log_group_private:
+      msgs = []
+      for text in await split_long_text(text, MAX_MSG_BYTES, tmp_msg):
+        if msgs:
+          msg = aioxmpp.Message(
+              to=msg.to,
+              type_=msg.type_,
+          )
+        msg.body[None] = text
+        msgs.append(msg)
+        #  if correct:
+        if xmpp_only:
+          break
+    else:
+      msgs = [msg]
+
+    if len(msgs) > 1:
+      tmp_msg = False
+      info("没办法同时更正多条消息")
+    for msg in msgs:
+      await sleep(msg_delay_default)
+      if text:
+        #  info(f"{jid=} {text=} {tmp_msg=} {correct=}")
+        add_id_to_msg(msg, correct, tmp_msg)
+        msg.xep0085_chatstate = chatstates.ChatState.ACTIVE
+      if msg.to.is_bare or msg.type_ == MessageType.GROUPCHAT or str(msg.to.bare()) not in my_groups:
+      #  if gpm is False:
+        if client is not None:
+          # https://docs.zombofant.net/aioxmpp/devel/api/public/node.html?highlight=client#aioxmpp.Client.send
+          res = await client.send(msg)
+          #  if res is None:
+          #    return True
+        elif room:
+          # https://docs.zombofant.net/aioxmpp/devel/api/public/muc.html?highlight=room#aioxmpp.muc.Room.send_message
+          # res=<StanzaToken id=0x00007f2a3083eca0>
+          res = room.send_message(msg)
+        else:
+          client = XB
+          res = await client.send(msg)
+          #  if res is None:
+          #    return True
+      else:
+        # https://docs.zombofant.net/aioxmpp/devel/api/public/im.html#aioxmpp.im.conversation.AbstractConversation.send_message
+        if client is None:
+          client = XB
+        p2ps = client.summon(im.p2p.Service)
+        c = p2ps.get_conversation(msg.to)
+        #  stanza = c.send_message(msg)
+        res = c.send_message(msg)
+        #  return False
+      #  if isawaitable(res):
+      #  info(f"{type(res)}: {res} {msg}")
+      if res is None:
+        info(f"res is not None: {res=} {client=} {room=} {msg=}")
+      elif asyncio.iscoroutine(res) or type(res) is stream.StanzaToken:
+        #  dbg(f"client send: {res=}")
+        try:
+          res2 = await res
+        except ValueError as e:
+          if e.args[0] == 'control characters are not allowed in well-formed XML':
+            #  err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", exc_info=True, stack_info=True)
+            info(f"发送xmpp消息失败，不支持特殊字符: {e=} {jid=} [msg=] {text=}")
+          else:
+            err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
+          return False
+        except Exception as e:
+          err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
+          return False
+        if res2 is None:
+          info(f"send xmpp msg: finally: {res=}")
+        #  elif hasattr(res, "stanza") and res.stanza and res.stanza.error is None:
+        #    # 群内私聊
+        #    info(f"send gpm msg: finally: {res=}")
+        #    return True
+          return True
+        else:
+          info(f"send xmpp msg: finally: {res=} {res2=}")
+          return False
+      else:
+        info(f"res is not coroutine: {res=} {client=} {room=} {msg=}")
+      #  return False
+      # 为了同步tg消息的删除，当tg删除消息时，这边会根据l[2]把xmpp这边的最后消息标记为临时待更正消息，但如果标记之前发送了别的xmpp正常消息，就不能进行该动作了，所以l[2]记录应该清除，而且对也确实没用了
+      if jid in mtmsgsg:
+        mtmsgs = mtmsgsg[jid]
+        for i in mtmsgs:
+          l = mtmsgs[i]
+          if len(l) > 2:
+            l[2] = set()
+      if delay is not None:
+        await sleep(delay)
+  return True
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -6231,6 +6189,15 @@ def hide_nick(msg):
   return nick
 
 
+
+def get_src(msg):
+  if msg.type_ == MessageType.GROUPCHAT:
+    return str(msg.from_.bare())
+  if msg.from_.is_bare:
+    return str(msg.from_)
+  if str(msg.to.bare()) in my_groups:
+    return str(msg.from_)
+  return str(msg.from_.bare())
 
 
 #  def gmsg(msg, member, source, **kwargs):
