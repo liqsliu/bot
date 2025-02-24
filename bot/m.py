@@ -4839,7 +4839,7 @@ async def msgt(event):
       else:
         file_info = "\n文件大小未知，终止下载"
       if text and file_info:
-        test += "\n\n"
+        text += "\n\n"
       text += file_info
 
 
