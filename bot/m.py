@@ -605,7 +605,7 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
     except OSError as e:
       no_send = True
       err("出错啦 OSError %s" % res, True)
-      raise
+      #  raise
     except Exception:
       pass
       #  err(f"W: {repr(e)} line: {e.__traceback__.tb_lineno}", exc_info=True, stack_info=True)
@@ -5640,9 +5640,9 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   #    return wrapper
 
   timeout = get_timeout(length)
-  async with aiofiles.open(fp, "rb") as file:
-    #  t = asyncio.create_task(update_tmp_msg(file))
-    try:
+  try:
+    async with aiofiles.open(fp, "rb") as file:
+      #  t = asyncio.create_task(update_tmp_msg(file))
       #  file.read = d(file.read)
       #  file.close = dc(file.close)
       file.readline = wrap_read(file.readline)
@@ -5655,9 +5655,12 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
       #  await send("测试进程间通信 res: {}".format(res))
       #  return res
-    except Exception as e:
-      err(f"上传失败：{e=} {slot.put.url=}")
-      return
+  except FileNotFoundError as e:
+    err(f"上传失败：{e=} {slot.put.url=}")
+    return
+  except Exception as e:
+    err(f"上传失败：{e=} {slot.put.url=}")
+    return
     #  finally:
     #    if not t.done():
     #      t.cancel()
