@@ -2886,7 +2886,7 @@ async def hgds(text):
 #    messages=messages,
 #    max_tokens=500,
 #  )
-  result = await asyncio.to_thread(client.chat.completions.create,
+  result = await asyncio.to_thread(dsclient.chat.completions.create,
     model="deepseek-ai/DeepSeek-R1", 
 	  messages=messages, 
 	  max_tokens=500,
@@ -7984,14 +7984,14 @@ async def init_cmd():
     if len(cmds) == 1:
       return f"HuggingChat\n.{cmds[0]} $text\n\n--\nhttps://github.com/xtekky/gpt4free\n问答: hg/di/lb/kl/you/bd/ai"
     text = ' '.join(cmds[1:])
-    return await hgds(text)
+    return await hg(text)
   cmd_funs["hg"] = _
   
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"HuggingChat deepseek\n.{cmds[0]} $text"
     text = ' '.join(cmds[1:])
-    return await hg(text, provider=Provider.HuggingChat)
+    return await hgds(text, provider=Provider.HuggingChat)
   cmd_funs["ds"] = _
 
   async def _(cmds, src):
