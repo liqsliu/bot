@@ -3091,10 +3091,26 @@ def on_nick_changed(member, old_nick, new_nick, *, muc_status_codes=set(), **kwa
       #  on_nick_changed_futures.pop(muc)
   #  info(f"nick changed: {jid} {muc} {old_nick} -> {new_nick}")
 
+
+
+def clean_forwarded_tg_msg_ids(jid):
+  d = set()
+  for i in forwarded_tg_msg_ids:
+    s = forwarded_tg_msg_ids[i]
+    if jid in s:
+      s.remove(jid)
+      if len(s) == 0:
+        d.add(i)
+  for i in d:
+    forwarded_tg_msg_ids.pop(i)
+
+
+
+
 send_locks = {}
 #  @cross_thread(need_main=True)
 @exceptions_handler(no_send=True)
-async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False, tmp_msg=False):
+async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False, tmp_msg=False, tg_msg_id=None):
   #  info(f"{msg}")
   muc = str(msg.to.bare())
   #  if muc not in rooms:
@@ -3197,12 +3213,27 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
     if len(msgs) > 1:
       tmp_msg = False
       info("没办法同时更正多条消息")
+    msg.autoset_id()
+    if jid not in last_outmsg:
+      correct = False
+      tmp_msg_chats.remove(jid)
+
     for msg in msgs:
       await sleep(msg_delay_default)
+      if tg_msg_id in deleted_tg_msg_ids:
+        return True
       if text:
         #  info(f"{jid=} {text=} {tmp_msg=} {correct=}")
-        add_id_to_msg(msg, correct, tmp_msg)
+        #  add_id_to_msg(msg, correct, tmp_msg)
+        #  j = get_msg_jid(msg)
         msg.xep0085_chatstate = chatstates.ChatState.ACTIVE
+        if correct or jid in tmp_msg_chats:
+          r = aioxmpp.misc.Replace()
+          r.id_ = last_outmsg[jid]
+          msg.xep0308_replace = r
+        else:
+          last_outmsg[jid] = msg.id_
+
       if msg.to.is_bare or msg.type_ == MessageType.GROUPCHAT or str(msg.to.bare()) not in my_groups:
       #  if gpm is False:
         if client is not None:
@@ -3259,23 +3290,34 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       else:
         info(f"res is not coroutine: {res=} {client=} {room=} {msg=}")
       #  return False
+      if tm_msg_id is None:
+        if tmp_msg is False:
+          clean_forwarded_tg_msg_ids(jid)
+        #  forwarded_tg_msg_ids.clear()
+      elif tg_msg_id in deleted_tg_msg_ids:
+        tmp_msg_chats.add(jid)
+        return
+      else:
+        clean_forwarded_tg_msg_ids(jid)
+        forwarded_tg_msg_ids[tg_msg_id].add(jid)
+
+      if tmp_msg is True:
+        tmp_msg_chats.add(jid)
+      elif jid in tmp_msg_chats:
+        tmp_msg_chats.remove(jid)
       # 为了同步tg消息的删除，当tg删除消息时，这边会根据l[2]把xmpp这边的最后消息标记为临时待更正消息，但如果标记之前发送了别的xmpp正常消息，就不能进行该动作了(镜像群也要处理)，所以l[2]记录应该清除，而且对也确实没用了
-      if jid in mtmsgsg:
-        mtmsgs = mtmsgsg[jid]
-        for i in mtmsgs:
-          l = mtmsgs[i]
-          if len(l) > 2:
-            l[2] = set()
-            tmp_msg_chats.difference_update( get_mucs(jid) )
-            info("tmp_msg_chats, remove: {jid} and mirror group")
+      #  if jid in mtmsgsg:
+      #    mtmsgs = mtmsgsg[jid]
+      #    for i in mtmsgs:
+      #      l = mtmsgs[i]
+      #      if len(l) > 2:
+      #        #  l[2] = set()
+      #        l[2].clear()
+      #        tmp_msg_chats.difference_update( get_mucs(jid) )
+      #        info("tmp_msg_chats, remove: {jid} and mirror group")
       if delay is not None:
         await sleep(delay)
   return True
-
-
-
-
-
 
 
 
@@ -3296,13 +3338,16 @@ async def _slow_mode(timeout=300):
     await sleep(10)
   msg_delay_default = 0
   slow_mode_task = None
+  warn("slow mode off")
 
 async def slow_mode(timeout=300):
   global slow_mode_task
   if slow_mode_task is not None:
     slow_mode_task.cancel()
+  warn("slow mode on")
   slow_mode_task = asyncio.create_task(_slow_mode(timeout))
   await sleep(timeout)
+  warn("slow mode is ending")
   return True
 
 
@@ -4592,43 +4637,57 @@ async def get_msg(url):
 #    gid = await send_tg(text, pid, return_id=True)
 #    return mtmsgs, gid
 
+deleted_tg_msg_ids = set()
+forwarded_tg_msg_ids = {}
+
 @exceptions_handler
 async def msgtd(event):
+  if not event.is_private:
+    return
   #  chat_id = event.sender_id
   chat_id = event.chat_id
   if chat_id is None:
     warn(f"chat_id is None")
   elif chat_id not in bridges:
+    info(f"chat_id is not in bridges: {chat_id}")
     return
-  info(f"delete msg: {chat_id} {event.deleted_id} {event.deleted_ids}")
+  deleted_tg_msg_ids.update(event.deleted_ids)
   #  src = bridges[chat_id]
     #  if src not in tmp_msg_chats:
-  if chat_id is None:
-    for i in event.deleted_ids:
-      #  for src in mtmsgsg:
-      for chat_id in bridges.copy():
-        if chat_id in tmp_msg_chats:
-          continue
-        src = bridges[chat_id]
-        if type(src) is dict:
-          bridges.pop(chat_id)
-          warn(f"delete old bridge: {src} - {chat_id}")
-          continue
-        if src in tmp_msg_chats:
-          continue
-        if src in mtmsgsg:
-          mtmsgs = mtmsgsg[src]
-          if chat_id in mtmsgs:
-            l = mtmsgs[chat_id]
-            if len(l) > 2:
-              #  if i in l[2]:
-              if i == max(l[2]):
-                #  tmp_msg_chats.add(src)
-                tmp_msg_chats.update(get_mucs(src))
-                info(f"set tmp_msg ok, found msg id {i} in chat {src} - {chat_id}")
-              else:
-                info(f"unsupported, ignore, found msg id {i} != max({l[2]}) in chat {src} - {chat_id}")
-            break
+  #  if chat_id is None:
+  for i in event.deleted_ids:
+    if i in forwarded_tg_msg_ids:
+      for src in forwarded_tg_msg_ids[i]:
+        tmp_msg_chats.add(src)
+        info(f"add {src} in tmp_msg_chats")
+    else:
+      warn(f"not found {i} in {forwarded_tg_msg_ids}")
+  info(f"delete msg: {chat_id} {event.deleted_id} {event.deleted_ids}")
+
+      #  #  for src in mtmsgsg:
+      #  for chat_id in bridges.copy():
+      #    #  if chat_id in tmp_msg_chats:
+      #    #    continue
+      #    src = bridges[chat_id]
+      #    if type(src) is dict:
+      #      bridges.pop(chat_id)
+      #      warn(f"delete old bridge: {src} - {chat_id}")
+      #      continue
+      #    #  if src in tmp_msg_chats:
+      #    #    continue
+      #    if src in mtmsgsg:
+      #      mtmsgs = mtmsgsg[src]
+      #      if chat_id in mtmsgs:
+      #        l = mtmsgs[chat_id]
+      #        if len(l) > 2:
+      #          #  if i in l[2]:
+      #          if i == max(l[2]):
+      #            #  tmp_msg_chats.add(src)
+      #            tmp_msg_chats.update(get_mucs(src))
+      #            info(f"set tmp_msg ok, found msg id {i} in chat {src} - {chat_id}")
+      #          else:
+      #            info(f"unsupported, ignore, found msg id {i} != max({l[2]}) in chat {src} - {chat_id}")
+      #        break
 
   #  if src in last_outmsg:
       #  tmp_msg_chats.add(j)
@@ -4764,8 +4823,6 @@ async def msgt(event):
       l[1].extend(msg.buttons)
       text = f"{bot_name}\n{text}"
 
-
-
     if msg.file:
       file = msg.file
       file_name = file.name
@@ -4803,32 +4860,29 @@ async def msgt(event):
         text += "\n\n"
       text += file_info
 
-
     if msg.edit_date:
       correct = True
     else:
       correct = False
     text = f"{l[0]}{text}"
-    if len(l) == 2:
-      l.append(set())
-    else:
-      if len(l[2]) > 0:
-        await sleep(0.3)
-      if chat_id == 5968721572:
-        await sleep(0.5)
-      elif chat_id == 6260675152:
-        await sleep(0.5)
-    if parse_message_deleted_task is not None:
-      if not parse_message_deleted_task.done():
-        info(f"等待处理完tg的消息删除事件 {parse_message_deleted_task}")
-        await parse_message_deleted_task
-        info("处理完成 parse_message_deleted_task")
-      else:
-        info("parse_message_deleted_task: done")
-    else:
-      info(f"None {parse_message_deleted_task=}")
-    l[2].add(msg.id)
-    send(text, src, correct=correct)
+    #  if len(l) == 2:
+    #    l.append(set())
+    #  else:
+    #    if len(l[2]) > 0:
+    #      await sleep(0.5)
+    #  if parse_message_deleted_task is not None:
+    #    if not parse_message_deleted_task.done():
+    #      info(f"等待处理完tg的消息删除事件 {parse_message_deleted_task}")
+    #      await parse_message_deleted_task
+    #      info("处理完成 parse_message_deleted_task")
+    #    else:
+    #      info("parse_message_deleted_task: done")
+    #  else:
+    #    info(f"None {parse_message_deleted_task=}")
+    #  l[2].add(msg.id)
+    gid = msg.id
+    forwarded_tg_msg_ids[gid] = set()
+    send(text, src, correct=correct, tg_msg_id=msg.id)
 
   else:
     res, nick, delay = await print_tg_msg(event)
@@ -7754,6 +7808,7 @@ async def init_cmd():
           return f"{cmds[0]} 是 {cmd1} {cmds2} 的快捷方式，要查看用法，请发送 {cmd1} {cmds2}"
         cmds.insert(1, cmd2)
       if len(cmds) == 1:
+        deleted_tg_msg_ids.clear()
         cmds2 = await get_commands2(bot_name, cmds[0])
         name = await get_name(username=bot_name)
         res = f"{name}\n.{cmds[0]} $text"
