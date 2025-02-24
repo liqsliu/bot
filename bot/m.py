@@ -1643,7 +1643,7 @@ async def init_myshell():
     info(f"myshell is ok, task of reading is running {f}")
     #  while True:
     while myshell_p.returncode is None:
-      d = await f(512000000)
+      d = await f(HTTP_FILE_MAX_BYTES)
       await myshell_queue1.put((n, d))
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
   
@@ -1658,12 +1658,12 @@ async def init_myshell():
         d = d[0]
         if n == 1:
           tmp1 += d + b"\n"
-          info(f"send data {tmp1}")
+          #  info(f"send data {tmp1}")
           await myshell_queue.put((n, tmp1))
           tmp1 = b""
         else:
           tmp2 += d + b"\n"
-          info(f"send data {tmp2}")
+          #  info(f"send data {tmp2}")
           await myshell_queue.put((n, tmp2))
           tmp2 = b""
         d = o
@@ -4806,26 +4806,42 @@ async def msgt(event):
 
 
     if msg.file:
-      #  path = await tg_download_media(msg)
-      path = await tg_download_media(msg, src=src, max_wait_time=get_timeout(msg.file.size))
-      file_name = msg.file.name
-      if path is not None:
-        try:
-          t = asyncio.create_task(backup(path))
-          xmpp_url = await upload(path, src)
-          url = await t
-          if xmpp_url:
-            url = f"\n- {xmpp_url}\n\n- {url}"
-          if file_name:
-            url = f"{file_name}\n{url}"
-          if text:
-            text = f"{text}\n\nfile: {url}"
-          else:
-            text = f"file: {url}"
-            #  await send(text, jid=jid)
-            #  return
-        finally:
-          t = asyncio.create_task(backup(path, delete=True))
+      file = msg.file
+      file_name = file.name
+      if file_name:
+        file_info = f"file: {file_name}"
+      else:
+        file_info = ""
+      if file.size:
+        if file.size > FILE_DOWNLOAD_MAX_BYTES:
+          file_info += "\n文件过大，终止下载({hbyte(file.size))})"
+        else:
+          #  path = await tg_download_media(msg)
+          path = await tg_download_media(msg, src=src, max_wait_time=get_timeout(msg.file.size))
+          if path is not None:
+            try:
+              t = asyncio.create_task(backup(path))
+              xmpp_url = await upload(path, src)
+              url = await t
+              if xmpp_url:
+                url = f"- {xmpp_url}\n\n- {url}"
+              #  if file_name:
+              #    url = f"{file_name}\n{url}"
+              #  if text:
+              #    text += f"\n\nfile: {url}"
+              #  else:
+              file_info +== "\n"
+              file_info +== url
+                #  await send(text, jid=jid)
+                #  return
+            finally:
+              t = asyncio.create_task(backup(path, delete=True))
+      else:
+        file_info = "\n文件大小未知，终止下载"
+      if text and file_info:
+        test += "\n\n"
+      text += file_info
+
 
     if msg.edit_date:
       correct = True
