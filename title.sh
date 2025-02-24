@@ -58,6 +58,7 @@ fi
       echo "目录有问题"
       exit 1
     }
+    echo "$fn"
 
 
 
@@ -203,6 +204,7 @@ fi
     # fe=$(file --extension -- "${fn}" | grep -o -P "[^\s/]+$")
     # fe=$(echo "$html" | file --extension -b -- -)
     # size=$(echo "$html" | wc -c)
+    echo "$fn"
     echo "$fs"
     echo "$ft"
     echo "$ft3"
@@ -212,7 +214,6 @@ fi
     # nohup mv "$fn" "$LP/$fno$fe" &>/dev/null &
     echo
     echo "- https://$DOMAIN/${fno}${fe}"
-    echo "$fn"
 
   fi
 # done

@@ -1837,7 +1837,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           res = "结束"
           send(res, src)
           # fixme: 不知道该设为多少
-          r = 0
+          r = -512
           break
         #  if k > 1:
         #    if myshell_queue.empty():
@@ -2681,28 +2681,45 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   if r == 0:
     if o:
       s = o.splitlines()
-      if len(s) > 1:
-        path = s[-1]
-        if os.path.exists(path):
+      if len(s) > 2:
+        #  path = s[-1]
+        if os.path.exists(s[1]):
+          s.pop(0)
+          path = s[0]
           try:
             t = asyncio.create_task(backup(path))
             url = await upload(path, src)
             await t
             if url:
-              s[-1] = f"\n- {url}"
+              s[0] = f"\n- {url}"
             else:
-              s.pop(-1)
+              s.pop(0)
           finally:
             asyncio.create_task(backup(path, delete=True))
         else:
-          s.pop(-1)
+          s.pop(0)
+          s.pop(0)
         return "\n".join(s)
       else:
         warn(f"need file path: {o=}")
-        return o
+        return s[-1]
     else:
       warn("failed: %s\n--\nE: %s\n%s" % (o, r, e))
       return
+  elif r == -512:
+    s = o.splitlines()
+    if len(s) > 0:
+      if os.path.exists(s[0]):
+        path = s[0]
+        info(f"delete {path}")
+        asyncio.create_task(backup(path, delete=True))
+      elif len(s) > 1:
+        if os.path.exists(s[1]):
+          s.pop(0)
+          path = s[0]
+          info(f"delete {path}")
+          asyncio.create_task(backup(path, delete=True))
+    return "timeout"
   else:
     #  if err:
     warn("%s\n--\nE: %s\n%s" % (o, r, e))
