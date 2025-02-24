@@ -3235,17 +3235,23 @@ async def send(text, jid=None, *args, **kwargs):
     if main_group in ms:
       if xmpp_only:
         for m in ms:
-          await send_typing(m)
-        await send1(text, jid=log_group_private, *args, **kwargs)
+          #  await send_typing(m)
+          asyncio.create_task( send_typing(m) )
+        #  await send1(text, jid=log_group_private, *args, **kwargs)
+        asyncio.create_task( send1(text, jid=log_group_private, *args, **kwargs) )
         return True
         ms = set()
       else:
-        await mt_send_for_long_text(text0, name=nick)
+        asyncio.create_task( mt_send_for_long_text(text0, name=nick) )
 
     for m in ms:
-      if await send1(text, jid=m, *args, **kwargs):
-        if isinstance(text, aioxmpp.Message):
-          text = text.body[None]
+      #  if await send1(text, jid=m, *args, **kwargs):
+      #    if isinstance(text, aioxmpp.Message):
+      #      text = text.body[None]
+      asyncio.create_task( send1(text, jid=m, *args, **kwargs) )
+      if isinstance(text, aioxmpp.Message):
+        #  text = text.body[None]
+        text = text.body.any()
 
     #  if main_group in ms and xmpp_only:
     #    for m in ms:
@@ -3270,7 +3276,9 @@ async def send(text, jid=None, *args, **kwargs):
     return True
   else:
     #  info(f"准备发送到: {muc=} {jid=}")
-    return await send1(text, jid=jid, *args, **kwargs)
+    #  return await send1(text, jid=jid, *args, **kwargs)
+    asyncio.create_task( send1(text, jid=jid, *args, **kwargs) )
+    return True
 
 @exceptions_handler(no_send=True)
 async def send1(text, jid=None, *args, **kwargs):
@@ -6579,12 +6587,14 @@ async def msgx(msg):
     ms = get_mucs(muc)
     for m in ms - {muc}:
       #  if await send1(f"**X {nick}:** {text}", m, name=f"X {nick}") is False:
-      if await send1(f"{username}{text0}", m, name=name) is False:
-        return
+      #  if await send1(f"{username}{text0}", m, name=name) is False:
+      #    return
+      asyncio.create_task( send1(f"{username}{text0}", m, name=name) )
     if main_group in ms:
       #  if await mt_send_for_long_text(text, name=f"X {nick}") is False:
-      if await mt_send_for_long_text(text0, name=name, qt=qt) is False:
-        return
+      #  if await mt_send_for_long_text(text0, name=name, qt=qt) is False:
+      #    return
+      asyncio.create_task( mt_send_for_long_text(text0, name=name, qt=qt) )
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
   #    pass
