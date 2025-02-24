@@ -7836,6 +7836,7 @@ async def init_cmd():
   add_tg_bot("GLBetabot", "glai", "/gpt", ".gl")
   add_tg_bot("GLBetabot", "glimg", "/img", ".gl")
   add_tg_bot("littleb_gptBOT", "bai")
+  add_tg_bot("chatgpt_tfrbot", "gk")
 
 
   #  async def _(cmds, src):
