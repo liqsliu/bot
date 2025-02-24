@@ -4663,7 +4663,7 @@ async def msgtd(event):
     if i in forwarded_tg_msg_ids:
       for src in forwarded_tg_msg_ids[i]:
         tmp_msg_chats.add(src)
-        info(f"add {src} in tmp_msg_chats")
+        info(f"add {src} into tmp_msg_chats")
     else:
       warn(f"not found {i} in {forwarded_tg_msg_ids}")
 
