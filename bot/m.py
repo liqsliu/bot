@@ -7776,7 +7776,7 @@ async def init_cmd():
         bot_cmds[bot_name] = ""
         #  return ""
     return bot_cmds[bot_name]
-  def add_tg_bot(bot_name, cmd, cmd2=None, cmd1=None):
+  def add_tg_bot(bot_name, cmd, cmd2=None, cmd1=None, no_file=False):
     #  @exceptions_handler
     async def _(cmds, src):
       if cmd2 is not None:
@@ -7791,7 +7791,7 @@ async def init_cmd():
           res += f"\n.{cmds[0]} /start: 更换ai模型(\"/start\"可以简写为\"s\")"
         res += f"\n---\n.{cmds[0]} /start: 某些bot通过该命令找到额外选项\n.{cmds[0]} /help: 某些bot通过该命令找到额外选项\n.{cmds[0]} /reset: 某些bot通过该命令清空bot记住的上下文\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并针对文件回复指定内容\n---\n其他ai接口命令：.gpt/.gpt4/.gm/.gm1/.gm2/.bai/.sd/.ai2/.ai3/.ds/.ds1\n---\nhttps://t.me/{bot_name}{cmds2}"
         return res
-      elif urlre.fullmatch(cmds[-1]):
+      elif not no_file and urlre.fullmatch(cmds[-1]):
         cmds2 = [f"{SH_PATH}/title.sh", cmds[-1]]
         cmds2.extend(["", "", "", "just_path"])
         #  r, o, e = await myshell(cmds, src=src, max_time=60)
@@ -7852,7 +7852,8 @@ async def init_cmd():
   add_tg_bot("GLBetabot", "glimg", "/img", ".gl")
   add_tg_bot("littleb_gptBOT", "bai")
   add_tg_bot("chatgpt_tfrbot", "gk")
-  add_tg_bot("UltraYTBot", "ytd")
+  add_tg_bot("UltraYTBot", "ytd", no_file=True)
+  add_tg_bot("YTsavebot", "ytd2", no_file=True)
 
 
   #  async def _(cmds, src):
