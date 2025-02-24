@@ -4696,6 +4696,7 @@ async def msgtp(event):
   #  else:
   #    return
   send_typing(src)
+  return
   res = await get_name(chat_id)
   if event.photo:
     #  await send(f"{bot_name} 正在发送图片", src, tmp_msg=True)
