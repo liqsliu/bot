@@ -3291,7 +3291,7 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       else:
         info(f"res is not coroutine: {res=} {client=} {room=} {msg=}")
       #  return False
-      if tm_msg_id is None:
+      if tg_msg_id is None:
         if tmp_msg is False:
           clean_forwarded_tg_msg_ids(jid)
         #  forwarded_tg_msg_ids.clear()
