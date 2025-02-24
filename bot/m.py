@@ -2700,9 +2700,17 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
           s.pop(0)
           s.pop(0)
         return "\n".join(s)
-      else:
-        warn(f"need file path: {o=}")
+      elif len(s) == 2:
         return s[-1]
+      else:
+        if os.path.exists(s[0]):
+          path = s[0]
+          warn(f"fixme: not found title, should delete {path}, url: {url}")
+          #  asyncio.create_task(backup(path, delete=True))
+          return
+        else:
+          warn(f"need file path: {o=}, url: {url}")
+          return
     else:
       warn("failed: %s\n--\nE: %s\n%s" % (o, r, e))
       return
@@ -2713,12 +2721,16 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
         path = s[0]
         info(f"delete {path}")
         asyncio.create_task(backup(path, delete=True))
-      elif len(s) > 1:
+      elif len(s) > 2:
         if os.path.exists(s[1]):
           s.pop(0)
           path = s[0]
           info(f"delete {path}")
           asyncio.create_task(backup(path, delete=True))
+        else:
+          warn(f"not found file: {o=}")
+      else:
+        warn(f"fixme: error out of tittle.sh: {o}")
     return "timeout"
   else:
     #  if err:
