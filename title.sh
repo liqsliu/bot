@@ -53,7 +53,7 @@ fi
     fn="$HOME/t/$fn"
     (
     cd "$HOME/t/" || exit 1
-    rm * &>/dev/null || true
+    # rm * &>/dev/null || true
     ) || {
       echo "目录有问题"
       exit 1
