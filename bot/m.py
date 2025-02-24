@@ -3200,8 +3200,6 @@ def send(text, jid=None, *args, **kwargs):
   else:
     xmpp_only = False
 
-
-
   ms = get_mucs(muc)
   if ms:
   #  if muc in my_groups:
