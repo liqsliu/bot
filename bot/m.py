@@ -2928,8 +2928,7 @@ send_locks = {}
 
 #  @cross_thread(need_main=True)
 @exceptions_handler(no_send=True)
-@cross_thread
-async def send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False, tmp_msg=False):
+async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False, tmp_msg=False):
   #  info(f"{msg}")
   muc = str(msg.to.bare())
   #  if muc not in rooms:
@@ -3115,8 +3114,8 @@ def send_log(text, jid=CHAT_ID, delay=1):
     warn(f"send_log is busy: {len(k)} {short(text)}")
   else:
     info(f"send_log: {text}")
-  asyncio.create_task(send_tg(text, jid, delay=(delay+1)**k), name="send_log")
-  asyncio.create_task(send_xmpp(text, jid=jid, delay=(delay+1)**k), name="send_log")
+  asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
+  asyncio.create_task(send_xmpp(text, log_group_private, delay=(delay+1)**k), name="send_log")
   return True
 
 
@@ -3210,7 +3209,7 @@ def send(text, jid=None, *args, **kwargs):
         #    #  send_typing(m)
         #    asyncio.create_task( send_typing(m) )
         #  await send1(text, jid=log_group_private, *args, **kwargs)
-        asyncio.create_task( send1(text, jid=log_group_private, *args, **kwargs) )
+        asyncio.create_task( send_xmpp(text, jid=log_group_private, *args, **kwargs) )
         return True
         ms = set()
       else:
@@ -3219,7 +3218,7 @@ def send(text, jid=None, *args, **kwargs):
       #  if await send1(text, jid=m, *args, **kwargs):
       #    if isinstance(text, aioxmpp.Message):
       #      text = text.body[None]
-      asyncio.create_task( send1(text, jid=m, *args, **kwargs) )
+      asyncio.create_task( send_xmpp(text, jid=m, *args, **kwargs) )
       if isinstance(text, aioxmpp.Message):
         #  text = text.body[None]
         text = text.body.any()
@@ -3227,11 +3226,12 @@ def send(text, jid=None, *args, **kwargs):
   else:
     #  info(f"准备发送到: {muc=} {jid=}")
     #  return await send1(text, jid=jid, *args, **kwargs)
-    asyncio.create_task( send1(text, jid=jid, *args, **kwargs) )
+    asyncio.create_task( send_xmpp(text, jid=jid, *args, **kwargs) )
     return True
 
 @exceptions_handler(no_send=True)
-async def send1(text, jid=None, *args, **kwargs):
+@cross_thread
+async def send_xmpp(text, jid=None, *args, **kwargs):
   # for short msg
 
   if type(text) is str:
@@ -3656,7 +3656,7 @@ async def parse_mt(msg):
       #  if await send1(text2, m, nick=rname) is False:
       #    warn(f"failed: {m} {text1}")
       #    return
-      asyncio.create_task( send1(text2, m, nick=rname) )
+      asyncio.create_task( send_xmpp(text2, m, nick=rname) )
 
     res = await run_cmd(text, gateway, name, textq=text0)
     if res is True:
@@ -3669,7 +3669,7 @@ async def parse_mt(msg):
         #  if await send1(res, m, nick="C bot") is False:
         #    warn(f"failed: {m} {res}")
         #    return
-        asyncio.create_task( send1(res, m, nick="C bot") )
+        asyncio.create_task( send_xmpp(res, m, nick="C bot") )
     #    if await send1(f"{name}{text}", m, name) is False:
     #      return
     #    if res:
@@ -6564,7 +6564,7 @@ async def msgx(msg):
       #  if await send1(f"**X {nick}:** {text}", m, name=f"X {nick}") is False:
       #  if await send1(f"{username}{text0}", m, name=name) is False:
       #    return
-      asyncio.create_task( send1(f"{username}{text0}", m, name=name) )
+      asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
     if main_group in ms:
       #  if await mt_send_for_long_text(text, name=f"X {nick}") is False:
       #  if await mt_send_for_long_text(text0, name=name, qt=qt) is False:
