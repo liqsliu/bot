@@ -3237,61 +3237,68 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
         else:
           last_outmsg[jid] = msg.id_
 
-      if msg.to.is_bare or msg.type_ == MessageType.GROUPCHAT or str(msg.to.bare()) not in my_groups:
-      #  if gpm is False:
-        if client is not None:
-          # https://docs.zombofant.net/aioxmpp/devel/api/public/node.html?highlight=client#aioxmpp.Client.send
-          res = await client.send(msg)
-          #  if res is None:
-          #    return True
-        elif room:
-          # https://docs.zombofant.net/aioxmpp/devel/api/public/muc.html?highlight=room#aioxmpp.muc.Room.send_message
-          # res=<StanzaToken id=0x00007f2a3083eca0>
-          res = room.send_message(msg)
+      try:
+        if msg.to.is_bare or msg.type_ == MessageType.GROUPCHAT or str(msg.to.bare()) not in my_groups:
+        #  if gpm is False:
+          if client is not None:
+            # https://docs.zombofant.net/aioxmpp/devel/api/public/node.html?highlight=client#aioxmpp.Client.send
+            res = await client.send(msg)
+            #  if res is None:
+            #    return True
+          elif room:
+            # https://docs.zombofant.net/aioxmpp/devel/api/public/muc.html?highlight=room#aioxmpp.muc.Room.send_message
+            # res=<StanzaToken id=0x00007f2a3083eca0>
+            #  res = room.send_message(msg)
+            res = await room.send_message(msg)
+          else:
+            client = XB
+            res = await client.send(msg)
+            #  if res is None:
+            #    return True
         else:
-          client = XB
-          res = await client.send(msg)
-          #  if res is None:
-          #    return True
-      else:
-        # https://docs.zombofant.net/aioxmpp/devel/api/public/im.html#aioxmpp.im.conversation.AbstractConversation.send_message
-        if client is None:
-          client = XB
-        p2ps = client.summon(im.p2p.Service)
-        c = p2ps.get_conversation(msg.to)
-        #  stanza = c.send_message(msg)
-        res = c.send_message(msg)
+          # https://docs.zombofant.net/aioxmpp/devel/api/public/im.html#aioxmpp.im.conversation.AbstractConversation.send_message
+          if client is None:
+            client = XB
+          p2ps = client.summon(im.p2p.Service)
+          c = p2ps.get_conversation(msg.to)
+          #  stanza = c.send_message(msg)
+          #  elif type(res) is stream.StanzaToken:
+          #  res2 = await res
+          res = await c.send_message(msg)
+      except ValueError as e:
+        if e.args[0] == 'control characters are not allowed in well-formed XML':
+          #  err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", exc_info=True, stack_info=True)
+          info(f"发送xmpp消息失败，不支持特殊字符: {e=} {jid=} [msg=] {text=}")
+        else:
+          err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
+        return False
+      except Exception as e:
+        err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
+        return False
         #  return False
       #  if isawaitable(res):
       #  info(f"{type(res)}: {res} {msg}")
       if res is None:
-        info(f"res is not None: {res=} {client=} {room=} {msg=}")
-      elif asyncio.iscoroutine(res) or type(res) is stream.StanzaToken:
-        #  dbg(f"client send: {res=}")
-        try:
-          res2 = await res
-        except ValueError as e:
-          if e.args[0] == 'control characters are not allowed in well-formed XML':
-            #  err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", exc_info=True, stack_info=True)
-            info(f"发送xmpp消息失败，不支持特殊字符: {e=} {jid=} [msg=] {text=}")
-          else:
-            err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
-          return False
-        except Exception as e:
-          err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
-          return False
-        if res2 is None:
-          info(f"send xmpp msg: finally: {res=}")
-        #  elif hasattr(res, "stanza") and res.stanza and res.stanza.error is None:
-        #    # 群内私聊
-        #    info(f"send gpm msg: finally: {res=}")
-        #    return True
-          return True
-        else:
-          info(f"send xmpp msg: finally: {res=} {res2=}")
-          return False
+        info(f"send xmpp msg ok: {short(text)}")
+      #  elif asyncio.iscoroutine(res) or type(res) is stream.StanzaToken:
       else:
-        info(f"res is not coroutine: {res=} {client=} {room=} {msg=}")
+        warn(f"res is not None: {res=} {client=} {room=} {msg=}")
+      #  elif type(res) is stream.StanzaToken:
+      #    #  dbg(f"client send: {res=}")
+      #    try:
+      #      res2 = await res
+      #    if res2 is None:
+      #      info(f"send xmpp msg ok: finally: {res=}")
+      #    #  elif hasattr(res, "stanza") and res.stanza and res.stanza.error is None:
+      #    #    # 群内私聊
+      #    #    info(f"send gpm msg: finally: {res=}")
+      #    #    return True
+      #      #  return True
+      #    else:
+      #      info(f"send xmpp msg: finally: {res=} {res2=}")
+      #      return False
+      #  else:
+      #    info(f"res is not coroutine: {res=} {client=} {room=} {msg=}")
       #  return False
       if tg_msg_id is None:
         if tmp_msg is False:
