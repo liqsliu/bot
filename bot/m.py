@@ -3982,6 +3982,7 @@ async def _mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
 #      #  os.system(f"{SH_PATH}/sm4gpt.sh {fn} {gateway}")
 #      return await asyncio.to_thread(os.system, f"{SH_PATH}/sm4gpt.sh {fn} {gateway}")
 
+@cross_thread(need_main=False)
 async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, **kwargs):
   if not isinstance(text, str):
     text = "%s" % text
