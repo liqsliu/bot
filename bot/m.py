@@ -3209,7 +3209,7 @@ def send(text, jid=None, *args, **kwargs):
     if main_group in ms:
       if xmpp_only:
         #  for m in ms:
-        #    #  await send_typing(m)
+        #    #  send_typing(m)
         #    asyncio.create_task( send_typing(m) )
         #  await send1(text, jid=log_group_private, *args, **kwargs)
         asyncio.create_task( send1(text, jid=log_group_private, *args, **kwargs) )
@@ -7963,7 +7963,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       return
     #  print(f"> I: {cmds}")
     info("got cmds: {}".format(cmds))
-    await send_typing(src)
+    send_typing(src)
     cmd = cmds[0]
     res = False
     if cmd in cmd_for_admin:
@@ -8038,7 +8038,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
 
           # 加name是为了处理tg in消息时可以知道该消息是回复谁的
           #  mtmsgs[src] = [name]
-        #  await send_typing(src)
+        #  send_typing(src)
         return True
       if res:
         return res
