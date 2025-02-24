@@ -2857,9 +2857,46 @@ async def ai(prompt, provider=Provider.You, model=models.default, proxy=None):
 
 
 
+
+
+
+
+
 from gradio_client import Client as Client_hg
 
 HF_TOKEN = get_my_key('HF_TOKEN')
+
+from huggingface_hub import InferenceClient
+
+dsclient = InferenceClient(
+	provider="novita",
+	api_key=HF_TOKEN
+)
+async def hgds(text):
+  messages = [
+    {
+      "role": "user",
+      #  "content": "What is the capital of France?"
+      "content": text
+    }
+  ]
+
+#  completion = client.chat.completions.create(
+#      model="deepseek-ai/DeepSeek-R1",
+#    messages=messages,
+#    max_tokens=500,
+#  )
+  result = await asyncio.to_thread(client.chat.completions.create,
+    model="deepseek-ai/DeepSeek-R1", 
+	  messages=messages, 
+	  max_tokens=500,
+  )
+  #  print(completion.choices[0].message)
+  res = completion.choices
+  if res:
+    return "%s" % res[0].message
+  else:
+    return "E: %s" % res
 
 
 async def hg(prompt, provider=Provider.You, model=models.default, proxy=None):
@@ -7905,7 +7942,7 @@ async def init_cmd():
   add_tg_bot("Tech_GPT_Bot", "gm1")
   add_tg_bot("GPT4Telegrambot", "gm2")
   add_tg_bot("RussiaChatGPTBot", "ds1")
-  add_tg_bot("DeepSeekBot", "ds")
+  add_tg_bot("DeepSeekBot", "ds2")
   add_tg_bot("chat_gpt_robot", "gpt")
   add_tg_bot("Chat_GPT4_rubot", "gpt4")
   add_tg_bot("GPT_TechSupport", "ai2")
@@ -7947,8 +7984,15 @@ async def init_cmd():
     if len(cmds) == 1:
       return f"HuggingChat\n.{cmds[0]} $text\n\n--\nhttps://github.com/xtekky/gpt4free\n问答: hg/di/lb/kl/you/bd/ai"
     text = ' '.join(cmds[1:])
-    return await hg(text, provider=Provider.HuggingChat)
+    return await hgds(text)
   cmd_funs["hg"] = _
+  
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"HuggingChat deepseek\n.{cmds[0]} $text"
+    text = ' '.join(cmds[1:])
+    return await hg(text, provider=Provider.HuggingChat)
+  cmd_funs["ds"] = _
 
   async def _(cmds, src):
     if len(cmds) == 1:
