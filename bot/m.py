@@ -4892,8 +4892,8 @@ async def msgt(event):
     #  l[2].add(msg.id)
     gid = msg.id
     if gid - 1 in forwarded_tg_msg_ids:
-      info(f"too many msg: {gid} for {chat_id}")
-      await sleep(1)
+      info(f"too many tg msg: {gid} for {chat_id}")
+      await sleep(0.5)
     forwarded_tg_msg_ids[gid] = set()
     send(text, src, correct=correct, tg_msg_id=msg.id)
 
