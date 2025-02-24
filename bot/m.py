@@ -1338,7 +1338,7 @@ def format_byte(num):
 #              info(f"临时输出: {tmp}")
 #              #  msg = await cmd_answer(tmp, client, msg, **args)
 #              #  info(f"临时输出: {tmp}")
-#              await send(tmp, src, xmpp_only=True, correct=True)
+#              send(tmp, src, xmpp_only=True, correct=True)
 #              tmp_last = tmp
 #            except Exception as e:
 #              #  err(f"can not send tmp: {e=}")
@@ -1350,7 +1350,7 @@ def format_byte(num):
 #          res = "my_popen: timeout, killed, cmd: {}\nres: {}".format(cmd, res)
 #          warn(res)
 #          if src:
-#            await send(f"E: killed(timeout): {cmd_str}", src)
+#            send(f"E: killed(timeout): {cmd_str}", src)
 #          #  await cmd_answer(res, client, msg)
 #          #  info(f"最终输出: {res}")
 #          break
@@ -1450,7 +1450,7 @@ def format_byte(num):
 #    if myshell_lock.locked():
 #      warn(f"myshell is busy: {cmd=}")
 #      if src:
-#        await send("前一次任务还没结束", src, correct=True)
+#        send("前一次任务还没结束", src, correct=True)
 #    async with myshell_lock:
 #      #  info("send \\n...")
 #      #  p.stdin.write(b"\n")
@@ -1504,7 +1504,7 @@ def format_byte(num):
 #            ds = tmp + "\n" + d
 #            tmp = ""
 #            ds = d.strip()
-#          await send(ds, src)
+#          send(ds, src)
 #        else:
 #          tmp += d
 #        return tmp
@@ -1540,7 +1540,7 @@ def format_byte(num):
 #              tmp = await pr(d, tmp)
 #              #  d = d.decode("utf-8", errors="ignore")
 #              #  d = re.sub(shell_color_re,  "", d)
-#              #  await send(d, src)
+#              #  send(d, src)
 #              #  e += await t2
 #              t2 = f2()
 #              ts[1] = t2
@@ -1563,7 +1563,7 @@ def format_byte(num):
 #            else:
 #              info("got a line of res")
 #            if time.time() - start_time > max_time:
-#              await send("结束。", src)
+#              send("结束。", src)
 #              return
 #      finally:
 #        if not ts[0].done():
@@ -1574,7 +1574,7 @@ def format_byte(num):
 #        #  myshell_p.stdin.close()
 #        #  await myshell_p.stdin.wait_closed()
 #        #  info("close stdin ok")
-#      await send("结束", src)
+#      send("结束", src)
 
 #  async def init_myshell():
 #    return await run_run(_init_myshell(), False)
@@ -1721,7 +1721,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     if src == CHAT_ID:
       warn(f"shell is busy: {cmds=}")
     else:
-      await send("前一次任务还没结束", src, tmp_msg=True)
+      send("前一次任务还没结束", src, tmp_msg=True)
     #  o = b""
     #  e = b""
     #  t1 = asyncio.create_task(p.stdout.readline())
@@ -1784,7 +1784,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
         #  if time.time() - start_time > run_shell_time_max*10:
         if time.time() - start_time > max_time:
           res = "end"
-          await send(res, src)
+          send(res, src)
           r = 0
           break
         if k > 1:
@@ -1835,7 +1835,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           #    break
           warn(f"timeout: {cmds}")
           res = "结束"
-          await send(res, src)
+          send(res, src)
           # fixme: 不知道该设为多少
           r = 0
           break
@@ -1900,7 +1900,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           ds = ds.strip()
           if ds:
             #  info(f"send: {src} {type(ds)} {ds[:16]}")
-            await send(ds, src)
+            send(ds, src)
             last_send = time.time()
             tmp = b""
         if k > 0:
@@ -1939,7 +1939,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
       if r == 0:
         if ds.endswith("\n0"):
           ds = ds[:-2]
-      await send(ds, src)
+      send(ds, src)
   #  if r is not None:
   #    return  (r, o, e)
   return  (r, o, e)
@@ -2030,7 +2030,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     #          tmp = await pr(d, tmp)
     #          #  d = d.decode("utf-8", errors="ignore")
     #          #  d = re.sub(shell_color_re,  "", d)
-    #          #  await send(d, src)
+    #          #  send(d, src)
     #          #  e += await t2
     #          t2 = f2()
     #          ts[1] = t2
@@ -2053,7 +2053,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     #        else:
     #          info("got a line of res")
     #        if time.time() - start_time > max_time:
-    #          await send("结束。", src)
+    #          send("结束。", src)
     #          return
     #  finally:
     #    if not ts[0].done():
@@ -2064,7 +2064,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     #    #  myshell_p.stdin.close()
     #    #  await myshell_p.stdin.wait_closed()
     #    #  info("close stdin ok")
-    #  await send("结束", src)
+    #  send("结束", src)
 
 
 
@@ -2096,7 +2096,7 @@ def wrap_read(func, src, ress):
         ress[0] = now
         #  if src and ress[1].strip():
         if ress[1].strip():
-          asyncio.create_task(send( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, tmp_msg=True) )
+          send( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, tmp_msg=True)
         ress[1] = b""
       #  print(f"{len(data)}")
     return data
@@ -2142,7 +2142,7 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None):
       info(f"执行中: {p} {o=} {e=}")
     now = time.time()
     if now - ress[0] > interval:
-      await send( "执行中 %ss" % int(now-start_time), src, tmp_msg=True)
+      send( "执行中 %ss" % int(now-start_time), src, tmp_msg=True)
     if now - ress[0] < max_time and now - start_time < max_time*10:
       pass
     elif p.returncode is None:
@@ -2653,7 +2653,7 @@ async def backup(path, src=None, delete=False):
   if res:
     info(f"res: {res} {shell_cmd}")
     if src:
-      await send(url, src)
+      send(url, src)
   return url
 
 @exceptions_handler
@@ -3115,16 +3115,17 @@ def send_log(text, jid=CHAT_ID, delay=1):
     warn(f"send_log is busy: {len(k)} {short(text)}")
   else:
     info(f"send_log: {text}")
-  asyncio.create_task(send(text, jid=jid, delay=(delay+1)**k), name="send_log")
+  asyncio.create_task(send_tg(text, jid, delay=(delay+1)**k), name="send_log")
+  asyncio.create_task(send_xmpp(text, jid=jid, delay=(delay+1)**k), name="send_log")
   return True
 
 
 @exceptions_handler(no_send=True)
 def sendme(*args, to=1, **kwargs):
   if to != 2:
-    asyncio.create_task(send(*args, jid=CHAT_ID, **kwargs))
+    send(*args, jid=CHAT_ID, **kwargs)
   if to != 1:
-    asyncio.create_task(send(*args, jid=ME, **kwargs))
+    send(*args, jid=ME, **kwargs)
   #  asyncio.create_task(run_run(send_t(text)))
 
 #  async def send(text, jid=None, *args, **kwargs):
@@ -3141,12 +3142,15 @@ def sendme(*args, to=1, **kwargs):
 
 #  async def send_x(text, jid=None, *args, **kwargs):
 @exceptions_handler(no_send=True)
-async def send(text, jid=None, *args, **kwargs):
+#  async def send(text, jid=None, *args, **kwargs):
+def send(text, jid=None, *args, **kwargs):
   if jid is None:
     if isinstance(text, str):
       return False
   elif isinstance(jid, int):
-    return await send_tg(text=text, chat_id=jid, *args, **kwargs)
+    #  return await send_tg(text=text, chat_id=jid, *args, **kwargs)
+    asyncio.create_task( send_tg(text=text, chat_id=jid, *args, **kwargs) )
+    return True
   #  if  type(jid) is int:
     #  if jid == CHAT_ID:
     #    #  await send_t(text, *args, **kwargs)
@@ -3183,36 +3187,6 @@ async def send(text, jid=None, *args, **kwargs):
     #    return
     text0 = text
     text = f"{name}{text}"
-    #  if jid is None:
-    #    #  await send_t(text, *args, **kwargs)
-    #    sendme(text0, *args, **kwargs)
-    #    jid = log_group_private
-
-  #  if 'correct' in kwargs:
-  #    correct = kwargs["correct"]
-  #  else:
-  #    correct = False
-
-  #  if jid is None:
-  #    if isinstance(text, aioxmpp.Message):
-  #      #  warn(f"fixme: 该消息为xmpp专用，不能发往telegram, {text}")
-  #    #  for i in msg.body:
-  #    #    text = msg.body[i]
-  #    #    if text:
-  #    #      break
-  #      text_any = text.body.any()
-  #      await send_t(text_any, *args, **kwargs)
-  #      if text.type_ == MessageType.GROUPCHAT:
-  #        muc = str(text.to.bare())
-  #      else:
-  #        pass
-  #    else:
-  #      await send_t(text, *args, **kwargs)
-  #      #  err(f"需要jid")
-  #      #  return False
-  #      jid = log_group_private
-  #  #  elif jid == "gateway1":
-  #  #    jid = main_group
 
   if name:
     kwargs["name"] = name[2:-4]
@@ -3234,16 +3208,15 @@ async def send(text, jid=None, *args, **kwargs):
     #  info(f"准备发送同步消息到: {ms} {text=}")
     if main_group in ms:
       if xmpp_only:
-        for m in ms:
-          #  await send_typing(m)
-          asyncio.create_task( send_typing(m) )
+        #  for m in ms:
+        #    #  await send_typing(m)
+        #    asyncio.create_task( send_typing(m) )
         #  await send1(text, jid=log_group_private, *args, **kwargs)
         asyncio.create_task( send1(text, jid=log_group_private, *args, **kwargs) )
         return True
         ms = set()
       else:
         asyncio.create_task( mt_send_for_long_text(text0, name=nick) )
-
     for m in ms:
       #  if await send1(text, jid=m, *args, **kwargs):
       #    if isinstance(text, aioxmpp.Message):
@@ -3252,27 +3225,6 @@ async def send(text, jid=None, *args, **kwargs):
       if isinstance(text, aioxmpp.Message):
         #  text = text.body[None]
         text = text.body.any()
-
-    #  if main_group in ms and xmpp_only:
-    #    for m in ms:
-    #      await send_typing(m)
-    #  else:
-    #    for m in ms:
-    #      if await send1(text, jid=m, *args, **kwargs):
-    #        if isinstance(text, aioxmpp.Message):
-    #          text = text.body[None]
-    #          #  #  text.body[None] = text0
-    #          #  body = text.body
-    #          #  text = aioxmpp.Message(
-    #          #      to=JID.fromstr(text.to),  # recipient_jid must be an aioxmpp.JID
-    #          #      type_=text.type_,
-    #          #  )
-    #          #  text.body = body
-    #        continue
-    #      return False
-    #  if xmpp_only is False:
-    #    if main_group in ms:
-    #      await mt_send_for_long_text(text0, name=nick)
     return True
   else:
     #  info(f"准备发送到: {muc=} {jid=}")
@@ -3413,8 +3365,9 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
     for t in ts:
       await sleep(msg_delay_default)
       try:
-        # chat_id 此处可以不考虑符号
-        peer = await UB.get_input_entity(chat_id)
+        #  if type(chat_id) is int and chat_id > 0:
+        #    # chat_id 此处可以不考虑符号
+        #    peer = await UB.get_input_entity(chat_id)
         #  if omsg is not None and ( correct is True or chat_id in tmp_msg_chats ):
         #      msg = await omsg.edit(t)
         if chat_id in last_outmsg:
@@ -4058,7 +4011,6 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
     if need_delete:
       #  os.remove(fn)
       run_cb_in_thread(os.remove, fn)
-
   return True
 
 
@@ -4104,7 +4056,7 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
       fp = path
     cb = None
     length = os.path.getsize(path)
-    await send("准备上传: {} {}".format(hbyte(length), fp.name), src, tmp_msg=True)
+    send("准备上传: {} {}".format(hbyte(length), fp.name), src, tmp_msg=True)
     if length > 100000:
       last_time = [time.time(), 0]
       start_time = time.time()
@@ -4116,12 +4068,12 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
         #  else:
           #  total = last_time[2]
         if sent == length:
-          asyncio.create_task(send("上传完成，用时: {}s".format(int(time.time()-start_time)), src, tmp_msg=True))
+          send("上传完成，用时: {}s".format(int(time.time()-start_time)), src, tmp_msg=True)
         else:
           now = time.time()
           if now - last_time[0] > interval:
             last_time[0] = now
-            asyncio.create_task(send("{}".format(hbyte(length-sent)), src, tmp_msg=True))
+            send("{}".format(hbyte(length-sent)), src, tmp_msg=True)
             info("剩余 {}".format(hbyte(length-sent)))
       #  async def update_tmp_msg():
       #    while True:
@@ -4200,7 +4152,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
       res += f"{hbyte(size)}"
     if msg.file.name:
       res += f" {msg.file.name}"
-    await send("准备下载: {}".format(res), src, tmp_msg=True)
+    send("准备下载: {}".format(res), src, tmp_msg=True)
     timeout = get_timeout(size)
     if max_wait_time > timeout:
       timeout = max_wait_time
@@ -4240,11 +4192,11 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
       current = last_time[1]
       total = last_time[2]
       if current == total:
-        await send("下载完成：{} 用时: {}s".format(res), src, int(time.time()-start_time), tmp_msg=True)
+        send("下载完成：{} 用时: {}s".format(res), src, int(time.time()-start_time), tmp_msg=True)
         break
       #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
       #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
-      await send(hbyte(total-current), src, tmp_msg=True)
+      send(hbyte(total-current), src, tmp_msg=True)
       last_time[0] = time.time()
         #  last_current = current
 
@@ -4260,7 +4212,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   try:
     if src:
       while src in tg_download_tasks:
-        await send("下载任务排队中 {}".format(res), src, tmp_msg=True)
+        send("下载任务排队中 {}".format(res), src, tmp_msg=True)
         await sleep(interval)
       tg_download_tasks.add(src)
       t = asyncio.create_task(update_tmp_msg())
@@ -4323,8 +4275,8 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     else:
       url = None
     if res:
-      #  await send(f"{res}\n{path}", src)
-      #  await send(f"{res}", src)
+      #  send(f"{res}\n{path}", src)
+      #  send(f"{res}", src)
       info(f"xmpp server is ok: {res}")
 
       #  asyncio.create_task(backup(path, src))
@@ -4339,7 +4291,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   else:
     #  res = f"{res} 下载失败: {path}"
     if src:
-      await send(res, src)
+      send(res, src)
     warn(res)
 
 def get_buttons(bs):
@@ -4612,7 +4564,7 @@ async def print_tg_msg(event, to_xmpp=False):
     #    else:
     #      res = "file: %s" % path
         #  text = f"file: {path}"
-        #  await send(text, jid=jid)
+        #  send(text, jid=jid)
         #  return
 
     #  res += " %s" % msg.file
@@ -4623,8 +4575,8 @@ async def print_tg_msg(event, to_xmpp=False):
       #  if res2:
       #    res2 += "\n%s" % msg.file.name
   #  if res2:
-  #    #  await send(res2, jid=log_group, name="", nick=nick, delay=1)
-  #    await send(res2, name="", nick=nick, delay=1)
+  #    #  send(res2, jid=log_group, name="", nick=nick, delay=1)
+  #    send(res2, name="", nick=nick, delay=1)
   #  if not event.is_private:
   #  print(f"{res1}: {short(res)}")
   if print_msg:
@@ -4744,27 +4696,30 @@ async def msgtp(event):
   #    src = bridges[chat_id]
   #  else:
   #    return
-  bot_name = await get_name(chat_id)
+  send_typing(src)
+  res = await get_name(chat_id)
   if event.photo:
-    await send(f"{bot_name} 正在发送图片", src, tmp_msg=True)
+    #  await send(f"{bot_name} 正在发送图片", src, tmp_msg=True)
+    res += " 正在发送图片"
   elif event.audio:
-    await send(f"{bot_name} 正在发送音频文件", src, tmp_msg=True)
+    res += " 正在发送音频文件"
   elif event.round:
-    await send(f"{bot_name} 正在发送视频文件", src, tmp_msg=True)
+    res += " 正在发送视频文件"
   elif event.sticker:
-    await send(f"{bot_name} 正在发送表情贴纸", src, tmp_msg=True)
+    res += " 正在发送表情贴纸"
   elif event.geo:
-    await send(f"{bot_name} 正在发送位置", src, tmp_msg=True)
+    res += " 正在发送位置"
   elif event.document:
-    await send(f"{bot_name} 正在发送文档", src, tmp_msg=True)
+    res += " 正在发送文档"
   elif event.uploading:
-    await send(f"{bot_name} 正在上传文件", src, tmp_msg=True)
+    res += " 正在上传文件"
   elif event.typing:
-    await send(f"{bot_name} 正在输入", src, tmp_msg=True)
+    res += " 正在输入"
   elif event.cancel:
-    await send(f"{bot_name} 正在取消操作", src, tmp_msg=True)
+    res += " 正在取消操作"
   else:
-    await send(f"{bot_name} ...", src, tmp_msg=True)
+    res += "  ..."
+  send(res, src, tmp_msg=True)
 
 bot_names = {}
 bot_cmds = {}
@@ -4897,13 +4852,13 @@ async def msgt(event):
     else:
       info(f"None {parse_message_deleted_task=}")
     l[2].add(msg.id)
-    await send(text, src, correct=correct)
+    send(text, src, correct=correct)
 
   else:
     res, nick, delay = await print_tg_msg(event)
     if res:
       info(f"sync: {chat_id} -> {bridges[chat_id]}: {short(res)}")
-      await send(res, src, name=f"**{nick}:** ", nick=nick, delay=delay)
+      send(res, src, name=f"**{nick}:** ", nick=nick, delay=delay)
     else:
       info(f"忽略空白信息: {msg.text} {res=} {nick=}")
 
@@ -4935,11 +4890,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     opts = 0
 
   if opts == 9:
-    await send(tmsg.stringify(), chat_id)
+    send(tmsg.stringify(), chat_id)
   elif tmsg.file:
     file = tmsg.file
     file_size = file.size
-    await send(f"file: {type(file)} {file.name} {file.size}", chat_id)
+    send(f"file: {type(file)} {file.name} {file.size}", chat_id)
     res = None
     #  if tmsg.text:
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
@@ -5012,7 +4967,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     path = await tg_download_media(tmsg, src=chat_id, max_wait_time=get_timeout(file_size))
     if path:
       if path.endswith(".tgs"):
-        await send(f"found tgs file: {path}", src, tmp_msg=True)
+        send(f"found tgs file: {path}", src, tmp_msg=True)
         fp = Path(path)
         filename = fp.name
         length = os.path.getsize(fp)
@@ -5038,13 +4993,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             err(f"上传失败 {e=}")
         else:
           if url:
-            await send(url, chat_id)
+            send(url, chat_id)
 
 
         #  res = None
         xmpp_url = None
         if res is None and opts == 4:
-          await send("上传到xmpp...", src, tmp_msg=True)
+          send("上传到xmpp...", src, tmp_msg=True)
           try:
             xmpp_url = await upload(path)
             info(xmpp_url)
@@ -5058,13 +5013,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             if opts == 3:
               return
           except rpcerrorlist.WebpageCurlFailedError as e:
-            await send(xmpp_url, chat_id)
+            send(xmpp_url, chat_id)
             err(f"文件url有问题: {e=} {url}")
           except rpcerrorlist.WebpageMediaEmptyError as e:
-            await send(xmpp_url, chat_id)
+            send(xmpp_url, chat_id)
             err(f"文件url有问题: {e=} {url}")
           except Exception as e:
-            await send(xmpp_url, chat_id)
+            send(xmpp_url, chat_id)
             err(f"{e=} {url}")
 
         try:
@@ -5103,7 +5058,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
   elif tmsg.text:
     res = await UB.send_message(chat_id, tmsg.text)
   else:
-    await send(tmsg.stringify(), chat_id)
+    send(tmsg.stringify(), chat_id)
 
 
 delete_next_msg = False
@@ -5113,7 +5068,7 @@ async def msgtout(event):
   msg = event.message
   if delete_next_msg is True:
     res = await msg.delete()
-    await send("deleted", CHAT_ID)
+    send("deleted", CHAT_ID)
     return
   #  info(event.stringify())
   chat_id = event.chat_id
@@ -5212,7 +5167,7 @@ async def msgtout(event):
         return
       if res:
         #  await UB.send_message(CHAT_ID, res)
-        await send(res, chat_id)
+        send(res, chat_id)
         return
 
     if text == 'id':
@@ -5243,12 +5198,12 @@ async def msgtout(event):
       url = cmds[1]
       if url:
         if url == "h":
-          await send("msg url raw/fast/xmpp/direct/vps", chat_id)
+          send("msg url raw/fast/xmpp/direct/vps", chat_id)
           return
         opts = 0
         peer = await get_entity(url)
         if peer:
-          #  await send(peer.stringify(), chat_id)
+          #  send(peer.stringify(), chat_id)
           ss = url.split('/')
           if len(ss) > 4:
             ids = int(ss[-1])
@@ -5259,12 +5214,12 @@ async def msgtout(event):
                 opts = cmds[2]
               await save_tg_msg(tmsg, chat_id, opts, url)
             else:
-              await send(f"error id: {ids}\nres: {msg}", chat_id)
+              send(f"error id: {ids}\nres: {msg}", chat_id)
           return
         else:
-          await send(f"error url: {url}\nres: {peer}", chat_id)
+          send(f"error url: {url}\nres: {peer}", chat_id)
           return
-      await send("error", chat_id)
+      send("error", chat_id)
 
 
 
@@ -5586,7 +5541,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
   headers["Content-Length"] = str(length)
   #  if src:
   info("开启进度刷新消息")
-  await send("开始上传: {} {}".format(hbyte(length), filename), src, tmp_msg=True)
+  send("开始上传: {} {}".format(hbyte(length), filename), src, tmp_msg=True)
 
     #  async def coro(slot, fp, timeout, headers):
   #  async def coro():
@@ -5619,7 +5574,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
     #      i = 0
     #      info("剩余 {fp.name} {:.1f}M".format((length-now)/1024/1024))
     #      if src:
-    #        await send("{:.1f}M".format((length-now)/1024/1024), src)
+    #        send("{:.1f}M".format((length-now)/1024/1024), src)
     #      if time.time() - start_time > download_media_time_max:
     #        if src:
     #          await send("超时", src, correct=True)
@@ -5635,7 +5590,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         ress[0] = now
         info("剩余: {}".format(hbyte(length-ress[1])))
         #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
-        asyncio.create_task( send(hbyte(length-ress[1]), src, tmp_msg=True) )
+        send(hbyte(length-ress[1]), src, tmp_msg=True)
       #  print(f"{len(data)}")
       return data
     return wrapper
@@ -5657,7 +5612,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       #  await sleep(5)
       res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
       info(f"res: {res}\nslot: {slot}")
-      await send("上传完成", src, tmp_msg=True)
+      send("上传完成", src, tmp_msg=True)
       #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
       #  coro = send("测试进程间通信 res: {}".format(res))
       #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
@@ -5790,24 +5745,29 @@ async def regisger_handler(client):
 
 
 @exceptions_handler(no_send=True)
-async def send_typing(muc):
-  if muc == "gateway1":
-    return True
-  if muc in my_groups:
+def send_typing(muc):
+  ms = get_mucs(muc)
+  if ms:
+  #  if muc == "gateway1":
+  #    return True
+  #  if muc in my_groups:
     type_=MessageType.GROUPCHAT
   elif type(muc) is int:
     # telegram
     return
   else:
     type_=MessageType.CHAT
+    ms = [muc]
 
-  msg = aioxmpp.Message(
-      to=JID.fromstr(muc),
-      type_=type_,
-  )
-  msg.xep0085_chatstate = chatstates.ChatState.COMPOSING
-  #  info(f"{msg.body=}") # ={}
-  await send_xmpp(msg)
+  for muc in ms:
+    msg = aioxmpp.Message(
+        to=JID.fromstr(muc),
+        type_=type_,
+    )
+    msg.xep0085_chatstate = chatstates.ChatState.COMPOSING
+    #  info(f"{msg.body=}") # ={}
+    #  await send_xmpp(msg)
+    asyncio.create_task( send_xmpp(msg) )
 
 
 last_outmsg = {}
@@ -6123,10 +6083,10 @@ async def msgxp(msg):
                 if item.role == "participant":
                   #  res = f"改名通知: {hide_nick(j[0])} -> {hide_nick(msg)}"
                   res = f"改名通知: {hide_nick(j[0])} -> {hide_nick(rnick)}"
-                  await send(res, muc, nick=nick)
+                  send(res, muc, nick=nick)
                 res = f"改名通知: {j[0]} -> {rnick}"
                 j[0] = rnick
-                await send(f"{res}\njid: {jid}\nmuc: {muc}", nick=nick)
+                send(f"{res}\njid: {jid}\nmuc: {muc}", nick=nick)
               j[1] = item.affiliation
               #  j[3] = time.time()
           else:
@@ -6160,10 +6120,10 @@ async def msgxp(msg):
                 welcome = f"欢迎 {hide_nick(msg)} ,该群新人默认不能发言。\n如果没有发言权，建议使用gajim或cheogram客户端申请。conversations不支持xmpp原生的申请方式。也可以群内私信bot：“申请发言权”，然后等管理批准。也可以改群内名字，添加“申请发言权”。\n建议经常在该群保持在线，管理看到就会给成员身份和发言权。\n该消息来自机器人(bot)，可不予理会。"
               else:
                 welcome = f"欢迎 {hide_nick(msg)} ,如需查看群介绍，请发送 “.help”。该消息来自机器人(bot)，可不予理会。"
-              await send(welcome, muc, nick=nick)
+              send(welcome, muc, nick=nick)
 
             #  await send(f"有新人入群: {j[0]}\n身份: {j[1]}\n角色: {j[2]}\njid: {jid}\nmuc: {muc}", nick=nick)
-            await send(f"有新人入群: {j[0]}\n身份: {j[1]}\n角色: {item.role}\njid: {jid}\nmuc: {muc}", nick=nick)
+            send(f"有新人入群: {j[0]}\n身份: {j[1]}\n角色: {item.role}\njid: {jid}\nmuc: {muc}", nick=nick)
 
           set_default_value(j)
           #  if len(jids[jid]) > 3:
@@ -6173,12 +6133,12 @@ async def msgxp(msg):
           break
       else:
         pprint(msg)
-        await send(f"未知群组消息: {msg}")
+        send(f"未知群组消息: {msg}")
     else:
       #  print(f"上线: {msg.from_} {msg.status}")
       info(f"上线: {msg.from_} {msg.status}")
       #  if muc != rssbot:
-      #    await send(f"上线: {msg.from_} {msg.status}")
+      #    send(f"上线: {msg.from_} {msg.status}")
     #  for i in msg.xep0045_muc_user.items:
     #    pprint(i)
   elif msg.type_ == PresenceType.SUBSCRIBE:
@@ -6191,12 +6151,12 @@ async def msgxp(msg):
       res = rc.approve(msg.from_)
       #  print(f"结果：{res}")
       #  print(f"结果：{res}")
-      await send("ok", msg.from_)
+      send("ok", msg.from_)
       warn(f"已同意状态订阅请求：{msg.from_} {res}")
       res = rc.subscribe(msg.from_)
     else:
       # https://docs.zombofant.net/aioxmpp/devel/api/public/roster.html#aioxmpp.RosterClient.remove_entry
-      await send(f"非管理禁止订阅，但可以私聊。暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
+      send(f"非管理禁止订阅，但可以私聊。暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
       try:
         res = await rc.remove_entry(msg.from_, timeout=5)
       except errors.XMPPModifyError as e:
@@ -6326,7 +6286,7 @@ async def msgx(msg):
   #    return
 
   #  if text == "ping":
-  #    #  await send("pong", ME)
+  #    #  send("pong", ME)
   #    if msg.type_ == MessageType.GROUPCHAT:
   #
   #      nick = msg.from_.resource
@@ -6469,20 +6429,20 @@ async def msgx(msg):
         w[0] = score + long*wtf_time/last
         w[1] += 1
         #  if is_admin:
-        #    await send(f"now: {w[0]} / {wtf_limit}", jid=muc)
+        #    send(f"now: {w[0]} / {wtf_limit}", jid=muc)
         if w[1] > 1 and w[0] > wtf_limit/(9/(w[1]+8) +0.1):
           j[2] = int(time.time() + wtf_ban_time)
           role = "visitor"
           reason = "不要刷屏"
           res = await room.muc_set_role(nick, role, reason=reason)
           warn(f"有人刷屏: {nick}\njid: {jid}\nmuc: {muc}\nnow: {w[0]}/{wtf_limit}/{w[1]}\n{res}")
-          await send(f"检测到刷屏，禁言{wtf_ban_time}s: {nick} {w[0]}/{wtf_limit}", jid=muc)
+          send(f"检测到刷屏，禁言{wtf_ban_time}s: {nick} {w[0]}/{wtf_limit}", jid=muc)
         elif need_warn:
           if w[1] == 1 and w[0] > wtf_limit/2:
-            await send(f"{nick}, 不要刷屏 {w[0]}/{wtf_limit}", jid=muc)
+            send(f"{nick}, 不要刷屏 {w[0]}/{wtf_limit}", jid=muc)
             w[0] = wtf_limit/2
           elif w[0] > wtf_limit/2:
-            await send(f"{nick}, 不要刷屏（第一次警告） {w[0]}/{wtf_limit}", jid=muc)
+            send(f"{nick}, 不要刷屏（第一次警告） {w[0]}/{wtf_limit}", jid=muc)
         
 
   elif muc == myjid:
@@ -6494,19 +6454,19 @@ async def msgx(msg):
     nick = msg.from_.localpart
   elif muc == rssbot:
     #  if msg.type_ == None:
-    await send(text, acg_group, name="", delay=5)
+    send(text, acg_group, name="", delay=5)
     return
   else:
     info("未知来源的消息%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
     if text == "ping":
       reply = msg.make_reply()
       reply.body[None] = "pong"
-      await send(reply)
+      send(reply)
       return
     if msg.type_ == MessageType.ERROR:
       send_log("未知来源的消息(wtf) %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), f"{msg.from_=}", msg.to, msg.body))
       return
-    await send(f"暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
+    send(f"暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
     #  chat = await get_entity(CHAT_ID, True)
     #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
     send_log(f"{msg.type_} {msg.from_}: {text}")
@@ -6526,9 +6486,9 @@ async def msgx(msg):
   if msg.type_ == MessageType.GROUPCHAT:
     if muc == acg_group:
       if is_admin:
-        await send(text, rssbot, name="")
+        send(text, rssbot, name="")
       else:
-        await send("仅管理可用", src)
+        send("仅管理可用", src)
       return
 
     #  if nick == "bot":
@@ -6605,7 +6565,7 @@ async def msgx(msg):
     if text == "ping":
       reply = msg.make_reply()
       reply.body[None] = "pong"
-      await send(reply)
+      send(reply)
       return
     if is_admin is False:
       info("群内私聊: %s" % msg)
@@ -6629,7 +6589,7 @@ async def msgx(msg):
   if text == "ping":
     reply = msg.make_reply()
     reply.body[None] = "pong"
-    await send(reply)
+    send(reply)
     return
 
   res = await run_cmd(text, get_src(msg), f"X {nick}: ", is_admin, text0)
@@ -6638,7 +6598,7 @@ async def msgx(msg):
   if res:
     reply = msg.make_reply()
     reply.body[None] = res
-    await send(reply)
+    send(reply)
     return
 
   return
@@ -6649,13 +6609,13 @@ async def msgx(msg):
     logger.setLevel(logging.DEBUG)
     reply = msg.make_reply()
     reply.body[None] = "ok"
-    await send(reply)
+    send(reply)
   elif text == "ok":
     info(f"got a msg: ok")
   elif text == "correct":
     reply = msg.make_reply()
     reply.body[None] = generand(3)
-    await send(reply, correct=True)
+    send(reply, correct=True)
   #  elif text == "correct":
   #    pprint(msg.xep308_replace)
 
@@ -7616,7 +7576,7 @@ async def init_cmd():
       if peer:
         res += "\npeer id: %s" % await UB.get_peer_id(peer)
         res += "\n%s: %s\n--\n%s" % (type(peer), peer.stringify(), peer)
-    await send(f"{res}", src)
+    send(f"{res}", src)
   cmd_funs["br"] = _
   cmd_for_admin.add('br')
 
@@ -7627,16 +7587,16 @@ async def init_cmd():
     #  pprint(rc)
     res = rc.subscribe(JID.fromstr(cmds[1]))
     #  print(f"结果：{res}")
-    await send(f"结果：{res}", src)
+    send(f"结果：{res}", src)
     await sleep(1)
     res = rc.approve(JID.fromstr(cmds[1]))
     #  print(f"结果：{res}")
-    await send(f"结果：{res}", src)
+    send(f"结果：{res}", src)
   cmd_funs["connect"] = _
   cmd_for_admin.add('connect')
 
   async def _(cmds, src):
-    await send(f"结果：{res}", src)
+    send(f"结果：{res}", src)
     global print_msg
     print_msg = not print_msg
     if printmsg:
@@ -7703,13 +7663,13 @@ async def init_cmd():
       o.append("%s\t%s\t%s" % (i.name, i.node, i.jid))
     if len(cmds) == 3:
       if cmds[2] == "full":
-        await send("\n".join(o), src)
+        send("\n".join(o), src)
         for i in res.items:
           o = f"{str(i.jid)}"
           await sleep(1)
           res2 = await disco_info(i.jid)
           o += f"\n{res2.to_dict()}"
-          await send(o, src)
+          send(o, src)
         return
     return "\n".join(o)
   cmd_funs["xmpps"] = _
@@ -7833,7 +7793,7 @@ async def init_cmd():
                   chat_id = await UB.get_peer_id(peer)
                   msg = await tg_upload_media(path, chat_id=chat_id)
                   if msg:
-                    await send("已发送", src=src, tmp_msg=True)
+                    send("已发送", src=src, tmp_msg=True)
                     if len(cmds) > 2:
                       r =await msg.reply(' '.join(cmds[1:-1]))
                     await t
@@ -8052,10 +8012,10 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
                 #  if mtmsgs:
                 #    await sleep(3)
                 info(f"stop link to {osrc}")
-                await send("bye", osrc, tmp_msg=True)
+                send("bye", osrc, tmp_msg=True)
                 bridges[pid] = src
                 info(f"link to {src}")
-                await send("typing", src, tmp_msg=True)
+                send("typing", src, tmp_msg=True)
 
                 if osrc in mtmsgsg:
                   #  mtmsgsg.pop(osrc)
@@ -8086,7 +8046,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         return True
       #  reply = msg.make_reply()
       #  reply.body[None] = "%s" % res
-      #  await send(reply)
+      #  send(reply)
       #  return True
     else:
       #  res = await send_cmd_to_bash(src, name, text)
@@ -8127,7 +8087,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
     for i in get_buttons(v[1]):
       k += 1
       if k == s:
-        await send(f"命中：{text} {i.text}", src, tmp_msg=True)
+        send(f"命中：{text} {i.text}", src, tmp_msg=True)
         info(f"已找到：{text} {i.text}")
         mtmsgs[pid] = [name]
         k = None
@@ -8155,7 +8115,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         if len(v) > 1:
           bs = v[1]
           text += print_buttons(bs)
-      await send(f"没找到，请重新发送指令{text}", src)
+      send(f"没找到，请重新发送指令{text}", src)
     return
 
   elif text.isnumeric():
@@ -8203,14 +8163,14 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           music_bot_state[src] += 1
           await i.click()
           i = True
-          await send(f"命中：{text}", src, tmp_msg=True)
+          send(f"命中：{text}", src, tmp_msg=True)
           break
 
     if i is True:
       pass
     else:
       info(f"没找到：{text}")
-      await send(f"没找到：{text}", src)
+      send(f"没找到：{text}", src)
     return
   else:
     # tilebot
@@ -8532,7 +8492,7 @@ def on_muc_role_request(form, submission_future):
   print(form)
   print(submission_future)
 
-  #  await send(f"发言申请: {form}")
+  #  send(f"发言申请: {form}")
   if submission_future.done():
     send_log(f"skip: 发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
     return
@@ -9012,9 +8972,9 @@ async def amain():
       info(f"测试通过副线程发信息")
       #  fu = t
       #  res = await t
-      t = loop2.create_task(send("通过副线程发信息成功(loop2)", jid=CHAT_ID)) # 测试结果: 必须放在下面这行代码上面，不然就无法执行task
+      t = loop2.create_task(send_tg("通过副线程发信息成功(loop2)", CHAT_ID)) # 测试结果: 必须放在下面这行代码上面，不然就无法执行task
 
-      fu = asyncio.run_coroutine_threadsafe(send("通过副线程发信息成功", jid=CHAT_ID), loop2)
+      fu = asyncio.run_coroutine_threadsafe(send_tg("通过副线程发信息成功", CHAT_ID), loop2)
       while not fu.done():
         info(f"通过副线程发信息: not done, loop is_running: {loop2.is_running()}")
         await sleep(1)
@@ -9063,7 +9023,7 @@ async def amain():
 
       info(f"初始化完成")
       sendme(f"启动成功，用时: {int(time.time()-start_time)}s", to=0)
-      #  await send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
+      #  send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
 
       try:
         #  while True:
