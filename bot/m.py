@@ -3216,7 +3216,8 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
     msg.autoset_id()
     if jid not in last_outmsg:
       correct = False
-      tmp_msg_chats.remove(jid)
+      if jid in tmp_msg_chats:
+        tmp_msg_chats.remove(jid)
 
     for msg in msgs:
       await sleep(msg_delay_default)
