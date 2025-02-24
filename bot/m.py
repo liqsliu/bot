@@ -6971,10 +6971,12 @@ async def init_cmd():
         cmds.add(k1)
 
     res = '可用的命令:\n'
-    res += '\n'.join(cmds)
+    #  res += '\n'.join(cmds)
+    res += '\n'.join(sorted(cmds))
     if cmds_admin:
       res += '\n\n仅管理可用的命令:\n'
-      res += '\n'.join(cmds_admin)
+      #  res += '\n'.join(cmds_admin)
+    res += '\n'.join(sorted(cmds_admin))
     return res
   cmd_funs["cmd"] = _
 
