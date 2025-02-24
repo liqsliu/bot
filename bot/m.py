@@ -4830,8 +4830,8 @@ async def msgt(event):
               #  if text:
               #    text += f"\n\nfile: {url}"
               #  else:
-              file_info +== "\n"
-              file_info +== url
+              file_info += "\n"
+              file_info += url
                 #  await send(text, jid=jid)
                 #  return
             finally:
