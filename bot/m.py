@@ -8034,7 +8034,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
                 send("bye", osrc, tmp_msg=True)
                 bridges[pid] = src
                 info(f"link to {src}")
-                send("typing", src, tmp_msg=True)
+                #  send("typing", src, tmp_msg=True)
 
                 if osrc in mtmsgsg:
                   #  mtmsgsg.pop(osrc)
