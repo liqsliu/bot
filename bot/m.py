@@ -4652,12 +4652,13 @@ async def msgtd(event):
   if chat_id is None:
     warn(f"chat_id is None")
   elif chat_id not in bridges:
-    info(f"chat_id is not in bridges: {chat_id}")
+    #  info(f"chat_id is not in bridges: {chat_id}")
     return
   deleted_tg_msg_ids.update(event.deleted_ids)
   #  src = bridges[chat_id]
     #  if src not in tmp_msg_chats:
   #  if chat_id is None:
+  info(f"delete msg: {chat_id} {event.deleted_id} {event.deleted_ids}")
   for i in event.deleted_ids:
     if i in forwarded_tg_msg_ids:
       for src in forwarded_tg_msg_ids[i]:
@@ -4665,7 +4666,6 @@ async def msgtd(event):
         info(f"add {src} in tmp_msg_chats")
     else:
       warn(f"not found {i} in {forwarded_tg_msg_ids}")
-  info(f"delete msg: {chat_id} {event.deleted_id} {event.deleted_ids}")
 
       #  #  for src in mtmsgsg:
       #  for chat_id in bridges.copy():
