@@ -3099,7 +3099,9 @@ def clean_forwarded_tg_msg_ids(jid):
     s = forwarded_tg_msg_ids[i]
     if jid in s:
       s.remove(jid)
+      info(f"delete forward log for {jid}: {i}")
       if len(s) == 0:
+        info(f"delete empty log: {i}")
         d.add(i)
   for i in d:
     forwarded_tg_msg_ids.pop(i)
@@ -4882,6 +4884,9 @@ async def msgt(event):
     #    info(f"None {parse_message_deleted_task=}")
     #  l[2].add(msg.id)
     gid = msg.id
+    if gid - 1 in forwarded_tg_msg_ids:
+      info(f"too many msg: {gid} for {chat_id}")
+      await sleep(1)
     forwarded_tg_msg_ids[gid] = set()
     send(text, src, correct=correct, tg_msg_id=msg.id)
 
