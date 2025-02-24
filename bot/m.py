@@ -2797,170 +2797,170 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
 #    return True
 
 
-#  global G1PSID
-#  BING_U = get_my_key("BING_U")
-G1PSID = get_my_key('BARD_COOKIE_KEY')
-
-from g4f.cookies import set_cookies
-
-#  set_cookies(".bing.com", {
-#    "_U": "%s" % BING_U
+#  #  global G1PSID
+#  #  BING_U = get_my_key("BING_U")
+#  G1PSID = get_my_key('BARD_COOKIE_KEY')
+#
+#  from g4f.cookies import set_cookies
+#
+#  #  set_cookies(".bing.com", {
+#  #    "_U": "%s" % BING_U
+#  #  })
+#  set_cookies(".google.com", {
+#    "__Secure-1PSID": G1PSID
 #  })
-set_cookies(".google.com", {
-  "__Secure-1PSID": G1PSID
-})
-
-
-from g4f import models, Provider
-from g4f.client import Client as Client_g4f
-
-#  def ai_img(prompt, model="gemini", proxy=None):
-async def ai_img(prompt, model="gemini"):
-  try:
-    global g4fclient
-    if "g4fclient" not in globals():
-      g4fclient = Client_g4f()
-    #  response = client.images.generate(
-      #  response = await client.images.generate(
-    response = await asyncio.to_thread(g4fclient.images.generate,
-      model=model,
-      #  prompt="a white siamese cat",
-      prompt=prompt,
-    )
-  except Exception as e:
-    image_url = f"{e=}"
-  else:
-    image_url = response.data[0].url
-  #  print(image_url)
-  return image_url
-
-async def ai(prompt, provider=Provider.You, model=models.default, proxy=None):
-  try:
-    global g4fclient
-    if "g4fclient" not in globals():
-      g4fclient = Client_g4f()
-    #  response = client.chat.completions.create(
-      #  response = await client.chat.completions.create(
-      #  s = await asyncio.to_thread(run_ocr, img=res)
-    response = await asyncio.to_thread(g4fclient.chat.completions.create,
-      model=model,
-      messages=[{"role": "user", "content": prompt}],
-      provider=provider,
-      proxy=proxy,
-    )
-  except Exception as e:
-    image_url = f"{e=}"
-  else:
-    image_url  = response.choices[0].message.content
-  #  print(image_url)
-  return image_url
-
-
-
-
-
-
-
-
-from gradio_client import Client as Client_hg
-
-HF_TOKEN = get_my_key('HF_TOKEN')
-
-from huggingface_hub import InferenceClient
-
-dsclient = InferenceClient(
-	provider="novita",
-	api_key=HF_TOKEN
-)
-async def hgds(text):
-  messages = [
-    {
-      "role": "user",
-      #  "content": "What is the capital of France?"
-      "content": text
-    }
-  ]
-
-#  completion = client.chat.completions.create(
-#      model="deepseek-ai/DeepSeek-R1",
-#    messages=messages,
-#    max_tokens=500,
+#
+#
+#  from g4f import models, Provider
+#  from g4f.client import Client as Client_g4f
+#
+#  #  def ai_img(prompt, model="gemini", proxy=None):
+#  async def ai_img(prompt, model="gemini"):
+#    try:
+#      global g4fclient
+#      if "g4fclient" not in globals():
+#        g4fclient = Client_g4f()
+#      #  response = client.images.generate(
+#        #  response = await client.images.generate(
+#      response = await asyncio.to_thread(g4fclient.images.generate,
+#        model=model,
+#        #  prompt="a white siamese cat",
+#        prompt=prompt,
+#      )
+#    except Exception as e:
+#      image_url = f"{e=}"
+#    else:
+#      image_url = response.data[0].url
+#    #  print(image_url)
+#    return image_url
+#
+#  async def ai(prompt, provider=Provider.You, model=models.default, proxy=None):
+#    try:
+#      global g4fclient
+#      if "g4fclient" not in globals():
+#        g4fclient = Client_g4f()
+#      #  response = client.chat.completions.create(
+#        #  response = await client.chat.completions.create(
+#        #  s = await asyncio.to_thread(run_ocr, img=res)
+#      response = await asyncio.to_thread(g4fclient.chat.completions.create,
+#        model=model,
+#        messages=[{"role": "user", "content": prompt}],
+#        provider=provider,
+#        proxy=proxy,
+#      )
+#    except Exception as e:
+#      image_url = f"{e=}"
+#    else:
+#      image_url  = response.choices[0].message.content
+#    #  print(image_url)
+#    return image_url
+#
+#
+#
+#
+#
+#
+#
+#
+#  from gradio_client import Client as Client_hg
+#
+#  HF_TOKEN = get_my_key('HF_TOKEN')
+#
+#  from huggingface_hub import InferenceClient
+#
+#  dsclient = InferenceClient(
+#    provider="novita",
+#    api_key=HF_TOKEN
 #  )
-  result = await asyncio.to_thread(dsclient.chat.completions.create,
-    model="deepseek-ai/DeepSeek-R1", 
-	  messages=messages, 
-	  max_tokens=500,
-  )
-  #  print(completion.choices[0].message)
-  res = completion.choices
-  if res:
-    return "%s" % res[0].message
-  else:
-    return "E: %s" % res
-
-
-async def hg(prompt, provider=Provider.You, model=models.default, proxy=None):
-  try:
-    global hgclient
-    if "hgclient" not in globals():
-      hgclient = Client_hg(api_key=HF_TOKEN)
-    #  response = client.chat.completions.create(
-    response = await hgclient.chat.completions.create(
-      model=model,
-      messages=[{"role": "user", "content": prompt}],
-      provider=provider,
-      proxy=proxy,
-    )
-  except Exception as e:
-    image_url = f"{e=}"
-  else:
-    image_url  = response.choices[0].message.content
-  #  print(image_url)
-  return image_url
-
-
-async def qw(text):
-  try:
-    global qw_client
-    if "qw_client" not in globals():
-      qw_client = Client_hg("https://qwen-qwen1-5-72b-chat.hf.space/--replicas/3kh1x/")
-    #  result = qw_client.predict(
-    result = await asyncio.to_thread(qw_client.predict,
-        #  sys.argv[1],	# str  in 'Input' Textbox component
-        text,	# str  in 'Input' Textbox component
-        #  [[sys.argv[1], sys.argv[1]]],	# Tuple[str | Dict(file: filepath, alt_text: str | None) | None, str | Dict(file: filepath, alt_text: str | None) | None]  in 'Qwen1.5-72B-Chat' Chatbot component
-        [],	# Tuple[str | Dict(file: filepath, alt_text: str | None) | None, str | Dict(file: filepath, alt_text: str | None) | None]  in 'Qwen1.5-72B-Chat' Chatbot component
-        "You are a helpful assistant.",	# str  in 'parameter_9' Textbox component
-        api_name="/model_chat"
-    )
-    #  print(result)
-    #  print(result[1][1][1])
-    #  print(result[1][0][1])
-    res = result[1][0][1]
-  except Exception as e:
-    res = f"{e=}"
-  return res
-
-async def qw2(text):
-  try:
-    global qw2_client
-    if "qw2_client" not in globals():
-      qw2_client = Client_hg("Qwen/Qwen1.5-110B-Chat-demo")
-    #  result = qw2_client.predict(
-    result = await asyncio.to_thread(qw2_client.predict,
-        #  query=sys.argv[1],
-        query=text,
-        history=[],
-        system="You are a helpful assistant.",
-        api_name="/model_chat"
-    )
-    #  print(result)
-    #  print(result[1][1][1])
-    #  print(result[1][0][1])
-    res = result[1][0][1]
-  except Exception as e:
-    res = f"{e=}"
-  return res
+#  async def hgds(text):
+#    messages = [
+#      {
+#        "role": "user",
+#        #  "content": "What is the capital of France?"
+#        "content": text
+#      }
+#    ]
+#
+#  #  completion = client.chat.completions.create(
+#  #      model="deepseek-ai/DeepSeek-R1",
+#  #    messages=messages,
+#  #    max_tokens=500,
+#  #  )
+#    result = await asyncio.to_thread(dsclient.chat.completions.create,
+#      model="deepseek-ai/DeepSeek-R1",
+#      messages=messages,
+#      max_tokens=500,
+#    )
+#    #  print(completion.choices[0].message)
+#    res = completion.choices
+#    if res:
+#      return "%s" % res[0].message
+#    else:
+#      return "E: %s" % res
+#
+#
+#  async def hg(prompt, provider=Provider.You, model=models.default, proxy=None):
+#    try:
+#      global hgclient
+#      if "hgclient" not in globals():
+#        hgclient = Client_hg(api_key=HF_TOKEN)
+#      #  response = client.chat.completions.create(
+#      response = await hgclient.chat.completions.create(
+#        model=model,
+#        messages=[{"role": "user", "content": prompt}],
+#        provider=provider,
+#        proxy=proxy,
+#      )
+#    except Exception as e:
+#      image_url = f"{e=}"
+#    else:
+#      image_url  = response.choices[0].message.content
+#    #  print(image_url)
+#    return image_url
+#
+#
+#  async def qw(text):
+#    try:
+#      global qw_client
+#      if "qw_client" not in globals():
+#        qw_client = Client_hg("https://qwen-qwen1-5-72b-chat.hf.space/--replicas/3kh1x/")
+#      #  result = qw_client.predict(
+#      result = await asyncio.to_thread(qw_client.predict,
+#          #  sys.argv[1],	# str  in 'Input' Textbox component
+#          text,	# str  in 'Input' Textbox component
+#          #  [[sys.argv[1], sys.argv[1]]],	# Tuple[str | Dict(file: filepath, alt_text: str | None) | None, str | Dict(file: filepath, alt_text: str | None) | None]  in 'Qwen1.5-72B-Chat' Chatbot component
+#          [],	# Tuple[str | Dict(file: filepath, alt_text: str | None) | None, str | Dict(file: filepath, alt_text: str | None) | None]  in 'Qwen1.5-72B-Chat' Chatbot component
+#          "You are a helpful assistant.",	# str  in 'parameter_9' Textbox component
+#          api_name="/model_chat"
+#      )
+#      #  print(result)
+#      #  print(result[1][1][1])
+#      #  print(result[1][0][1])
+#      res = result[1][0][1]
+#    except Exception as e:
+#      res = f"{e=}"
+#    return res
+#
+#  async def qw2(text):
+#    try:
+#      global qw2_client
+#      if "qw2_client" not in globals():
+#        qw2_client = Client_hg("Qwen/Qwen1.5-110B-Chat-demo")
+#      #  result = qw2_client.predict(
+#      result = await asyncio.to_thread(qw2_client.predict,
+#          #  query=sys.argv[1],
+#          query=text,
+#          history=[],
+#          system="You are a helpful assistant.",
+#          api_name="/model_chat"
+#      )
+#      #  print(result)
+#      #  print(result[1][1][1])
+#      #  print(result[1][0][1])
+#      res = result[1][0][1]
+#    except Exception as e:
+#      res = f"{e=}"
+#    return res
 
 
 def send_log(text, jid=CHAT_ID, delay=1):
@@ -7973,54 +7973,58 @@ async def init_cmd():
   #    return 3, bot_name, text
   #  cmd_funs["bai"] = _
 
-  async def _(cmds, src):
-    if len(cmds) == 1:
-      return f"gemini 图像生成(仅支持英文)\n.{cmds[0]} $text"
-    text = ' '.join(cmds[1:])
-    return await ai_img(text)
-  cmd_funs["img"] = _
+  #  async def _(cmds, src):
+  #    if len(cmds) == 1:
+  #      return f"gemini 图像生成(仅支持英文)\n.{cmds[0]} $text"
+  #    text = ' '.join(cmds[1:])
+  #    return await ai_img(text)
+  #  cmd_funs["img"] = _
+  #
+  #  async def _(cmds, src):
+  #    if len(cmds) == 1:
+  #      return f"HuggingChat\n.{cmds[0]} $text\n\n--\nhttps://github.com/xtekky/gpt4free\n问答: hg/di/lb/kl/you/bd/ai"
+  #    text = ' '.join(cmds[1:])
+  #    return await hg(text, provider=Provider.HuggingChat)
+  #  cmd_funs["hg"] = _
+  #
+  #  async def _(cmds, src):
+  #    if len(cmds) == 1:
+  #      return f"HuggingChat deepseek\n.{cmds[0]} $text"
+  #    text = ' '.join(cmds[1:])
+  #    return await hgds(text)
+  #  cmd_funs["ds"] = _
+  #
+  #  async def _(cmds, src):
+  #    if len(cmds) == 1:
+  #      return f"DeepInfra\n.{cmds[0]} $text"
+  #    text = ' '.join(cmds[1:])
+  #    return  await ai(text, provider=Provider.DeepInfra)
+  #  cmd_funs["di"] = _
+  #
+  #  async def _(cmds, src):
+  #    if len(cmds) == 1:
+  #      return f"Liaobots\n.{cmds[0]} $text"
+  #    text = ' '.join(cmds[1:])
+  #    return await ai(text, provider=Provider.Liaobots)
+  #  cmd_funs["lb"] = _
+  #
+  #  async def _(cmds, src):
+  #    if len(cmds) == 1:
+  #      return f"Liaobots\n.{cmds[0]} $text"
+  #    text = ' '.join(cmds[1:])
+  #    return await ai(text, provider=Provider.Koala, proxy="http://127.0.0.1:6080")
+  #  cmd_funs["kl"] = _
+  #
+  #  async def _(cmds, src):
+  #    if len(cmds) == 1:
+  #      return f"You\n.{cmds[0]} $text\n\n--\nhttps://github.com/xtekky/gpt4free\n问答: hg/di/lb/kl/you/bd/ai"
+  #    text = ' '.join(cmds[1:])
+  #    return await ai(text, provider=Provider.You, proxy="http://127.0.0.1:6080")
+  #  cmd_funs["you"] = _
+  #
 
-  async def _(cmds, src):
-    if len(cmds) == 1:
-      return f"HuggingChat\n.{cmds[0]} $text\n\n--\nhttps://github.com/xtekky/gpt4free\n问答: hg/di/lb/kl/you/bd/ai"
-    text = ' '.join(cmds[1:])
-    return await hg(text, provider=Provider.HuggingChat)
-  cmd_funs["hg"] = _
-  
-  async def _(cmds, src):
-    if len(cmds) == 1:
-      return f"HuggingChat deepseek\n.{cmds[0]} $text"
-    text = ' '.join(cmds[1:])
-    return await hgds(text)
-  cmd_funs["ds"] = _
 
-  async def _(cmds, src):
-    if len(cmds) == 1:
-      return f"DeepInfra\n.{cmds[0]} $text"
-    text = ' '.join(cmds[1:])
-    return  await ai(text, provider=Provider.DeepInfra)
-  cmd_funs["di"] = _
 
-  async def _(cmds, src):
-    if len(cmds) == 1:
-      return f"Liaobots\n.{cmds[0]} $text"
-    text = ' '.join(cmds[1:])
-    return await ai(text, provider=Provider.Liaobots)
-  cmd_funs["lb"] = _
-
-  async def _(cmds, src):
-    if len(cmds) == 1:
-      return f"Liaobots\n.{cmds[0]} $text"
-    text = ' '.join(cmds[1:])
-    return await ai(text, provider=Provider.Koala, proxy="http://127.0.0.1:6080")
-  cmd_funs["kl"] = _
-
-  async def _(cmds, src):
-    if len(cmds) == 1:
-      return f"You\n.{cmds[0]} $text\n\n--\nhttps://github.com/xtekky/gpt4free\n问答: hg/di/lb/kl/you/bd/ai"
-    text = ' '.join(cmds[1:])
-    return await ai(text, provider=Provider.You, proxy="http://127.0.0.1:6080")
-  cmd_funs["you"] = _
 
   async def _(cmds, src):
     i = 0
