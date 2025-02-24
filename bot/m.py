@@ -3274,7 +3274,7 @@ async def send_xmpp(text, jid=None, *args, **kwargs):
     #    await add_id_to_msg(msg, False)
     #  else:
     msg.body[None] = text
-    if await send_xmpp(msg, *args, **kwargs) is not True:
+    if await _send_xmpp(msg, *args, **kwargs) is not True:
       return False
     #  if correct:
     #  if msg.xep0308_replace:
@@ -3304,7 +3304,7 @@ async def send_xmpp(text, jid=None, *args, **kwargs):
     #    return False
 
 
-    return await send_xmpp(msg, *args, **kwargs)
+    return await _send_xmpp(msg, *args, **kwargs)
   else:
     err(f"text类型不对: {type(text)}")
     return False
