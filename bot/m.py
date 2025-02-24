@@ -3259,13 +3259,14 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       else:
         info(f"res is not coroutine: {res=} {client=} {room=} {msg=}")
       #  return False
-      # 为了同步tg消息的删除，当tg删除消息时，这边会根据l[2]把xmpp这边的最后消息标记为临时待更正消息，但如果标记之前发送了别的xmpp正常消息，就不能进行该动作了，所以l[2]记录应该清除，而且对也确实没用了
+      # 为了同步tg消息的删除，当tg删除消息时，这边会根据l[2]把xmpp这边的最后消息标记为临时待更正消息，但如果标记之前发送了别的xmpp正常消息，就不能进行该动作了(镜像群也要处理)，所以l[2]记录应该清除，而且对也确实没用了
       if jid in mtmsgsg:
         mtmsgs = mtmsgsg[jid]
         for i in mtmsgs:
           l = mtmsgs[i]
           if len(l) > 2:
             l[2] = set()
+            tmp_msg_chats.difference_update( get_mucs(jid) )
       if delay is not None:
         await sleep(delay)
   return True
