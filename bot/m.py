@@ -3267,6 +3267,7 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
           if len(l) > 2:
             l[2] = set()
             tmp_msg_chats.difference_update( get_mucs(jid) )
+            info("tmp_msg_chats, remove: {jid} and mirror group")
       if delay is not None:
         await sleep(delay)
   return True
