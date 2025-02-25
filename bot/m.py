@@ -4050,8 +4050,8 @@ async def pvb(text):
 
 #  async def pvb(text):
   #  fu = run_cb_in_thread(pb.send, text)
-  fu = run_cb_in_thread(sendpv, text)
-  res = await fu
+  #  fu = run_cb_in_thread(sendpv, text)
+  #  res = await fu
   j = load_str(res)
   if j["status"] == 0:
     return j["result"]["link"]
