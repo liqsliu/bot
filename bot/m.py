@@ -4917,7 +4917,7 @@ async def msgt(event):
             if path is not None:
               #  t = asyncio.create_task(backup(path))
               #  url = await t
-              url, backup_task = backup(path, no_wait=True)
+              url, backup_task = await backup(path, no_wait=True)
               #  xmpp_url = await upload(path, src)
               #  if xmpp_url:
               #    url = f"- {xmpp_url}\n\n- {url}"
