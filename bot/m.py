@@ -2689,21 +2689,26 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
       if len(s) > 2:
         #  path = s[-1]
         if os.path.exists(s[1]):
-          s.pop(0)
-          path = s[0]
+          #  s.pop(0)
+          info("delete path1: %s" % s.pop(0))
+          #  path = s[0]
+          path = s.pop(0)
+          info("delete path2: %s" % path)
           try:
             t = asyncio.create_task(backup(path))
             url = await upload(path, src)
             await t
             if url:
-              s[0] = f"\n- {url}"
-            else:
-              s.pop(0)
+              #  s[0] = f"\n- {url}"
+              s.append(f"\n- {url}")
+              info("add xmpp file url: %s" % url)
+            #  else:
+            #    s.pop(0)
           finally:
             asyncio.create_task(backup(path, delete=True))
         else:
-          s.pop(0)
-          s.pop(0)
+          warn("delete path1: %s" % s.pop(0))
+          warn("delete path2: %s" % s.pop(0))
         return "\n".join(s)
       elif len(s) == 2:
         return s[-1]
