@@ -58,7 +58,7 @@ fi
       echo "目录有问题"
       exit 1
     }
-    echo "$fn"
+    # echo "$fn"
 
 
 
