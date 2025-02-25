@@ -2650,7 +2650,7 @@ async def save_data():
 #      warn(res)
 #    return res
 
-async def backup(path, src=None, delete=False):
+async def backup(path, src=None, delete=False, no_wait=False):
   url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
   info(f"url: {url}")
   #  shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
@@ -2662,7 +2662,11 @@ async def backup(path, src=None, delete=False):
     shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
   #  res = await run_my_bash(shell_cmd, shell=False)
   #  res = await my_sexec(shell_cmd)
-  res = await myshell(shell_cmd)
+  if no_wait:
+    t = asyncio.create_task( myshell(shell_cmd) )
+    return url, t
+  else:
+    res = await myshell(shell_cmd)
   if res:
     info(f"res: {res} {shell_cmd}")
     if src:
@@ -4895,71 +4899,70 @@ async def msgt(event):
       l[1].extend(msg.buttons)
       text = f"{bot_name}\n{text}"
 
-    if msg.file:
-      file = msg.file
-      file_name = file.name
-      if file_name:
-        file_info = f"file: {file_name}"
-      else:
-        file_info = ""
-      if file.size:
-        if file.size > FILE_DOWNLOAD_MAX_BYTES:
-          file_info += f"\n文件过大，终止下载({hbyte(file.size)})"
+    backup_task = None
+    try:
+      if msg.file:
+        file = msg.file
+        file_name = file.name
+        if file_name:
+          file_info = f"file: {file_name}"
         else:
-          #  path = await tg_download_media(msg)
-          path = await tg_download_media(msg, src=src, max_wait_time=get_timeout(msg.file.size))
-          if path is not None:
-            try:
-              t = asyncio.create_task(backup(path))
-              xmpp_url = await upload(path, src)
-              url = await t
-              if xmpp_url:
-                url = f"- {xmpp_url}\n\n- {url}"
-              #  if file_name:
-              #    url = f"{file_name}\n{url}"
-              #  if text:
-              #    text += f"\n\nfile: {url}"
-              #  else:
+          file_info = ""
+        if file.size:
+          if file.size > FILE_DOWNLOAD_MAX_BYTES:
+            file_info += f"\n文件过大，终止下载({hbyte(file.size)})"
+          else:
+            #  path = await tg_download_media(msg)
+            path = await tg_download_media(msg, src=src, max_wait_time=get_timeout(msg.file.size))
+            if path is not None:
+              #  t = asyncio.create_task(backup(path))
+              #  url = await t
+              url, backup_task = backup(path, no_wait=True)
+              #  xmpp_url = await upload(path, src)
+              #  if xmpp_url:
+              #    url = f"- {xmpp_url}\n\n- {url}"
               file_info += "\n"
               file_info += url
                 #  await send(text, jid=jid)
                 #  return
-            finally:
-              t = asyncio.create_task(backup(path, delete=True))
-      else:
-        file_info = "\n文件大小未知，终止下载"
-      if text and file_info:
-        text += "\n\n"
-      text += file_info
+        else:
+          file_info = "\n文件大小未知，终止下载"
+        if text and file_info:
+          text += "\n\n"
+        text += file_info
 
-    if msg.edit_date:
-      correct = True
-    else:
-      correct = False
-    text = f"{l[0]}{text}"
-    #  if len(l) == 2:
-    #    l.append(set())
-    #  else:
-    #    if len(l[2]) > 0:
-    #      await sleep(0.5)
-    #  if parse_message_deleted_task is not None:
-    #    if not parse_message_deleted_task.done():
-    #      info(f"等待处理完tg的消息删除事件 {parse_message_deleted_task}")
-    #      await parse_message_deleted_task
-    #      info("处理完成 parse_message_deleted_task")
-    #    else:
-    #      info("parse_message_deleted_task: done")
-    #  else:
-    #    info(f"None {parse_message_deleted_task=}")
-    #  l[2].add(msg.id)
-    if type(src) is int:
-      send(text, src, correct=correct)
-    else:
-      gid = msg.id
-      if gid - 1 in forwarded_tg_msg_ids:
-        info(f"too many tg msg: {gid} for {chat_id}")
-        await sleep(0.5)
-      send(text, src, correct=correct, tg_msg_id=msg.id)
+      if msg.edit_date:
+        correct = True
+      else:
+        correct = False
+      text = f"{l[0]}{text}"
+      #  if len(l) == 2:
+      #    l.append(set())
+      #  else:
+      #    if len(l[2]) > 0:
+      #      await sleep(0.5)
+      #  if parse_message_deleted_task is not None:
+      #    if not parse_message_deleted_task.done():
+      #      info(f"等待处理完tg的消息删除事件 {parse_message_deleted_task}")
+      #      await parse_message_deleted_task
+      #      info("处理完成 parse_message_deleted_task")
+      #    else:
+      #      info("parse_message_deleted_task: done")
+      #  else:
+      #    info(f"None {parse_message_deleted_task=}")
+      #  l[2].add(msg.id)
+      if type(src) is int:
+        send(text, src, correct=correct)
+      else:
+        gid = msg.id
+        if gid - 1 in forwarded_tg_msg_ids:
+          info(f"too many tg msg: {gid} for {chat_id}")
+          await sleep(0.5)
+        send(text, src, correct=correct, tg_msg_id=msg.id)
+    finally:
+      if backup_task is not None:
+        await backup_task
+        asyncio.create_task(backup(path, delete=True))
 
   elif chat_id in bridges:
     src = bridges[chat_id]
