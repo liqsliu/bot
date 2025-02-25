@@ -4859,6 +4859,10 @@ async def msgt(event):
 
   #  if src in mtmsgsg:
   if chat_id in bridges_tmp:
+    src = bridges_tmp[chat_id]
+    if src not in mtmsgsg:
+      warn(f"not found {src} in mtmsgsg")
+      return
     mtmsgs = mtmsgsg[src]
     # 需要转发消息，约等于临时桥接通道, 发送消息的代码在 def run_cmd
     text = msg.text
