@@ -4027,12 +4027,13 @@ def pvb_init():
   global tmp_for_pvb_print
   tmp_for_pvb_print = io.StringIO()
 
-
 #  def sendpv(text):
 @exceptions_handler
 @cross_thread(need_main=False)
-async def pvb(text):
+async def pvb(text, server=None):
   args_for_pvb.text = text
+  if server is not None:
+    args_for_pvb.server = server
   try:
     orig = sys.stdout
     sys.stdout = tmp_for_pvb_print
@@ -8065,10 +8066,17 @@ async def init_cmd():
 
   async def _(cmds, src):
     if len(cmds) == 1:
-      return f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin"
+      return f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://privatebin.info/directory/"
     text = ' '.join(cmds[1:])
     return await pvb(text)
   cmd_funs["pvb"] = _
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://paste.ononoki.org/\nhttps://paste.i2pd.xyz/"
+    text = ' '.join(cmds[1:])
+    return await pvb(text, server="https://paste.ononoki.org/")
+  cmd_funs["pvb2"] = _
 
 
 
