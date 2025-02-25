@@ -4147,6 +4147,9 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
     else:
       res = await pastebin(data=data, filename=filename, extra=extra, use="0x0", **kwargs)
       warn(f"fallback 0x0: {res}")
+      if not res.startswith("https://0x0.st/"):
+        warn(f"fallback pvb: {res}")
+        return await pvb(text)
   elif url == pb_list["senio"][0]:
     # fixme
     return res
