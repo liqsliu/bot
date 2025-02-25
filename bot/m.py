@@ -4481,8 +4481,8 @@ def print_buttons(bs, k=0):
 
 def parse_tg_url(url, wtf=1):
   peer = None
-  ids = None
-  url.rstrip("?single")
+  gid = None
+  url = url.rstrip("?single")
   if "?comment=" in url:
     #需要先获取频道绑定的群，然后再在群里根据消息id找，麻烦，先不搞
     url = url.split("?comment")[0]
@@ -4493,22 +4493,7 @@ def parse_tg_url(url, wtf=1):
     if url:
       peer = url.split('/',1)[0]
       if '/' in url:
-        ids = url.rsplit('/', 1)[-1]
-    #    if url:
-    #      peer = url.rsplit('/',1)[0]
-    #      if '/' in url:
-    #        ids = url.rsplit('/')[-1]
-    #      #    ids = url.rsplit('/',1)[1]
-    #      #    if '/' in ids:
-    #      #      err(f"fixme: tg url 格式错误")
-    #  elif url:
-    #    peer = url.rsplit('/',1)[0]
-    #    #  url = url.rsplit('/',1)[1]
-    #    if '/' in url:
-    #      ids = url.rsplit('/')[-1]
-    #    #    ids = url.rsplit('/',1)[1]
-    #    #    if '/' in ids:
-    #    #      ids = ids.rsplit('/',1)[1]
+        gid = url.rsplit('/', 1)[-1]
   if peer:
     #  if peer[0] != "-":
     if peer.isnumeric():
@@ -4519,9 +4504,9 @@ def parse_tg_url(url, wtf=1):
       elif wtf == 2:
         peer = f"-{peer}"
         peer = int(peer)
-  if ids:
-    ids = int(ids)
-  return peer, ids
+  if gid:
+    gid = int(gid)
+  return peer, gid
 
 
 async def get_commands(chat_id):
@@ -4558,6 +4543,7 @@ async def get_entity(chat_id, id_only=True):
   #  elif isinstance(peer, str):
   #    peer = await UB.get_input_entity(peer)
   #  else:
+  gid = None
   try:
     url = chat_id
     #  chat_id = get_addr(chat_id)
@@ -4575,7 +4561,7 @@ async def get_entity(chat_id, id_only=True):
       elif url.startswith("-") and  url[1:].isnumeric():
         peer = int(url)
       else:
-        p, _ = parse_tg_url(url)
+        p, gid = parse_tg_url(url)
         if p:
           peer = p
         else:
@@ -4590,8 +4576,6 @@ async def get_entity(chat_id, id_only=True):
       dbg(f"search inputpeer: {peer}")
       try:
         peer = await UB.get_input_entity(peer)
-        if id_only:
-          return peer
       except TypeError as e:
         err(f"E: {e=}, not found input entity: {peer}")
         return
@@ -4600,13 +4584,15 @@ async def get_entity(chat_id, id_only=True):
         try:
           pid = await UB.get_peer_id(peer)
           peer = await UB.get_input_entity(pid)
-          if id_only:
-            return peer
         except TypeError as e:
           err(f"E: {e=}, not found input entity(use get_peer_id): {peer}")
           return
         except ValueError as e:
           info(f"not found input entity: {peer} {e=}")
+      if id_only:
+        return peer
+      if gid is not None:
+        return peer, gid
 
       dbg(f"search peer: {peer}")
       try:
@@ -5349,7 +5335,13 @@ async def msgtout(event):
 
       url = text.split(' ')[1]
       e = await get_entity(url, False)
-      if e:
+      if type(e) is tuple:
+        peer = e[0]
+        gid = e[1]
+        e = await UB.get_messages(peer, ids=gid)
+        await UB.send_message(chat_id, f"{e.stringify()}")
+        await UB.send_message(chat_id, "peer id: %s" % await UB.get_peer_id(peer))
+      elif e:
         await UB.send_message(chat_id, f"{e.stringify()}")
         await UB.send_message(chat_id, "peer id: %s" % await UB.get_peer_id(e))
       else:
@@ -5367,15 +5359,15 @@ async def msgtout(event):
           #  send(peer.stringify(), chat_id)
           ss = url.split('/')
           if len(ss) > 4:
-            ids = int(ss[-1])
-            tmsg = await UB.get_messages(peer, ids=ids)
+            gid = int(ss[-1])
+            tmsg = await UB.get_messages(peer, ids=gid)
             if tmsg:
               opts = 0
               if len(cmds) == 3:
                 opts = cmds[2]
               await save_tg_msg(tmsg, chat_id, opts, url)
             else:
-              send(f"error id: {ids}\nres: {msg}", chat_id)
+              send(f"error id: {gid}\nres: {msg}", chat_id)
           return
         else:
           send(f"error url: {url}\nres: {peer}", chat_id)
