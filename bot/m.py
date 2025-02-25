@@ -3401,8 +3401,8 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
           if jid in s:
             s.remove(jid)
             info(f"delete forward log for {jid}: {i}")
-        #  if tg_msg_id not in forwarded_tg_msg_ids:
-        #    forwarded_tg_msg_ids[tg_msg_id] = set()
+        if tg_msg_id not in forwarded_tg_msg_ids:
+          forwarded_tg_msg_ids[tg_msg_id] = set()
         forwarded_tg_msg_ids[tg_msg_id].add(jid)
 
       if tmp_msg is True:
@@ -4978,7 +4978,6 @@ async def msgt(event):
       if gid - 1 in forwarded_tg_msg_ids:
         info(f"too many tg msg: {gid} for {chat_id}")
         await sleep(0.5)
-      forwarded_tg_msg_ids[gid] = set()
       send(text, src, correct=correct, tg_msg_id=msg.id)
 
   elif chat_id in bridges:
