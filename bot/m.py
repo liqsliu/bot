@@ -1908,8 +1908,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           ds = ds.strip()
           if ds:
             #  info(f"send: {src} {type(ds)} {ds[:16]}")
-            ds = f"```\n{ds}```"
-            send(ds, src)
+            send(f"```\n{ds}```", src)
             last_send = time.time()
             tmp = b""
         if k > 0:
@@ -1948,7 +1947,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
       if r == 0:
         if ds.endswith("\n0"):
           ds = ds[:-2]
-      send(ds, src)
+      send(f"```\n{ds}```", src)
   #  if r is not None:
   #    return  (r, o, e)
   return  (r, o, e)
