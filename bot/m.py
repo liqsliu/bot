@@ -3169,19 +3169,19 @@ def on_nick_changed(member, old_nick, new_nick, *, muc_status_codes=set(), **kwa
 
 
 
-def clean_forwarded_tg_msg_ids(jid):
-  d = set()
-  for i in forwarded_tg_msg_ids:
-    s = forwarded_tg_msg_ids[i]
-    if jid in s:
-      s.remove(jid)
-      info(f"delete forward log for {jid}: {i}")
-      if len(s) == 0:
-        info(f"delete empty log: {i}")
-        d.add(i)
-  for i in d:
-    forwarded_tg_msg_ids.pop(i)
-
+#  def clean_forwarded_tg_msg_ids(jid):
+#    d = set()
+#    for i in forwarded_tg_msg_ids:
+#      s = forwarded_tg_msg_ids[i]
+#      if jid in s:
+#        s.remove(jid)
+#        info(f"delete forward log for {jid}: {i}")
+#        if len(s) == 0:
+#          info(f"delete empty log: {i}")
+#          d.add(i)
+#    for i in d:
+#      forwarded_tg_msg_ids.pop(i)
+#
 
 
 
@@ -3378,13 +3378,31 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       #  return False
       if tg_msg_id is None:
         if tmp_msg is False:
-          clean_forwarded_tg_msg_ids(jid)
+          #  clean_forwarded_tg_msg_ids(jid)
+          d = set()
+          for i in forwarded_tg_msg_ids:
+            s = forwarded_tg_msg_ids[i]
+            if jid in s:
+              s.remove(jid)
+              info(f"delete forward log for {jid}: {i}")
+              if len(s) == 0:
+                info(f"delete empty log: {i}")
+                d.add(i)
+          for i in d:
+            forwarded_tg_msg_ids.pop(i)
         #  forwarded_tg_msg_ids.clear()
       elif tg_msg_id in deleted_tg_msg_ids:
         tmp_msg_chats.add(jid)
         return
       else:
-        clean_forwarded_tg_msg_ids(jid)
+        #  clean_forwarded_tg_msg_ids(jid)
+        for i in forwarded_tg_msg_ids:
+          s = forwarded_tg_msg_ids[i]
+          if jid in s:
+            s.remove(jid)
+            info(f"delete forward log for {jid}: {i}")
+        #  if tg_msg_id not in forwarded_tg_msg_ids:
+        #    forwarded_tg_msg_ids[tg_msg_id] = set()
         forwarded_tg_msg_ids[tg_msg_id].add(jid)
 
       if tmp_msg is True:
