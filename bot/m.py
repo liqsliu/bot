@@ -2539,10 +2539,10 @@ async def load_config():
       for jid in tmp:
         jids.pop(jid)
 
-    for chat_id in bridges:
-      target = bridges[chat_id]
-      if type(target) is dict:
-        target.clear()
+    #  for chat_id in bridges:
+    #    target = bridges[chat_id]
+    #    if type(target) is dict:
+    #      target.clear()
 
     info(f"my_groups: {my_groups=}")
 
@@ -4729,7 +4729,7 @@ async def msgtd(event):
   chat_id = event.chat_id
   if chat_id is None:
     warn(f"chat_id is None")
-  elif chat_id not in bridges:
+  elif chat_id not in bridges_tmp:
     #  info(f"chat_id is not in bridges: {chat_id}")
     return
   deleted_tg_msg_ids.update(event.deleted_ids)
@@ -4780,7 +4780,7 @@ async def msgtp(event):
   #  chat_id = event.sender_id
   # 私聊这俩都一样
   chat_id = event.chat_id
-  if chat_id not in bridges:
+  if chat_id not in bridges_tmp:
     return
   #  if chat_id != 5815596965:
   #    return
@@ -4790,7 +4790,7 @@ async def msgtp(event):
   #  if not event.is_private:
   #    return
 
-  src = bridges[chat_id]
+  src = bridges_tmp[chat_id]
   #  if chat_id in bridges:
   #    src = bridges[chat_id]
   #  else:
@@ -4852,30 +4852,13 @@ async def msgt(event):
   # https://docs.telethon.dev/en/stable/modules/custom.html#telethon.tl.custom.chatgetter.ChatGetter
   msg = event.message
   chat_id = event.chat_id
-  if event.is_private:
-    if chat_id is None:
-      warn(f"chat_id is None")
-      chat_id = event.sender_id
-    if chat_id not in bridges:
-      info(f"忽略私聊 {chat_id=} {short(msg.text)}")
-      return
-  elif chat_id in bridges:
-    pass
-  else:
-    #  info(f"{chat_id=} {short(msg.text)}")
-    #  res, nick, delay = await print_tg_msg(event)
-    if print_msg:
-      await print_tg_msg(event)
-    #  if res:
-    #    info(f"{nick}{res}")
-    return
-  src = bridges[chat_id]
-  if isinstance(src, dict):
-    bridges.pop(chat_id)
-    warn(f"delete old bridge: {src}")
-    return
+  if chat_id is None:
+    warn(f"chat_id is None")
+    chat_id = event.sender_id
 
-  if src in mtmsgsg:
+
+  #  if src in mtmsgsg:
+  if chat_id in bridges_tmp:
     mtmsgs = mtmsgsg[src]
     # 需要转发消息，约等于临时桥接通道, 发送消息的代码在 def run_cmd
     text = msg.text
@@ -4971,13 +4954,29 @@ async def msgt(event):
       forwarded_tg_msg_ids[gid] = set()
       send(text, src, correct=correct, tg_msg_id=msg.id)
 
-  else:
+  elif chat_id in bridges:
+    src = bridges[chat_id]
+    if isinstance(src, dict):
+      bridges.pop(chat_id)
+      warn(f"delete old bridge: {src}")
+      return
     res, nick, delay = await print_tg_msg(event)
     if res:
       info(f"sync: {chat_id} -> {bridges[chat_id]}: {short(res)}")
       send(res, src, name=f"**{nick}:** ", nick=nick, delay=delay)
     else:
       info(f"忽略空白信息: {msg.text} {res=} {nick=}")
+  elif event.is_private:
+      info(f"忽略私聊 {chat_id=} {short(msg.text)}")
+      return
+  else:
+    #  info(f"{chat_id=} {short(msg.text)}")
+    #  res, nick, delay = await print_tg_msg(event)
+    if print_msg:
+      await print_tg_msg(event)
+    #  if res:
+    #    info(f"{nick}{res}")
+    return
 
     #  elif event.is_private:
     #    pass
@@ -5194,18 +5193,15 @@ async def msgtout(event):
   #    last_outmsg.pop(chat_id)
 
   if event.is_private:
-    if chat_id in bridges:
-      src = bridges[chat_id]
-      if type(src) is dict:
-        warn(f"src is dict: {src}")
-        bridges.pop(chat_id)
-      elif src in mtmsgsg:
-        bridges.pop(chat_id)
-        mtmsgs = mtmsgsg[src]
-        if mtmsgs:
-          mtmsgs.clear()
-          #  await send(f"unlink {src}", CHAT_ID)
-          warn(f"unlink {src} - (chat_id)")
+    if chat_id in bridges_tmp:
+      #  src = bridges_tmp[chat_id]
+      #  if src in mtmsgsg:
+      #    mtmsgs = mtmsgsg[src]
+      #    if mtmsgs:
+      #      mtmsgs.clear()
+      #      #  await send(f"unlink {src}", CHAT_ID)
+      #      warn(f"unlink {src} - (chat_id)")
+      bridges_tmp.pop(chat_id)
   text = msg.text
   info(f"tg out msg: {chat_id}: {text}")
   if text == "/help":
@@ -7817,21 +7813,21 @@ async def init_cmd():
 
 
 
-  async def _(cmds, src):
-    if len(cmds) == 1:
-      return f"阿里千问\n.{cmds[0]} $text"
-    text = ' '.join(cmds[1:])
-    return await qw(text)
-  cmd_funs["qw"] = _
-
-  async def _(cmds, src):
-    if len(cmds) == 1:
-      return f"阿里千问\n{cmds[0]} $text"
-    text = ' '.join(cmds[1:])
-    return await qw2(text)
-  cmd_funs["qw2"] = _
-
-
+  #  async def _(cmds, src):
+  #    if len(cmds) == 1:
+  #      return f"阿里千问\n.{cmds[0]} $text"
+  #    text = ' '.join(cmds[1:])
+  #    return await qw(text)
+  #  cmd_funs["qw"] = _
+  #
+  #  async def _(cmds, src):
+  #    if len(cmds) == 1:
+  #      return f"阿里千问\n{cmds[0]} $text"
+  #    text = ' '.join(cmds[1:])
+  #    return await qw2(text)
+  #  cmd_funs["qw2"] = _
+  #
+  #
 
 
   async def _(cmds, src):
@@ -7890,8 +7886,10 @@ async def init_cmd():
         #  return ""
     return bot_cmds[bot_name]
   def add_tg_bot(bot_name, cmd, cmd2=None, cmd1=None, no_file=False):
-    #  mtmsgsg[src] = {}
+    #  peer = await get_entity(bot_name)
+    #  pid = await UB.get_peer_id(peer)
     #  bridges[pid] = src
+    #  mtmsgsg[src] = {}
     #  @exceptions_handler
     async def _(cmds, src):
       if cmd2 is not None:
@@ -8090,6 +8088,9 @@ async def init_cmd():
 
 
 
+bridges_tmp = {}
+
+
 @exceptions_handler
 async def run_cmd(*args, **kwargs):
   res = await _run_cmd(*args, **kwargs)
@@ -8148,14 +8149,14 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           mtmsgs = mtmsgsg[src]
           mtmsgs[pid] = [name]
 
-          if pid not in bridges:
-            bridges[pid] = src
+          if pid not in bridges_tmp:
+            bridges_tmp[pid] = src
           else:
-            osrc = bridges[pid]
+            osrc = bridges_tmp[pid]
 
             if osrc != src:
               if type(osrc) is dict:
-                bridges[pid] = src
+                bridges_tmp[pid] = src
               else:
                 #  await send("coming", src, tmp_msg=True)
                 #  await send("...", src, tmp_msg=True)
@@ -8163,7 +8164,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
                 #    await sleep(3)
                 info(f"stop link to {osrc}")
                 send("bye", osrc, tmp_msg=True)
-                bridges[pid] = src
+                bridges_tmp[pid] = src
                 info(f"link to {src}")
                 #  send("typing", src, tmp_msg=True)
 
@@ -8172,10 +8173,10 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
                   mtmsgsg[osrc].clear()
 
           await send_tg(text, pid)
-          for i in bridges.copy():
+          for i in bridges_tmp.copy():
             if i != pid:
-              if bridges[i] == src:
-                bridges.pop(i)
+              if bridges_tmp[i] == src:
+                bridges_tmp.pop(i)
                 if i in mtmsgs:
                   mtmsgs.pop(i)
                 warn(f"stop link for {src}: {i} -> {pid}")
@@ -8219,9 +8220,9 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
     if pid is None:
       return
 
-    if pid not in bridges:
+    if pid not in bridges_tmp:
       return
-    if bridges[pid] != src:
+    if bridges_tmp[pid] != src:
       return
     s = int(text)
     k = 0
@@ -8268,60 +8269,6 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       send(f"没找到，请重新发送指令{text}", src)
     return
 
-  elif text.isnumeric():
-    if src in music_bot_state and music_bot_state[src] == 2 and bridges[music_bot] == src:
-      pass
-    else:
-      return
-    if src not in mtmsgsg:
-      return
-    mtmsgs = mtmsgsg[src]
-    if mtmsgs:
-      pass
-    else:
-      return
-    #  tmp = []
-    #  for i in gid_src:
-    #    if gid_src[i] == src:
-    #      tmp.append(i)
-    #  qid = max(tmp)
-    ids = list(mtmsgs.keys())
-    qid = max(ids)
-    #  info(f"尝试下载：{text} {qid}")
-    bs = mtmsgs[qid][1]
-    if bs is None:
-      warn(f"fixme: bs is None")
-      return
-    if bs is float:
-      warn(f"fixme: bs is float")
-      return
-    info(f"尝试下载：{text} msg: {bs}")
-    i = None
-    for i in get_buttons(bs):
-      #  if type(i) is list:
-      #    for j in i:
-      #      if j.text == text:
-      #        info(f"已找到：{text}")
-      #        await j.click()
-      #        i = True
-      #        break
-      #    if i is True:
-      #      break
-      #  else:
-        if i.text == text:
-          info(f"已找到：{text}")
-          music_bot_state[src] += 1
-          await i.click()
-          i = True
-          send(f"命中：{text}", src, tmp_msg=True)
-          break
-
-    if i is True:
-      pass
-    else:
-      info(f"没找到：{text}")
-      send(f"没找到：{text}", src)
-    return
   else:
     # tilebot
     tmp=""
