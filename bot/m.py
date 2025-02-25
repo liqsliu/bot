@@ -2694,14 +2694,11 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   if r == 0:
     if o:
       s = o.splitlines()
-      if len(s) > 2:
+      if len(s) > 1:
         #  path = s[-1]
-        if os.path.exists(s[1]):
-          #  s.pop(0)
-          info("delete path1: %s" % s.pop(0))
-          #  path = s[0]
+        if os.path.exists(s[0]):
           path = s.pop(0)
-          info("delete path2: %s" % path)
+          info("found file: %s" % path)
           try:
             t = asyncio.create_task(backup(path))
             url = await upload(path, src)
@@ -2710,62 +2707,38 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
               #  s[0] = f"\n- {url}"
               s.append(f"\n- {url}")
               info("add xmpp file url: %s" % url)
-            #  else:
-            #    s.pop(0)
           finally:
             asyncio.create_task(backup(path, delete=True))
         else:
-          warn("delete path1: %s" % s.pop(0))
-          warn("delete path2: %s" % s.pop(0))
+          warn("not found file. delete path: %s" % s.pop(0))
         return "\n".join(s)
-      elif len(s) == 2:
-        return s[-1]
       else:
-        if os.path.exists(s[0]):
-          path = s[0]
-          warn(f"fixme: not found title, should delete {path}, url: {url}")
-          #  asyncio.create_task(backup(path, delete=True))
-          return
-        else:
-          warn(f"need file path: {o=}, url: {url}")
-          return
+        warn(f"fixme: {o=} {url}")
+        return s[-1]
     else:
-      warn("failed: %s\n--\nE: %s\n%s" % (o, r, e))
+      warn("empty out: %s\n--\nE: %s\n%s" % (o, r, e))
       return
   elif r == -512:
     if o:
       s = o.splitlines()
       if len(s) > 1:
-        path = None
-        if len(s) > 2:
-          if os.path.exists(s[1]):
-            s.pop(0)
-            info("delete path1: %s" % s.pop(0))
-            path = s.pop(0)
-            info(f"delete {path}")
-          else:
-            warn("delete path1: %s" % s.pop(0))
-            warn("delete path2: %s" % s.pop(0))
-        elif len(s)  == 2:
-          if os.path.exists(s[0]):
-            path = s.pop(0)
-            info(f"delete {path}")
-          else:
-            warn("delete path1: %s" % s.pop(0))
-        if path:
+        if os.path.exists(s[0]):
+          path = s.pop(0)
+          info("found file: %s" % path)
           t = asyncio.create_task(backup(path))
           url = await t
           if url:
             s.appent(url)
           asyncio.create_task(backup(path, delete=True))
+        else:
+          warn("not found file. delete path: %s" % s.pop(0))
       else:
-        warn(f"not found file: {o=}")
+        warn(f"fixme: {o=} {url}")
         return "timeout"
       return "\n".join(s)
     else:
       return "timeout"
   else:
-    #  if err:
     warn("%s\n--\nE: %s\n%s" % (o, r, e))
     return "%s\n--\nE: %s\n%s" % (o, r, e)
 
