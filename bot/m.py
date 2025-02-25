@@ -3844,6 +3844,7 @@ import pbincli.actions
 from pbincli.api import PrivateBin
 from pbincli.utils import PBinCLIException, PBinCLIError, validate_url_ending
 
+@cross_thread(need_main=False)
 def pvb_init():
   CONFIG_PATHS = [
     os.path.join(".", "pbincli.conf", ),
@@ -9219,6 +9220,7 @@ async def after_init():
   #  p.stdout.readline = wrap_read(p.stdout.readline)
   #  ress.append(b"")
   #  p.stderr.readline = wrap_read(p.stderr.readline)
+  pvb_init()
 
 
 
