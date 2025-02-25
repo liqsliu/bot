@@ -1776,11 +1776,11 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
   async with myshell_lock:
 
     if not myshell_queue.empty():
-      info("clean...")
+      warn("clean shell out...")
       #  await sleep(1)
       while not myshell_queue.empty():
         info("drop: %s" % await myshell_queue.get())
-      info("clean ok")
+      warn("clean ok")
 
     start_time = time.time()
     last_send = start_time
