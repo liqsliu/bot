@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # PYTHON_ARGCOMPLETE_OK
 import os, sys, argparse
 
@@ -51,7 +51,7 @@ def read_config(filename):
 
 
 
-def main():
+def init():
   parser = argparse.ArgumentParser(description='Full-featured PrivateBin command-line client')
   parser.add_argument("-d", "--debug", default=False, action="store_true", help="Enable debug output")
 
@@ -146,7 +146,9 @@ def main():
   argcomplete.autocomplete(parser)
 
   # parse arguments
-  args = parser.parse_args()
+  #  args = parser.parse_args()
+  global args, api_client, CONFIG
+  args = parser.parse_args( args=["send", "-t", "t", "--json"])
 
   CONFIG = {
     'server': 'https://paste.i2pd.xyz/',
@@ -173,15 +175,47 @@ def main():
     'auth_custom': None,
     'json': False
   }
+
+  for key in CONFIG.keys():
+    var = "PRIVATEBIN_{}".format(key.upper())
+    if var in os.environ: CONFIG[key] = os.getenv(var)
+    # values from command line switches are preferred
+    args_var = vars(args)
+    if key in args_var:
+      CONFIG[key] = args_var[key]
+
   api_client = PrivateBin(CONFIG)
-  args.text = "test"
+  #  args.text = "test"
+  #  args.json = argparse.SUPPRESS
+  #  args.func=pbincli.actions.send
+
+  import io
+  global tmp_for_print
+  tmp_for_print = io.StringIO()
+
+def send(text):
+  args.text = text
   try:
+    orig = sys.stdout
+    sys.stdout = tmp_for_print
     pbincli.actions.send(args, api_client, settings=CONFIG)
     #  args.func(args, api_client, settings=CONFIG)
 
   except PBinCLIException as pe:
     raise PBinCLIException("error: {}".format(pe))
+  #  except Exception as e:
+  #    #  print(f"E: {e=}")
+  except SystemExit as e:
+    pass
+  #  except BaseException as e:
+  #    print(f"E: {e=}")
+  sys.stdout = orig
+  return tmp_for_print.getvalue()
+  #  print(f"res: {res=}")
+  print(f"res: {tmp_for_print.getvalue()=}")
 
 
 if __name__ == "__main__":
-  main()
+  #  main()
+  init()
+  send("main")
