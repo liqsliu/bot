@@ -5200,12 +5200,12 @@ async def msgtout(event):
         warn(f"src is dict: {src}")
         bridges.pop(chat_id)
       elif src in mtmsgsg:
+        bridges.pop(chat_id)
         mtmsgs = mtmsgsg[src]
         if mtmsgs:
-          bridges.pop(chat_id)
           mtmsgs.clear()
           #  await send(f"unlink {src}", CHAT_ID)
-          warn(f"unlink {src}")
+          warn(f"unlink {src} - (chat_id)")
   text = msg.text
   info(f"tg out msg: {chat_id}: {text}")
   if text == "/help":
