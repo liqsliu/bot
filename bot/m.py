@@ -4961,7 +4961,7 @@ async def msgt(event):
     #  else:
     #    info(f"None {parse_message_deleted_task=}")
     #  l[2].add(msg.id)
-    if type(sec) is int:
+    if type(src) is int:
       send(text, src, correct=correct)
     else:
       gid = msg.id
