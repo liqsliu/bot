@@ -4931,7 +4931,7 @@ async def msgt(event):
         file_info = ""
       if file.size:
         if file.size > FILE_DOWNLOAD_MAX_BYTES:
-          file_info += f"\n文件过大，终止下载({hbyte(file.size))})"
+          file_info += f"\n文件过大，终止下载({hbyte(file.size)})"
         else:
           #  path = await tg_download_media(msg)
           path = await tg_download_media(msg, src=src, max_wait_time=get_timeout(msg.file.size))
