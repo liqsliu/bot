@@ -3846,7 +3846,7 @@ from pbincli.api import PrivateBin
 from pbincli.utils import PBinCLIException, PBinCLIError, validate_url_ending
 
 @cross_thread(need_main=False)
-def pvb_init():
+def pvb_init(server=None):
   CONFIG_PATHS = [
     os.path.join(".", "pbincli.conf", ),
     os.path.join(os.getenv("HOME") or "~", ".config", "pbincli", "pbincli.conf")
@@ -4018,6 +4018,8 @@ def pvb_init():
     if key in args_var:
       CONFIG[key] = args_var[key]
 
+  if server is not None:
+    CONFIG["server"] = server
   api_client = PrivateBin(CONFIG)
   #  args.text = "test"
   #  args.json = argparse.SUPPRESS
@@ -4030,10 +4032,8 @@ def pvb_init():
 #  def sendpv(text):
 @exceptions_handler
 @cross_thread(need_main=False)
-async def pvb(text, server=None):
+async def pvb(text):
   args_for_pvb.text = text
-  if server is not None:
-    args_for_pvb.server = server
   try:
     orig = sys.stdout
     sys.stdout = tmp_for_pvb_print
@@ -8067,6 +8067,8 @@ async def init_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://privatebin.info/directory/"
+    elif cmds[1] == "init":
+      pvb_init()
     text = ' '.join(cmds[1:])
     return await pvb(text)
   cmd_funs["pvb"] = _
@@ -8074,8 +8076,10 @@ async def init_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://paste.ononoki.org/\nhttps://paste.i2pd.xyz/"
+    fu = pvb_init(server="https://paste.ononoki.org/")
+    await fu
     text = ' '.join(cmds[1:])
-    return await pvb(text, server="https://paste.ononoki.org/")
+    return await pvb(text)
   cmd_funs["pvb2"] = _
 
 
