@@ -1177,6 +1177,7 @@ def tmp_save(data, ex=""):
     file.write(data)
   return name
 
+@exceptions_handler
 def load_str(msg, no_ast=False):
   """str to dict"""
   msg = msg.strip()
@@ -1185,13 +1186,13 @@ def load_str(msg, no_ast=False):
     return json.loads(msg)
   try:
     return ast.literal_eval(msg)
-  except ValueError:
-    warn(msg)
+  except (ValueError, SyntaxError) as e:
+    warn(f"faild: {e=} {msg=}")
     import json
     try:
       return json.loads(msg)
     except Exception as e:
-      err(f"json: error str: {msg} line: {e.__traceback__.tb_lineno}")
+      err(f"failed2: {msg=}")
       #  raise e
 
 
@@ -4028,6 +4029,7 @@ def pvb_init():
 
 
 #  def sendpv(text):
+@exceptions_handler
 @cross_thread(need_main=False)
 async def pvb(text):
   args_for_pvb.text = text
