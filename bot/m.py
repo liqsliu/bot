@@ -3834,6 +3834,17 @@ async def clear_history(src=None):
   allright.set()
   info("reset ok")
 
+import pb
+pb.init()
+
+async def pvb(text):
+  fu = run_cb_in_thread(pb.send, text)
+  res = await fu
+  j = load_str(res)
+  if j.status == 0:
+    return j.result.link
+  return res
+
 
 pb_list = {
     #  "anon": ["https://api.anonfiles.com/upload", "file"],
@@ -7828,7 +7839,17 @@ async def init_cmd():
   cmd_funs["xmppi"] = _
 
 
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"pastebin\n.{cmds[0]} text\n---\nhttps://fars.ee/"
+    return await pastebin(text)
+  cmd_funs["pb"] = _
 
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin"
+    return await pvb(text)
+  cmd_funs["pvb"] = _
 
 
 
