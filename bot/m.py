@@ -385,7 +385,7 @@ MAX_MSG_BYTES_TG = 4000
 HTTP_RES_MAX_BYTES = 15*2**20
 HTTP_FILE_MAX_BYTES = 50*2**20
 
-FILE_DOWNLOAD_MAX_BYTES = 64*2**20
+FILE_DOWNLOAD_MAX_BYTES = 100*2**20
 TMP_PATH=f"{HOME}/tera/tmp"
 
 DOWNLOAD_PATH0 = "/var/www/dav/tmp"
@@ -4930,7 +4930,7 @@ async def msgt(event):
       else:
         file_info = ""
       if file.size:
-        if file.size > FILE_DOWNLOAD_MAX_BYTES * 2:
+        if file.size > FILE_DOWNLOAD_MAX_BYTES:
           file_info += f"\n文件过大，终止下载({hbyte(file.size))})"
         else:
           #  path = await tg_download_media(msg)
