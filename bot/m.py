@@ -3377,10 +3377,10 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       #  if isawaitable(res):
       #  info(f"{type(res)}: {res} {msg}")
       if res is None:
-        info(f"send xmpp msg ok: {short(text)}")
+        info(f"sent: {jid} {short(text)}")
       #  elif asyncio.iscoroutine(res) or type(res) is stream.StanzaToken:
       else:
-        warn(f"res is not None: {res=} {client=} {room=} {msg=}")
+        warn(f"res is not None: {res=} {client=} {room=} {jid=} {msg=}")
       #  elif type(res) is stream.StanzaToken:
       #    #  dbg(f"client send: {res=}")
       #    try:
@@ -6422,10 +6422,11 @@ async def msgx(msg):
     #  await sleep(1)
     real_time = delay.stamp.timestamp()
     if time.time() - real_time > 60:
-      info("跳过旧消息: %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, short(msg.body), delay))
+      #  info("跳过旧消息: %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, short(msg.body), delay))
+      info("跳过旧消息: %s %s %s" % (str(msg.from_), short(msg.body), delay))
       return
     else:
-      info("旧消息: %s %s %s %s %s 延迟%ss" % (msg.type_, msg.id_,  str(msg.from_), msg.to, short(msg.body), time.time() - delay.stamp.timestamp()))
+      info("旧消息: 延迟%ss %s %s %s %s %s" % (time.time() - delay.stamp.timestamp(), msg.type_, msg.id_,  str(msg.from_), msg.to, short(msg.body)))
   else:
     #  info(f"假定消息无延迟: {msg}")
     real_time = time.time()
@@ -6488,13 +6489,13 @@ async def msgx(msg):
     #  if str(msg.from_) == str(rooms[muc].me.conversation_jid.bare()):
     #  if msg.from_.resource == rooms[muc].me.nick:
     if room.me is not None and nick == room.me.nick:
-      info("跳过自消息1: %s %s %s" % (msg.from_, msg.to, short(text)))
+      info("跳过1: %s %s" % (msg.from_, short(text)))
       return
 
     jids = users[muc]
     j = jids[myjid]
     if nick == j[0]:
-      info("跳过自消息2: %s %s %s" % (msg.from_, msg.to, short(text)))
+      info("跳过2: %s %s" % (msg.from_, short(text)))
       return
 
     rejoin = False
@@ -6508,7 +6509,7 @@ async def msgx(msg):
         if i.nick == nick:
           jid = str(i.direct_jid.bare())
           if jid == myjid:
-            info("跳过自消息3: %s %s %s" % (msg.from_, msg.to, short(text)))
+            warn("跳过3: %s %s" % (msg.from_, short(text)))
             return
           existed = True
 
@@ -6535,21 +6536,22 @@ async def msgx(msg):
 
       if not existed:
         if rejoin is False:
+          warn("leave muc: {muc}")
           await room.leave()
           rejoin = True
           rooms.pop(muc)
-          send_log("检测到幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
+          warn("检测到幽灵发言: %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
+          await sleep(5)
           if await join(muc):
             room = rooms[muc]
+            warn("joined muc: {muc}")
             continue
         else:
-          send_log("忽略幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
+          send_log("重新进群无效，忽略幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
           return
       break
 
-
     #  if msg.type_ == MessageType.CHAT:
-
 
     if is_admin is False:
       info(f"group msg: {short(text)}")
