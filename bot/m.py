@@ -3978,8 +3978,8 @@ def pvb_init():
 
   # parse arguments
   #  args = parser.parse_args()
-  global args, api_client, CONFIG
-  args = parser.parse_args( args=["send", "-t", "t", "--json"])
+  global args_for_pvb, api_client, CONFIG
+  args_for_pvb = parser.parse_args( args=["send", "-t", "t", "--json"])
 
   CONFIG = {
     'server': 'https://paste.i2pd.xyz/',
@@ -4011,7 +4011,7 @@ def pvb_init():
     var = "PRIVATEBIN_{}".format(key.upper())
     if var in os.environ: CONFIG[key] = os.getenv(var)
     # values from command line switches are preferred
-    args_var = vars(args)
+    args_var = vars(args_for_pvb)
     if key in args_var:
       CONFIG[key] = args_var[key]
 
@@ -4026,11 +4026,11 @@ def pvb_init():
 
 
 def sendpv(text):
-  args.text = text
+  args_for_pvb.text = text
   try:
     orig = sys.stdout
     sys.stdout = tmp_for_pvb_print
-    pbincli.actions.send(args, api_client, settings=CONFIG)
+    pbincli.actions.send(args_for_pvb, api_client, settings=CONFIG)
     #  args.func(args, api_client, settings=CONFIG)
   except PBinCLIException as pe:
     raise PBinCLIException("error: {}".format(pe))
