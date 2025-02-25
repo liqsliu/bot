@@ -8149,7 +8149,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           mtmsgs = mtmsgsg[src]
           mtmsgs[pid] = [name]
 
-          if pid in bridge:
+          if pid in bridges:
             bridges.pop(chat_id)
           if pid not in bridges_tmp:
             bridges_tmp[pid] = src
