@@ -7842,12 +7842,14 @@ async def init_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"pastebin\n.{cmds[0]} text\n---\nhttps://fars.ee/"
+    text = ' '.join(cmds[1:])
     return await pastebin(text)
   cmd_funs["pb"] = _
 
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin"
+    text = ' '.join(cmds[1:])
     return await pvb(text)
   cmd_funs["pvb"] = _
 
