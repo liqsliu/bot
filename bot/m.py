@@ -2494,7 +2494,7 @@ async def load_config():
       gd = {}
 
     if "mtmsgsg" in gd:
-      info("load msg history: %s" % gd["users"]
+      info("load msg history: %s" % gd["users"])
     else:
       warn("not found msg history")
 
