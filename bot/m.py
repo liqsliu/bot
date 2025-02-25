@@ -4027,7 +4027,9 @@ def pvb_init():
   tmp_for_pvb_print = io.StringIO()
 
 
-def sendpv(text):
+#  def sendpv(text):
+@cross_thread(need_main=False)
+async def pvb(text):
   args_for_pvb.text = text
   try:
     orig = sys.stdout
@@ -4043,10 +4045,10 @@ def sendpv(text):
   #  except BaseException as e:
   #    print(f"E: {e=}")
   sys.stdout = orig
-  return tmp_for_pvb_print.getvalue()
+  #  return tmp_for_pvb_print.getvalue()
+  res = tmp_for_pvb_print.getvalue()
 
-
-async def pvb(text):
+#  async def pvb(text):
   #  fu = run_cb_in_thread(pb.send, text)
   fu = run_cb_in_thread(sendpv, text)
   res = await fu
