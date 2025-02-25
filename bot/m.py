@@ -2493,6 +2493,11 @@ async def load_config():
       err(e)
       gd = {}
 
+    if "mtmsgsg" in gd:
+      info("load msg history: %s" % gd["users"]
+    else:
+      warn("not found msg history")
+
     if "users" not in gd:
       gd["users"] = {}
 
@@ -4956,12 +4961,15 @@ async def msgt(event):
     #  else:
     #    info(f"None {parse_message_deleted_task=}")
     #  l[2].add(msg.id)
-    gid = msg.id
-    if gid - 1 in forwarded_tg_msg_ids:
-      info(f"too many tg msg: {gid} for {chat_id}")
-      await sleep(0.5)
-    forwarded_tg_msg_ids[gid] = set()
-    send(text, src, correct=correct, tg_msg_id=msg.id)
+    if type(sec) is int:
+      send(text, src, correct=correct)
+    else:
+      gid = msg.id
+      if gid - 1 in forwarded_tg_msg_ids:
+        info(f"too many tg msg: {gid} for {chat_id}")
+        await sleep(0.5)
+      forwarded_tg_msg_ids[gid] = set()
+      send(text, src, correct=correct, tg_msg_id=msg.id)
 
   else:
     res, nick, delay = await print_tg_msg(event)
@@ -7882,6 +7890,8 @@ async def init_cmd():
         #  return ""
     return bot_cmds[bot_name]
   def add_tg_bot(bot_name, cmd, cmd2=None, cmd1=None, no_file=False):
+    #  mtmsgsg[src] = {}
+    #  bridges[pid] = src
     #  @exceptions_handler
     async def _(cmds, src):
       if cmd2 is not None:
