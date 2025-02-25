@@ -8351,13 +8351,13 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       elif url.startswith("https://twitter.com/"):
         res = await get_twitter(url, max_time=8)
         return res
-      if not res:
-        if len(urls) == 1:
-          res="%s" % await get_title(url, max_time=8)
-          break
-        res="[ %s urls ]" % len(urls)
-      #  res+="\n\n> %s\n%s" % (url, await get_title(url, src))
-      res+="\n\n> %s\n%s" % (url, await get_title(url, max_time=15))
+      tmp = "%s" % await get_title(url, max_time=8)
+      if len(urls) == 1:
+        res = tmp
+      else:
+        if not res:
+          res="[ %s urls ]" % len(urls)
+        res+="\n\n> %s\n%s" % (url, tmp)
 
     if res:
       res = f"{name}{res}"
