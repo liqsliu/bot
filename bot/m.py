@@ -1773,9 +1773,17 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
   cmds.append(f"echo "+eof)
   eof = eof.encode()
   k =  len(cmds)
-  start_time = time.time()
-  last_send = start_time
   async with myshell_lock:
+
+    if not myshell_queue.empty():
+      info("clean...")
+      #  await sleep(1)
+      while not myshell_queue.empty():
+        info("drop: %s" % await myshell_queue.get())
+      info("clean ok")
+
+    start_time = time.time()
+    last_send = start_time
     for c in cmds:
       p.stdin.write( c.encode() )
       info(f"send {k}: {short(c)}")
@@ -2725,23 +2733,37 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
       warn("failed: %s\n--\nE: %s\n%s" % (o, r, e))
       return
   elif r == -512:
-    s = o.splitlines()
-    if len(s) > 0:
-      if os.path.exists(s[0]):
-        path = s[0]
-        info(f"delete {path}")
-        asyncio.create_task(backup(path, delete=True))
-      elif len(s) > 2:
-        if os.path.exists(s[1]):
-          s.pop(0)
-          path = s[0]
-          info(f"delete {path}")
+    if o:
+      s = o.splitlines()
+      if len(s) > 1:
+        path = None
+        if len(s) > 2:
+          if os.path.exists(s[1]):
+            s.pop(0)
+            info("delete path1: %s" % s.pop(0))
+            path = s.pop(0)
+            info(f"delete {path}")
+          else:
+            warn("delete path1: %s" % s.pop(0))
+            warn("delete path2: %s" % s.pop(0))
+        elif len(s)  == 2:
+          if os.path.exists(s[0]):
+            path = s.pop(0)
+            info(f"delete {path}")
+          else:
+            warn("delete path1: %s" % s.pop(0))
+        if path:
+          t = asyncio.create_task(backup(path))
+          url = await t
+          if url:
+            s.appent(url)
           asyncio.create_task(backup(path, delete=True))
-        else:
-          warn(f"not found file: {o=}")
       else:
-        warn(f"fixme: error out of tittle.sh: {o}")
-    return "timeout"
+        warn(f"not found file: {o=}")
+        return "timeout"
+      return "\n".join(s)
+    else:
+      return "timeout"
   else:
     #  if err:
     warn("%s\n--\nE: %s\n%s" % (o, r, e))
