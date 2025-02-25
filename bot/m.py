@@ -8357,7 +8357,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
           break
         res="[ %s urls ]" % len(urls)
       #  res+="\n\n> %s\n%s" % (url, await get_title(url, src))
-      res+="\n\n> %s\n%s" % (url, await get_title(url, max_time=8))
+      res+="\n\n> %s\n%s" % (url, await get_title(url, max_time=15))
 
     if res:
       res = f"{name}{res}"
