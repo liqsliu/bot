@@ -8607,6 +8607,61 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
 
   return False
 
+@exceptions_handler
+async def set_presence(client=None):
+  if client is None:
+    client = XB
+  ps = XB.summon(aioxmpp.PresenceServer)
+  # https://stackoverflow.com/a/24773021
+  st = ps.set_presence(
+      aioxmpp.PresenceState(available=True, show="chat"),
+      f"xmpp:{main_group}?join",
+      )
+  res = await st
+  if res is not None:
+    warn(f"error StanzaToken: {res}")
+  else:
+    info("update presence ok")
+    #  st = ps.resend_presence()
+    #  res = await st
+    #  if res is None:
+    #    info("update presence ok")
+    #  else:
+    #    warn(f"error StanzaToken: {res}")
+@exceptions_handler
+async def set_vcard(client=None):
+  if client is None:
+    client = XB
+  vs = client.summon(aioxmpp.vcard.VCardService)
+  vc = await vs.get_vcard(None)
+  if vc.get_photo_mime_type() is None:
+  #  if True:
+    #  fn = WORK_DIR / "photo.png"
+    fn = WORK_DIR / "w.png"
+    fn = fn.as_posix()
+    #  fn = 'tx.jpg'
+    data = await read_file(fn, 'rb')
+    #  vc.set_photo_data('image/jpeg', data)
+    vc.set_photo_data('image/png', data)
+    await vs.set_vcard(vc)
+    await sleep(1)
+    vc = await vs.get_vcard(None)
+    if vc.get_photo_mime_type() is not None:
+      info(f"头像设置成功: {jid} {fn}")
+      #  warn(f"修改头像需要重新登录才能生效：{jid}")
+      #  await stop(client)
+      #  if await login(client, True):
+      #    #  n = fn.split("@", 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
+      #    #  mynicks.add((jid, n))
+      #    info(f"头像设置成功: {jid} {fn}")
+      #    return True
+      #  else:
+      #    return False
+    else:
+      warn(f"头像设置失败：{jid}")
+  else:
+    info(f"无需设置头像：{jid}")
+
 
 @exceptions_handler
 async def login(client=None):
@@ -8618,38 +8673,8 @@ async def login(client=None):
     #  steam = await i.connected().__aenter__()
     steam = await asyncio.wait_for(client.connected().__aenter__(), timeout=30)
     info(f"登录成功：{jid}")
-
-    vs = client.summon(aioxmpp.vcard.VCardService)
-    vc = await vs.get_vcard(None)
-    if vc.get_photo_mime_type() is None:
-    #  if True:
-      #  fn = WORK_DIR / "photo.png"
-      fn = WORK_DIR / "w.png"
-      fn = fn.as_posix()
-      #  fn = 'tx.jpg'
-      data = await read_file(fn, 'rb')
-      #  vc.set_photo_data('image/jpeg', data)
-      vc.set_photo_data('image/png', data)
-      await vs.set_vcard(vc)
-      await sleep(1)
-      vc = await vs.get_vcard(None)
-      if vc.get_photo_mime_type() is not None:
-        info(f"头像设置成功: {jid} {fn}")
-        #  warn(f"修改头像需要重新登录才能生效：{jid}")
-        #  await stop(client)
-        #  if await login(client, True):
-        #    #  n = fn.split("@", 1)[1].split('_', 1)[1].rsplit('.', 1)[0]
-        #    #  mynicks.add((jid, n))
-        #    info(f"头像设置成功: {jid} {fn}")
-        #    return True
-        #  else:
-        #    return False
-      else:
-        warn(f"头像设置失败：{jid}")
-    else:
-      info(f"无需设置头像：{jid}")
-
-
+    asyncio.create_task(set_presence(client))
+    asyncio.create_task(set_vcard(client))
 
   except TimeoutError as e:
     warn(f"登录失败(超时)：{jid}, {e=}")
@@ -9256,27 +9281,10 @@ async def after_init():
 
 
 async def loop_task():
-  ps = XB.summon(aioxmpp.PresenceServer)
-  # https://stackoverflow.com/a/24773021
-  st = ps.set_presence(
-      aioxmpp.PresenceState(available=True, show="chat"),
-      f"xmpp:{main_group}?join",
-      )
-  res = await st
-  if res is not None:
-    warn(f"error StanzaToken: {res}")
-  else:
-    info("update presence ok")
   #  while True:
   #    if XB.running:
   while XB.running:
     await sleep(60)
-    #  st = ps.resend_presence()
-    #  res = await st
-    #  if res is None:
-    #    info("update presence ok")
-    #  else:
-    #    warn(f"error StanzaToken: {res}")
 
     continue
 
