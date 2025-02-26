@@ -4338,6 +4338,7 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
   if not isinstance(text, str):
     text = "%s" % text
   info(f"send to mt: {gateway} {text}")
+  global mt_send_lock
   if mt_send_lock is None:
     mt_send_lock = asyncio.Lock()
   async with mt_send_lock:
