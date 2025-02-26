@@ -1,6 +1,5 @@
 #!/bin/bash
 (
-
 pkill -x mt
 echo "wait ..."
 sleep 5
@@ -20,7 +19,7 @@ if [[ "$r" -eq 1 ]]; then
 else
 echo "restart ..."
 echo "wait ..."
-sleep 3
+sleep 5
 fi
 done
 )
