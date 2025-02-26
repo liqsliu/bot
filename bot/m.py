@@ -3249,7 +3249,7 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
             #  await fu
             try:
               #  await asyncio.wait_for(await asyncio.shield(fu), timeout=8)
-              await asyncio.wait_for(fu, timeout=5)
+              await asyncio.wait_for(fu, timeout=3)
             #  except Exception as e:
             except TimeoutError as e:
               on_nick_changed_futures.pop(muc)
