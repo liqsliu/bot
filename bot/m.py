@@ -4023,7 +4023,6 @@ def pvb_init(server=None):
   #  args.func=pbincli.actions.send
 
   #  import io
-  global tmp_for_pvb_print
   pvb_init2(server)
 
 def pvb_init2(server=None):
@@ -4057,9 +4056,9 @@ async def pvb(text, server=None):
   sys.stdout = orig
   #  return tmp_for_pvb_print.getvalue()
   res = tmp_for_pvb_print.getvalue()
-  if "\n" in res:
-    warn(f"wrong format res: {res=}")
-    res = res.splitlines()[-1]
+  #  if "\n" in res:
+  #    warn(f"wrong format res: {res=}")
+  #    res = res.splitlines()[-1]
 
 #  async def pvb(text):
   #  fu = run_cb_in_thread(pb.send, text)
