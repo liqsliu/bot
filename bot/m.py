@@ -4058,7 +4058,7 @@ async def pvb(text, server=None):
   res = tmp_for_pvb_print.getvalue()
   if "\n" in res:
     warn(f"wrong format res: {res=}")
-    res = res.split("\n", 1)[0]
+    res = res.splitlines()[-1]
 
 #  async def pvb(text):
   #  fu = run_cb_in_thread(pb.send, text)
