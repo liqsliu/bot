@@ -428,8 +428,9 @@ CLEAN = "/new_chat"
 #  stuck= {}
 queues = {}
 nids = {}
-mt_send_lock = asyncio.Lock()
-mt_send_lock2 = asyncio.Lock()
+mt_send_lock = None
+#  mt_send_lock = asyncio.Lock()
+#  mt_send_lock2 = asyncio.Lock()
 downlaod_lock = asyncio.Lock()
 bash_lock = asyncio.Lock()
 tg_send_lock = asyncio.Lock()
@@ -4318,8 +4319,8 @@ async def _mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
     "username": "{}".format(name),
     "gateway": "{}".format(gateway)
   }
-  async with mt_send_lock:
-    res = await http("http://127.0.0.1:4247/api/message", method="POST", json=data)
+  #  async with mt_send_lock:
+  res = await http("http://127.0.0.1:4247/api/message", method="POST", json=data)
   #  info("res of mt_send: {}".format(res))
   return True
   return res
@@ -4337,6 +4338,8 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
   if not isinstance(text, str):
     text = "%s" % text
   info(f"send to mt: {gateway} {text}")
+  if mt_send_lock is None:
+    mt_send_lock = asyncio.Lock()
   async with mt_send_lock:
     need_delete = False
     if os.path.exists(f"{SH_PATH}"):
@@ -4358,8 +4361,9 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
       #  await mt_send(res, gateway=gateway, name="")
       name = ""
     if need_delete:
-      #  os.remove(fn)
-      run_cb_in_thread(os.remove, fn)
+      os.remove(fn)
+      #  fu = run_cb_in_thread(os.remove, fn)
+      #  await fu
   return True
 
 
