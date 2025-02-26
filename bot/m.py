@@ -4056,18 +4056,21 @@ async def pvb(text, server=None):
   sys.stdout = orig
   #  return tmp_for_pvb_print.getvalue()
   res = tmp_for_pvb_print.getvalue()
-  #  if "\n" in res:
-  #    warn(f"wrong format res: {res=}")
-  #    res = res.splitlines()[-1]
+  if "\n" in res:
+    warn(f"wrong format res: {res=}")
+    res = res.splitlines()[-1]
 
 #  async def pvb(text):
   #  fu = run_cb_in_thread(pb.send, text)
   #  fu = run_cb_in_thread(sendpv, text)
   #  res = await fu
-  j = load_str(res)
-  if j["status"] == 0:
-    return j["result"]["link"]
-  return res
+  try:
+    j = load_str(res)
+    if j["status"] == 0:
+      return j["result"]["link"]
+    return res
+  except Exception as e:
+    return f"{e=} {res=}"
 
 
 pb_list = {
