@@ -4086,6 +4086,7 @@ pb_list = {
     }
 #async def pastebin(data="test", filename=None, url="https://fars.ee/?u=1", fieldname="c", extra={}, **kwargs):
 @exceptions_handler
+@cross_thread
 async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname="c", extra={}, ce=None, use=None, **kwargs):
   #  use = "0x0"
   if not data:
@@ -4221,7 +4222,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
           elif res.status != 200 and res.status != 201:
             text = await res.text()
             html = f"E: error http status: {res.status} {res.reason} headers: {res.headers} url: {res.url} res: {text}"
-            err(html)
+            warn(html)
           else:
             # print(type(res))
             # print("Status:", res.status)
@@ -4236,7 +4237,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               length = int(res.headers['Content-Length'])
             #  if 'Content-Length' in res.headers and int(res.headers['Content-Length']) > HTTP_RES_MAX_BYTES:
             if length > HTTP_RES_MAX_BYTES:
-              err(f"文件过大，终止下载: ({length}) {url}")
+              warn(f"文件过大，终止下载: ({length}) {url}")
             elif 'Transfer-Encoding' in res.headers and res.headers['Transfer-Encoding'] == "chunked":
               #  async for data in res.content.iter_chunked(HTTP_RES_MAX_BYTES):
               #    break
@@ -4252,9 +4253,9 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               #  data = await res.read()
               data = await res.content.read(HTTP_FILE_MAX_BYTES)
       except ClientPayloadError as e:
-        err(f"读取失败: {e=} {url=}")
+        warn(f"读取失败: {e=} {url=}")
       except Exception as e:
-        err(f"http connect error: {e=} {url=}")
+        warn(f"http connect error: {e=} {url=}")
 
       if data:
         info(f"http body data: {len(data)} {short(data)}")
@@ -4265,12 +4266,12 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
             if b:
               data = b
             else:
-              err("解压失败: {} url: {}\n".format(res.headers['Content-Encoding'], url))
+              warn("解压失败: {} url: {}\n".format(res.headers['Content-Encoding'], url))
               #  return data
         #  except brotli.error as e:
         #    err(f"解压时出现错误: {e=} {res.headers=} {data[:512]}")
         except Exception as e:
-          err(f"解压时出现错误: {e=} {res.headers=} {short(data)}")
+          warn(f"解压时出现错误: {e=} {res.headers=} {short(data)}")
         try:
           # if "text/plain" in res.headers['content-type']:
           if "text" in res.headers['content-type']:
@@ -4346,10 +4347,10 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
     need_delete = False
     if os.path.exists(f"{SH_PATH}"):
       fn = f"{SH_PATH}/SM_LOCK_{gateway}"
-      for _ in range(5):
+      for _ in range(3):
         if os.path.exists(fn):
           info(f"busy: {gateway} {fn}")
-          await sleep(2)
+          await sleep(1)
         else:
           break
 
