@@ -9255,6 +9255,33 @@ async def after_init():
   pvb_init()
 
 
+async def loop_task():
+  ps = XB.summon(aioxmpp.PresenceServer)
+  # https://stackoverflow.com/a/24773021
+  st = ps.set_presence(
+      aioxmpp.PresenceState(available=True, show="chat"),
+      f"xmpp:main_group?join",
+      )
+  res = await st
+  if res is not None:
+    warn(f"error StanzaToken: {res}")
+  #  while True:
+  #    if XB.running:
+  while XB.running:
+    await sleep(60)
+    st = ps.resend_presence()
+    res = await st
+    if res is None:
+      info("update presence ok")
+    else:
+      warn(f"error StanzaToken: {res}")
+
+    continue
+
+  warn("xmppbot is not running, restart...")
+  sys.exit(2)
+  
+  await UB.run_until_disconnected()
 
 async def init():
   global loop
@@ -9407,25 +9434,14 @@ async def amain():
       info(f"初始化完成")
       sendme(f"启动成功，用时: {int(time.time()-start_time)}s", to=0)
       #  send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
-
       try:
-        #  while True:
-        #    if XB.running:
-        while XB.running:
-          await sleep(60)
-          continue
-        warn("xmppbot is not running, restart...")
-        await stop()
-        await save_data()
-        sys.exit(2)
-
-        
-        await UB.run_until_disconnected()
+        await loop_task()
       finally:
         info("断开bot连接前需要清理")
         await stop()
         await stop_sub()
         info("清理完成")
+
 
     info("主程序结束")
   finally:
