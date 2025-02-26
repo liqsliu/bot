@@ -4024,7 +4024,6 @@ def pvb_init(server=None):
 
   #  import io
   global tmp_for_pvb_print
-  tmp_for_pvb_print = io.StringIO()
   pvb_init2(server)
 
 def pvb_init2(server=None):
@@ -4042,7 +4041,8 @@ async def pvb(text, server=None):
   pvb_args.text = text
   try:
     orig = sys.stdout
-    tmp_for_pvb_print.seek(0)
+    #  tmp_for_pvb_print.seek(0)
+    tmp_for_pvb_print = io.StringIO()
     sys.stdout = tmp_for_pvb_print
     pbincli.actions.send(pvb_args, pvb_client, settings=pvb_CONFIG)
     #  args.func(args, api_client, settings=CONFIG)
