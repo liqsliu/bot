@@ -9271,12 +9271,21 @@ async def loop_task():
   #    if XB.running:
   while XB.running:
     await sleep(60)
-    st = ps.resend_presence()
+    st = ps.set_presence(
+        aioxmpp.PresenceState(available=True, show="chat"),
+        None,
+        )
     res = await st
-    if res is None:
-      info("update presence ok")
-    else:
+    if res is not None:
       warn(f"error StanzaToken: {res}")
+    else:
+      info("update presence ok")
+    #  st = ps.resend_presence()
+    #  res = await st
+    #  if res is None:
+    #    info("update presence ok")
+    #  else:
+    #    warn(f"error StanzaToken: {res}")
 
     continue
 
