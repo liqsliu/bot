@@ -4086,8 +4086,8 @@ pb_list = {
     "fars1": ["https://fars.ee/", "c"]
     }
 #async def pastebin(data="test", filename=None, url="https://fars.ee/?u=1", fieldname="c", extra={}, **kwargs):
+#  @cross_thread
 @exceptions_handler
-@cross_thread
 async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname="c", extra={}, ce=None, use=None, **kwargs):
   #  use = "0x0"
   if not data:
@@ -4224,7 +4224,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
             text = await res.text()
             html = f"E: error http status: {res.status} {res.reason} headers: {res.headers} url: {res.url} res: {text}"
             err(html)
-            return
+            #  return
           else:
             # print(type(res))
             # print("Status:", res.status)
@@ -4256,7 +4256,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               data = await res.content.read(HTTP_FILE_MAX_BYTES)
       except ClientPayloadError as e:
         err(f"读取失败: {e=} {url=}")
-        return
+        #  return
       #  except Exception as e:
       #    err(f"http connect error: {e=} {url=}")
 
