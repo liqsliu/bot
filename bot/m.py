@@ -9260,11 +9260,13 @@ async def loop_task():
   # https://stackoverflow.com/a/24773021
   st = ps.set_presence(
       aioxmpp.PresenceState(available=True, show="chat"),
-      f"xmpp:main_group?join",
+      f"xmpp:{main_group}?join",
       )
   res = await st
   if res is not None:
     warn(f"error StanzaToken: {res}")
+  else:
+    info("update presence ok")
   #  while True:
   #    if XB.running:
   while XB.running:
