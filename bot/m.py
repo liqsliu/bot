@@ -4042,6 +4042,7 @@ async def pvb(text, server=None):
   pvb_args.text = text
   try:
     orig = sys.stdout
+    tmp_for_pvb_print.seek(0)
     sys.stdout = tmp_for_pvb_print
     pbincli.actions.send(pvb_args, pvb_client, settings=pvb_CONFIG)
     #  args.func(args, api_client, settings=CONFIG)
