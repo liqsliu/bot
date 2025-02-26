@@ -8632,6 +8632,7 @@ async def set_presence(client=None):
 async def set_vcard(client=None):
   if client is None:
     client = XB
+  jid = get_jid(client.local_jid)
   vs = client.summon(aioxmpp.vcard.VCardService)
   vc = await vs.get_vcard(None)
   if vc.get_photo_mime_type() is None:
@@ -8647,7 +8648,6 @@ async def set_vcard(client=None):
     await sleep(1)
     vc = await vs.get_vcard(None)
     if vc.get_photo_mime_type() is not None:
-      jid = get_jid(client.local_jid)
       info(f"头像设置成功: {jid} {fn}")
       #  warn(f"修改头像需要重新登录才能生效：{jid}")
       #  await stop(client)
