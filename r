@@ -3,7 +3,7 @@
 
 pkill -x mt
 echo "wait ..."
-sleep 2
+sleep 5
 cd ~/bot
 while true
 do

@@ -6,8 +6,6 @@ cd ~/bot/ && bash init.sh || exit 1
 cd ~/
 
 while true; do
-
-
 r=0
 #./matterbridge "$@" || bash tg.sh "matterbridge exit $?"
 ./mt "$@" || {
