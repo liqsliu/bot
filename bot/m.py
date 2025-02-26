@@ -4031,6 +4031,7 @@ def pvb_init2(server=None):
   global pvb_args, pvb_client, pvb_CONFIG
   if server is not None:
     pvb_CONFIG["server"] = server
+  pvb_client = PrivateBin(pvb_CONFIG)
 
 #  def sendpv(text):
 @exceptions_handler
@@ -4042,7 +4043,6 @@ async def pvb(text, server=None):
   try:
     orig = sys.stdout
     sys.stdout = tmp_for_pvb_print
-    pvb_client = PrivateBin(pvb_CONFIG)
     pbincli.actions.send(pvb_args, pvb_client, settings=pvb_CONFIG)
     #  args.func(args, api_client, settings=CONFIG)
   except PBinCLIException as pe:
