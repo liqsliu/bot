@@ -9273,7 +9273,6 @@ async def loop_task():
     await sleep(60)
     st = ps.set_presence(
         aioxmpp.PresenceState(available=True, show="chat"),
-        None,
         )
     res = await st
     if res is not None:
