@@ -4025,8 +4025,7 @@ def pvb_init(server=None):
   #  import io
   global tmp_for_pvb_print
   tmp_for_pvb_print = io.StringIO()
-  if server is not None:
-    pvb_init2(server)
+  pvb_init2(server)
 
 def pvb_init2(server=None):
   global pvb_args, pvb_client, pvb_CONFIG
