@@ -2975,6 +2975,7 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
 #    return res
 
 
+@cross_thread(need_main=True)
 def send_log(text, jid=CHAT_ID, delay=1):
   k = 0
   # https://docs.python.org/zh-cn/3/library/asyncio-task.html#introspection
@@ -4180,8 +4181,8 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
 #      session = aiohttp.ClientSession()
 #      warn("a new session")
 
+#  @cross_thread
 @exceptions_handler
-@cross_thread
 async def http(url, method="GET", return_headers=False, *args, **kwargs):
   if "headers" in kwargs:
     headers = kwargs["headers"]
@@ -4222,7 +4223,8 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
           elif res.status != 200 and res.status != 201:
             text = await res.text()
             html = f"E: error http status: {res.status} {res.reason} headers: {res.headers} url: {res.url} res: {text}"
-            warn(html)
+            err(html)
+            return
           else:
             # print(type(res))
             # print("Status:", res.status)
@@ -4237,7 +4239,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               length = int(res.headers['Content-Length'])
             #  if 'Content-Length' in res.headers and int(res.headers['Content-Length']) > HTTP_RES_MAX_BYTES:
             if length > HTTP_RES_MAX_BYTES:
-              warn(f"文件过大，终止下载: ({length}) {url}")
+              err(f"文件过大，终止下载: ({length}) {url}")
             elif 'Transfer-Encoding' in res.headers and res.headers['Transfer-Encoding'] == "chunked":
               #  async for data in res.content.iter_chunked(HTTP_RES_MAX_BYTES):
               #    break
@@ -4253,9 +4255,10 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               #  data = await res.read()
               data = await res.content.read(HTTP_FILE_MAX_BYTES)
       except ClientPayloadError as e:
-        warn(f"读取失败: {e=} {url=}")
-      except Exception as e:
-        warn(f"http connect error: {e=} {url=}")
+        err(f"读取失败: {e=} {url=}")
+        return
+      #  except Exception as e:
+      #    err(f"http connect error: {e=} {url=}")
 
       if data:
         info(f"http body data: {len(data)} {short(data)}")
@@ -4271,7 +4274,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
         #  except brotli.error as e:
         #    err(f"解压时出现错误: {e=} {res.headers=} {data[:512]}")
         except Exception as e:
-          warn(f"解压时出现错误: {e=} {res.headers=} {short(data)}")
+          err(f"解压时出现错误: {e=} {res.headers=} {short(data)}")
         try:
           # if "text/plain" in res.headers['content-type']:
           if "text" in res.headers['content-type']:
@@ -4283,7 +4286,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
             html = data.decode(errors='ignore')
           info(f"http res: {short(html)} url: {url}")
         except UnicodeDecodeError as e:
-          warn(f"{e=} res data: {short(data)}")
+          err(f"docode failed: {e=} res data: {short(data)}")
           html = data
   if return_headers:
     if res:
@@ -4293,12 +4296,12 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
   else:
     return html
 
-async def mt_send(*args, **kwargs):
-  asyncio.create_task(_mt_send(*args, **kwargs))
-  return True
+#  async def mt_send(*args, **kwargs):
+#    asyncio.create_task(_mt_send(*args, **kwargs))
+#    return True
 
 #  async def mt_send(text="null", name="bot", gateway="test", qt=None):
-async def _mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
+async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
   #  # api.xmpp
   #  MT_API = "127.0.0.1:4247"
   #  #  if gateway == 'me':
