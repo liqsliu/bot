@@ -3980,10 +3980,10 @@ def pvb_init(server=None):
 
   # parse arguments
   #  args = parser.parse_args()
-  global args_for_pvb, api_client, CONFIG
-  args_for_pvb = parser.parse_args( args=["send", "-t", "t", "--json"])
+  global pvb_args, pvb_client, pvb_CONFIG
+  pvb_args = parser.parse_args( args=["send", "-t", "t", "--json"])
 
-  CONFIG = {
+  pvb_CONFIG = {
     'server': 'https://paste.i2pd.xyz/',
     'random_server': None,
     'mirrors': None,
@@ -4010,17 +4010,14 @@ def pvb_init(server=None):
     'json': False
   }
 
-  for key in CONFIG.keys():
+  for key in pvb_CONFIG.keys():
     var = "PRIVATEBIN_{}".format(key.upper())
-    if var in os.environ: CONFIG[key] = os.getenv(var)
+    if var in os.environ: pvb_CONFIG[key] = os.getenv(var)
     # values from command line switches are preferred
-    args_var = vars(args_for_pvb)
+    args_var = vars(pvb_args)
     if key in args_var:
-      CONFIG[key] = args_var[key]
+      pvb_CONFIG[key] = args_var[key]
 
-  if server is not None:
-    CONFIG["server"] = server
-  api_client = PrivateBin(CONFIG)
   #  args.text = "test"
   #  args.json = argparse.SUPPRESS
   #  args.func=pbincli.actions.send
@@ -4028,16 +4025,26 @@ def pvb_init(server=None):
   #  import io
   global tmp_for_pvb_print
   tmp_for_pvb_print = io.StringIO()
+  if server is not None:
+    pvb_init2(server)
+
+def pvb_init2(server=None):
+  global pvb_args, pvb_client, pvb_CONFIG
+  if server is not None:
+    pvb_CONFIG["server"] = server
+  pvb_client = PrivateBin(pvb_CONFIG)
 
 #  def sendpv(text):
 @exceptions_handler
 @cross_thread(need_main=False)
-async def pvb(text):
-  args_for_pvb.text = text
+async def pvb(text, server=None):
+  if server is not None:
+    pvb_init2(server)
+  pvb_args.text = text
   try:
     orig = sys.stdout
     sys.stdout = tmp_for_pvb_print
-    pbincli.actions.send(args_for_pvb, api_client, settings=CONFIG)
+    pbincli.actions.send(pvb_args, pvb_client, settings=pvb_CONFIG)
     #  args.func(args, api_client, settings=CONFIG)
   except PBinCLIException as pe:
     raise PBinCLIException("error: {}".format(pe))
