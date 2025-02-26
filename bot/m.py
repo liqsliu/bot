@@ -8085,10 +8085,10 @@ async def init_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://paste.ononoki.org/\nhttps://paste.i2pd.xyz/"
-    fu = pvb_init(server="https://0.0g.gg/")
-    await fu
+    #  fu = pvb_init(server="https://0.0g.gg/")
+    #  await fu
     text = ' '.join(cmds[1:])
-    return await pvb(text)
+    return await pvb(text, server="https://0.0g.gg/")
   cmd_funs["pvb2"] = _
 
 
