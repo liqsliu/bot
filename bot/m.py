@@ -4180,6 +4180,7 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
 #      warn("a new session")
 
 @exceptions_handler
+@cross_thread
 async def http(url, method="GET", return_headers=False, *args, **kwargs):
   if "headers" in kwargs:
     headers = kwargs["headers"]
