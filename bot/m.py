@@ -2983,7 +2983,7 @@ def send_log(text, jid=CHAT_ID, delay=1):
     if j.get_name() == "send_log":
       k += 1
   if k > 0:
-    warn(f"send_log is busy: {k} {short(text)}")
+    warn(f"send_log is waiting: {k} text: {short(text)}")
   else:
     info(f"send_log: {text}")
   asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
