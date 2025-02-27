@@ -1781,8 +1781,8 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
       warn("clean shell out...")
       #  await sleep(1)
       while not myshell_queue.empty():
-        info("drop: %s" % await myshell_queue.get())
-      warn("clean ok")
+        info("drop old out: %s" % str(await myshell_queue.get()) )
+      info("clean ok")
 
     start_time = time.time()
     last_send = start_time
@@ -2983,7 +2983,7 @@ def send_log(text, jid=CHAT_ID, delay=1):
     if j.get_name() == "send_log":
       k += 1
   if k > 0:
-    warn(f"send_log is busy: {len(k)} {short(text)}")
+    warn(f"send_log is busy: {k} {short(text)}")
   else:
     info(f"send_log: {text}")
   asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
