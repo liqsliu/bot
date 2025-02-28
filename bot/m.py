@@ -504,6 +504,7 @@ def cross_thread(func=None, *, need_main=True):
         #    return run_cb_in_main(func, *args, **kwargs)
         #  else:
         #    return run_cb_in_thread(func, *args, **kwargs)
+        return run_cb(func, *args, **kwargs, need_main=need_main)
         fu = run_cb(func, *args, **kwargs, need_main=need_main)
         if not fu.done():
           time.sleep(0.3)
@@ -891,8 +892,9 @@ async def compress(data, m="zst"):
     #  d = await run_run(f(), False)
     info(f"start to compress: {len(data)} {short(data)}")
     #  fu = run_cb_in_thread(_compress_funcs[m], data)
-    fu = run_cb(_compress_funcs[m], data, need_main=False)
-    d = await fu
+    #  fu = run_cb(_compress_funcs[m], data, need_main=False)
+    #  d = await fu
+    d = run_cb(_compress_funcs[m], data, need_main=False)
     #  d =  _compress_funcs[m](data)
     #  d = run_cb_in_thread(_compress_funcs[m], data)
     if d:
@@ -926,8 +928,9 @@ async def decompress(data, m):
     #  d = await run_run(f(), False)
     info(f"start to decompress: {len(data)} {short(data)}")
     #  fu = run_cb_in_thread(_decompress_funcs[m], data)
-    fu = run_cb(_decompress_funcs[m], data, need_main=False)
-    d = await fu
+    #  fu = run_cb(_decompress_funcs[m], data, need_main=False)
+    #  d = await fu
+    d = run_cb(_decompress_funcs[m], data, need_main=False)
     #  d =  _decompress_funcs[m](data)
     if d:
       info(f"解压成功: {m} {short(data)} -> {short(d)}")
@@ -5812,14 +5815,21 @@ def run_cb(cb, *args, need_main=False, **kwargs):
       info("in thread")
       safe = True
       lp = loop2
-  fu = asyncio.Future()
   if safe:
+    return cb()
+    fu = asyncio.Future()
     @exceptions_handler
     #  def cb2():
     def cb2(fu):
       fu.set_result(cb(*args, **kwargs))
     lp.call_soon(cb2, fu)
   else:
+    async def cb2():
+      return cb()
+    fu = asyncio.run_coroutine_threadsafe(cb2(), lp)
+    return fu.result()
+
+    fu = asyncio.Future()
     # for multi thread
     @exceptions_handler
     def cb2(fu):
