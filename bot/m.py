@@ -5800,14 +5800,14 @@ def run_cb(cb, *args, need_main=False, **kwargs):
     else:
       info("not in main")
       safe = False
-      lp = loop2
-      olp = loop
+      lp = loop
+      olp = loop2
   else:
     if in_main_thread():
       info("not in thread")
       safe = False
-      lp = loop
-      olp = loop2
+      lp = loop2
+      olp = loop
     else:
       info("in thread")
       safe = True
@@ -5824,10 +5824,15 @@ def run_cb(cb, *args, need_main=False, **kwargs):
     def cb2():
       #  lp.call_soon_threadsafe(partial(fu.set_result, partial(cb, *args, **kwargs)()))
       #  lp.call_soon_threadsafe(partial(fu.set_result, cb(*args, **kwargs)))
+      info(f"start run cb: {cb.__name__}")
       res = cb()
       info(f"res: {res}")
-      lp.call_soon_threadsafe(partial(fu.set_result, res))
-    olp.call_soon_threadsafe(cb2)
+      olp.call_soon_threadsafe(partial(fu.set_result, res))
+      time.sleep(1)
+      info(f"fu: {fu.done()}")
+      if fu.done():
+        info(f"fu result: {fu.result()}")
+    lp.call_soon_threadsafe(cb2)
   return fu
 
 #  async def run_run(coro, *args, **kwargs, need_main=False):
