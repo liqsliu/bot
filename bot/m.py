@@ -883,10 +883,10 @@ async def compress(data, m="zst"):
     #    return _compress_funcs[m](data)
     #  d = await run_run(f(), False)
     info(f"start to compress: {len(data)} {short(data)}")
-    #  fu = run_cb_in_thread(_compress_funcs[m], data)
-    #  d = await fu
+    fu = run_cb_in_thread(_compress_funcs[m], data)
+    d = await fu
     #  d =  _compress_funcs[m](data)
-    d = run_cb_in_thread(_compress_funcs[m], data)
+    #  d = run_cb_in_thread(_compress_funcs[m], data)
     if d:
       info(f"压缩成功: {m} {len(data)} {short(data)} -> {len(d)} {short(d)}")
       return d
@@ -5765,12 +5765,12 @@ def run_cb_in_thread(cb, *args, **kwargs):
     loop2.call_soon_threadsafe(cb)
     return fu
   info("not in main")
-  return cb(*args, **kwargs)
+  #  return cb(*args, **kwargs)
   fu = asyncio.Future()
   @exceptions_handler
   def cb2():
     fu.set_result(cb(*args, **kwargs))
-  loop.call_soon(cb2)
+  loop2.call_soon(cb2)
   return fu
 
 #  @exceptions_handler
