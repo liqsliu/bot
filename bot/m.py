@@ -5816,7 +5816,7 @@ def run_cb(cb, *args, need_main=False, **kwargs):
       safe = True
       lp = loop2
   if safe:
-    return cb()
+    return cb(*args, **kwargs)
     fu = asyncio.Future()
     @exceptions_handler
     #  def cb2():
@@ -5825,7 +5825,7 @@ def run_cb(cb, *args, need_main=False, **kwargs):
     lp.call_soon(cb2, fu)
   else:
     async def cb2():
-      return cb()
+      return cb(*args, **kwargs)
     fu = asyncio.run_coroutine_threadsafe(cb2(), lp)
     return fu.result()
 
