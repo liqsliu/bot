@@ -8076,13 +8076,13 @@ async def init_cmd():
   cmd_for_admin.add('connect')
 
   async def _(cmds, src):
-    send(f"结果：{res}", src)
     global print_msg
     print_msg = not print_msg
     if printmsg:
       return "ok"
     else:
-      return "not"
+      return "hide"
+    #  send(f"结果：{res}", src)
   cmd_funs["printmsg"] = _
   cmd_for_admin.add('printmsg')
 
