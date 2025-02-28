@@ -5821,7 +5821,7 @@ def run_cb(cb, *args, need_main=False, **kwargs):
     @exceptions_handler
     def cb2():
       lp.call_soon_threadsafe(partial(fu.set_result, partial(cb, *args, **kwargs)()))
-    loop.call_soon_threadsafe(cb)
+    loop.call_soon_threadsafe(cb2)
   return fu
 
 #  async def run_run(coro, *args, **kwargs, need_main=False):
@@ -5874,7 +5874,6 @@ async def run_run(coro, need_main=False):
     oloop.call_soon_threadsafe(partial(fua.set_result, fu.result()))
   fu.add_done_callback(cb_for_fu_result)
   return await fua
-
 
 
 
