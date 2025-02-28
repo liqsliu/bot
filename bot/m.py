@@ -8078,7 +8078,7 @@ async def init_cmd():
   async def _(cmds, src):
     global print_msg
     print_msg = not print_msg
-    if printmsg:
+    if print_msg:
       return "ok"
     else:
       return "hide"
