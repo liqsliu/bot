@@ -883,7 +883,8 @@ async def compress(data, m="zst"):
     #    return _compress_funcs[m](data)
     #  d = await run_run(f(), False)
     info(f"start to compress: {len(data)} {short(data)}")
-    fu = run_cb_in_thread(_compress_funcs[m], data)
+    #  fu = run_cb_in_thread(_compress_funcs[m], data)
+    fu = run_cb(_compress_funcs[m], data, need_main=False)
     d = await fu
     #  d =  _compress_funcs[m](data)
     #  d = run_cb_in_thread(_compress_funcs[m], data)
@@ -5782,7 +5783,38 @@ def cb_for_future(f2, oloop):
     oloop.call_soon_threadsafe(partial(fu.set_result, f2()))
   return cb, fu
 
-
+def run_cb(cb, *args, **kwargs, need_main=False):
+  if need_main:
+    if in_main_thread():
+      info("in main")
+      safe = True
+      lp = loop
+    else:
+      info("not in main")
+      safe = False
+      lp = loop2
+  else:
+    if in_main_thread():
+      info("not in thread")
+      safe = False
+      lp = loop
+    else:
+      info("in thread")
+      safe = True
+      lp = loop2
+  fu = asyncio.Future()
+  if safe:
+    @exceptions_handler
+    def cb2():
+      fu.set_result(cb(*args, **kwargs))
+    lp.call_soon(cb2)
+  else:
+    # for multi thread
+    @exceptions_handler
+    def cb2():
+      lp.call_soon_threadsafe(partial(fu.set_result, partial(cb, *args, **kwargs)()))
+    loop.call_soon_threadsafe(cb)
+  return fu
 
 #  async def run_run(coro, *args, **kwargs, need_main=False):
 @exceptions_handler(no_send=True)
@@ -5798,6 +5830,7 @@ async def run_run(coro, need_main=False):
       oloop = loop2
     else:
       # 未知线程
+      warn("未知线程")
       fu = asyncio.run_coroutine_threadsafe(coro, loop)
       return
   else:
@@ -5810,6 +5843,7 @@ async def run_run(coro, need_main=False):
       return await coro
     else:
       # 未知线程
+      warn("未知线程")
       return await coro
 
   fua = asyncio.Future()
