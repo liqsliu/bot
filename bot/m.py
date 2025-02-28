@@ -871,6 +871,7 @@ _decompress_funcs={
     }
 
 #  @exceptions_handler
+@cross_thread(need_main=False)
 async def compress(data, m="zst"):
   if isinstance(data, str):
     data = data.encode()
@@ -882,9 +883,9 @@ async def compress(data, m="zst"):
     #    return _compress_funcs[m](data)
     #  d = await run_run(f(), False)
     info(f"start to compress: {len(data)} {short(data)}")
-    fu = run_cb_in_thread(_compress_funcs[m], data)
-    d = await fu
-    #  d =  _compress_funcs[m](data)
+    #  fu = run_cb_in_thread(_compress_funcs[m], data)
+    #  d = await fu
+    d =  _compress_funcs[m](data)
     if d:
       info(f"压缩成功: {m} {len(data)} {short(data)} -> {len(d)} {short(d)}")
       return d
