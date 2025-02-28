@@ -5817,6 +5817,7 @@ def run_cb(cb, *args, need_main=False, **kwargs):
       lp = loop2
   if safe:
     return cb(*args, **kwargs)
+
     fu = asyncio.Future()
     @exceptions_handler
     #  def cb2():
