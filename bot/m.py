@@ -500,10 +500,17 @@ def cross_thread(func=None, *, need_main=True):
       @wraps(func)
       def wrapper(*args, **kwargs):
         #  return func(*args, **kwargs)
-        if need_main:
-          return run_cb_in_main(func, *args, **kwargs)
-        else:
-          return run_cb_in_thread(func, *args, **kwargs)
+        #  if need_main:
+        #    return run_cb_in_main(func, *args, **kwargs)
+        #  else:
+        #    return run_cb_in_thread(func, *args, **kwargs)
+        fu = run_cb(func, *args, **kwargs, need_main=need_main)
+        if not fu.done():
+          time.sleep(0.3)
+          while not fu.done():
+            time.sleep(0.5)
+            info(f"waiting for result: {func.__name__}({args}, {kwargs})")
+        return fu.result()
     return wrapper
   #  if func is not None:
   #    return _cross_thread(func)
@@ -918,7 +925,8 @@ async def decompress(data, m):
     #    return _decompress_funcs[m](data)
     #  d = await run_run(f(), False)
     info(f"start to decompress: {len(data)} {short(data)}")
-    fu = run_cb_in_thread(_decompress_funcs[m], data)
+    #  fu = run_cb_in_thread(_decompress_funcs[m], data)
+    fu = run_cb(_decompress_funcs[m], data, need_main=False)
     d = await fu
     #  d =  _decompress_funcs[m](data)
     if d:
