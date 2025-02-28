@@ -881,6 +881,7 @@ async def compress(data, m="zst"):
     #  async def f():
     #    return _compress_funcs[m](data)
     #  d = await run_run(f(), False)
+    info(f"start to compress: {len(data)} {short(data)}")
     fu = run_cb_in_thread(_compress_funcs[m], data)
     d = await fu
     #  d =  _compress_funcs[m](data)
@@ -888,7 +889,7 @@ async def compress(data, m="zst"):
       info(f"压缩成功: {m} {len(data)} {short(data)} -> {len(d)} {short(d)}")
       return d
     else:
-      info(f"压缩failed: {m} {short(data)}")
+      info(f"压缩失败: {m} {short(data)}")
       return data
   err(f"unknown encoding: {m}")
     #  if m == "zst":
@@ -913,6 +914,7 @@ async def decompress(data, m):
     #  async def f():
     #    return _decompress_funcs[m](data)
     #  d = await run_run(f(), False)
+    info(f"start to decompress: {len(data)} {short(data)}")
     fu = run_cb_in_thread(_decompress_funcs[m], data)
     d = await fu
     #  d =  _decompress_funcs[m](data)
@@ -920,7 +922,7 @@ async def decompress(data, m):
       info(f"解压成功: {m} {short(data)} -> {short(d)}")
       return d
     else:
-      info(f"解压failed: {m} {short(data)}")
+      info(f"解压失败: {m} {short(data)}")
       return data
   else:
     err(f"unknown encoding: {m}")
@@ -4180,9 +4182,9 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
 #    if session is None:
 #      session = aiohttp.ClientSession()
 #      warn("a new session")
+#  @cross_thread
 
 @exceptions_handler
-@cross_thread
 async def http(url, method="GET", return_headers=False, *args, **kwargs):
   if "headers" in kwargs:
     headers = kwargs["headers"]
@@ -4206,6 +4208,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
   #  await init_aiohttp_session()
   async with aiohttp.ClientSession() as session:
     try:
+      info(f"{method}: {url}")
       res = await session.request(url=url, method=method, *args, **kwargs)
     except asyncio.TimeoutError as e:
       #  raise
@@ -4325,6 +4328,7 @@ async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
     "gateway": "{}".format(gateway)
   }
   #  async with mt_send_lock:
+  info(f"send to mt: {short(text)}")
   res = await http("http://127.0.0.1:4247/api/message", method="POST", json=data)
   #  info("res of mt_send: {}".format(res))
   return True
