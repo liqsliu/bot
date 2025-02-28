@@ -508,7 +508,7 @@ def cross_thread(func=None, *, need_main=True):
         if not fu.done():
           time.sleep(0.3)
           while not fu.done():
-            time.sleep(0.5)
+            time.sleep(1)
             info(f"waiting for result: {func.__name__}({args}, {kwargs})")
         return fu.result()
     return wrapper
@@ -5801,11 +5801,13 @@ def run_cb(cb, *args, need_main=False, **kwargs):
       info("not in main")
       safe = False
       lp = loop2
+      olp = loop
   else:
     if in_main_thread():
       info("not in thread")
       safe = False
       lp = loop
+      olp = loop2
     else:
       info("in thread")
       safe = True
@@ -5821,7 +5823,7 @@ def run_cb(cb, *args, need_main=False, **kwargs):
     @exceptions_handler
     def cb2():
       lp.call_soon_threadsafe(partial(fu.set_result, partial(cb, *args, **kwargs)()))
-    loop.call_soon_threadsafe(cb2)
+    olp.call_soon_threadsafe(cb2)
   return fu
 
 #  async def run_run(coro, *args, **kwargs, need_main=False):
