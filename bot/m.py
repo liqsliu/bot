@@ -5836,6 +5836,8 @@ def run_cb(cb, *args, need_main=False, **kwargs):
         fu.set_result(res)
         if fu.done():
           info(f"fu result 1: {fu.result()}")
+        else:
+          info(f"fu result failed 1: {fu.result()}")
     lp.call_soon_threadsafe(cb2)
   return fu
 
