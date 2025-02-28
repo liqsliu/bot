@@ -5815,30 +5815,35 @@ def run_cb(cb, *args, need_main=False, **kwargs):
   fu = asyncio.Future()
   if safe:
     @exceptions_handler
-    def cb2():
+    #  def cb2():
+    def cb2(fu):
       fu.set_result(cb(*args, **kwargs))
-    lp.call_soon(cb2)
+    lp.call_soon(cb2, fu)
   else:
     # for multi thread
     @exceptions_handler
-    def cb2():
+    def cb2(fu):
       #  lp.call_soon_threadsafe(partial(fu.set_result, partial(cb, *args, **kwargs)()))
       #  lp.call_soon_threadsafe(partial(fu.set_result, cb(*args, **kwargs)))
       info(f"start run cb: {cb.__name__}")
       res = cb()
       info(f"res: {res}")
       olp.call_soon_threadsafe(partial(fu.set_result, res))
-      time.sleep(1)
+      time.sleep(0.1)
       info(f"fu: {fu.done()}")
       if fu.done():
         info(f"fu result: {fu.result()}")
       else:
-        fu.set_result(res)
+        time.sleep(0.5)
         if fu.done():
-          info(f"fu result 1: {fu.result()}")
+          pass
         else:
-          info(f"fu result failed 1: {fu.result()}")
-    lp.call_soon_threadsafe(cb2)
+          fu.set_result(res)
+          if fu.done():
+            info(f"fu result 1: {fu.result()}")
+          else:
+            info(f"fu result failed 1: {fu.result()}")
+    lp.call_soon_threadsafe(cb2, fu)
   return fu
 
 #  async def run_run(coro, *args, **kwargs, need_main=False):
