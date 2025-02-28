@@ -5783,7 +5783,7 @@ def cb_for_future(f2, oloop):
     oloop.call_soon_threadsafe(partial(fu.set_result, f2()))
   return cb, fu
 
-def run_cb(cb, *args, **kwargs, need_main=False):
+def run_cb(cb, *args, need_main=False, **kwargs):
   if need_main:
     if in_main_thread():
       info("in main")
