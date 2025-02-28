@@ -5822,7 +5822,11 @@ def run_cb(cb, *args, need_main=False, **kwargs):
     # for multi thread
     @exceptions_handler
     def cb2():
-      lp.call_soon_threadsafe(partial(fu.set_result, partial(cb, *args, **kwargs)()))
+      #  lp.call_soon_threadsafe(partial(fu.set_result, partial(cb, *args, **kwargs)()))
+      #  lp.call_soon_threadsafe(partial(fu.set_result, cb(*args, **kwargs)))
+      res = cb()
+      info(f"res: {res}")
+      lp.call_soon_threadsafe(partial(fu.set_result, res))
     olp.call_soon_threadsafe(cb2)
   return fu
 
