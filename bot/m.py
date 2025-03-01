@@ -9546,21 +9546,6 @@ async def amain():
 
       await after_init()
 
-      info(f"测试通过副线程发信息")
-      #  fu = t
-      #  res = await t
-      #  t = loop2.create_task(send_tg("通过副线程发信息成功(loop2)", CHAT_ID)) # 测试结果: 必须放在下面这行代码上面，不然就无法执行task
-
-      fu = asyncio.run_coroutine_threadsafe(send_tg("通过副线程发信息成功", CHAT_ID), loop2)
-      while not fu.done():
-        info(f"通过副线程发信息: not done, loop is_running: {loop2.is_running()}")
-        await sleep(1)
-      info(f"副线程发信息结果: {fu.result()}")
-
-      #  while not t.done():
-      #    info(f"通过副线程发信息(loop2): not done, loop is_running: {loop2.is_running()}")
-      #    await sleep(1)
-      #  info(f"副线程发信息结果(loop2): {t.result()}")
       
       while True:
         if allright_task > 0:
@@ -9597,6 +9582,22 @@ async def amain():
 
       await regisger_handler(XB)
       await init_cmd()
+
+      info(f"测试通过副线程发信息")
+      #  fu = t
+      #  res = await t
+      #  t = loop2.create_task(send_tg("通过副线程发信息成功(loop2)", CHAT_ID)) # 测试结果: 必须放在下面这行代码上面，不然就无法执行task
+
+      fu = asyncio.run_coroutine_threadsafe(send_tg("通过副线程发信息成功", CHAT_ID), loop2)
+      while not fu.done():
+        info(f"等待发送消息的任务结束: not done, loop is_running: {loop2.is_running()}")
+        await sleep(1)
+      info(f"副线程发信息结果: {fu.result()}")
+
+      #  while not t.done():
+      #    info(f"通过副线程发信息(loop2): not done, loop is_running: {loop2.is_running()}")
+      #    await sleep(1)
+      #  info(f"副线程发信息结果(loop2): {t.result()}")
 
       info(f"初始化完成")
       sendme(f"启动成功，用时: {int(time.time()-start_time)}s", to=0)
