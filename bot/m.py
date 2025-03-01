@@ -258,24 +258,39 @@ def info2(s):
 
 info = logger.info
 
-def err(text, no_send=False):
+def err(text=None, no_send=False, e=None):
   logger.error(text, exc_info=True, stack_info=True)
   #  raise ValueError
   if no_send:
     pass
   else:
-    send_log(text)
+    text = f"E: {text}"
+    if e is None:
+      fm = sys._getframe()
+      fm = fm.f_back
+      send_log(text, fm=fm)
+    else:
+      text = "%s %s %s" % (get_lineno(e=e), text, e)
+      send_log(text)
 
-def warn(text, more=False, no_send=True):
+
+def warn(text=None, more=False, no_send=True, e=None):
   if more:
-    warn(text, exc_info=True, stack_info=True)
+    logger.warning(text, exc_info=True, stack_info=True)
   else:
     #  text = f"{fm.f_code.co_name} {fm.f_lineno} {text}"
     logger.warning(text)
   if no_send:
     pass
   else:
-    send_log(text)
+    text = f"W: {text}"
+    if e is None:
+      fm = sys._getframe()
+      fm = fm.f_back
+      send_log(text, fm=fm)
+    else:
+      text = "%s %s %s" % (get_lineno(e=e), text, e)
+      send_log(text)
 
 #  def dbg(text):
 #    logger.debug(text)
@@ -856,7 +871,7 @@ def decode_base64(data, altchars=b'+/'):
     try:
         return base64.b64decode(data, altchars)
     except binascii.Error as e:
-        err(e)
+        err(e=e)
 
 
 def encode_base64(data, altchars=b'+/'):
@@ -1211,7 +1226,6 @@ def load_str(msg, no_ast=False):
     except Exception as e:
       err(f"failed2: {msg=}")
       #  raise e
-
 
 
 
@@ -2517,7 +2531,7 @@ async def load_config():
       else:
         gd = {}
     except Exception as e:
-      err(e)
+      err(e=e)
       gd = {}
 
     if "mtmsgsg" in gd:
@@ -2992,7 +3006,11 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
 
 
 @cross_thread(need_main=True)
-def send_log(text, jid=CHAT_ID, delay=1):
+def send_log(text, jid=CHAT_ID, delay=1, fm=None):
+  if fm is None:
+    fm = sys._getframe()
+    fm = fm.f_back
+  text = f"{fm.f_code.co_name} {fm.f_lineno} {text}"
   k = 0
   # https://docs.python.org/zh-cn/3/library/asyncio-task.html#introspection
   for j in asyncio.all_tasks(loop):
@@ -4851,7 +4869,8 @@ async def get_entity(chat_id, id_only=True):
       except ValueError as e:
         info(f"not found entity: {peer=} {e=}")
   except Exception as e:
-    err(f"E: {e=}")
+    #  err(f"{e=}")
+    err(e)
     return
   #  raise ValueError(f"无法获取entity: {chat_id=} {peer=}")
 
