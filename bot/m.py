@@ -5876,6 +5876,46 @@ def run_cb(cb, *args, need_main=False, **kwargs):
     lp.call_soon_threadsafe(cb2, fu)
   return fu
 
+def run_cb2(cb, *args, need_main=False, **kwargs):
+  if need_main:
+    if in_main_thread():
+      info("in main")
+      safe = True
+      lp = loop
+    else:
+      info("not in main")
+      safe = False
+      lp = loop
+      olp = loop2
+  else:
+    if in_main_thread():
+      info("not in thread")
+      safe = False
+      lp = loop2
+      olp = loop
+    else:
+      info("in thread")
+      safe = True
+      lp = loop2
+  fu = asyncio.Future()
+  if safe:
+    @exceptions_handler
+    def cb2():
+      fu.set_result(cb(*args, **kwargs))
+    lp.call_soon(cb2)
+  else:
+    @exceptions_handler
+    async def cb2():
+      return cb(*args, **kwargs)
+    fu0 = asyncio.run_coroutine_threadsafe(cb2(), lp)
+    @exceptions_handler
+    def cb_for_fu_result(fu0):
+      #  oloop.call_soon_threadsafe(partial(f, f2()))
+      #  oloop.call_soon_threadsafe(partial(fu.set_result, fu0.result()))
+      fu.set_result(fu0.result())
+    fu0.add_done_callback(cb_for_fu_result)
+  return fu
+
 #  async def run_run(coro, *args, **kwargs, need_main=False):
 @exceptions_handler(no_send=True)
 async def run_run(coro, need_main=False):
@@ -5923,7 +5963,8 @@ async def run_run(coro, need_main=False):
   @exceptions_handler
   def cb_for_fu_result(fu):
     #  oloop.call_soon_threadsafe(partial(f, f2()))
-    oloop.call_soon_threadsafe(partial(fua.set_result, fu.result()))
+    #  oloop.call_soon_threadsafe(partial(fua.set_result, fu.result()))
+    fua.set_result(fu.result())
   fu.add_done_callback(cb_for_fu_result)
   return await fua
 
