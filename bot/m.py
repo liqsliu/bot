@@ -5923,9 +5923,10 @@ async def run_run(coro, need_main=False):
     #  if threading.current_thread() is loop2_thread:
       #  if asyncio.iscoroutine():
     if in_main_thread():
+      info(f"在主线程执行: {coro}")
       return await coro
     elif loop2_thread.native_id == threading.get_native_id():
-      #  info(f"在副线程执行: {coro}")
+      info(f"在副线程跨线程执行: {coro}")
       fu = asyncio.run_coroutine_threadsafe(coro, loop)
       oloop = loop2
     else:
@@ -5936,10 +5937,12 @@ async def run_run(coro, need_main=False):
   else:
     #  if threading.current_thread() is loop2_thread:
     if in_main_thread():
+      info(f"在主线程跨线程执行: {coro}")
       fu = asyncio.run_coroutine_threadsafe(coro, loop2)
       oloop = loop
     #  elif main_thread.native_id != threading.get_native_id():
     elif loop2_thread.native_id == threading.get_native_id():
+      info(f"在副线程执行: {coro}")
       return await coro
     else:
       # 未知线程
