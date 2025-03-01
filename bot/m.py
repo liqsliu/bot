@@ -5917,7 +5917,8 @@ def run_cb2(cb, *args, need_main=False, **kwargs):
     def cb_for_fu_result(fu0):
       #  oloop.call_soon_threadsafe(partial(f, f2()))
       #  oloop.call_soon_threadsafe(partial(fu.set_result, fu0.result()))
-      fu.set_result(fu0.result())
+      #  fu.set_result(fu0.result())
+      oloop.call_soon_threadsafe(fu.set_result, fu0.result())
     fu0.add_done_callback(cb_for_fu_result)
   return fu
 
@@ -5976,8 +5977,8 @@ async def run_run(coro, need_main=False):
     res = fu.result()
     info(f"fu.result: {res}")
     #  fua.set_result(res)
-    #  oloop.call_soon_threadsafe(fua.set_result, res)
-    oloop.call_soon(fua.set_result, res)
+    oloop.call_soon_threadsafe(fua.set_result, res)
+    #  oloop.call_soon(fua.set_result, res)
     info(f"done")
   fu.add_done_callback(cb_for_fu_result)
   return await fua
