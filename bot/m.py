@@ -911,9 +911,9 @@ async def compress(data, m="zst"):
     #  d = await run_run(f(), False)
     info(f"start to compress: {len(data)} {short(data)}")
     #  fu = run_cb_in_thread(_compress_funcs[m], data)
-    #  fu = run_cb(_compress_funcs[m], data, need_main=False)
-    #  d = await fu
-    d = run_cb(_compress_funcs[m], data, need_main=False)
+    #  d = run_cb(_compress_funcs[m], data, need_main=False)
+    fu = run_cb2(_compress_funcs[m], data, need_main=False)
+    d = await fu
     #  d =  _compress_funcs[m](data)
     #  d = run_cb_in_thread(_compress_funcs[m], data)
     if d:
@@ -947,9 +947,9 @@ async def decompress(data, m):
     #  d = await run_run(f(), False)
     info(f"start to decompress: {len(data)} {short(data)}")
     #  fu = run_cb_in_thread(_decompress_funcs[m], data)
-    #  fu = run_cb(_decompress_funcs[m], data, need_main=False)
-    #  d = await fu
-    d = run_cb(_decompress_funcs[m], data, need_main=False)
+    #  d = run_cb(_decompress_funcs[m], data, need_main=False)
+    fu = run_cb2(_decompress_funcs[m], data, need_main=False)
+    d = await fu
     #  d =  _decompress_funcs[m](data)
     if d:
       info(f"解压成功: {m} {short(data)} -> {short(d)}")
