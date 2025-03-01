@@ -3559,6 +3559,7 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
       #  await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2+msg_delay_default)
     #  if correct:
     #    last_outmsg[chat_id] = msg
+  info(f"send ok: {chat_id} {short(text)}")
   return True
   chat = await get_entity(CHAT_ID, True)
   await UB.send_message(chat, text)
