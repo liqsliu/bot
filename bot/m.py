@@ -5882,24 +5882,27 @@ def run_cb(cb, *args, need_main=False, **kwargs):
   return fu
 
 def run_cb2(cb, *args, need_main=False, **kwargs):
+  # lp： 目标线程
+  # olp： 当前线程
+  # return future
   if need_main:
     if in_main_thread():
-      info("in main")
+      info(f"在主线程执行: {cb}")
       safe = True
       lp = loop
     else:
-      info("not in main")
+      info(f"在副线程跨线程执行: {cb}")
       safe = False
       lp = loop
       olp = loop2
   else:
     if in_main_thread():
-      info("not in thread")
+      info(f"在主线程跨线程执行: {cb}")
       safe = False
       lp = loop2
       olp = loop
     else:
-      info("in thread")
+      info(f"在副线程执行: {cb}")
       safe = True
       lp = loop2
   fu = asyncio.Future()
