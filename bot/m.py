@@ -510,7 +510,9 @@ def cross_thread(func=None, *, need_main=True):
       @wraps(func)
       async def wrapper(*args, **kwargs):
         coro = func(*args, **kwargs)
-        return await run_run(coro, need_main=need_main)
+        res = await run_run(coro, need_main=need_main)
+        info(f"done: {res}")
+        return res
     else:
       @wraps(func)
       def wrapper(*args, **kwargs):
@@ -519,7 +521,9 @@ def cross_thread(func=None, *, need_main=True):
         #    return run_cb_in_main(func, *args, **kwargs)
         #  else:
         #    return run_cb_in_thread(func, *args, **kwargs)
-        return run_cb(func, *args, **kwargs, need_main=need_main)
+        res = run_cb(func, *args, **kwargs, need_main=need_main)
+        info(f"done: {res}")
+        return res
         fu = run_cb(func, *args, **kwargs, need_main=need_main)
         if not fu.done():
           time.sleep(0.3)
