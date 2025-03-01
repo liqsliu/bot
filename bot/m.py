@@ -5977,7 +5977,7 @@ async def run_run(coro, need_main=False):
     res = fu.result()
     info(f"fu.result: {res}")
     #  fua.set_result(res)
-    loop.call_soon_threadsafe(fua.set_result, res)
+    oloop.call_soon_threadsafe(fua.set_result, res)
     #  oloop.call_soon(fua.set_result, res)
     info(f"done")
   fu.add_done_callback(cb_for_fu_result)
