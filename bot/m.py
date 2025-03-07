@@ -2769,7 +2769,7 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
           t = asyncio.create_task(backup(path))
           url = await t
           if url:
-            s.appent(url)
+            s.append(url)
           asyncio.create_task(backup(path, delete=True))
         else:
           warn("not found file. delete path: %s" % s.pop(0))
