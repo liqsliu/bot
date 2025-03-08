@@ -4,6 +4,7 @@
 
 目前已连接:
 X xmpp群( ipfs@salas.suchat.org )
+T tox群（通过bot邀请进群，bot id: 2436380A97D9FE41898C2482DF9B52428EBE5E86E2427B4A3EFEDCC7E139136FB40917DAAFFF ）
 I irc频道( #wtfipfs )
 M matrix群( #wtfipfs:matrix.org )
 D discord( https://discord.gg/G6YmQuCJFD )
