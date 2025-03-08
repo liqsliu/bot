@@ -77,6 +77,12 @@ log_msg(){
   echo
   echo "##"
 }
+if [[ "$3" = api.tox ]]; then
+  echo "got msg" >> $LOG
+  log_msg "$@" >> $LOG
+else
+  log_msg "$@" >> $LOG
+fi
 # log_msg "$@" >> ~/mt.log
 
 # alias log_msg='_log_msg "$@" >> ~/mt.log'
@@ -911,6 +917,7 @@ ${NAME}"
   # fi
 fi
 
+echo "not blocked" >> $LOG
 
 echo -n "$NAME"
 echo -n $SPLIT
