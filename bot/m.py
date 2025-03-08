@@ -956,9 +956,9 @@ async def decompress(data, m):
       return d
     else:
       info(f"解压失败: {m} {short(data)}")
-      return data
   else:
     err(f"unknown encoding: {m}")
+  return data
 
 
 
@@ -4302,19 +4302,19 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
 
       if data:
         info(f"http body data: {len(data)} {short(data)}")
-        try:
-          if "Content-Encoding" in res.headers:
-            info(f"start to decompress: %s {type(data)} {short(data)}" % res.headers['Content-Encoding'])
-            b = await decompress(data, res.headers['Content-Encoding'])
-            if b:
-              data = b
-            else:
-              warn("解压失败: {} url: {}\n".format(res.headers['Content-Encoding'], url))
-              #  return data
+        #  try:
+        if "Content-Encoding" in res.headers:
+          info(f"start to decompress: %s {type(data)} {short(data)}" % res.headers['Content-Encoding'])
+          data = await decompress(data, res.headers['Content-Encoding'])
+          #  if b:
+          #    data = b
+          #  else:
+          #    warn("解压失败: {} url: {}\n".format(res.headers['Content-Encoding'], url))
+            #  return data
         #  except brotli.error as e:
         #    err(f"解压时出现错误: {e=} {res.headers=} {data[:512]}")
-        except Exception as e:
-          err(f"解压时出现错误: {e=} {res.headers=} {short(data)}")
+        #  except Exception as e:
+        #    err(f"解压时出现错误: {e=} {res.headers=} {short(data)}")
         try:
           # if "text/plain" in res.headers['content-type']:
           if "text" in res.headers['content-type']:
