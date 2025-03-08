@@ -5,8 +5,8 @@
 export SH_PATH=${SH_PATH:-$(cd $(dirname ${BASH_SOURCE[0]}) || exit; pwd )}
 
 run_sh(){
-export LOG="$HOME/mt.log"
-[[ -e "$SH_PATH/DEBUG" ]] && export LOG_FILE=$LOG || export LOG_FILE=/dev/null
+  export LOG="$HOME/mt.log"
+  [[ -e "$SH_PATH/DEBUG" ]] && export LOG_FILE=$LOG || export LOG_FILE=/dev/null
   local e=0
   rm "$SH_PATH/.ERROR"
   # echo bash "$SH_PATH/$ll" "$res" &>> $LOG_FILE
