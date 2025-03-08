@@ -512,15 +512,15 @@ discord.*)
 irc.*)
   LABLE="I"
   ;;
-# api.tox)
-#   LABLE="T"
-#   ;;
+api.tox)
+  LABLE="T"
+  ;;
 # api.in)
 #   LABLE="0"
 #   ;;
-# api.cmd)
-#   LABLE="0"
-#   ;;
+api.cmd)
+  LABLE="0"
+  ;;
 # api.cmdres)
 #   LABLE="0"
 #   if [[ "$(echo "$NAME" | wc -l)" -ge 2 ]]; then
