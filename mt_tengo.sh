@@ -62,8 +62,7 @@ $TEXT"
 # [[ "${NAME:3:1}" == " " ]] && [[ "${NAME: -4}" == ":** " ]] && orig_msg
 # [[ $( echo "${NAME}" | wc -l ) -ge 3 ]] && orig_msg
 
-LOG="$HOME/mt.log"
-
+# LOG="$HOME/mt.log"
 log_msg(){
   echo
   echo "#### mt $(date) ####"
@@ -76,12 +75,12 @@ log_msg(){
   echo
   echo "##"
 }
-if [[ "$3" = api.tox ]]; then
-  echo "got msg" >> $LOG
-  log_msg "$@" >> $LOG
-else
-  log_msg "$@" >> $LOG
-fi
+# if [[ "$8" = api.tox ]]; then
+#   echo "got msg" >> $LOG
+#   log_msg "$@" >> $LOG
+# else
+#   log_msg "$@" >> $LOG
+# fi
 # log_msg "$@" >> ~/mt.log
 
 # alias log_msg='_log_msg "$@" >> ~/mt.log'
@@ -916,7 +915,7 @@ ${NAME}"
   # fi
 fi
 
-echo "not blocked" >> $LOG
+# echo "not blocked" >> $LOG
 
 echo -n "$NAME"
 echo -n $SPLIT
