@@ -3860,7 +3860,7 @@ async def clear_history(src=None):
     warn("wait for allright...")
     await allright.wait()
     return
-  music_bot_state.clear()
+  #  music_bot_state.clear()
   allright.clear()
   #  await sleep(1)
   #  for g in queues:
@@ -4641,8 +4641,8 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
         if src in tg_download_tasks:
           continue
         #  if src not in music_bot_state or music_bot_state[src] < 3:
-        if src in music_bot_state and music_bot_state[src] > 2:
-          continue
+        #  if src in music_bot_state and music_bot_state[src] > 2:
+        #    continue
         info(f"下载中止：{res}")
         path = None
         return f"下载取消: {res}"
@@ -7469,12 +7469,12 @@ async def init_cmd():
     if cmds[1] == "clear":
       if src in tg_download_tasks:
         tg_download_tasks.remove(src)
-      if src in music_bot_state:
-        music_bot_state.pop(src)
+      #  if src in music_bot_state:
+      #    music_bot_state.pop(src)
       return "ok"
     elif cmds[1] == "clear2":
       tg_download_tasks.clear()
-      music_bot_state.clear()
+      #  music_bot_state.clear()
       await sleep(interval+1)
       tg_download_tasks.clear()
       return "ok"
@@ -8319,7 +8319,7 @@ async def init_cmd():
       await clear_history()
       return "ok"
     text = ' '.join(cmds[1:])
-    music_bot_state[src] = 1
+    #  music_bot_state[src] = 1
     text="/search "+text
     #  mid = await send_to_tg_bot(text, music_bot, src)
     #  return 1, mid
