@@ -8665,24 +8665,36 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         return res
   #  elif text.isnumeric() and bridges[music_bot] != src:
   elif text.isnumeric():
-    if src in mtmsgsg:
-      mtmsgs = mtmsgsg[src]
-    else:
-      info("not founc {src} in mtmsgsg")
-      return
-    pid = None
-    for pid,l in mtmsgs.items():
-      if len(l) > 1:
-        if l[1]:
-          break
-      pid = None
-    if pid is None:
-      return
 
-    if pid not in bridges_tmp:
-      return
-    if bridges_tmp[pid] != src:
-      return
+    src_o = src
+    
+    for src in get_mucs(src):
+      if src in mtmsgsg:
+        mtmsgs = mtmsgsg[src]
+      else:
+        info("not founc {src} in mtmsgsg")
+        #  return
+        continue
+      pid = None
+      for pid,l in mtmsgs.items():
+        if len(l) > 1:
+          if l[1]:
+            break
+        pid = None
+      if pid is None:
+        #  return
+        continue
+
+      if pid not in bridges_tmp:
+        #  return
+        continue
+      if bridges_tmp[pid] != src:
+        #  return
+        continue
+      break
+
+    #  src = src_o
+
     s = int(text)
     k = 0
     #  for _, v in mtmsgs.items():
