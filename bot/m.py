@@ -8675,6 +8675,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
 
     src_o = src
     
+    pid = None
     for src in get_mucs(src):
       if src in mtmsgsg:
         mtmsgs = mtmsgsg[src]
@@ -8682,25 +8683,20 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
         info("not founc {src} in mtmsgsg")
         #  return
         continue
-      pid = None
       for pid,l in mtmsgs.items():
         if len(l) > 1:
           if l[1]:
-            break
+            if pid in bridges_tmp:
+              if bridges_tmp[pid] == src:
+                break
         pid = None
-      if pid is None:
-        #  return
-        continue
 
-      if pid not in bridges_tmp:
-        #  return
-        continue
-      if bridges_tmp[pid] != src:
-        #  return
-        continue
-      break
+      if pid is not None:
+        break
 
     #  src = src_o
+    if pid is None:
+      return
 
     s = int(text)
     k = 0
@@ -8712,8 +8708,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
     #  if k is None:
     #    break
 
-    v = l
-    for i in get_buttons(v[1]):
+    for i in get_buttons(l[1]):
       k += 1
       if k == s:
         send(f"命中：{text} {i.text}", src, tmp_msg=True)
@@ -8740,9 +8735,9 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       text = ""
       k = 0
       for pid in mtmsgs:
-        v = mtmsgs[pid]
-        if len(v) > 1:
-          bs = v[1]
+        l = mtmsgs[pid]
+        if len(l) > 1:
+          bs = l[1]
           text += print_buttons(bs)
       send(f"没找到，请重新发送指令{text}", src)
     return
