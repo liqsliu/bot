@@ -144,7 +144,7 @@ for (( ; i < 4; i++)); do
   if [[ "$restmp" == "null" ]]; then
     break
   else
-echo "start to check restmp: $restmp" &>> $LOG_FILE
+    echo "start to check restmp: $restmp" &>> $LOG_FILE
     TEXT=$(echo "$restmp" | jq -r ".text")
 #    echo "$text" | sed '/^[^>]/,$d'
 #    text=$(echo "$text" | sed '/^[^>]/,$!d')
@@ -160,17 +160,17 @@ echo "start to check restmp: $restmp" &>> $LOG_FILE
     username=$(echo "$NAME" | tail -n1)
 
     [[ "${username:0:2}" != "C " ]] && [[ "${username: -5}" != "bot: " ]] && {
-    QT=$(echo "$NAME" | sed -e '/^> [^>]/!d')
-    qt=$(echo "$QT" | sed -e 's/^> //')
-    if [[ -n "$qt" ]]; then
-      text="$TEXT
+      QT=$(echo "$NAME" | sed -e '/^> [^>]/!d')
+      qt=$(echo "$QT" | sed -e 's/^> //')
+      if [[ -n "$qt" ]]; then
+        text="$TEXT
 
-$qt"
-    else
-      text="$TEXT"
-    fi
+  $qt"
+      else
+        text="$TEXT"
+      fi
       # bcmd "$text" "$username" "$gateway" "$restmp"
-      nohup bash "$SH_PATH/cmd2.sh" "$gateway" "$username" "$text" "$restmp" 2>> $LOG 1>> $LOG_FILE &
+      # nohup bash "$SH_PATH/cmd2.sh" "$gateway" "$username" "$text" "$restmp" 2>> $LOG 1>> $LOG_FILE &
     }
 
     # continue
@@ -208,9 +208,4 @@ done
 # [[ -e "$SH_PATH/DEBUG" ]] && set -x
 
 # [[ -e "$SH_PATH/DEBUG" ]] && set +x
-
-
-
-
-
 
