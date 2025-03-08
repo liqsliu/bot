@@ -5488,7 +5488,8 @@ async def msgtout(event):
   msg = event.message
   if delete_next_msg is True:
     res = await msg.delete()
-    send("deleted", CHAT_ID)
+    #  send("deleted", CHAT_ID)
+    await msg.reply("deleted")
     return
   #  info(event.stringify())
   chat_id = event.chat_id
@@ -5511,38 +5512,40 @@ async def msgtout(event):
   if text == "/help":
     if event.is_reply:
       r = await msg.get_reply_message()
-      sendme(f"{r.stringify()}")
+      #  sendme(f"{r.stringify()}")
+      await msg.reply(f"{r.stringify()}")
     else:
-      sendme(f"{event.chat_id}")
+      #  sendme(f"{event.chat_id}")
+      await msg.reply(f"{event.chat_id}")
   elif text.startswith("$"):
     cmds = get_cmd(text)
     if cmds[0] == "$get":
       if cmds[1] == "id":
         #  await UB.send_message('me', f"{event.chat_id}")
-        sendme(f"{event.chat_id}")
+        await msg.reply(f"{event.chat_id}")
       elif cmds[1] == "chat_id":
-        sendme(f"{event.chat_id}")
+        await msg.reply(f"{event.chat_id}")
       elif cmds[1] == "event":
-        sendme(f"{event.stringify()}")
+        await msg.reply(f"{event.stringify()}")
       elif cmds[1] == "msg":
-        sendme(f"{msg.stringify()}")
+        await msg.reply(f"{msg.stringify()}")
       elif cmds[1] == "chat":
         e = await event.get_chat()
-        sendme(f"{e.stringify()}")
+        await msg.reply(f"{e.stringify()}")
       elif cmds[1] == "reply":
         if event.is_reply:
-          sendme(event.reply_to.stringify())
+          await msg.reply(event.reply_to.stringify())
           e = await msg.get_reply_message()
-          sendme(f"{e.stringify()}")
+          await msg.reply(f"{e.stringify()}")
         else:
-          sendme(f"not a reply: {msg.stringify()}")
+          await msg.reply(f"not a reply: {msg.stringify()}")
       elif cmds[1] == "sender":
         if event.is_reply:
           e = await msg.get_reply_message()
           e = await e.get_sender()
-          sendme(f"{e.stringify()}")
+          await msg.reply(f"{e.stringify()}")
         else:
-          sendme(f"not a reply: {msg.stringify()}")
+          await msg.reply(f"not a reply: {msg.stringify()}")
       elif cmds[1] == "file":
         e = await msg.get_reply_message()
         tmsg = e
@@ -5558,7 +5561,7 @@ async def msgtout(event):
   if chat_id == MY_ID or chat_id == CHAT_ID:
     if chat_id == CHAT_ID:
       if event.fwd_from:
-        sendme(event.fwd_from.stringify())
+        await msg.reply(event.fwd_from.stringify())
         tmsg = event
         cmds = get_cmd(text)
         opts = 0
@@ -5567,7 +5570,7 @@ async def msgtout(event):
         await save_tg_msg(tmsg, chat_id, opts)
         if tmsg.document:
           file = tmsg.document
-          sendme(f"type: {type(file)}")
+          await msg.reply(f"type: {type(file)}")
           #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
         return
       #  elif event.is_reply:
@@ -5585,12 +5588,14 @@ async def msgtout(event):
       if res:
         #  res = f"```\n{res}```"
         #  await UB.send_message(CHAT_ID, res)
-        send(res, chat_id)
+        #  send(res, chat_id)
+        await msg.reply(res)
         return
 
     if text == 'id':
       #  await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
-      await UB.send_message(chat_id, f"id @name https://t.me/name\nchat_id: {chat_id}")
+      #  await UB.send_message(chat_id, f"id @name https://t.me/name\nchat_id: {chat_id}")
+      await msg.reply(f"id @name https://t.me/name\nchat_id: {chat_id}")
       return
     if text.startswith("id "):
       #  url = text.split(' ')[1]
@@ -7599,6 +7604,8 @@ async def init_cmd():
     #  res = await myshell(cmds, src=src)
     #  res = await run_run( myshell(cmds, src=src) , False)
     res = await myshell(cmds, src=src)
+    if res:
+      res = f"```\n{res}```"
     #  return format_out_of_shell(res)
   cmd_funs["sh"] = _
   cmd_for_admin.add('sh')
