@@ -890,6 +890,8 @@ $M *$NAME*: "
 #     fi
 #     block_msg
 #     ;;
+  api.tox)
+    ;;
   api.*)
     if [[ -n "$NAME" ]]; then
       get_full_text
