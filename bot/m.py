@@ -7604,8 +7604,8 @@ async def init_cmd():
     #  res = await myshell(cmds, src=src)
     #  res = await run_run( myshell(cmds, src=src) , False)
     res = await myshell(cmds, src=src)
-    if res:
-      res = f"```\n{res}```"
+    #  if res:
+    #    res = f"```\n{res}```"
     #  return format_out_of_shell(res)
   cmd_funs["sh"] = _
   cmd_for_admin.add('sh')
