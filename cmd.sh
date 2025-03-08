@@ -159,6 +159,7 @@ for (( ; i < 4; i++)); do
 
     username=$(echo "$NAME" | tail -n1)
 
+    text=$TEXT
     [[ "${username:0:2}" != "C " ]] && [[ "${username: -5}" != "bot: " ]] && {
       QT=$(echo "$NAME" | sed -e '/^> [^>]/!d')
       qt=$(echo "$QT" | sed -e 's/^> //')
@@ -184,6 +185,7 @@ for (( ; i < 4; i++)); do
       #   # send_msg_to_simplex "$msg" 2>> $LOG 1>> $LOG_FILE
       #   send_msg_to_simplex 2>> $LOG 1>> $LOG_FILE
       # fi
+      # echo "$restmp"
       msg=$(get_msg "$username" "$text") || continue
       # if [[ "$username" != "O bot: " ]]; then
       # if [[ "${username:0:2}" != "O " ]]; then

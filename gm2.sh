@@ -8,7 +8,7 @@ run_sh(){
   export LOG="$HOME/mt.log"
   [[ -e "$SH_PATH/DEBUG" ]] && export LOG_FILE=$LOG || export LOG_FILE=/dev/null
   local e=0
-  rm "$SH_PATH/.ERROR"
+  [[ -e "$SH_PATH/.ERROR" ]] && rm "$SH_PATH/.ERROR"
   # echo bash "$SH_PATH/$ll" "$res" &>> $LOG_FILE
   # bash "$SH_PATH/$ll" "$res" 1> "$SH_PATH/.STDOUT" 2> "$SH_PATH/.ERROR" || e=$?
   local out=$(bash "$SH_PATH/$ll" "$res" 2> "$SH_PATH/.ERROR") || e=$?
