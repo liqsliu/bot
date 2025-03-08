@@ -1,7 +1,5 @@
 #!/bin/bash
 
-
-
 NAME="$2"
 SPLIT="_SPLIT_FOR_MT_"
 TEXT="$1"
@@ -64,6 +62,7 @@ $TEXT"
 # [[ "${NAME:3:1}" == " " ]] && [[ "${NAME: -4}" == ":** " ]] && orig_msg
 # [[ $( echo "${NAME}" | wc -l ) -ge 3 ]] && orig_msg
 
+LOG="$HOME/mt.log"
 
 log_msg(){
   echo
