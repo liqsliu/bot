@@ -8679,13 +8679,8 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
     src_o = src
     
     pid = None
-    for src in get_mucs(src):
-      if src in mtmsgsg:
-        mtmsgs = mtmsgsg[src]
-      else:
-        info(f"not founc {src} in mtmsgsg")
-        #  return
-        continue
+    if src in mtmsgsg:
+      mtmsgs = mtmsgsg[src]
       for pid,l in mtmsgs.items():
         if len(l) > 1:
           if l[1]:
@@ -8694,8 +8689,24 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
                 break
         pid = None
 
-      if pid is not None:
-        break
+    if pid is None:
+      for src in get_mucs(src):
+        if src in mtmsgsg:
+          mtmsgs = mtmsgsg[src]
+        else:
+          info(f"not founc {src} in mtmsgsg")
+          #  return
+          continue
+        for pid,l in mtmsgs.items():
+          if len(l) > 1:
+            if l[1]:
+              if pid in bridges_tmp:
+                if bridges_tmp[pid] == src:
+                  break
+          pid = None
+
+        if pid is not None:
+          break
 
     #  src = src_o
     if pid is None:
