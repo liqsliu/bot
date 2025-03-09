@@ -54,14 +54,17 @@ $qt"
   }
   if [[ "$gateway" == "gateway1" ]]; then
     URL=$(echo "$restmp" | jq -r ".Extra.file[0].URL")
-    msg=$(get_msg "$username" "$text") || continue
+    get_msg "**${username% }** " "$text"
+    # msg=$(get_msg "**${username% }** " "$text")
     # if [[ "$username" != "O bot: " ]]; then
     # if [[ "${username:0:2}" != "O " ]]; then
-    if [[ "${username:0:2}" != "T " ]]; then
-      # msg=$(get_msg "$username" "$text") || continue
-      echo "send to tox: $msg" &>> $LOG_FILE
-      echo "$msg"
-    fi
+    # account=$(echo "$restmp" | jq -r ".account")
+    # # if [[ "${username:0:2}" != "T " ]]; then
+    # if [[ "${account}" != "api.tox" ]]; then
+    #   # msg=$(get_msg "$username" "$text") || continue
+    #   echo "send to tox: $msg" &>> $LOG_FILE
+    #   echo "$msg"
+    # fi
     # if [[ "${username:0:2}" != "Q " ]]; then
     #   bash "$SH_PATH/mqtt.sh" "$msg"
     # fi
