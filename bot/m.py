@@ -334,47 +334,6 @@ def generand(N=4, M=None, *, no_uppercase=False):
   return ''.join(random.choice(l) for x in range(N))
 
 
-async def split_long_text(text, msg_max_length=MAX_MSG_BYTES_TG, tmp_msg=False):
-  max_list = 5
-  texts = []
-  if len(text.encode()) > msg_max_length:
-    def _():
-      ls = text.splitlines()
-      tmp = None
-      for l in ls:
-        if tmp is not None:
-          if len((tmp+l).encode()) > msg_max_length:
-            texts.append(tmp)
-            if len(texts) > max_list:
-              return
-            print(f"texts1: {len(texts)} {len(tmp)}")
-          else:
-            tmp += '\n'+l
-            continue
-        while len(l.encode()) > msg_max_length:
-          tmp = l[:msg_max_length]
-          while len(tmp.encode()) > msg_max_length:
-            tmp = tmp[:-int( (len(tmp.encode())-msg_max_length)/2 + 1 )]
-          texts.append(tmp)
-          if len(texts) > max_list:
-            return
-          print(f"texts2: {len(texts)} {len(tmp)}")
-          l = l[len(tmp):]
-        tmp = l
-      if tmp:
-        texts.append(tmp)
-    _()
-  else:
-    texts = [text]
-  if len(texts) > max_list:
-    info(f"文本过长，使用pb: {short(text)}")
-    url =await pastebin(text)
-    return ["文本过长，请打开链接查看: {}\n{}".format(url, short(text))]
-  if len(texts) > 1:
-    if tmp_msg:
-      return [short(text, 500)]
-  return texts
-
 
 #  api_id = int(get_my_key("TELEGRAM_API_ID"))
 
@@ -1011,6 +970,47 @@ async def write_file(text, path='config.json', *args, **kwargs):
     path = path.as_posix()
   async with aiofiles.open(path, *args, **kwargs) as file:
       return await file.write(text)
+
+async def split_long_text(text, msg_max_length=MAX_MSG_BYTES_TG, tmp_msg=False):
+  max_list = 5
+  texts = []
+  if len(text.encode()) > msg_max_length:
+    def _():
+      ls = text.splitlines()
+      tmp = None
+      for l in ls:
+        if tmp is not None:
+          if len((tmp+l).encode()) > msg_max_length:
+            texts.append(tmp)
+            if len(texts) > max_list:
+              return
+            print(f"texts1: {len(texts)} {len(tmp)}")
+          else:
+            tmp += '\n'+l
+            continue
+        while len(l.encode()) > msg_max_length:
+          tmp = l[:msg_max_length]
+          while len(tmp.encode()) > msg_max_length:
+            tmp = tmp[:-int( (len(tmp.encode())-msg_max_length)/2 + 1 )]
+          texts.append(tmp)
+          if len(texts) > max_list:
+            return
+          print(f"texts2: {len(texts)} {len(tmp)}")
+          l = l[len(tmp):]
+        tmp = l
+      if tmp:
+        texts.append(tmp)
+    _()
+  else:
+    texts = [text]
+  if len(texts) > max_list:
+    info(f"文本过长，使用pb: {short(text)}")
+    url =await pastebin(text)
+    return ["文本过长，请打开链接查看: {}\n{}".format(url, short(text))]
+  if len(texts) > 1:
+    if tmp_msg:
+      return [short(text, 500)]
+  return texts
 
 async def my_split(path, is_str=False):
   if is_str:
