@@ -8683,7 +8683,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       if src in mtmsgsg:
         mtmsgs = mtmsgsg[src]
       else:
-        info("not founc {src} in mtmsgsg")
+        info(f"not founc {src} in mtmsgsg")
         #  return
         continue
       for pid,l in mtmsgs.items():
