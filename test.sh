@@ -119,6 +119,7 @@ my_cmd(){
 ff="gm.fifo"
 mkfifo $ff
 exec 6<>$ff
+rm -f $ff
 
 # ping -c 9 localhost &
 ping -c 9 localhost 1>&6   &

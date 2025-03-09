@@ -113,8 +113,7 @@ mkfifo "$ff"
 exec 6<>"$ff"
 rm -f "$ff"
 
-curl --buffer -N -s http://127.0.0.1:4241/api/stream 1>&6
-
+curl --buffer -N -s http://127.0.0.1:4241/api/stream 1>&6 2> "$SH_PATH/.ERROR" &
 
 # while read -r line; do
 # done < `curl -s curl http://localhost:4242/api/stream`
@@ -123,6 +122,17 @@ curl --buffer -N -s http://127.0.0.1:4241/api/stream 1>&6
 # https://stackoverflow.com/a/36368249
 # curl --buffer -N -s http://127.0.0.1:4241/api/stream | while read -r res; do
 while read -u6 -r res; do
+if [[ -f "$SH_PATH/.ERROR" ]]; then
+  err=$(cat "$SH_PATH/.ERROR")
+  rm "$SH_PATH/.ERROR"
+  [[ -n "$err" ]] && {
+    bash "$SH_PATH/sm.sh" "C bot" "E:$(
+    echo "$err"
+    echo "---"
+    echo "$out"
+    )" 4240 &>> $LOG
+  }
+fi
 # date
 # echo "got: $res"
 res=$(echo "$res" | jq 'del(.Extra.file[0].Data)') &>/dev/null || continue
@@ -130,3 +140,5 @@ my_cmd parse_msg
 done
 
 exec 6>&-
+
+
