@@ -895,6 +895,12 @@ $M *$NAME*: "
     fi
     ;;
   api.tox)
+      qt=$(echo "$QT" | sed -e 's/^> //')
+      if [[ -n "$qt" ]]; then
+        NAME="$qt
+${NAME}"
+      fi
+      newline
     ;;
   api.*)
     if [[ -n "$NAME" ]]; then
