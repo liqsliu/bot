@@ -108,25 +108,26 @@ my_cmd(){
 }
 
 
-ff="${SH_PATH}/.gm.sh.fifo"
-mkfifo "$ff"
-exec 6<>"$ff"
-rm -f "$ff"
-
-curl --buffer -N -s http://127.0.0.1:4241/api/stream 1>&6
-
 
 # while read -r line; do
 # done < `curl -s curl http://localhost:4242/api/stream`
 # done <<< `ping -c 9 localhost`
 #
 # https://stackoverflow.com/a/36368249
-# curl --buffer -N -s http://127.0.0.1:4241/api/stream | while read -r res; do
-while read -u6 -r res; do
+curl --buffer -N -s http://127.0.0.1:4241/api/stream | while read -r res; do
 # date
 # echo "got: $res"
 res=$(echo "$res" | jq 'del(.Extra.file[0].Data)') &>/dev/null || continue
 my_cmd parse_msg
 done
 
-exec 6>&-
+exit
+
+res=$(curl -m 1 -s http://127.0.0.1:4241/api/messages) || exit 0
+if [[ "$res" != "[]" ]]; then
+# date >> ~/mt.log
+# echo "gm.sh log: $res" >> ~/mt.log
+res=$(echo "$res" | jq 'del(.[].Extra.file[0].Data)') &>/dev/null || exit 0
+bash "$SH_PATH/gm2.sh" "$res"
+fi
+

@@ -108,12 +108,32 @@ my_cmd(){
 }
 
 
+# exec 6>&1
+# exec 0<&1
+# exec 4>&2
+#
+#
 
-while read -r line; do
+
+
+ff="gm.fifo"
+mkfifo $ff
+exec 6<>$ff
+
+# ping -c 9 localhost &
+ping -c 9 localhost 1>&6   &
+date
+echo "loop..."
+
+while read -u6 -r line; do
 date
 echo "got: $line"
 # done < `curl -s curl http://localhost:4242/api/stream`
-done <<< `ping -c 9 localhost`
+done
+
+# exec 1>&6
+# exec 0&-
+exec 6>&-
 
 exit
 
