@@ -334,8 +334,8 @@ def generand(N=4, M=None, *, no_uppercase=False):
   return ''.join(random.choice(l) for x in range(N))
 
 
-async def split_long_text(text, msg_max_length=500, tmp_msg=False):
-  max_list = 3
+async def split_long_text(text, msg_max_length=MAX_MSG_BYTES_TG, tmp_msg=False):
+  max_list = 5
   texts = []
   if len(text.encode()) > msg_max_length:
     def _():
@@ -396,6 +396,9 @@ music_bot_name = 'Music163bot'
 
 MAX_MSG_BYTES = 8000
 MAX_MSG_BYTES_TG = 4000
+# https://github.com/TokTok/c-toxcore/blob/81b1e4f6348124784088591c4fe9ab41e273031d/toxcore/tox.h#L292
+MAX_MSG_BYTES_TOX = 1372
+MAX_MSG_BYTES_IRC = 512
 
 HTTP_RES_MAX_BYTES = 15*2**20
 HTTP_FILE_MAX_BYTES = 50*2**20
