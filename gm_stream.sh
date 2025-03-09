@@ -54,7 +54,7 @@ $qt"
   }
   if [[ "$gateway" == "gateway1" ]]; then
     URL=$(echo "$restmp" | jq -r ".Extra.file[0].URL")
-    get_msg "**${username% }** " "$text"
+    get_msg "*${username% }* " "$text"
     # msg=$(get_msg "**${username% }** " "$text")
     # if [[ "$username" != "O bot: " ]]; then
     # if [[ "${username:0:2}" != "O " ]]; then
