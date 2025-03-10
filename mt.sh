@@ -1,18 +1,15 @@
 #!/bin/bash
 
-
 cd ~/bot/ && bash init.sh || exit 1
 
 cd ~/
 
 while true; do
-r=0
 #./matterbridge "$@" || bash tg.sh "matterbridge exit $?"
-./mt "$@" || {
-  r=$?
-  # bash tg.sh "matterbridge exit $?"
-  # bash ~/bot/sm.sh "C cmd" "mt stopped" 4249 test
-}
+./mt "$@"
+r=$?
+# bash tg.sh "matterbridge exit $?"
+# bash ~/bot/sm.sh "C cmd" "mt stopped" 4249 test
 echo "res: $r"
 date
 if [[ "$r" -eq 143 ]]; then
