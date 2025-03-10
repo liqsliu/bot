@@ -23,6 +23,7 @@ pkill -x toxbot
 if [[ "$r" -eq 1 ]]; then
   # ctrl+C
   echo stop by me
+  sleep 2
 else
   echo "restart ..."
   echo "wait ..."
