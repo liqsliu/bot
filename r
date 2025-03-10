@@ -15,8 +15,10 @@ python3 -m bot && {
 } || r=$?
 echo "res: $r"
 date
-vgp && tgp && bash init.sh || break
-Tgpp && make || exit 1
+vgp && tgp
+bash init.sh || break
+Tgpp
+make || exit 1
 
 pkill -x mt
 pkill -x toxbot
