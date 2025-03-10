@@ -26,7 +26,7 @@ else
   break
 fi
 
-sleep 8
+sleep 1
 done
 
 exit 0
