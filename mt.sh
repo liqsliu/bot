@@ -1,5 +1,6 @@
 #!/bin/bash
 
+tgp
 cd ~/bot/ && bash init.sh || exit 1
 
 cd ~/
@@ -15,7 +16,6 @@ date
 if [[ "$r" -eq 143 ]]; then
   echo "killed by pkill"
   echo 'restart ...'
-  continue
 elif [[ "$r" -eq 0 ]]; then
   echo 'wtf ...'
 else
