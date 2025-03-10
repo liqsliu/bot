@@ -16,8 +16,8 @@ python3 -m bot && {
 echo "res: $r"
 date
 vgp && tgp
-bash init.sh || break
 Tgpp
+bash init.sh || break
 (cd ~/ToxBot && make )|| exit 1
 
 pkill -x mt
