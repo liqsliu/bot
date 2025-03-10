@@ -5,7 +5,10 @@ pkill -x mt
 pkill -x toxbot
 echo "wait ..."
 # sleep 5
-vgp && tgp && bash init.sh || break
+vgp
+tgp
+Tgp
+bash init.sh || break
 
 while true
 do
