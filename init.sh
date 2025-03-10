@@ -43,6 +43,8 @@ cp group_help_xmpp.txt "$SH_PATH/"
 cp group_help_tox.txt "$SH_PATH/"
 cp group_help_*.txt "$SH_PATH/"
 
+cp ~/ToxBot/commands.txt "$SH_PATH/"
+
 
 
 #touch "$SH_PATH/group_note.txt"
@@ -65,8 +67,4 @@ file_name=group_qun.txt
 [[ -e "$SH_PATH/.BUSY" ]] || {
   echo 2 > "$SH_PATH/.BUSY"
 }
-
-
-
-
 
