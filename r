@@ -18,7 +18,7 @@ date
 vgp && tgp
 bash init.sh || break
 Tgpp
-make || exit 1
+(cd ~/ToxBot && make )|| exit 1
 
 pkill -x mt
 pkill -x toxbot
