@@ -1,8 +1,6 @@
 #!/bin/bash
 (
 cd ~/bot || exit 1
-pkill -x mt
-pkill -x toxbot
 echo "wait ..."
 # sleep 5
 vgp
@@ -10,6 +8,8 @@ tgp
 Tgp
 bash init.sh || break
 
+pkill -x mt
+pkill -x toxbot
 while true
 do
 python3 -m bot && {
