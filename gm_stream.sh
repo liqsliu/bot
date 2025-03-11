@@ -2,6 +2,23 @@
 export SH_PATH=${SH_PATH:-$(cd $(dirname ${BASH_SOURCE[0]}) || exit; pwd )}
 export LOG_FILE=${LOG_FILE:-/dev/null}
 export LOG=${LOG:-$HOME/mt.log}
+
+MAX_BYTES=1371
+split_msg(){
+  echo "$text"
+  return
+
+if [[ $(echo -n "$text" | wc -c) -gt $MAX_BYTES ]]; then
+  tmp=$(echo "$TEXT" | head -n1)
+  name_re=$(echo "$TEXT" | head -n1 | grep -o -P ".*?: " | head -n1 )
+  TEXT=${TEXT:${#name_re}}
+  echo -n "$name_re"; echo -n "${tmp::64} 💾"; echo "$TEXT" | curl -m 8 -s -F "c=@-" "https://fars.ee/?u=1"
+else
+  echo "$text"
+fi
+}
+
+
 get_msg(){
   local username=$1
   local text=$2
@@ -11,15 +28,18 @@ get_msg(){
       return 1
       # continue
     else
-      bash "$SH_PATH/change_long_text.sh" "$username$text"
+      # bash "$SH_PATH/change_long_text.sh" "$username$text"
+      split_msg "$username$text"
     fi
   else
     if [[ -n "$gateway" ]]; then
       Comment=$(echo "$restmp" | jq -r ".Extra.file[0].Comment")
       if [[ -z "$Comment" ]]; then
-        bash "$SH_PATH/change_long_text.sh" "$username$text $URL"
+        # bash "$SH_PATH/change_long_text.sh" "$username$text $URL"
+        split_msg "$username$text $URL"
       else
-        bash "$SH_PATH/change_long_text.sh" "$username$text$Comment: $URL"
+        # bash "$SH_PATH/change_long_text.sh" "$username$text$Comment: $URL"
+        split_msg "$username$text$Comment: $URL"
       fi
     fi
   fi
