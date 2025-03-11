@@ -5,6 +5,7 @@ export LOG=${LOG:-$HOME/mt.log}
 
 MAX_BYTES=1371
 split_msg(){
+  local text=$1
   echo "$text"
   return
 
