@@ -158,6 +158,8 @@ fi
 # echo "got: $res"
 res=$(echo "$res" | jq 'del(.Extra.file[0].Data)') &>/dev/null || continue
 my_cmd parse_msg
+echo
+echo
 echo "EOF_FOR_TOX"
 done
 
