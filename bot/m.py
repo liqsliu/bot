@@ -5244,10 +5244,12 @@ async def msgt(event):
           else:
             tg_msg_cache_for_bot2_event.clear()
             #  await sleep(0.2)
+            i+=1
             if i>16:
               info("bot1 timeout")
               break
             info("wait for bot2")
+            await asyncio.sleep(0)
         #  i = 0
         #  while i<18:
         #    if tg_msg_cache_for_bot2 is None:
