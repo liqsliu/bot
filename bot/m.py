@@ -3504,12 +3504,12 @@ async def slow_mode(timeout=300):
 @exceptions_handler(no_send=True)
 @cross_thread
 async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None):
-  if chat_id == GROUP_ID:
-    #  global tg_msg_cache_for_bot2
-    #  if "bot: " + text == tg_msg_cache_for_bot2:
-    #    tg_msg_cache_for_bot2 = None
-    #    info("重复消息，停止发送")
-    #    return True
+  #  if chat_id == GROUP_ID:
+  #    global tg_msg_cache_for_bot2
+  #    if "bot: " + text == tg_msg_cache_for_bot2:
+  #      tg_msg_cache_for_bot2 = None
+  #      info("重复消息，停止发送")
+  #      return True
   async with tg_send_lock:
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
