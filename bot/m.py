@@ -5206,6 +5206,7 @@ async def msgt(event):
       sender_id = event.sender_id
       if sender_id == 420415423:
         i = 0
+        global tg_msg_cache_for_bot2
         while tg_msg_cache_for_bot2 is not None:
           if i>25:
             info("timeout")
