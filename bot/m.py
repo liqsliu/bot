@@ -5199,11 +5199,12 @@ async def msgt(event):
   if chat_id is None:
     warn(f"chat_id is None")
     chat_id = event.sender_id
-  msg = event.message
 
+  msg = event.message
+  sender_id = event.sender_id
+  print(f"{chat_id} {sender_id}: {short(msg.text)}")
   if chat_id == GROUP_ID:
     if msg.raw_text:
-      sender_id = event.sender_id
       if sender_id == 420415423:
         i = 0
         global tg_msg_cache_for_bot2
