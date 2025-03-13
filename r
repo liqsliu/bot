@@ -10,6 +10,8 @@ bash init.sh || break
 
 pkill -x mt
 pkill -x toxbot
+kill $(ps uax|grep gm_stream | grep -v grep | awk '{print $2}')
+
 while true
 do
 python3 -m bot && {
