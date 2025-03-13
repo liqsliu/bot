@@ -5261,13 +5261,15 @@ async def msgt(event):
         async with tg_msg_cache_for_bot2_lock:
           i = 0
           #  while tg_msg_cache_for_bot2 is not None:
+          await asyncio.sleep(0)
           while tg_msg_cache_for_bot2_event.is_set():
             if i>10:
               info("bot2 wait for clear timeout: {short(text)}")
               break
             info("bot2 wait for clear: {short(text)}")
-            await sleep(0.5)
+            await sleep(0.8)
             i+=1
+          await asyncio.sleep(0)
           tg_msg_cache_for_bot2 = text
           tg_msg_cache_for_bot2_event.set()
       elif sender_id == 5864905002:
@@ -5279,7 +5281,7 @@ async def msgt(event):
         try:
           while True:
             #  await tg_msg_cache_for_bot2_event.wait()
-            await asyncio.wait_for(tg_msg_cache_for_bot2_event.wait(), timeout=5)
+            await asyncio.wait_for(tg_msg_cache_for_bot2_event.wait(), timeout=16)
             await asyncio.sleep(0)
             #  if tg_msg_cache_for_bot2.startswith(text2):
             if text == tg_msg_cache_for_bot2:
