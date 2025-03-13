@@ -3044,7 +3044,7 @@ def send_log(text, jid=None, delay=1, fm=None):
       warn(f"send_log xmpp is busy: {n} text: {short(text)}")
     else:
       info(f"send_log xmpp: {text}")
-    asyncio.create_task(send_xmpp(text, log_group_private, delay=(delay+1)**m), name="send_log"))
+    asyncio.create_task(send_xmpp(text, log_group_private, delay=(delay+1)**m), name="send_log")
 
   #  if jid is None:
   #    #  asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
