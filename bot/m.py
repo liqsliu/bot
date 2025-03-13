@@ -5207,48 +5207,51 @@ async def msgt(event):
   #  print(f"{chat_id} {sender_id}: {short(msg.text)}")
   if chat_id == GROUP_ID:
     if msg.raw_text:
+      text = msg.raw_text
       global tg_msg_cache_for_bot2
       if sender_id == 420415423:
-        # bot2
-        if msg.raw_text.startswith("bot: G "):
-          warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {msg.raw_text}")
-          await msg.delete()
-          return
-        async with tg_msg_cache_for_bot2_lock:
-          i = 0
-          #  while tg_msg_cache_for_bot2 is not None:
-          while tg_msg_cache_for_bot2_event.is_set():
-            if i>15:
-              info("bot2 timeout")
-              break
-            info("wait for check finished")
-            await sleep(0.2)
-            i+=1
-          tg_msg_cache_for_bot2 = msg.raw_text
-          tg_msg_cache_for_bot2_event.set()
+        # bot2: t2bot
+        if text.startswith("bot: "):
+          text = text[5:].splitlines()[0]
+          if text.startswith("G "):
+            warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {text}")
+            await msg.delete()
+            return
+          async with tg_msg_cache_for_bot2_lock:
+            i = 0
+            #  while tg_msg_cache_for_bot2 is not None:
+            while tg_msg_cache_for_bot2_event.is_set():
+              if i>10:
+                info("bot2 timeout: {short(text)}")
+                break
+              info("wait for check: {short(text)}")
+              await sleep(0.5)
+              i+=1
+            tg_msg_cache_for_bot2 = text
+            tg_msg_cache_for_bot2_event.set()
       elif sender_id == 5864905002:
         # mybot
-        text2 = "bot: " + (msg.raw_text)
-        text2 = text2.splitlines()[0]
+        #  text2 = "bot: " + (msg.raw_text)
+        text = text.splitlines()[0]
         i = 0
         while True:
           await tg_msg_cache_for_bot2_event.wait()
           await asyncio.sleep(0)
-          #  if text2 == tg_msg_cache_for_bot2:
-          if tg_msg_cache_for_bot2.startswith(text2):
+          #  if tg_msg_cache_for_bot2.startswith(text2):
+          if text == tg_msg_cache_for_bot2:
             tg_msg_cache_for_bot2_event.clear()
             await msg.delete()
             #  tg_msg_cache_for_bot2 = None
-            info(f"bot1 found: {text2}")
+            info(f"bot1 found: {short(text)}")
             break
           else:
             tg_msg_cache_for_bot2_event.clear()
             #  await sleep(0.2)
             i+=1
             if i>16:
-              info("bot1 timeout")
+              info(f"bot1 timeout: {short(text)}")
               break
-            info("wait for bot2")
+            info(f"bot1 miss: {short(text)}")
             await asyncio.sleep(0)
         #  i = 0
         #  while i<18:
