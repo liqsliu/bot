@@ -3059,7 +3059,7 @@ def send_log(text, jid=None, delay=1, fm=None):
   #      asyncio.create_task(send_tg(text, CHAT_ID, name="send_log")
   #    else:
   #      asyncio.create_task(send_xmpp(text, log_group_private, name="send_log")
-  return await t
+  #  return await t
   return True
 
 
