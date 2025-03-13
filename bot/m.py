@@ -5229,7 +5229,7 @@ async def msgt(event):
       elif sender_id == 5864905002:
         # mybot
         text2 = "bot: " + (msg.raw_text)
-        text = text.splitlines()[0]
+        text2 = text2.splitlines()[0]
         i = 0
         while True:
           await tg_msg_cache_for_bot2_event.wait()
