@@ -1980,11 +1980,12 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
   else:
     e = None
     
-  if tmp:
+  if len(ds) > 0:
     ds = tmp.decode("utf-8", errors="ignore")
     ds = re.sub(shell_color_re,  "", ds)
     ds = ds.strip()
-    if ds:
+    #  if ds:
+    if len(ds) > 0:
       if r == 0:
         if ds.endswith("\n0"):
           ds = ds[:-2]
