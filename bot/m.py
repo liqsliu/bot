@@ -3505,11 +3505,11 @@ async def slow_mode(timeout=300):
 @cross_thread
 async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None):
   if chat_id == GROUP_ID:
-    global tg_msg_cache_for_bot2
-    if "bot: " + text == tg_msg_cache_for_bot2:
-      tg_msg_cache_for_bot2 = None
-      info("重复消息，停止发送")
-      return True
+    #  global tg_msg_cache_for_bot2
+    #  if "bot: " + text == tg_msg_cache_for_bot2:
+    #    tg_msg_cache_for_bot2 = None
+    #    info("重复消息，停止发送")
+    #    return True
   async with tg_send_lock:
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
@@ -3543,9 +3543,9 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
           #  msg = await UB.send_message(await get_entity(chat_id), t)
         k += 1
         if k == len(ts):
-          if chat_id == GROUP_ID:
-            #  wait_for_msg_form_bot2(msg, chat_id)
-            asyncio.create_task(wait_for_msg_form_bot2(msg, chat_id))
+          #  if chat_id == GROUP_ID:
+          #    #  wait_for_msg_form_bot2(msg, chat_id)
+          #    asyncio.create_task(wait_for_msg_form_bot2(msg, chat_id))
           last_outmsg[chat_id] = msg
           if tmp_msg:
             tmp_msg_chats.add(chat_id)
@@ -5158,6 +5158,8 @@ async def get_name(chat_id=None, username=None):
 
 
 tg_msg_cache_for_bot2=None
+tg_msg_cache_for_bot2_lock=asyncio.Lock()
+tg_msg_cache_for_bot2_event=asyncio.Event() # 默认已经clear()
 
 async def wait_for_msg_form_bot2(msg, chat_id):
   global tg_msg_cache_for_bot2
@@ -5205,16 +5207,55 @@ async def msgt(event):
   print(f"{chat_id} {sender_id}: {short(msg.text)}")
   if chat_id == GROUP_ID:
     if msg.raw_text:
+      global tg_msg_cache_for_bot2
       if sender_id == 420415423:
+        # bot2
+        async with tg_msg_cache_for_bot2_lock:
+          i = 0
+          #  while tg_msg_cache_for_bot2 is not None:
+          while tg_msg_cache_for_bot2_event.is_set():
+            if i>25:
+              info("bot2 timeout")
+              break
+            info("wait for check finished")
+            await sleep(0.2)
+            i+=1
+          tg_msg_cache_for_bot2 = msg.raw_text
+          tg_msg_cache_for_bot2_event.set()
+      elif sender_id == 420415423:
+        # mybot
+        text2 = "bot: " + (msg.raw_text)
         i = 0
-        global tg_msg_cache_for_bot2
-        while tg_msg_cache_for_bot2 is not None:
-          if i>25:
-            info("timeout")
+        while True:
+          await tg_msg_cache_for_bot2_event
+          await asyncio.sleep(0)
+          tg_msg_cache_for_bot2_event.clear()
+          if text2 == tg_msg_cache_for_bot2:
+            await msg.delete()
+            #  tg_msg_cache_for_bot2 = None
+            info("bot1 found")
             break
-          await sleep(0.2)
-          i+=1
-        tg_msg_cache_for_bot2 = msg.raw_text
+          elif i>16:
+            info("bot1 timeout")
+            break
+          else:
+            info("wait for bot2")
+        #  i = 0
+        #  while i<18:
+        #    if tg_msg_cache_for_bot2 is None:
+        #      pass
+        #    #  elif "bot: " + (msg.raw_text) != tg_msg_cache_for_bot2:
+        #    #    info("miss: {msg.raw_text} != {tg_msg_cache_for_bot2}")
+        #    #    tg_msg_cache_for_bot2 = None
+        #    #  else:
+        #    elif "bot: " + (msg.raw_text) == tg_msg_cache_for_bot2:
+        #      await msg.delete()
+        #      tg_msg_cache_for_bot2 = None
+        #      info("found")
+        #      break
+        #    info("wait for bot2")
+        #    await sleep(0.3)
+        #    i+=1
     return
   #  if src in mtmsgsg:
   if chat_id in bridges_tmp:
