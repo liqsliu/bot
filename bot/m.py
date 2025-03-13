@@ -3014,37 +3014,39 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
 
 
 #  def send_log(text, jid=CHAT_ID, delay=1, fm=None):
-@cross_thread(need_main=True)
+#  @cross_thread(need_main=True)
 def send_log(text, jid=None, delay=1, fm=None):
   if fm is None:
     fm = sys._getframe()
     fm = fm.f_back
+  if jid is None:
+    if send_log(text, CHAT_ID, delay, fm) is True:
+      if send_log(text, log_group_private, delay, fm) is True:
+        return True
+    return False
   text = f"{fm.f_code.co_name} {fm.f_lineno} {text}"
-  #  k = 0
   m = 0
   n = 0
   # https://docs.python.org/zh-cn/3/library/asyncio-task.html#introspection
   for j in asyncio.all_tasks(loop):
-    #  if j.get_name() == "send_log":
-    #    k += 1
     if j.get_name() == "send_log_tg":
       m += 1
     elif j.get_name() == "send_log_xmpp":
       n += 1
-  #  if k > 0:
-  if jid is None or isinstance(jid, int):
+  if isinstance(jid, int):
     if m > 0:
       warn(f"send_log tg is busy: {m} text: {short(text)}")
       #  await sleep(delay*m)
     else:
       info(f"send_log tg: {text}")
-    asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**m), name="send_log")
-  if jid is None or isinstance(jid, int) is False:
+    t = asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**m), name="send_log_tg")
+  #  if isinstance(jid, int) is False:
+  else:
     if n > 0:
       warn(f"send_log xmpp is busy: {n} text: {short(text)}")
     else:
       info(f"send_log xmpp: {text}")
-    asyncio.create_task(send_xmpp(text, log_group_private, delay=(delay+1)**m), name="send_log")
+    t = asyncio.create_task(send_xmpp(text, log_group_private, delay=(delay+1)**m), name="send_log_xmpp")
 
   #  if jid is None:
   #    #  asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
@@ -3057,6 +3059,7 @@ def send_log(text, jid=None, delay=1, fm=None):
   #      asyncio.create_task(send_tg(text, CHAT_ID, name="send_log")
   #    else:
   #      asyncio.create_task(send_xmpp(text, log_group_private, name="send_log")
+  return await t
   return True
 
 
