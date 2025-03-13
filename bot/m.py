@@ -5222,7 +5222,7 @@ async def msgt(event):
             i+=1
           tg_msg_cache_for_bot2 = msg.raw_text
           tg_msg_cache_for_bot2_event.set()
-      elif sender_id == 420415423:
+      elif sender_id == 5864905002:
         # mybot
         text2 = "bot: " + (msg.raw_text)
         i = 0
