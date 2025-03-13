@@ -5229,11 +5229,13 @@ async def msgt(event):
       elif sender_id == 5864905002:
         # mybot
         text2 = "bot: " + (msg.raw_text)
+        text = text.splitlines()[0]
         i = 0
         while True:
           await tg_msg_cache_for_bot2_event.wait()
           await asyncio.sleep(0)
-          if text2 == tg_msg_cache_for_bot2:
+          #  if text2 == tg_msg_cache_for_bot2:
+          if tg_msg_cache_for_bot2.startswith(text2):
             tg_msg_cache_for_bot2_event.clear()
             await msg.delete()
             #  tg_msg_cache_for_bot2 = None
@@ -5241,11 +5243,11 @@ async def msgt(event):
             break
           else:
             tg_msg_cache_for_bot2_event.clear()
-            info("wait for bot2")
             #  await sleep(0.2)
-          if i>16:
-            info("bot1 timeout")
-            break
+            if i>16:
+              info("bot1 timeout")
+              break
+            info("wait for bot2")
         #  i = 0
         #  while i<18:
         #    if tg_msg_cache_for_bot2 is None:
