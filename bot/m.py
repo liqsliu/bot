@@ -3040,12 +3040,12 @@ def send_log(text, jid=None, delay=1, fm=None):
       info(f"send_log tg: {text}")
     asyncio.create_task(send_tg(text, CHAT_ID, name="send_log"))
     if jid is None or isinstance(jid, int) is False:
-    if n > 0:
-      warn(f"send_log xmpp is busy: {n} text: {short(text)}")
-      await sleep(delay*n)
-    else:
-      info(f"send_log xmpp: {text}")
-    asyncio.create_task(send_xmpp(text, log_group_private, name="send_log")
+      if n > 0:
+        warn(f"send_log xmpp is busy: {n} text: {short(text)}")
+        await sleep(delay*n)
+      else:
+        info(f"send_log xmpp: {text}")
+      asyncio.create_task(send_xmpp(text, log_group_private, name="send_log")
 
   #  if jid is None:
   #    #  asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
