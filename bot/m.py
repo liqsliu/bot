@@ -5241,8 +5241,9 @@ async def msgt(event):
         # bot2: t2bot
         if text.startswith("bot: "):
           text = text[5:].splitlines()[0]
-          if text[-1] == " ":
-            text = text[:-1]
+          text = text.strip()
+          #  if text[-1] == " ":
+          #    text = text[:-1]
           if text.startswith("G "):
             warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {text}")
             await msg.delete()
@@ -5263,6 +5264,7 @@ async def msgt(event):
         # mybot
         #  text2 = "bot: " + (msg.raw_text)
         text = text.splitlines()[0]
+        text = text.strip()
         #  start_time = time.time()
         try:
           while True:
