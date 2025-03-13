@@ -653,7 +653,8 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
           #  t1 = asyncio.create_task(_send_log(res, wait=9, to=2))
           send_log(res, log_group_private, 9)
     return
-    return res
+    #  return res
+
   def wrapper(func):
     if asyncio.iscoroutinefunction(func):
       @wraps(func)
@@ -5959,12 +5960,15 @@ def run_cb(cb, *args, need_main=False, **kwargs):
     return cb(*args, **kwargs)
 
     fu = asyncio.Future()
-    @exceptions_handler
     #  def cb2():
+
+    @exceptions_handler
     def cb2(fu):
       fu.set_result(cb(*args, **kwargs))
     lp.call_soon(cb2, fu)
   else:
+
+    @exceptions_handler
     async def cb2():
       return cb(*args, **kwargs)
     fu = asyncio.run_coroutine_threadsafe(cb2(), lp)
@@ -5972,6 +5976,7 @@ def run_cb(cb, *args, need_main=False, **kwargs):
 
     fu = asyncio.Future()
     # for multi thread
+
     @exceptions_handler
     def cb2(fu):
       #  lp.call_soon_threadsafe(partial(fu.set_result, partial(cb, *args, **kwargs)()))
@@ -6023,15 +6028,18 @@ def run_cb2(cb, *args, need_main=False, **kwargs):
       lp = loop2
   fu = asyncio.Future()
   if safe:
+
     @exceptions_handler
     def cb2():
       fu.set_result(cb(*args, **kwargs))
     lp.call_soon(cb2)
   else:
+
     @exceptions_handler
     async def cb2():
       return cb(*args, **kwargs)
     fu0 = asyncio.run_coroutine_threadsafe(cb2(), lp)
+
     @exceptions_handler
     def cb_for_fu_result(fu0):
       #  oloop.call_soon_threadsafe(partial(f, f2()))
