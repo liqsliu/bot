@@ -268,9 +268,6 @@ xmpp.*)
 # elif [[ "$3" == "matrix.mymatrix" ]]; then
 # matrix.mymatrix)
 matrix.*)
-  # if [[ "$NAME" == "coybot beta" ]]; then
-  #   block_msg
-  # fi
   LABLE="M"
 #  log_msg "$@" &>> ~/tera/mt.log
 
@@ -419,6 +416,9 @@ chang_name_for_qt_from_matrix(){
 # elif [[ "$3" == "telegram.mytelegram" ]]; then
 # telegram.mytelegram)
 telegram.*)
+  if [[ "$10" == "#wtfipfs:mozilla.org" ]]; then
+    block_msg
+  fi
   if [[ "$NAME" == "Telegram" ]]; then
     block_msg
   fi
