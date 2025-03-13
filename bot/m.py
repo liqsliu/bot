@@ -4136,10 +4136,12 @@ async def pvb(text, server=None):
   #  except Exception as e:
   #    #  print(f"E: {e=}")
   except SystemExit as e:
-    pass
+    sys.stdout = orig
+    warn("failed", e=e)
+  finally:
+    sys.stdout = orig
   #  except BaseException as e:
   #    print(f"E: {e=}")
-  sys.stdout = orig
   #  return tmp_for_pvb_print.getvalue()
   res = tmp_for_pvb_print.getvalue()
   if "\n" in res:
