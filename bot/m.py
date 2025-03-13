@@ -5210,11 +5210,15 @@ async def msgt(event):
       global tg_msg_cache_for_bot2
       if sender_id == 420415423:
         # bot2
+        if msg.raw_text.startswith("bot: G "):
+          warn("fixme: 多余的消息，mt的过滤规则需要修改: {msg.raw_text}")
+          await msg.delete()
+          return
         async with tg_msg_cache_for_bot2_lock:
           i = 0
           #  while tg_msg_cache_for_bot2 is not None:
           while tg_msg_cache_for_bot2_event.is_set():
-            if i>25:
+            if i>15:
               info("bot2 timeout")
               break
             info("wait for check finished")
@@ -5229,18 +5233,19 @@ async def msgt(event):
         while True:
           await tg_msg_cache_for_bot2_event.wait()
           await asyncio.sleep(0)
-          async with tg_msg_cache_for_bot2_lock:
-            if text2 == tg_msg_cache_for_bot2:
-              tg_msg_cache_for_bot2_event.clear()
-              await msg.delete()
-              #  tg_msg_cache_for_bot2 = None
-              info("bot1 found")
-              break
-            elif i>16:
-              info("bot1 timeout")
-              break
-            else:
-              info("wait for bot2")
+          if text2 == tg_msg_cache_for_bot2:
+            tg_msg_cache_for_bot2_event.clear()
+            await msg.delete()
+            #  tg_msg_cache_for_bot2 = None
+            info("bot1 found")
+            break
+          else:
+            tg_msg_cache_for_bot2_event.clear()
+            info("wait for bot2")
+            #  await sleep(0.2)
+          if i>16:
+            info("bot1 timeout")
+            break
         #  i = 0
         #  while i<18:
         #    if tg_msg_cache_for_bot2 is None:
