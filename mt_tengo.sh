@@ -62,7 +62,7 @@ $TEXT"
 # [[ "${NAME:3:1}" == " " ]] && [[ "${NAME: -4}" == ":** " ]] && orig_msg
 # [[ $( echo "${NAME}" | wc -l ) -ge 3 ]] && orig_msg
 
-# LOG="$HOME/mt.log"
+LOG="$HOME/mt.log"
 log_msg(){
   echo
   echo "#### mt $(date) ####"
@@ -416,7 +416,8 @@ chang_name_for_qt_from_matrix(){
 # elif [[ "$3" == "telegram.mytelegram" ]]; then
 # telegram.mytelegram)
 telegram.*)
-  if [[ "$10" == "#wtfipfs:mozilla.org" ]]; then
+  # log_msg "$@" >> $LOG
+  if [[ "${10}" == "#wtfipfs:mozilla.org" ]]; then
     block_msg
   fi
   if [[ "$NAME" == "Telegram" ]]; then
