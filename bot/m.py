@@ -5261,26 +5261,28 @@ async def msgt(event):
         # mybot
         #  text2 = "bot: " + (msg.raw_text)
         text = text.splitlines()[0]
-        i = 0
-        while True:
-          await tg_msg_cache_for_bot2_event.wait()
-          await asyncio.sleep(0)
-          #  if tg_msg_cache_for_bot2.startswith(text2):
-          if text == tg_msg_cache_for_bot2:
-            tg_msg_cache_for_bot2_event.clear()
-            await msg.delete()
-            #  tg_msg_cache_for_bot2 = None
-            info(f"bot1 found: {short(text)}")
-            break
-          else:
-            tg_msg_cache_for_bot2_event.clear()
-            #  await sleep(0.2)
-            if i>8:
-              info(f"bot1 timeout: {short(text)}")
-              break
-            info(f"bot1 miss: {short(text)} != {short(tg_msg_cache_for_bot2)}")
-            i+=1
+        #  start_time = time.time()
+        try:
+          while True:
+            #  await tg_msg_cache_for_bot2_event.wait()
+            await asyncio.wait_for(tg_msg_cache_for_bot2_event.wait(), timeout=5)
             await asyncio.sleep(0)
+            #  if tg_msg_cache_for_bot2.startswith(text2):
+            if text == tg_msg_cache_for_bot2:
+              tg_msg_cache_for_bot2_event.clear()
+              await msg.delete()
+              #  tg_msg_cache_for_bot2 = None
+              info(f"bot1 found: {short(text)}")
+              break
+            else:
+              tg_msg_cache_for_bot2_event.clear()
+              #  if time.time() - start_time > 5:
+              #  await sleep(0.2)
+              #  info(f"bot1 miss: {short(text)} != {short(tg_msg_cache_for_bot2)}")
+              info(f"bot1 miss: {text=} != {tg_msg_cache_for_bot2=}")
+              await asyncio.sleep(0)
+        except TimeoutError as e:
+          info(f"bot1 timeout: {short(text)}")
         #  i = 0
         #  while i<18:
         #    if tg_msg_cache_for_bot2 is None:
