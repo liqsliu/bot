@@ -5239,7 +5239,7 @@ async def msgt(event):
             tg_msg_cache_for_bot2_event.clear()
             await msg.delete()
             #  tg_msg_cache_for_bot2 = None
-            info("bot1 found")
+            info(f"bot1 found: {text2}")
             break
           else:
             tg_msg_cache_for_bot2_event.clear()
