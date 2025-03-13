@@ -647,11 +647,11 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
         #  send_log(res, 9)
         if not no_send_tg:
           #  t1 = asyncio.create_task(_send_log(res, wait=9, to=1))
-          send_log(res, CHAT_ID, 9)
+          send_log(res, CHAT_ID, 3)
           
         if not no_send_xmpp:
           #  t1 = asyncio.create_task(_send_log(res, wait=9, to=2))
-          send_log(res, log_group_private, 9)
+          send_log(res, log_group_private, 2)
     return
     #  return res
 
@@ -3013,23 +3013,51 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
 #    return res
 
 
+#  def send_log(text, jid=CHAT_ID, delay=1, fm=None):
 @cross_thread(need_main=True)
-def send_log(text, jid=CHAT_ID, delay=1, fm=None):
+def send_log(text, jid=None, delay=1, fm=None):
   if fm is None:
     fm = sys._getframe()
     fm = fm.f_back
   text = f"{fm.f_code.co_name} {fm.f_lineno} {text}"
-  k = 0
+  #  k = 0
+  m = 0
+  n = 0
   # https://docs.python.org/zh-cn/3/library/asyncio-task.html#introspection
   for j in asyncio.all_tasks(loop):
-    if j.get_name() == "send_log":
-      k += 1
-  if k > 0:
-    warn(f"send_log is waiting: {k} text: {short(text)}")
-  else:
-    info(f"send_log: {text}")
-  asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
-  asyncio.create_task(send_xmpp(text, log_group_private, delay=(delay+1)**k), name="send_log")
+    #  if j.get_name() == "send_log":
+    #    k += 1
+    if j.get_name() == "send_log_tg":
+      m += 1
+    elif j.get_name() == "send_log_xmpp":
+      n += 1
+  #  if k > 0:
+  if jid is None or isinstance(jid, int):
+    if m > 0:
+      warn(f"send_log tg is busy: {m} text: {short(text)}")
+      await sleep(delay*m)
+    else:
+      info(f"send_log tg: {text}")
+    asyncio.create_task(send_tg(text, CHAT_ID, name="send_log")
+  if jid is None or not isinstance(jid, int):
+    if n > 0:
+      warn(f"send_log xmpp is busy: {n} text: {short(text)}")
+      await sleep(delay*n)
+    else:
+      info(f"send_log xmpp: {text}")
+    asyncio.create_task(send_xmpp(text, log_group_private, name="send_log")
+
+  #  if jid is None:
+  #    #  asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
+  #    #  asyncio.create_task(send_xmpp(text, log_group_private, delay=(delay+1)**k), name="send_log")
+  #    asyncio.create_task(send_tg(text, CHAT_ID, name="send_log")
+  #    asyncio.create_task(send_xmpp(text, log_group_private, name="send_log")
+  #  else:
+  #    #  asyncio.create_task(send(text, jid, delay=(delay+1)**k), name="send_log")
+  #    if isinstance(jid, int):
+  #      asyncio.create_task(send_tg(text, CHAT_ID, name="send_log")
+  #    else:
+  #      asyncio.create_task(send_xmpp(text, log_group_private, name="send_log")
   return True
 
 
@@ -7763,8 +7791,8 @@ async def init_cmd():
     cmds.pop(0)
     res = await my_exec(' '.join(cmds), src)
     return f"{res}"
-  cmd_funs["exec2"] = _
-  cmd_for_admin.add('exec2')
+  cmd_funs["exec0"] = _
+  cmd_for_admin.add('exec0')
 
   async def _(cmds, src):
     if len(cmds) == 1:
