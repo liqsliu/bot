@@ -5240,26 +5240,30 @@ async def msgt(event):
       if sender_id == 420415423:
         # bot2: t2bot
         if text.startswith("bot: "):
-          text = text[5:].splitlines()[0]
-          text = text.strip()
-          #  if text[-1] == " ":
-          #    text = text[:-1]
-          if text.startswith("G "):
-            warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {text}")
-            await msg.delete()
-            return
-          async with tg_msg_cache_for_bot2_lock:
-            i = 0
-            #  while tg_msg_cache_for_bot2 is not None:
-            while tg_msg_cache_for_bot2_event.is_set():
-              if i>10:
-                info("bot2 wait for clear timeout: {short(text)}")
-                break
-              info("bot2 wait for clear: {short(text)}")
-              await sleep(0.5)
-              i+=1
-            tg_msg_cache_for_bot2 = text
-            tg_msg_cache_for_bot2_event.set()
+          text = text[5:]
+        #  elif " " not in  text.splei(": ", 1)[0]:
+        elif text[1] != " ":
+          text = "M " + text
+        text = text.splitlines()[0]
+        text = text.strip()
+        #  if text[-1] == " ":
+        #    text = text[:-1]
+        if text.startswith("G "):
+          warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {text}")
+          await msg.delete()
+          return
+        async with tg_msg_cache_for_bot2_lock:
+          i = 0
+          #  while tg_msg_cache_for_bot2 is not None:
+          while tg_msg_cache_for_bot2_event.is_set():
+            if i>10:
+              info("bot2 wait for clear timeout: {short(text)}")
+              break
+            info("bot2 wait for clear: {short(text)}")
+            await sleep(0.5)
+            i+=1
+          tg_msg_cache_for_bot2 = text
+          tg_msg_cache_for_bot2_event.set()
       elif sender_id == 5864905002:
         # mybot
         #  text2 = "bot: " + (msg.raw_text)
