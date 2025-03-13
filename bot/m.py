@@ -5250,9 +5250,9 @@ async def msgt(event):
             #  while tg_msg_cache_for_bot2 is not None:
             while tg_msg_cache_for_bot2_event.is_set():
               if i>10:
-                info("bot2 timeout: {short(text)}")
+                info("bot2 wait for clear timeout: {short(text)}")
                 break
-              info("wait for check: {short(text)}")
+              info("bot2 wait for clear: {short(text)}")
               await sleep(0.5)
               i+=1
             tg_msg_cache_for_bot2 = text
@@ -5275,11 +5275,11 @@ async def msgt(event):
           else:
             tg_msg_cache_for_bot2_event.clear()
             #  await sleep(0.2)
-            i+=1
-            if i>16:
+            if i>8:
               info(f"bot1 timeout: {short(text)}")
               break
-            info(f"bot1 miss: {short(text)}")
+            info(f"bot1 miss: {short(text)} != {short(tg_msg_cache_for_bot2)}")
+            i+=1
             await asyncio.sleep(0)
         #  i = 0
         #  while i<18:
