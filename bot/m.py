@@ -5211,7 +5211,7 @@ async def msgt(event):
       if sender_id == 420415423:
         # bot2
         if msg.raw_text.startswith("bot: G "):
-          warn("fixme: 多余的消息，mt的过滤规则需要修改: {msg.raw_text}")
+          warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {msg.raw_text}")
           await msg.delete()
           return
         async with tg_msg_cache_for_bot2_lock:
