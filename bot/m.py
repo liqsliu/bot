@@ -340,7 +340,7 @@ def generand(N=4, M=None, *, no_uppercase=False):
 MY_ID = int(get_my_key("TELEGRAM_MY_ID"))
 
 CHAT_ID = int(get_my_key("TELEGRAM_GROUP_LIQS"))
-#  GROUP_ID = int(get_my_key("TELEGRAM_GROUP_WTFIPFS"))
+GROUP_ID = int(get_my_key("TELEGRAM_GROUP_WTFIPFS"))
 
 #  gpt_bot = int(get_my_key("TELEGRAM_GPT_ID"))
 gpt_bot = 6226014461
@@ -3504,6 +3504,12 @@ async def slow_mode(timeout=300):
 @exceptions_handler(no_send=True)
 @cross_thread
 async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None):
+  if chat_id == GROUP_ID:
+    global tg_msg_cache_for_bot2
+    if "bot: " + text == tg_msg_cache_for_bot2:
+      tg_msg_cache_for_bot2 = None
+      info("重复消息，停止发送")
+      return True
   async with tg_send_lock:
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
@@ -3537,11 +3543,15 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
           #  msg = await UB.send_message(await get_entity(chat_id), t)
         k += 1
         if k == len(ts):
+          if chat_id == GROUP_ID:
+            #  wait_for_msg_form_bot2(msg, chat_id)
+            asyncio.create_task(wait_for_msg_form_bot2(msg, chat_id))
           last_outmsg[chat_id] = msg
           if tmp_msg:
             tmp_msg_chats.add(chat_id)
           elif chat_id in tmp_msg_chats:
             tmp_msg_chats.remove(chat_id)
+
         elif len(ts) > 1:
           await sleep(0.5)
         if delay is not None:
@@ -5032,6 +5042,8 @@ async def msgtd(event):
   #    return
   #  chat_id = event.sender_id
   chat_id = event.chat_id
+  if chat_id == GROUP_ID:
+    return
   if chat_id is None:
     warn(f"chat_id is None")
   elif chat_id not in bridges_tmp:
@@ -5143,6 +5155,34 @@ async def get_name(chat_id=None, username=None):
       bot_names[chat_id] += " " + peer.last_name
   return bot_names[chat_id]
 
+
+
+tg_msg_cache_for_bot2=None
+
+async def wait_for_msg_form_bot2(msg, chat_id):
+  global tg_msg_cache_for_bot2
+  #  old_msg = None
+  #  if chat_id in last_outmsg:
+  #    old_msg = last_outmsg[chat_id]
+  i = 0
+  while i<15:
+    if tg_msg_cache_for_bot2 is None:
+      pass
+    elif "bot: " + (msg.raw_text) != tg_msg_cache_for_bot2:
+      tg_msg_cache_for_bot2 = None
+    else:
+      await msg.delete()
+      tg_msg_cache_for_bot2 = None
+      last_outmsg.pop(chat_id)
+      if chat_id in tmp_msg_chats:
+        tmp_msg_chats.remove(chat_id)
+      info("found")
+      break
+    info("wait for bot2")
+    await sleep(0.3)
+    i++
+
+
 @exceptions_handler
 async def msgt(event):
   
@@ -5155,13 +5195,25 @@ async def msgt(event):
   #  if msg.buttons:
   #    info(f"buttons: {msg.buttons=}")
   # https://docs.telethon.dev/en/stable/modules/custom.html#telethon.tl.custom.chatgetter.ChatGetter
-  msg = event.message
   chat_id = event.chat_id
   if chat_id is None:
     warn(f"chat_id is None")
     chat_id = event.sender_id
+  msg = event.message
 
-
+  if chat_id == GROUP_ID:
+    if msg.raw_text:
+      sender_id = event.sender_id
+      if sender_id == 420415423:
+        i = 0
+        while tg_msg_cache_for_bot2 is not None:
+          if i>25:
+            info("timeout")
+            break
+          await sleep(0.2)
+          i++
+        tg_msg_cache_for_bot2 = msg.raw_text
+    return
   #  if src in mtmsgsg:
   if chat_id in bridges_tmp:
     src = bridges_tmp[chat_id]
