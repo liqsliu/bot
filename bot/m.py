@@ -5180,7 +5180,7 @@ async def wait_for_msg_form_bot2(msg, chat_id):
       break
     info("wait for bot2")
     await sleep(0.3)
-    i++
+    i+=1
 
 
 @exceptions_handler
@@ -5211,7 +5211,7 @@ async def msgt(event):
             info("timeout")
             break
           await sleep(0.2)
-          i++
+          i+=1
         tg_msg_cache_for_bot2 = msg.raw_text
     return
   #  if src in mtmsgsg:
