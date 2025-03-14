@@ -9780,7 +9780,7 @@ async def amain():
     #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, proxy=("socks5", '127.0.0.1', 6080))
 
     #  allright_task += 1
-    asyncio.create_task(bot_start(bot_token), name="bot")
+    asyncio.create_task(bot_start(), name="bot")
 
     #  del api_id
     #  del api_hash
