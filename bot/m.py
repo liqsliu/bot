@@ -9493,7 +9493,7 @@ async def bot_start(bot_token):
   await TB.start(bot_token=bot_token)
   info("telegram bot 登陆成功")
   async with TB:
-    info("telegram bot 登陆成功")
+    info("telegram bot 登陆成功2")
 
     @TB.on(events.NewMessage(incoming=True))
     @TB.on(events.MessageEdited(incoming=True))
@@ -9779,8 +9779,8 @@ async def amain():
     api_hash = bot_token.split(":", 1)[1]
     #  TB = await TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash).start(bot_token=bot_token)
     TB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash)
-    allright_task += 1
-    asyncio.create_task(bot_start(bot_token), name="bot")
+    #  allright_task += 1
+    #  asyncio.create_task(bot_start(bot_token), name="bot")
 
     #  del api_id
     #  del api_hash
