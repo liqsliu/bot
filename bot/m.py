@@ -3021,7 +3021,7 @@ def send_log(text, jid=None, delay=1, fm=None):
     fm = sys._getframe()
     fm = fm.f_back
   if jid is None:
-    if send_log(text, MY_ID, delay, fm) is True:
+    if send_log(text, CHAT_ID, delay, fm) is True:
       if send_log(text, log_group_private, delay, fm) is True:
         return True
     return False
@@ -3040,7 +3040,7 @@ def send_log(text, jid=None, delay=1, fm=None):
       #  await sleep(delay*m)
     else:
       info(f"send_log tg: {text}")
-    t = asyncio.create_task(send_tg2(text, jid, delay=(delay+1)**m), name="send_log_tg")
+    t = asyncio.create_task(send_tg(text, jid, delay=(delay+1)**m), name="send_log_tg")
   #  if isinstance(jid, int) is False:
   else:
     if n > 0:
@@ -3068,7 +3068,8 @@ def send_log(text, jid=None, delay=1, fm=None):
 def sendme(*args, to=1, **kwargs):
   if to != 2:
     #  send(*args, jid=CHAT_ID, **kwargs)
-    asyncio.create_task(send_tg2(*args, chat_id=MY_ID, **kwargs))
+    #  asyncio.create_task(send_tg(*args, chat_id=MY_ID, **kwargs))
+    asyncio.create_task(send_tg(*args, **kwargs))
   if to != 1:
     send(*args, jid=ME, **kwargs)
   #  asyncio.create_task(run_run(send_t(text)))
@@ -3538,7 +3539,7 @@ tmp_msg_chats_bot = {}
 
 @exceptions_handler(no_send=True)
 @cross_thread
-async def send_tg2(text, chat_id=MY_ID, correct=False, tmp_msg=False, delay=None):
+async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None):
   async with tg_send_lock:
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
@@ -3590,7 +3591,7 @@ async def send_tg2(text, chat_id=MY_ID, correct=False, tmp_msg=False, delay=None
 
 @exceptions_handler(no_send=True)
 @cross_thread
-async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None):
+async def send_tg2(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None):
   #  if chat_id == GROUP_ID:
   #    global tg_msg_cache_for_bot2
   #    if "bot: " + text == tg_msg_cache_for_bot2:
@@ -9929,7 +9930,7 @@ async def amain():
       #  res = await t
       #  t = loop2.create_task(send_tg("通过副线程发信息成功(loop2)", CHAT_ID)) # 测试结果: 必须放在下面这行代码上面，不然就无法执行task
 
-      fu = asyncio.run_coroutine_threadsafe(send_tg2("通过副线程发信息成功"), loop2)
+      fu = asyncio.run_coroutine_threadsafe(send_tg("通过副线程发信息成功"), loop2)
       while not fu.done():
         info(f"等待发送消息的任务结束: not done, loop is_running: {loop2.is_running()}")
         await sleep(1)
