@@ -9495,7 +9495,11 @@ async def msgb(event):
           await msg.reply("peer id: %s" % await UB.get_peer_id(peer))
         elif e:
           await msg.reply(f"{e.stringify()}")
-          await msg.reply("peer id: %s" % await UB.get_peer_id(e))
+          pid = await UB.get_peer_id(e)
+          if pid > 0:
+            await msg.reply("peer id: [%s](tg://openmessage?user_id=%s)" % (pid, pid))
+          else:
+            await msg.reply("peer id: %s" % pid)
         else:
           await msg.reply("not fount entity")
         return
