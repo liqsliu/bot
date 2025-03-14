@@ -9551,9 +9551,9 @@ async def msgb(event):
       if sender_id:
         #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
         #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
-        await msg2.reply(f"id: [{sender_id}](tg://user?id={sender_id})")
+        await msg2.reply(f"id: [{sender_id}](tg://user?id={sender_id})", parse_mode="md")
       else:
-        await msg2.reply(f"chat_id: [{chat_id}](tg://user?id={chat_id})")
+        await msg2.reply(f"chat_id: [{chat_id}](tg://user?id={chat_id})", parse_mode="md")
       await msg.reply("ok")
 
 @exceptions_handler
