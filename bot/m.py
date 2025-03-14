@@ -9534,7 +9534,16 @@ async def msgb(event):
         #  await TB.send_message(chat_id, "pong")
         await msg.reply("pong")
         return
-    if chat_id == CHAT_ID:
+    if chat_id == MY_ID:
+      if msg.is_reply:
+        msg2 = await msg.get_reply_message()
+        if msg2.raw_text:
+          text2 = msg.raw_text
+          if text2.startswith("id: "):
+            tid = int(text2.split(" ")[1])
+            msg3 = await msg.forward_to(tid)
+            await msg.reply("ok")
+            return
       await msg.reply("?")
     elif event.is_private:
       msg2 = await msg.forward_to(MY_ID)
