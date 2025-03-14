@@ -3021,7 +3021,7 @@ def send_log(text, jid=None, delay=1, fm=None):
     fm = sys._getframe()
     fm = fm.f_back
   if jid is None:
-    if send_log(text, CHAT_ID, delay, fm) is True:
+    if send_log(text, MY_ID, delay, fm) is True:
       if send_log(text, log_group_private, delay, fm) is True:
         return True
     return False
@@ -3040,14 +3040,14 @@ def send_log(text, jid=None, delay=1, fm=None):
       #  await sleep(delay*m)
     else:
       info(f"send_log tg: {text}")
-    t = asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**m), name="send_log_tg")
+    t = asyncio.create_task(send_tg2(text, jid, delay=(delay+1)**m), name="send_log_tg")
   #  if isinstance(jid, int) is False:
   else:
     if n > 0:
       warn(f"send_log xmpp is busy: {n} text: {short(text)}")
     else:
       info(f"send_log xmpp: {text}")
-    t = asyncio.create_task(send_xmpp(text, log_group_private, delay=(delay+1)**m), name="send_log_xmpp")
+    t = asyncio.create_task(send_xmpp(text, jid, delay=(delay+1)**m), name="send_log_xmpp")
 
   #  if jid is None:
   #    #  asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
@@ -3093,7 +3093,7 @@ def send(text, jid=None, *args, **kwargs):
       return False
   elif isinstance(jid, int):
     #  return await send_tg(text=text, chat_id=jid, *args, **kwargs)
-    asyncio.create_task( send_tg(text=text, chat_id=jid, *args, **kwargs) )
+    asyncio.create_task(send_tg(text=text, chat_id=jid, *args, **kwargs) )
     return True
   #  if  type(jid) is int:
     #  if jid == CHAT_ID:
@@ -3532,6 +3532,60 @@ async def slow_mode(timeout=300):
 
 
 
+last_outmsg_bot = {}
+tmp_msg_chats_bot = {}
+
+@exceptions_handler(no_send=True)
+@cross_thread
+async def send_tg2(text, chat_id=MY_ID, correct=False, tmp_msg=False, delay=None):
+  async with tg_send_lock:
+    ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
+    if len(ts) > 1:
+      tmp_msg = False
+    k = 0
+    for t in ts:
+      await sleep(msg_delay_default)
+      try:
+        if chat_id in last_outmsg_bot:
+          omsg = last_outmsg_bot[chat_id]
+          if correct is True:
+            msg = await omsg.edit(t)
+            correct = False
+          elif chat_id in tmp_msg_chats_bot:
+            msg = await omsg.edit(t)
+          else:
+            msg = await TB.send_message(chat_id, t)
+        else:
+          msg = await TB.send_message(chat_id, t)
+        k += 1
+        if k == len(ts):
+          last_outmsg_bot[chat_id] = msg
+          if tmp_msg:
+            tmp_msg_chats_bot.add(chat_id)
+          elif chat_id in tmp_msg_chats_bot:
+            tmp_msg_chats_bot.remove(chat_id)
+
+        elif len(ts) > 1:
+          await sleep(0.5)
+        if delay is not None:
+          await sleep(delay)
+      except rpcerrorlist.FloodWaitError as e:
+        warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
+        await slow_mode()
+        return False
+      except rpcerrorlist.MessageTooLongError as e:
+        warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
+        await sleep(5)
+        return False
+      except ValueError as e:
+        if e.args[0] == 'Failed to parse message':
+          err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
+        return False
+      except Exception as e:
+        err(f"发送tg消息失败: {chat_id} {e=} {t=}")
+        return False
+  info(f"send ok: {chat_id} {short(text)}")
+  return True
 
 @exceptions_handler(no_send=True)
 @cross_thread
@@ -9477,7 +9531,20 @@ async def msgb(event):
       sender_id = event.sender_id
       info(f"bot got msg: {chat_id} {sender_id}: {text}")
       if text == "ping":
+        #  await TB.send_message(chat_id, "pong")
         await msg.reply("pong")
+        return
+    if chat_id == CHAT_ID:
+      await msg.reply("?")
+    elif event.is_private:
+      msg2 = await msg.forward_to(MY_ID)
+      if sender_id:
+        #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
+        #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
+        await msg2.reply(f"id: [{sender_id}](tg://user?id={sender_id})")
+      else:
+        await msg2.reply(f"chat_id: [{chat_id}](tg://user?id={chat_id})")
+      await msg.reply("ok")
 
 @exceptions_handler
 async def msgbo(event):
@@ -9498,6 +9565,8 @@ async def bot_start():
   info("telegram bot 登陆成功")
   async with TB:
     info("telegram bot 登陆成功2")
+    #  TB.parse_mode = None
+    TB.parse_mode = 'md'
 
     @TB.on(events.NewMessage(incoming=True))
     @TB.on(events.MessageEdited(incoming=True))
