@@ -5774,7 +5774,8 @@ async def msgtout(event):
   if chat_id == MY_ID or chat_id == CHAT_ID:
     if chat_id == CHAT_ID:
       if event.fwd_from:
-        await msg.reply(event.fwd_from.stringify())
+        #  await msg.reply(event.fwd_from.stringify())
+        await send_tg(event.fwd_from.stringify())
         tmsg = event
         cmds = get_cmd(text)
         opts = 0
@@ -5783,7 +5784,7 @@ async def msgtout(event):
         await save_tg_msg(tmsg, chat_id, opts)
         if tmsg.document:
           file = tmsg.document
-          await msg.reply(f"type: {type(file)}")
+          await send_tg(f"type: {type(file)}")
           #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
         return
       #  elif event.is_reply:
@@ -9454,6 +9455,8 @@ async def join(jid=None, nick=None, client=None):
 
 @exceptions_handler
 async def msgb(event):
+  if event.fwd_from:
+    return
   chat_id = event.chat_id
   if event.is_private or chat_id == CHAT_ID:
     msg = event.message
@@ -9534,6 +9537,8 @@ async def msgb(event):
         return
 
 
+      if msg.file:
+        return
       #  res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
       res = await run_cmd(text, chat_id, f"G {MY_NAME}: ", is_admin=True)
       if res is True:
