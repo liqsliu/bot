@@ -5793,65 +5793,6 @@ async def msgtout(event):
       return
 
 
-    if text == 'id':
-      #  await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
-      #  await UB.send_message(chat_id, f"id @name https://t.me/name\nchat_id: {chat_id}")
-      await msg.reply(f"id @name https://t.me/name\nchat_id: {chat_id}")
-      return
-    if text.startswith("id "):
-      #  url = text.split(' ')[1]
-      #  if url.startswith("https://t.me/"):
-      #    username = url.split('/')[3]
-      #  elif url.startswith("@"):
-      #    username = url[1:]
-      #  else:
-      #    await UB.send_message(chat_id, "error url")
-      #    return
-      #
-      #  e = await UB.get_entity(username)
-
-      url = text.split(' ')[1]
-      e = await get_entity(url, False)
-      if type(e) is tuple:
-        peer = e[0]
-        gid = e[1]
-        e = await UB.get_messages(peer, ids=gid)
-        await UB.send_message(chat_id, f"{e.stringify()}")
-        await UB.send_message(chat_id, "peer id: %s" % await UB.get_peer_id(peer))
-      elif e:
-        await UB.send_message(chat_id, f"{e.stringify()}")
-        await UB.send_message(chat_id, "peer id: %s" % await UB.get_peer_id(e))
-      else:
-        await UB.send_message(chat_id, "not fount entity")
-    elif text.startswith("msg "):
-      cmds = get_cmd(text)
-      url = cmds[1]
-      if url:
-        if url == "h":
-          send("msg url raw/fast/xmpp/direct/vps", chat_id)
-          return
-        opts = 0
-        peer = await get_entity(url)
-        if peer:
-          #  send(peer.stringify(), chat_id)
-          ss = url.split('/')
-          if len(ss) > 4:
-            gid = int(ss[-1])
-            tmsg = await UB.get_messages(peer, ids=gid)
-            if tmsg:
-              opts = 0
-              if len(cmds) == 3:
-                opts = cmds[2]
-              await save_tg_msg(tmsg, chat_id, opts, url)
-            else:
-              send(f"error id: {gid}\nres: {msg}", chat_id)
-          return
-        else:
-          send(f"error url: {url}\nres: {peer}", chat_id)
-          return
-      send("error", chat_id)
-
-
 
 
 
@@ -9526,6 +9467,69 @@ async def msgb(event):
         return
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
+      if text == 'id':
+        #  await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
+        #  await UB.send_message(chat_id, f"id @name https://t.me/name\nchat_id: {chat_id}")
+        await msg.reply(f"id @name https://t.me/name\nchat_id: {chat_id}")
+        return
+      if text.startswith("id "):
+        #  url = text.split(' ')[1]
+        #  if url.startswith("https://t.me/"):
+        #    username = url.split('/')[3]
+        #  elif url.startswith("@"):
+        #    username = url[1:]
+        #  else:
+        #    await UB.send_message(chat_id, "error url")
+        #    return
+        #
+        #  e = await UB.get_entity(username)
+
+        url = text.split(' ')[1]
+        e = await get_entity(url, False)
+        if type(e) is tuple:
+          peer = e[0]
+          gid = e[1]
+          e = await TB.get_messages(peer, ids=gid)
+          #  await UB.send_message(chat_id, f"{e.stringify()}")
+          await msg.reply(f"{e.stringify()}")
+          await msg.reply("peer id: %s" % await UB.get_peer_id(peer))
+        elif e:
+          await msg.reply(f"{e.stringify()}")
+          await msg.reply("peer id: %s" % await UB.get_peer_id(e))
+        else:
+          await msg.reply("not fount entity")
+        return
+      elif text.startswith("msg "):
+        cmds = get_cmd(text)
+        url = cmds[1]
+        if url:
+          if url == "h":
+            #  send("msg url raw/fast/xmpp/direct/vps", chat_id)
+            await msg.reply("msg url raw/fast/xmpp/direct/vps")
+            return
+          opts = 0
+          peer = await get_entity(url)
+          if peer:
+            #  send(peer.stringify(), chat_id)
+            ss = url.split('/')
+            if len(ss) > 4:
+              gid = int(ss[-1])
+              tmsg = await TB.get_messages(peer, ids=gid)
+              if tmsg:
+                opts = 0
+                if len(cmds) == 3:
+                  opts = cmds[2]
+                await save_tg_msg(tmsg, chat_id, opts, url)
+              else:
+                await msg.reply(f"error id: {gid}\nres: {msg}")
+            return
+          else:
+            await msg.reply(f"error url: {url}\nres: {peer}")
+            return
+        await msg.reply("error")
+        return
+
+
       #  res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
       res = await run_cmd(text, chat_id, f"G {MY_NAME}: ", is_admin=True)
       if res is True:
