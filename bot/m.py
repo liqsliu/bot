@@ -5792,18 +5792,6 @@ async def msgtout(event):
     if not text:
       return
 
-    #  res = await run_cmd(text, CHAT_ID, "G me")
-    if chat_id == CHAT_ID:
-      #  res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
-      res = await run_cmd(text, chat_id, f"G {MY_NAME}: ", is_admin=True)
-      if res is True:
-        return
-      if res:
-        #  res = f"```\n{res}```"
-        #  await UB.send_message(CHAT_ID, res)
-        #  send(res, chat_id)
-        await msg.reply(res)
-        return
 
     if text == 'id':
       #  await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
@@ -9536,7 +9524,19 @@ async def msgb(event):
         #  await TB.send_message(chat_id, "pong")
         await msg.reply("pong")
         return
-    if chat_id == MY_ID:
+    #  res = await run_cmd(text, CHAT_ID, "G me")
+    if chat_id == CHAT_ID:
+      #  res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
+      res = await run_cmd(text, chat_id, f"G {MY_NAME}: ", is_admin=True)
+      if res is True:
+        return
+      if res:
+        #  res = f"```\n{res}```"
+        #  await UB.send_message(CHAT_ID, res)
+        #  send(res, chat_id)
+        await msg.reply(res)
+        return
+    elif chat_id == MY_ID:
       if msg.is_reply:
         msg2 = await msg.get_reply_message()
         if msg2.raw_text:
