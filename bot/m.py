@@ -5527,7 +5527,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
   elif tmsg.file:
     file = tmsg.file
     file_size = file.size
-    send(f"file: {type(file)} {file.name} {file.size}", chat_id)
+    send(f"file: {type(file)}\nname: {file.name}\nsize: {file.size}", chat_id)
     res = None
     #  if tmsg.text:
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
