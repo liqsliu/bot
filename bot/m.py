@@ -9493,7 +9493,7 @@ async def msgb(event):
         if type(e) is tuple:
           peer = e[0]
           gid = e[1]
-          e = await TB.get_messages(peer, ids=gid)
+          e = await UB.get_messages(peer, ids=gid)
           #  await UB.send_message(chat_id, f"{e.stringify()}")
           await msg.reply(f"{e.stringify()}")
           await msg.reply("peer id: %s" % await UB.get_peer_id(peer))
@@ -9522,7 +9522,7 @@ async def msgb(event):
             ss = url.split('/')
             if len(ss) > 4:
               gid = int(ss[-1])
-              tmsg = await TB.get_messages(peer, ids=gid)
+              tmsg = await UB.get_messages(peer, ids=gid)
               if tmsg:
                 opts = 0
                 if len(cmds) == 3:
