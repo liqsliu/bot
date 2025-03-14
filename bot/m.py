@@ -9512,7 +9512,7 @@ async def bot_start():
 
     if allright_task > 0:
       allright_task -= 1
-    TB.run_until_disconnected()
+    await TB.run_until_disconnected()
 
 @exceptions_handler
 async def xmpp_start():
