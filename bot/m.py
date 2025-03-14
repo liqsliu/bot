@@ -19,7 +19,7 @@ from typing import Type
 from . import debug, WORK_DIR, PARENT_DIR, LOG_FILE, get_my_key, HOME, LOGGER
 
 
-
+from telethon import TelegramClient
 #  from tg.telegram import DOWNLOAD_PATH
 from telethon.tl.types import KeyboardButton, KeyboardButtonUrl, KeyboardButtonCallback, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument
 from telethon import events, utils
@@ -9487,6 +9487,7 @@ async def msgbo(event):
     sender_id = event.sender_id
     info(f"bot out msg: {chat_id} {sender_id}: {text}")
 
+@exceptions_handler
 async def bot_start():
   global TB
   bot_token = get_my_key("TELEGRAM_BOT_TOKEN")
@@ -9768,7 +9769,6 @@ async def amain():
     #  asyncio.create_task(wtf_loop())
 
     global UB
-    from telethon import TelegramClient
     api_id = int(get_my_key("TELEGRAM_API_ID"))
     api_hash = get_my_key("TELEGRAM_API_HASH")
     #  client = TelegramClient('anon', api_id, api_hash)
