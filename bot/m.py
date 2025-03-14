@@ -9518,7 +9518,7 @@ async def bot_start():
       allright_task -= 1
     TB.run_until_disconnected()
 
-#  @exceptions_handler
+@exceptions_handler
 async def xmpp_start():
   info("开始登录xmpp")
   global XB, myjid, UPLOAD, UPLOAD_MAX
