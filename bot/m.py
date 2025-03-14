@@ -3535,7 +3535,7 @@ async def slow_mode(timeout=300):
 
 
 last_outmsg_bot = {}
-tmp_msg_chats_bot = {}
+tmp_msg_chats_bot = set()
 
 @exceptions_handler(no_send=True)
 @cross_thread
