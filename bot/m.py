@@ -5689,9 +5689,10 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
 
   elif tmsg.text:
-    res = await UB.send_message(chat_id, tmsg.text)
+    #  res = await UB.send_message(chat_id, tmsg.text)
+    await send_tg(tmsg.text, chat_id)
   else:
-    send(tmsg.stringify(), chat_id)
+    await send_tg(tmsg.stringify(), chat_id)
 
 
 delete_next_msg = False
@@ -5784,7 +5785,7 @@ async def msgtout(event):
         await save_tg_msg(tmsg, chat_id, opts)
         if tmsg.document:
           file = tmsg.document
-          await send_tg(f"type: {type(file)}")
+          await send_tg(f"document type: {type(file)}")
           #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
         return
       #  elif event.is_reply:
