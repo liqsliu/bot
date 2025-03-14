@@ -9467,6 +9467,44 @@ async def join(jid=None, nick=None, client=None):
         )
     return False
 
+async def msgb(event):
+  msg = event.message
+  chat_id = event.chat_id
+  text = msg.text
+  if text:
+    sender_id = event.sender_id
+    info(f"bot got msg: {chat_id} {sender_id}: {text}")
+    if text == "ping":
+      await msg.reply("pong")
+
+async def msgbo(event):
+  msg = event.message
+  chat_id = event.chat_id
+  text = msg.text
+  if text:
+    sender_id = event.sender_id
+    info(f"bot out msg: {chat_id} {sender_id}: {text}")
+
+async def bot_start():
+  global allright_task
+  async with TB:
+    info("telegram bot 登陆成功")
+
+    @TB.on(events.NewMessage(incoming=True))
+    @TB.on(events.MessageEdited(incoming=True))
+    async def _(event):
+      #  if not allright.is_set():
+      #    #  info("skip msg: allright is not ok")
+      #    return
+      asyncio.create_task(msgb(event))
+
+    @TB.on(events.NewMessage(outgoing=True))
+    async def _(event):
+      asyncio.create_task(msgbo(event))
+
+    if allright_task > 0:
+      allright_task -= 1
+    TB.run_until_disconnected()
 
 #  @exceptions_handler
 async def xmpp_start():
@@ -9729,6 +9767,14 @@ async def amain():
     #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, loop=loop)
     UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash)
     #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, proxy=("socks5", '127.0.0.1', 6080))
+
+    global TB
+    bot_token = get_my_key("TELEGRAM_BOT_TOKEN")
+    api_id = int(bot_token.split(":", 1)[0])
+    api_hash = bot_token.split(":", 1)[1]
+    TB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash).start(bot_token=bot_token)
+    allright_task += 1
+    asyncio.create_task(bot_start(), name="bot")
 
     #  del api_id
     #  del api_hash
