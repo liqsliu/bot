@@ -27,6 +27,7 @@ bash init.sh || break
 
 pkill -x mt
 pkill -x toxbot
+kill $(ps uax|grep gm_stream | grep -v grep | awk '{print $2}')
 if [[ "$r" -eq 1 ]]; then
   # ctrl+C
   echo stop by me
