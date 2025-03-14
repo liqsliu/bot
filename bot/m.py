@@ -9467,6 +9467,7 @@ async def join(jid=None, nick=None, client=None):
         )
     return False
 
+@exceptions_handler
 async def msgb(event):
   msg = event.message
   chat_id = event.chat_id
@@ -9477,6 +9478,7 @@ async def msgb(event):
     if text == "ping":
       await msg.reply("pong")
 
+@exceptions_handler
 async def msgbo(event):
   msg = event.message
   chat_id = event.chat_id
