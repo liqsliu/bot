@@ -9469,14 +9469,15 @@ async def join(jid=None, nick=None, client=None):
 
 @exceptions_handler
 async def msgb(event):
-  msg = event.message
   chat_id = event.chat_id
-  text = msg.text
-  if text:
-    sender_id = event.sender_id
-    info(f"bot got msg: {chat_id} {sender_id}: {text}")
-    if text == "ping":
-      await msg.reply("pong")
+  if event.is_private or chat_id == CHAT_ID:
+    msg = event.message
+    text = msg.text
+    if text:
+      sender_id = event.sender_id
+      info(f"bot got msg: {chat_id} {sender_id}: {text}")
+      if text == "ping":
+        await msg.reply("pong")
 
 @exceptions_handler
 async def msgbo(event):
