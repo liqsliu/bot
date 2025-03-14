@@ -9491,6 +9491,8 @@ async def msgbo(event):
 async def bot_start():
   global allright_task
   info("telegram bot login...")
+
+  bot_token = get_my_key("TELEGRAM_BOT_TOKEN")
   await TB.start(bot_token=bot_token)
   info("telegram bot 登陆成功")
   async with TB:
@@ -9773,7 +9775,6 @@ async def amain():
     UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash)
     #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, proxy=("socks5", '127.0.0.1', 6080))
     global TB
-    bot_token = get_my_key("TELEGRAM_BOT_TOKEN")
     #  api_id = int(bot_token.split(":", 1)[0])
     #  api_hash = bot_token.split(":", 1)[1]
     #  TB = await TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash).start(bot_token=bot_token)
