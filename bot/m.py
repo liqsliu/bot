@@ -9489,12 +9489,6 @@ async def msgbo(event):
 
 @exceptions_handler
 async def bot_start():
-  global TB
-  bot_token = get_my_key("TELEGRAM_BOT_TOKEN")
-  api_id = int(bot_token.split(":", 1)[0])
-  api_hash = bot_token.split(":", 1)[1]
-  #  TB = await TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash).start(bot_token=bot_token)
-  TB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash)
   global allright_task
   info("telegram bot login...")
   await TB.start(bot_token=bot_token)
@@ -9778,8 +9772,14 @@ async def amain():
     #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, loop=loop)
     UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash)
     #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, proxy=("socks5", '127.0.0.1', 6080))
+    global TB
+    bot_token = get_my_key("TELEGRAM_BOT_TOKEN")
+    #  api_id = int(bot_token.split(":", 1)[0])
+    #  api_hash = bot_token.split(":", 1)[1]
+    #  TB = await TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash).start(bot_token=bot_token)
+    TB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash)
 
-    #  allright_task += 1
+    allright_task += 1
     asyncio.create_task(bot_start(), name="bot")
 
     #  del api_id
