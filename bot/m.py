@@ -9539,7 +9539,7 @@ async def msgb(event):
       if msg.is_reply:
         msg2 = await msg.get_reply_message()
         if msg2.raw_text:
-          text2 = msg.raw_text
+          text2 = msg2.raw_text
           if text2.startswith("id: "):
             tid = int(text2.split(" ")[1])
             msg3 = await msg.forward_to(tid)
