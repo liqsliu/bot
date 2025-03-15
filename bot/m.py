@@ -9503,7 +9503,7 @@ async def msgb(event):
       name = "G %s" % peer.first_name
       name2 = "**G %s:** " % peer.first_name
       qt = None
-      if msg.is_reply:
+      if msg.is_reply and msg.reply_to.reply_to_msg_id != GROUP2_TOPIC:
         msg2 = await msg.get_reply_message()
         peer = await msg2.get_sender()
         qt = "G %s: %s" % (peer.first_name, msg.text)
