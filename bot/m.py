@@ -3956,7 +3956,7 @@ async def msgmt(msg):
       asyncio.create_task( send_xmpp(text2, m, nick=rname) )
 
 
-    await send_tg(text2, tGROUP2_ID, opic=GROUP2_TOPIC)
+    await send_tg(text2, GROUP2_ID, opic=GROUP2_TOPIC)
 
     res = await run_cmd(text, gateway, name, textq=text0)
     if res is True:
