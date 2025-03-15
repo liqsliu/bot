@@ -8748,7 +8748,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       #    info(res, exc_info=e)
       f = exceptions_handler(send_to=src)(cmd_funs[cmd])
       res = await f(cmds, src)
-      info(f"res: {r}")
+      info(f"res: {res}")
       if type(res) is tuple:
         if res[0] == 1 or res[0] == 3:
           bot_name = res[1]
