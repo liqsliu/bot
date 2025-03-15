@@ -3352,7 +3352,8 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
           jids[myjid] = set_default_value(m=room.me)
           warn(f"不存在nick记录，已添加: {muc} {myjid} {msg} {jids[myjid]}")
         nick_old = jids[myjid][0]
-        if nick_old != nick:
+        #  if nick_old != nick:
+        if False:
           fu = asyncio.Future()
           #  jid = str(room.me.direct_jid)
           on_nick_changed_futures[muc] = fu
@@ -9507,10 +9508,10 @@ async def msgb(event):
         peer = await msg2.get_sender()
         qt = "G %s: %s" % (peer.first_name, msg.text)
 
+      asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
       ms = get_mucs(main_group)
       for m in ms:
         asyncio.create_task( send_xmpp(f"{name2}{text}", m, name=name) )
-      asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
       #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
       res = await run_cmd(f"{text}\n\n{qt}", "gateway1", f"X {name}: ", False, text)
       if res is True:
