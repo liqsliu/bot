@@ -3191,6 +3191,7 @@ def send(text, jid=None, *args, **kwargs):
   #  if muc in my_groups:
     #  info(f"准备发送同步消息到: {ms} {text=}")
     if main_group in ms:
+      asyncio.create_task( send_tg(f"{name}{text0}", GROUP2_ID, topic=GROUP2_TOPIC) )
       if xmpp_only:
         #  for m in ms:
         #    #  send_typing(m)
@@ -3201,7 +3202,6 @@ def send(text, jid=None, *args, **kwargs):
         ms = set()
       else:
         asyncio.create_task( mt_send_for_long_text(text0, name=nick) )
-      asyncio.create_task( send_tg(f"{name}{text0}", GROUP2_ID, topic=GROUP2_TOPIC) )
     for m in ms:
       #  if await send1(text, jid=m, *args, **kwargs):
       #    if isinstance(text, aioxmpp.Message):
