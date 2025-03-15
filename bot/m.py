@@ -3967,12 +3967,12 @@ async def msgmt(msg):
         #    warn(f"failed: {m} {res}")
         #    return
         asyncio.create_task( send_xmpp(res, m, nick="C bot") )
+      await send_tg(res, GROUP2_ID, topic=GROUP2_TOPIC)
     #    if await send1(f"{name}{text}", m, name) is False:
     #      return
     #    if res:
     #      if await send1(f"{name}{res}", m, "C bot") is False:
     #        return
-      await send_tg(res, GROUP2_ID, topic=GROUP2_TOPIC)
 
 
   #  except Exception as e:
@@ -9497,6 +9497,7 @@ async def msgb(event):
       peer = await event.get_sender()
       #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
       name = "G %s" % peer.first_name
+      name2 = "**G %s:** " % peer.first_name
       qt = None
       if msg.is_reply:
         msg2 = await msg.get_reply_message()
@@ -9505,7 +9506,7 @@ async def msgb(event):
 
       ms = get_mucs(main_group)
       for m in ms:
-        asyncio.create_task( send_xmpp(f"{username}{text}", m, name=name) )
+        asyncio.create_task( send_xmpp(f"{name2}{text}", m, name=name) )
       asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
     return
   if event.is_private or chat_id == CHAT_ID:
