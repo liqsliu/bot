@@ -8748,6 +8748,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
       #    info(res, exc_info=e)
       f = exceptions_handler(send_to=src)(cmd_funs[cmd])
       res = await f(cmds, src)
+      info(f"res: {r}")
       if type(res) is tuple:
         if res[0] == 1 or res[0] == 3:
           bot_name = res[1]
@@ -8789,7 +8790,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
                   #  mtmsgsg.pop(osrc)
                   mtmsgsg[osrc].clear()
 
-          await send_tg(text, pid)
+          await send_tg2(text, pid)
           for i in bridges_tmp.copy():
             if i != pid:
               if bridges_tmp[i] == src:
