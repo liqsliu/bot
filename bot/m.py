@@ -5344,23 +5344,6 @@ async def msgt(event):
     warn(f"chat_id is None: {chat_id} {sender_id}: {text}")
     chat_id = sender_id
 
-  if chat_id == GROUP2_ID:
-    #  if msg.is_reply:
-    if msg.reply_to.reply_to_top_id == GROUP2_TOPIC or msg.reply_to.reply_to_msg_id == GROUP2_TOPIC:
-      peer = await event.get_sender()
-      #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
-      name = "G %s" % peer.first_name
-      qt = None
-      if msg.is_reply:
-        msg2 = await msg.get_reply_message()
-        peer = await msg2.get_sender()
-        qt = "G %s: %s" % (peer.first_name, msg.text)
-
-      ms = get_mucs(muc)
-      for m in ms - {muc}:
-        asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
-      asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
-    return
   #  print(f"{chat_id} {sender_id}: {short(msg.text)}")
   if chat_id == GROUP_ID:
     if msg.raw_text:
@@ -9506,6 +9489,23 @@ async def msgb(event):
   if event.fwd_from:
     return
   chat_id = event.chat_id
+  if chat_id == GROUP2_ID:
+    #  if msg.is_reply:
+    if msg.reply_to.reply_to_top_id == GROUP2_TOPIC or msg.reply_to.reply_to_msg_id == GROUP2_TOPIC:
+      peer = await event.get_sender()
+      #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
+      name = "G %s" % peer.first_name
+      qt = None
+      if msg.is_reply:
+        msg2 = await msg.get_reply_message()
+        peer = await msg2.get_sender()
+        qt = "G %s: %s" % (peer.first_name, msg.text)
+
+      ms = get_mucs(muc)
+      for m in ms - {muc}:
+        asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
+      asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
+    return
   if event.is_private or chat_id == CHAT_ID:
     msg = event.message
     text = msg.text
