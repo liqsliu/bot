@@ -312,7 +312,7 @@ def get_cmd(text):
     if need_escape is True:
       need_escape = False
       if c == ' ' and in_quote is False:
-        tmp[-1] = c
+        tmp = tmp[:-1] + c
         continue
     if in_quote is True:
       if c == '"':
