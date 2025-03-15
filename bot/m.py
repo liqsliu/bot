@@ -258,8 +258,8 @@ def info2(s):
 
 info = logger.info
 
-def err(text=None, no_send=False, e=None):
-  logger.error(text, exc_info=True, stack_info=True)
+def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
+  logger.error(text, exc_info=exc_info, stack_info=stack_info)
   #  raise ValueError
   if no_send:
     pass
@@ -274,9 +274,9 @@ def err(text=None, no_send=False, e=None):
       send_log(text)
 
 
-def warn(text=None, more=False, no_send=True, e=None):
+def warn(text=None, more=False, no_send=True, e=None, exc_info=True, stack_info=True):
   if more:
-    logger.warning(text, exc_info=True, stack_info=True)
+    logger.warning(text, exc_info=exc_info, stack_info=stack_info)
   else:
     #  text = f"{fm.f_code.co_name} {fm.f_lineno} {text}"
     logger.warning(text)
@@ -10063,10 +10063,11 @@ def main():
     info("停止原因：用户手动终止")
     sys.exit(1)
   except SystemExit as e:
-    warn(f"捕获到systemexit: {e=} {e.args=}", exc_info=True, stack_info=True)
     if "restart" in str(e.args[0]):
+      info(f"捕获到systemexit: {e=} {e.args=}")
       sys.exit(1)
     else:
+      warn(f"捕获到systemexit: {e=} {e.args=}", exc_info=True, stack_info=True)
       sys.exit(2)
   except Exception as e:
     err(f"出现未知异常: 正在停止运行...{e=}", exc_info=True, stack_info=True)
