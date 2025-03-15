@@ -9513,7 +9513,10 @@ async def msgb(event):
       for m in ms:
         asyncio.create_task( send_xmpp(f"{name2}{text}", m, name=name) )
       #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
-      res = await run_cmd(f"{text}\n\n{qt}", "gateway1", f"X {name}: ", False, text)
+      if qt is not None:
+        res = await run_cmd(f"{text}\n\n{qt}", "gateway1", f"X {name}: ", False, text)
+      else:
+        res = await run_cmd(text, "gateway1", f"X {name}: ", False)
       if res is True:
         return
       if res:
