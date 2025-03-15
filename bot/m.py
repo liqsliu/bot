@@ -3586,6 +3586,7 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
       tmp_msg = False
+    info(f"send to tg: {chat_id}: {short(text)}")
     k = 0
     for t in ts:
       await sleep(msg_delay_default)
@@ -9494,6 +9495,7 @@ async def msgb(event):
     msg = event.message
     #  if msg.is_reply:
     if msg.reply_to.reply_to_top_id == GROUP2_TOPIC or msg.reply_to.reply_to_msg_id == GROUP2_TOPIC:
+      text = msg.text
       peer = await event.get_sender()
       #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
       name = "G %s" % peer.first_name
