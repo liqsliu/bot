@@ -304,41 +304,32 @@ def get_cmd(text):
     #  c = text[i]
   qn = 0
   #  qq = None
-  qq = "\\"
-  qq1 = '"'
-  qq2 = "'"
+  #  qq = "\\"
   need_escape = False
+  in_quote = False
   cmd = []
   for c in text:
     if need_escape is True:
-      if c == ' ' and qn == 0:
-        tmp[-1] = c
-      else:
-        tmp += c
       need_escape = False
-      continue
-    if c == '\\':
-      need_escape = True
-    elif c == qq:
-      if c == qq1:
-        qq = qq2
-      elif c == qq2:
-        qq = qq2
-      qn -= 1
-    elif c == qq1:
-      c = qq1
-      qn += 1
-    elif c == qq2:
-      c = qq2
-      qn += 1
-    elif qn == 0:
-      if c == ' ':
+      if c == ' ' and in_quote is False:
+        tmp[-1] = c
+        continue
+    if in_quote is True:
+      if c == '"':
+        in_quote = False
+    else:
+      if c == '\\':
+        need_escape = True
+      elif c == '"':
+        in_quote = True
+      elif c == ' ':
         cmd.append(tmp)
         tmp = ""
         continue
     tmp += c
   if len(tmp) > 0:
     cmd.append(tmp)
+  info(f"return cmd {len(cmd)}: {cmd}")
   return cmd
 
 
