@@ -296,6 +296,72 @@ def warn(text=None, more=False, no_send=True, e=None):
 #    logger.debug(text)
 dbg=logger.debug
 
+def get_cmd2(text):
+  if text.endswith(": "):
+    text = text[:-2]
+  tmp = ""
+  #  for i in range(len(text)):
+    #  c = text[i]
+  qn = 0
+  qq = '"'
+  qq1 = '"'
+  qq2 = "'"
+  need_escape = False
+  cmd = []
+  for c in text:
+    if need_escape is True:
+      if c == ' ' and qn == 0:
+        tmp[-1] = c
+      else:
+        tmp += c
+      need_escape = False
+      continue
+    if c == '\\':
+      need_escape = True
+    elif c == qq:
+      if c == qq1:
+        qq = qq2
+      elif c == qq2:
+        qq = qq2
+      qn -= 1
+    elif c == qq1:
+      c = qq1
+      qn += 1
+    elif c == qq2:
+      c = qq2
+      qn += 1
+    elif qn == 0:
+      if c == ' ':
+        cmd.append(tmp)
+        tmp = ""
+        continue
+    tmp += c
+  if len(tmp) > 0:
+    cmd.append(tmp)
+  return cmd
+
+
+
+  cmd = text.split(' ')
+  tmp = []
+  for i in cmd:
+    if tmp:
+      ii = tmp[-1].split("\\\\")[-1]
+      if ii and ii[-1] == "\\":
+        tmp[-1] = tmp[-1][:-1] + " " + i
+      else:
+        #  if i:
+        tmp.append(i)
+    else:
+      if i:
+        tmp.append(i)
+  if tmp:
+    cmd = tmp
+    info(f"return cmd {len(cmd)}: {cmd=}")
+  return cmd
+
+
+
 def get_cmd(text):
   if text.endswith(": "):
     text = text[:-2]
@@ -9465,13 +9531,13 @@ async def msgb(event):
   if event.is_private or chat_id == CHAT_ID:
     msg = event.message
     text = msg.text
+    sender_id = event.sender_id
     if text:
-      sender_id = event.sender_id
       info(f"bot got msg: {chat_id} {sender_id}: {text}")
-      if text == "ping":
-        #  await TB.send_message(chat_id, "pong")
-        await msg.reply("pong")
-        return
+    if text == "ping":
+      #  await TB.send_message(chat_id, "pong")
+      await msg.reply("pong")
+      return
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
       if text == 'id':
