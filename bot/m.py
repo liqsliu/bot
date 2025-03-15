@@ -9516,7 +9516,7 @@ async def msgb(event):
       if res is True:
         return
       if res:
-        send(res)
+        send(res, main_group)
     return
   if event.is_private or chat_id == CHAT_ID:
     msg = event.message
