@@ -296,7 +296,7 @@ def warn(text=None, more=False, no_send=True, e=None):
 #    logger.debug(text)
 dbg=logger.debug
 
-def get_cmd2(text):
+def get_cmd(text):
   if text.endswith(": "):
     text = text[:-2]
   tmp = ""
@@ -342,47 +342,26 @@ def get_cmd2(text):
   return cmd
 
 
-
-  cmd = text.split(' ')
-  tmp = []
-  for i in cmd:
-    if tmp:
-      ii = tmp[-1].split("\\\\")[-1]
-      if ii and ii[-1] == "\\":
-        tmp[-1] = tmp[-1][:-1] + " " + i
-      else:
-        #  if i:
-        tmp.append(i)
-    else:
-      if i:
-        tmp.append(i)
-  if tmp:
-    cmd = tmp
-    info(f"return cmd {len(cmd)}: {cmd=}")
-  return cmd
-
-
-
-def get_cmd(text):
-  if text.endswith(": "):
-    text = text[:-2]
-  cmd = text.split(' ')
-  tmp = []
-  for i in cmd:
-    if tmp:
-      ii = tmp[-1].split("\\\\")[-1]
-      if ii and ii[-1] == "\\":
-        tmp[-1] = tmp[-1][:-1] + " " + i
-      else:
-        #  if i:
-        tmp.append(i)
-    else:
-      if i:
-        tmp.append(i)
-  if tmp:
-    cmd = tmp
-    info(f"return cmd {len(cmd)}: {cmd=}")
-  return cmd
+#  def get_cmd(text):
+#    if text.endswith(": "):
+#      text = text[:-2]
+#    cmd = text.split(' ')
+#    tmp = []
+#    for i in cmd:
+#      if tmp:
+#        ii = tmp[-1].split("\\\\")[-1]
+#        if ii and ii[-1] == "\\":
+#          tmp[-1] = tmp[-1][:-1] + " " + i
+#        else:
+#          #  if i:
+#          tmp.append(i)
+#      else:
+#        if i:
+#          tmp.append(i)
+#    if tmp:
+#      cmd = tmp
+#      info(f"return cmd {len(cmd)}: {cmd=}")
+#    return cmd
 
 def check_str(nick, nicks):
   for i in nicks:
