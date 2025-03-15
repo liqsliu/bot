@@ -3953,7 +3953,7 @@ async def msgmt(msg):
       asyncio.create_task( send_xmpp(text2, m, nick=rname) )
 
 
-    await send_tg(GROUP2_ID, text2, topic=GROUP2_TOPIC)
+    await send_tg(text2, tGROUP2_ID, opic=GROUP2_TOPIC)
 
     res = await run_cmd(text, gateway, name, textq=text0)
     if res is True:
@@ -3972,7 +3972,7 @@ async def msgmt(msg):
     #    if res:
     #      if await send1(f"{name}{res}", m, "C bot") is False:
     #        return
-      await send_tg(GROUP2_ID, res, topic=GROUP2_TOPIC)
+      await send_tg(res, GROUP2_ID, topic=GROUP2_TOPIC)
 
 
   #  except Exception as e:
@@ -7296,7 +7296,7 @@ async def msgx(msg):
       asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
     if main_group in ms:
       asyncio.create_task( mt_send_for_long_text(text0, name=name, qt=qt) )
-    await send_tg(GROUP2_ID, f"{username}{text0}", topic=GROUP2_TOPIC)
+    await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC)
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
   #    pass
@@ -9503,8 +9503,8 @@ async def msgb(event):
         peer = await msg2.get_sender()
         qt = "G %s: %s" % (peer.first_name, msg.text)
 
-      ms = get_mucs(muc)
-      for m in ms - {muc}:
+      ms = get_mucs(main_group)
+      for m in ms:
         asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
       asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
     return
