@@ -9847,8 +9847,7 @@ async def loop_task():
   #    if XB.running:
   while XB.running:
     await sleep(60)
-
-    continue
+    info("XB is running...")
 
   warn("xmppbot is not running, restart...")
   sys.exit(2)
