@@ -303,7 +303,8 @@ def get_cmd2(text):
   #  for i in range(len(text)):
     #  c = text[i]
   qn = 0
-  qq = '"'
+  #  qq = None
+  qq = "\\"
   qq1 = '"'
   qq2 = "'"
   need_escape = False
