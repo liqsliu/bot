@@ -7296,6 +7296,7 @@ async def msgx(msg):
       asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
     if main_group in ms:
       asyncio.create_task( mt_send_for_long_text(text0, name=name, qt=qt) )
+    await send_tg(GROUP2_ID, f"{username}{text0}", topic=GROUP2_TOPIC)
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
   #    pass
@@ -9490,6 +9491,7 @@ async def msgb(event):
     return
   chat_id = event.chat_id
   if chat_id == GROUP2_ID:
+    msg = event.message
     #  if msg.is_reply:
     if msg.reply_to.reply_to_top_id == GROUP2_TOPIC or msg.reply_to.reply_to_msg_id == GROUP2_TOPIC:
       peer = await event.get_sender()
