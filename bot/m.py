@@ -4903,7 +4903,9 @@ async def get_full_entity(chat_id):
   #  print(res.stringify())
   return res
 
-async def get_entity(chat_id, id_only=True):
+async def get_entity(chat_id, id_only=True, client=None):
+  if client is None:
+    client = UB
   #  if isinstance(peer, PeerUser):
   #    #  info(f"PeerUser: {peer}")
   #    peer = await UB.get_input_entity(peer)
@@ -4948,15 +4950,15 @@ async def get_entity(chat_id, id_only=True):
     if peer:
       dbg(f"search inputpeer: {peer}")
       try:
-        peer = await UB.get_input_entity(peer)
+        peer = await client.get_input_entity(peer)
       except TypeError as e:
         err(f"E: {e=}, not found input entity: {peer}")
         return
       except ValueError as e:
         info(f"search inputpeer(use get_peer_id): {peer} {e=}")
         try:
-          pid = await UB.get_peer_id(peer)
-          peer = await UB.get_input_entity(pid)
+          pid = await client.get_peer_id(peer)
+          peer = await client.get_input_entity(pid)
         except TypeError as e:
           err(f"E: {e=}, not found input entity(use get_peer_id): {peer}")
           return
@@ -4969,7 +4971,7 @@ async def get_entity(chat_id, id_only=True):
 
       dbg(f"search peer: {peer}")
       try:
-        entity = await UB.get_entity(peer)
+        entity = await client.get_entity(peer)
         return entity
       except TypeError as e:
         err(f"E: {e=}, not found entity: {peer} {e=}")
@@ -9473,9 +9475,10 @@ async def msgb(event):
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
       if text == 'id':
-        #  await UB.send_message('me', f"id @name https://t.me/name\nchat_id: {chat_id}")
-        #  await UB.send_message(chat_id, f"id @name https://t.me/name\nchat_id: {chat_id}")
         await msg.reply(f"id @name https://t.me/name\nchat_id: {chat_id}")
+        return
+      if text == 'msg':
+        await msg.reply("msg url raw/fast/xmpp/direct/vps")
         return
       if text.startswith("id "):
         #  url = text.split(' ')[1]
@@ -9506,16 +9509,28 @@ async def msgb(event):
           else:
             await msg.reply("peer id: %s" % pid)
         else:
-          await msg.reply("not fount entity")
+          e = await get_entity(url, False, client=TB)
+          if type(e) is tuple:
+            peer = e[0]
+            gid = e[1]
+            e = await TB.get_messages(peer, ids=gid)
+            #  await UB.send_message(chat_id, f"{e.stringify()}")
+            await msg.reply(f"{e.stringify()}")
+            await msg.reply("using TB, peer id: %s" % await UB.get_peer_id(peer))
+          elif e:
+            await msg.reply(f"{e.stringify()}")
+            pid = await TB.get_peer_id(e)
+            if pid > 0:
+              await msg.reply("using TB, peer id: [%s](tg://openmessage?user_id=%s)" % (pid, pid))
+            else:
+              await msg.reply("using TB, peer id: %s" % pid)
+          else:
+            await msg.reply("not fount entity")
         return
       elif text.startswith("msg "):
         cmds = get_cmd(text)
         url = cmds[1]
         if url:
-          if url == "h":
-            #  send("msg url raw/fast/xmpp/direct/vps", chat_id)
-            await msg.reply("msg url raw/fast/xmpp/direct/vps")
-            return
           opts = 0
           peer = await get_entity(url)
           if peer:
@@ -9563,6 +9578,9 @@ async def msgb(event):
             return
       await msg.reply("?")
     elif event.is_private:
+      if text == 'id':
+        await msg.reply(f"{chat_id}")
+        return
       msg2 = await msg.forward_to(MY_ID)
       if sender_id:
         #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
