@@ -9513,6 +9513,8 @@ async def msgb(event):
       asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
       #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
       res = await run_cmd(f"{text}\n\n{qt}", "gateway1", f"X {name}: ", False, text)
+      if res is True:
+        return
       if res:
         send(res)
     return
