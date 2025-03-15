@@ -9,6 +9,7 @@ I irc频道( #wtfipfs )
 M matrix群( #wtfipfs:matrix.org )
 D discord( https://discord.gg/G6YmQuCJFD )
 G telegram( https://t.me/wtfipfs_fucktelegram )
+G telegram( https://t.me/cnretrosahre )
 ...
 C bot自动回复或推送的新闻
 

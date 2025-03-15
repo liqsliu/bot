@@ -9488,11 +9488,17 @@ async def join(jid=None, nick=None, client=None):
         )
     return False
 
+
+
+
 @exceptions_handler
 async def msgb(event):
   if event.fwd_from:
     return
   chat_id = event.chat_id
+  if chat_id == GROUP_ID:
+    info("ignore msg from GROUP_ID")
+    return
   if chat_id == GROUP2_ID:
     msg = event.message
     #  if msg.is_reply:
@@ -9522,6 +9528,7 @@ async def msgb(event):
       if res:
         send(res, main_group)
     return
+
   if event.is_private or chat_id == CHAT_ID:
     msg = event.message
     text = msg.text
