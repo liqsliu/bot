@@ -379,6 +379,9 @@ MY_ID = int(get_my_key("TELEGRAM_MY_ID"))
 CHAT_ID = int(get_my_key("TELEGRAM_GROUP_LIQS"))
 GROUP_ID = int(get_my_key("TELEGRAM_GROUP_WTFIPFS"))
 
+GROUP2_ID = int(get_my_key("TELEGRAM_GROUP_PEERS"))
+GROUP2_TOPIC = int(get_my_key("TELEGRAM_GROUP_PEERS_TOPIC"))
+
 #  gpt_bot = int(get_my_key("TELEGRAM_GPT_ID"))
 gpt_bot = 6226014461
 gpt_bot_name = 'littleb_gptBOT'
@@ -3574,9 +3577,11 @@ async def slow_mode(timeout=300):
 last_outmsg_bot = {}
 tmp_msg_chats_bot = set()
 
+
+
 @exceptions_handler(no_send=True)
 @cross_thread
-async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None):
+async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None):
   async with tg_send_lock:
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
@@ -3593,9 +3598,9 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
           elif chat_id in tmp_msg_chats_bot:
             msg = await omsg.edit(t)
           else:
-            msg = await TB.send_message(chat_id, t)
+            msg = await TB.send_message(chat_id, t, reply_to=topic)
         else:
-          msg = await TB.send_message(chat_id, t)
+          msg = await TB.send_message(chat_id, t, reply_to=topic)
         k += 1
         if k == len(ts):
           last_outmsg_bot[chat_id] = msg
@@ -3782,7 +3787,7 @@ async def mt_read():
               # await send_mt_msg_to_queue(buffer, queue)
               #  await mt2tg(line)
               #  asyncio.create_task(mt2tg(line))
-              asyncio.create_task(parse_mt(line))
+              asyncio.create_task(msgmt(line))
               info(f"from mt: {len(line)}")
               line = b""
 
@@ -3809,7 +3814,7 @@ async def mt_read():
 #    text = msgd['text']
 
 @exceptions_handler
-async def parse_mt(msg):
+async def msgmt(msg):
   '''
   #       Data sent: 'GET /api/stream HTTP/1.1\r\nHost: 127.0.0.1\r\n\r\n'
   #      Data received: 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nDate: Wed, 19 Jan 2022 02:03:29 GMT\r\nTransfer-Encoding: chunked\r\n\r\nd5\r\n{"text":"","channel":"","username":"","userid":"","avatar":"","account":"","event":"api_connected","protocol":"","gateway":"","parent_id":"","timestamp":"2022-01-19T10:03:29.666861315+08:00","id":"","Extra":null}\n\r\n'
@@ -3947,6 +3952,9 @@ async def parse_mt(msg):
       #    return
       asyncio.create_task( send_xmpp(text2, m, nick=rname) )
 
+
+    await send_tg(GROUP2_ID, text2, topic=GROUP2_TOPIC)
+
     res = await run_cmd(text, gateway, name, textq=text0)
     if res is True:
       return
@@ -3964,6 +3972,7 @@ async def parse_mt(msg):
     #    if res:
     #      if await send1(f"{name}{res}", m, "C bot") is False:
     #        return
+      await send_tg(GROUP2_ID, res, topic=GROUP2_TOPIC)
 
 
   #  except Exception as e:
@@ -5327,12 +5336,31 @@ async def msgt(event):
   #    info(f"buttons: {msg.buttons=}")
   # https://docs.telethon.dev/en/stable/modules/custom.html#telethon.tl.custom.chatgetter.ChatGetter
   chat_id = event.chat_id
+  sender_id = event.sender_id
+  msg = event.message
   if chat_id is None:
     warn(f"chat_id is None")
-    chat_id = event.sender_id
+    text = msg.text
+    warn(f"chat_id is None: {chat_id} {sender_id}: {text}")
+    chat_id = sender_id
 
-  msg = event.message
-  sender_id = event.sender_id
+  if chat_id == GROUP2_ID:
+    #  if msg.is_reply:
+    if msg.reply_to.reply_to_top_id == GROUP2_TOPIC or msg.reply_to.reply_to_msg_id == GROUP2_TOPIC:
+      peer = await event.get_sender()
+      #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
+      name = "G %s" % peer.first_name
+      qt = None
+      if msg.is_reply:
+        msg2 = await msg.get_reply_message()
+        peer = await msg2.get_sender()
+        qt = "G %s: %s" % (peer.first_name, msg.text)
+
+      ms = get_mucs(muc)
+      for m in ms - {muc}:
+        asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
+      asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
+    return
   #  print(f"{chat_id} {sender_id}: {short(msg.text)}")
   if chat_id == GROUP_ID:
     if msg.raw_text:
@@ -7242,18 +7270,6 @@ async def msgx(msg):
         send("仅管理可用", src)
       return
 
-    #  if nick == "bot":
-    #    #  if muc not in check_bot_groups:
-    #    #  if muc != "ipfs@salas.suchat.org":
-    #    #  if muc != "wtfipfs@muc.pimux.de":
-    #    #    return
-    #    #  if send_by_me(text):
-    #    #    return
-    #    #  username=""
-    #    username=f"**C bot:** "
-    #    name=f"C bot"
-    #    qt=None
-    #  else:
     username=f"**X {nick}:** "
     name=f"X {nick}"
     qt = None
@@ -7292,19 +7308,10 @@ async def msgx(msg):
         qt2 = '\n> '.join(tmp)
         username = f"> {qt2}\n{username}"
       info(f"delete qt: [text0]")
-    #    else:
-    #      info(f"{tmp=} {qt=}")
-    #  info(f"{text=} {text2=}")
     ms = get_mucs(muc)
     for m in ms - {muc}:
-      #  if await send1(f"**X {nick}:** {text}", m, name=f"X {nick}") is False:
-      #  if await send1(f"{username}{text0}", m, name=name) is False:
-      #    return
       asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
     if main_group in ms:
-      #  if await mt_send_for_long_text(text, name=f"X {nick}") is False:
-      #  if await mt_send_for_long_text(text0, name=name, qt=qt) is False:
-      #    return
       asyncio.create_task( mt_send_for_long_text(text0, name=name, qt=qt) )
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
