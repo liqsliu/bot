@@ -9849,10 +9849,11 @@ async def loop_task():
     await sleep(60)
     info("XB is running...")
 
-  warn("xmppbot is not running, restart...")
+  warn("xmppbot is not running, restart...", no_send=False)
   sys.exit(2)
   
   await UB.run_until_disconnected()
+
 
 async def init():
   global loop
