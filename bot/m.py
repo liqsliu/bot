@@ -9505,7 +9505,7 @@ async def msgb(event):
 
       ms = get_mucs(main_group)
       for m in ms:
-        asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
+        asyncio.create_task( send_xmpp(f"{username}{text}", m, name=name) )
       asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
     return
   if event.is_private or chat_id == CHAT_ID:
