@@ -451,6 +451,7 @@ mt_send_lock = None
 downlaod_lock = asyncio.Lock()
 bash_lock = asyncio.Lock()
 tg_send_lock = asyncio.Lock()
+tg_send_lock2 = asyncio.Lock()
 
 rss_lock = asyncio.Lock()
 
@@ -3643,7 +3644,7 @@ async def send_tg2(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=No
   #      tg_msg_cache_for_bot2 = None
   #      info("重复消息，停止发送")
   #      return True
-  async with tg_send_lock:
+  async with tg_send_lock2:
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
       tmp_msg = False
@@ -9539,10 +9540,24 @@ async def msgb(event):
       #  await TB.send_message(chat_id, "pong")
       await msg.reply("pong")
       return
-    if text == "dc":
-      #  await TB.send_message(chat_id, "pong")
+    if text == "raw sender":
       sender = await event.get_sender()
-      await msg.reply("dc_id: %d", sender.dc_id)
+      await msg.reply(sender.stringify())
+      return
+    if text == "raw chat":
+      peer = await event.get_chat()
+      await msg.reply(peer.stringify())
+      return
+    if text == "dc":
+      try:
+        sender = await event.get_sender()
+        if sender.photo:
+          await msg.reply("dc_id: %d", sender.photo.dc_id)
+        else:
+          await msg.reply("没设置头像")
+      except Exception as e:
+        await msg.reply("error")
+        raise
       return
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
