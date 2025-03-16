@@ -9558,6 +9558,7 @@ async def msgb(event):
           await msg.reply("dc_id: %d" % sender.photo.dc_id)
         else:
           await msg.reply("没设置头像")
+          info(sender.stringify())
       except Exception as e:
         await msg.reply("error")
         raise
