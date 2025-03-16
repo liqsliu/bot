@@ -9539,6 +9539,11 @@ async def msgb(event):
       #  await TB.send_message(chat_id, "pong")
       await msg.reply("pong")
       return
+    if text == "dc":
+      #  await TB.send_message(chat_id, "pong")
+      sender = await event.get_sender()
+      await msg.reply("dc_id: %d", sender.dc_id)
+      return
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
       if text == 'id':
