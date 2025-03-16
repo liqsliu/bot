@@ -7299,7 +7299,7 @@ async def msgx(msg):
       asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
     if main_group in ms:
       asyncio.create_task( mt_send_for_long_text(text0, name=name, qt=qt) )
-    await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC)
+      await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC)
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
   #    pass
@@ -9520,9 +9520,9 @@ async def msgb(event):
         asyncio.create_task( send_xmpp(f"{name2}{text}", m, name=name) )
       #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
       if qt is not None:
-        res = await run_cmd(f"{text}\n\n{qt}", main_group, f"X {name}: ", False, text)
+        res = await run_cmd(f"{text}\n\n{qt}", chat_id, f"X {name}: ", False, text)
       else:
-        res = await run_cmd(text, main_group, f"X {name}: ", False)
+        res = await run_cmd(text, chat_id, f"X {name}: ", False)
       if res is True:
         return
       if res:
