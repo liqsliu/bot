@@ -9503,31 +9503,34 @@ async def msgb(event):
   if chat_id == GROUP2_ID:
     msg = event.message
     #  if msg.is_reply:
-    if msg.reply_to.reply_to_top_id == GROUP2_TOPIC or msg.reply_to.reply_to_msg_id == GROUP2_TOPIC:
-      text = msg.text
-      peer = await event.get_sender()
-      #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
-      name = "G %s" % peer.first_name
-      name2 = "**G %s:** " % peer.first_name
-      qt = None
-      if msg.is_reply and msg.reply_to.reply_to_msg_id != GROUP2_TOPIC:
-        msg2 = await msg.get_reply_message()
-        peer = await msg2.get_sender()
-        qt = "G %s: %s" % (peer.first_name, msg.text)
+    if msg.reply_to is not None:
+      if msg.reply_to.reply_to_top_id == GROUP2_TOPIC or msg.reply_to.reply_to_msg_id == GROUP2_TOPIC:
+        text = msg.text
+        peer = await event.get_sender()
+        #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
+        name = "G %s" % peer.first_name
+        name2 = "**G %s:** " % peer.first_name
+        qt = None
+        if msg.is_reply and msg.reply_to.reply_to_msg_id != GROUP2_TOPIC:
+          msg2 = await msg.get_reply_message()
+          peer = await msg2.get_sender()
+          qt = "G %s: %s" % (peer.first_name, msg.text)
 
-      asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
-      ms = get_mucs(main_group)
-      for m in ms:
-        asyncio.create_task( send_xmpp(f"{name2}{text}", m, name=name) )
-      #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
-      if qt is not None:
-        res = await run_cmd(f"{text}\n\n{qt}", chat_id, f"X {name}: ", False, text)
-      else:
-        res = await run_cmd(text, chat_id, f"X {name}: ", False)
-      if res is True:
-        return
-      if res:
-        send(res, main_group)
+        asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
+        ms = get_mucs(main_group)
+        for m in ms:
+          asyncio.create_task( send_xmpp(f"{name2}{text}", m, name=name) )
+        #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
+        if qt is not None:
+          res = await run_cmd(f"{text}\n\n{qt}", chat_id, f"X {name}: ", False, text)
+        else:
+          res = await run_cmd(text, chat_id, f"X {name}: ", False)
+        if res is True:
+          return
+        if res:
+          send(res, main_group)
+    else:
+      info("fixme: unknown msg: %s" % msg.stringify())
     return
 
   if event.is_private or chat_id == CHAT_ID:
