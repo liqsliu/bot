@@ -243,7 +243,7 @@ def get_lineno(e=None, fs=None):
       tb = maybe
     fm = tb.tb_frame
   if fs is not None:
-    return f"{fm.f_code.co_name} {fm.f_lineno}", fs
+    return f"{fm.f_code.co_name} {fm.f_lineno}", fs, fm
   else:
     return f"{fm.f_code.co_name} {fm.f_lineno}"
 
@@ -564,143 +564,7 @@ def auto_task(func, return_task=False):
 
 
 def exceptions_handler(func=None, *, no_send=False, send_to=None):
-  _no_send = no_send
-  def _exceptions_handler(e, *args, **kwargs):
-    no_send = _no_send
-    more = True
-    #  no_send = False
-    no_send_tg = False
-    no_send_xmpp = False
-    #  res = f'内部错误: {e=} line: {e.__traceback__.tb_next.tb_lineno}'
-    #  lineno = get_lineno2(tb)
-    #  lineno = "%s" % tb.tb_lineno
-    fs = set()
-    lineno,fs = get_lineno(e, fs)
-    #  while tb.tb_next is not None:
-    #    lineno += " %s" % tb.tb_next.tb_lineno
-    #    last_num = tb.tb_next.tb_lineno
-    #    tb = tb.tb_next
-    #  res = f'{tb.tb_frame.f_code.co_name} {tb.tb_frame.f_code.f_lineno} 内部错误 {e=}'
-    res = f'{lineno} {e=}'
-    #  print("print use logger")
-    #  logger.error(res, exc_info=e, stack_info=True)
-    #  print("print use logger ok")
-    try:
-      #  res = f'{e=} line: {e.__traceback__.tb_next.tb_next.tb_lineno}'
-      #  raise e
-      raise
-    except KeyboardInterrupt:
-      info("W: 手动终止")
-      raise
-    except SystemExit:
-      err(res, exc_info=True, stack_info=True)
-      raise
-    except RuntimeError:
-      pass
-    except AttributeError:
-      pass
-    except urllib.error.HTTPError:
-      res += ' Data not retrieved because %s\nURL: %s %s' % (e, args, kwargs)
-    except urllib.error.URLError:
-      if isinstance(e.reason, socket.timeout):
-        res += ' socket timed out: urllib.error.URLError'
-      else:
-        res += ' some other error happened'
-    except socket.timeout:
-      res += ' socket timed out'
-    except ConnectionError as e:
-      no_send = True
-      #  err("链接问题，退出吧 %s" % res, exc_info=True, stack_info=True)
-      #  raise
-      more = False
-      if e.args[0] == 'stream is not ready':
-        # sending xmpp msg
-        more = False
-      elif e.args[0] == 'disconnected':
-        # sending xmpp msg
-        more = False
-      elif e.args[0] == 'client is not running':
-        more = False
-      else:
-        pass
-    except UnicodeDecodeError:
-      pass
-    except rpcerrorlist.FloodWaitError:
-      no_send = True
-      info(f"消息发送太快，被服务器当作洪水信息攻击了。")
-      global msg_delay_default
-      msg_delay_default += (300 - msg_delay_default)/2
-      async def f():
-        global msg_delay_default
-        await sleep(60)
-        msg_delay_default -= (300 - msg_delay_default)/2
-        if msg_delay_default < 0:
-          msg_delay_default = 0.4
-      asyncio.create_task(f())
-      return True
-    except OSError as e:
-      no_send = True
-      err("出错啦 OSError %s" % res, True)
-      #  raise
-    except Exception:
-      pass
-      #  err(f"W: {repr(e)} line: {e.__traceback__.tb_lineno}", exc_info=True, stack_info=True)
-      #  print(f"W: {repr(e)} line: {e.__traceback__.tb_next.tb_next.tb_lineno}")
-
-    res = f"已忽略异常: {res}"
-    if not no_send:
-      #  warn(res)
-      #  asyncio.create_task(mt_send(res))
-      #  asyncio.create_task(send(res, ME))
-      #  warn(res)
-      info("check send_tg: {}".format(send_tg.__name__ in fs))
-      info("check send_xmpp: {}".format(send_xmpp.__name__ in fs))
-      if not allright.is_set():
-        no_send = True
-      elif send_tg.__name__ in fs:
-        no_send = True
-        no_send_tg = True
-        info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-      elif send_xmpp.__name__ in fs:
-        no_send = True
-        no_send_xmpp = True
-        info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-      elif send_tg.__name__ in res:
-        no_send = True
-        no_send_tg = True
-        info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-      elif send_xmpp.__name__ in res:
-        no_send = True
-        no_send_xmpp = True
-        info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-
-      elif send_log.__name__ in fs:
-        info(f"send_log is busy: {res}")
-        no_send = True
-
-    if no_send:
-      if more:
-        err(res, True)
-      else:
-        warn(res)
-    else:
-      err(res, True)
-      if send_to:
-        send_log(res, send_to, 1)
-      else:
-        # wait is ok
-        #  await sleep(5)
-        #  send_log(res, 9)
-        if not no_send_tg:
-          #  t1 = asyncio.create_task(_send_log(res, wait=9, to=1))
-          send_log(res, CHAT_ID, 3)
-          
-        if not no_send_xmpp:
-          #  t1 = asyncio.create_task(_send_log(res, wait=9, to=2))
-          send_log(res, log_group_private, 2)
-    return
-    #  return res
-
+  #  _no_send = no_send
   def wrapper(func):
     if asyncio.iscoroutinefunction(func):
       @wraps(func)
@@ -709,7 +573,7 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
           return await func(*args, **kwargs)
         #  except Exception as e:
         except BaseException as e:
-          return  _exceptions_handler(e, *args, **kwargs)
+          return  _exceptions_handler(no_send, send_to, e, *args,  **kwargs)
     else:
       @wraps(func)
       def wrapper(*args, **kwargs):
@@ -717,12 +581,149 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
           return func(*args, **kwargs)
         #  except Exception as e:
         except BaseException as e:
-           return  _exceptions_handler(e, *args, **kwargs)
+          return  _exceptions_handler(no_send, send_to, e, *args,  **kwargs)
     return wrapper
   if func is not None:
     return wrapper(func)
   return wrapper
 
+def _exceptions_handler(no_send, send_to, e, *args, **kwargs):
+  #  no_send = _no_send
+  more = True
+  #  no_send = False
+  no_send_tg = False
+  no_send_xmpp = False
+  #  res = f'内部错误: {e=} line: {e.__traceback__.tb_next.tb_lineno}'
+  #  lineno = get_lineno2(tb)
+  #  lineno = "%s" % tb.tb_lineno
+  fs = set()
+  lineno, fs, fm = get_lineno(e, fs)
+  #  while tb.tb_next is not None:
+  #    lineno += " %s" % tb.tb_next.tb_lineno
+  #    last_num = tb.tb_next.tb_lineno
+  #    tb = tb.tb_next
+  #  res = f'{tb.tb_frame.f_code.co_name} {tb.tb_frame.f_code.f_lineno} 内部错误 {e=}'
+  res = f'{lineno} {e=}'
+  #  print("print use logger")
+  #  logger.error(res, exc_info=e, stack_info=True)
+  #  print("print use logger ok")
+  try:
+    #  res = f'{e=} line: {e.__traceback__.tb_next.tb_next.tb_lineno}'
+    #  raise e
+    raise
+  except KeyboardInterrupt:
+    info("W: 手动终止")
+    raise
+  except SystemExit:
+    err(res, exc_info=True, stack_info=True)
+    raise
+  except RuntimeError:
+    pass
+  except AttributeError:
+    pass
+  except urllib.error.HTTPError:
+    res += ' Data not retrieved because %s\nURL: %s %s' % (e, args, kwargs)
+  except urllib.error.URLError:
+    if isinstance(e.reason, socket.timeout):
+      res += ' socket timed out: urllib.error.URLError'
+    else:
+      res += ' some other error happened'
+  except socket.timeout:
+    res += ' socket timed out'
+  except ConnectionError as e:
+    no_send = True
+    #  err("链接问题，退出吧 %s" % res, exc_info=True, stack_info=True)
+    #  raise
+    more = False
+    if e.args[0] == 'stream is not ready':
+      # sending xmpp msg
+      more = False
+    elif e.args[0] == 'disconnected':
+      # sending xmpp msg
+      more = False
+    elif e.args[0] == 'client is not running':
+      more = False
+    else:
+      pass
+  except UnicodeDecodeError:
+    pass
+  except rpcerrorlist.FloodWaitError:
+    no_send = True
+    info(f"消息发送太快，被服务器当作洪水信息攻击了。")
+    global msg_delay_default
+    msg_delay_default += (300 - msg_delay_default)/2
+    async def f():
+      global msg_delay_default
+      await sleep(60)
+      msg_delay_default -= (300 - msg_delay_default)/2
+      if msg_delay_default < 0:
+        msg_delay_default = 0.4
+    asyncio.create_task(f())
+    return True
+  except OSError as e:
+    no_send = True
+    err("出错啦 OSError %s" % res, True)
+    #  raise
+  except Exception:
+    pass
+    #  err(f"W: {repr(e)} line: {e.__traceback__.tb_lineno}", exc_info=True, stack_info=True)
+    #  print(f"W: {repr(e)} line: {e.__traceback__.tb_next.tb_next.tb_lineno}")
+
+  res = f"已忽略异常: {res}"
+  if not no_send:
+    #  warn(res)
+    #  asyncio.create_task(mt_send(res))
+    #  asyncio.create_task(send(res, ME))
+    #  warn(res)
+    info("check send_tg: {}".format(send_tg.__name__ in fs))
+    info("check send_xmpp: {}".format(send_xmpp.__name__ in fs))
+    if not allright.is_set():
+      no_send = True
+    elif send_tg.__name__ in fs:
+      no_send = True
+      no_send_tg = True
+      info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
+    elif send_tg2.__name__ in fs:
+      no_send = True
+      no_send_tg = True
+      info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
+    elif send_xmpp.__name__ in fs:
+      no_send = True
+      no_send_xmpp = True
+      info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
+    elif send_tg.__name__ in res:
+      no_send = True
+      no_send_tg = True
+      info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
+    elif send_xmpp.__name__ in res:
+      no_send = True
+      no_send_xmpp = True
+      info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
+
+    elif send_log.__name__ in fs:
+      info(f"send_log is busy: {res}")
+      no_send = True
+
+  if no_send:
+    if more:
+      err(res, True)
+    else:
+      warn(res)
+  else:
+    err(res, True)
+    if send_to:
+      send_log(res, send_to, 1)
+    else:
+      # wait is ok
+      #  await sleep(5)
+      #  send_log(res, 9)
+      if not no_send_tg:
+        send_log(res, CHAT_ID, 3)
+        
+      if not no_send_xmpp:
+        send_log(res, log_group_private, 2)
+  return
+  #  return res
 
 
 # https://www.utf8-chartable.de/unicode-utf8-table.pl
@@ -3066,12 +3067,13 @@ def send_log(text, jid=None, delay=1, fm=None):
   if fm is None:
     fm = sys._getframe()
     fm = fm.f_back
-  if jid is None:
-    if send_log(text, CHAT_ID, delay, fm) is True:
-      if send_log(text, log_group_private, delay, fm) is True:
-        return True
-    return False
-  text = f"{fm.f_code.co_name} {fm.f_lineno} {text}"
+  if fm.f_code.co_name != "_exceptions_handler":
+    text = f"{fm.f_code.co_name} {fm.f_lineno} {text}"
+  #  if jid is None:
+  #    if send_log(text, CHAT_ID, delay, fm) is True:
+  #      if send_log(text, log_group_private, delay, fm) is True:
+  #        return True
+  #    return False
   m = 0
   n = 0
   # https://docs.python.org/zh-cn/3/library/asyncio-task.html#introspection
@@ -3080,7 +3082,8 @@ def send_log(text, jid=None, delay=1, fm=None):
       m += 1
     elif j.get_name() == "send_log_xmpp":
       n += 1
-  if isinstance(jid, int):
+
+  if jid is None or isinstance(jid, int):
     if m > 0:
       warn(f"send_log tg is busy: {m} text: {short(text)}")
       #  await sleep(delay*m)
@@ -3088,7 +3091,8 @@ def send_log(text, jid=None, delay=1, fm=None):
       info(f"send_log tg: {text}")
     t = asyncio.create_task(send_tg(text, jid, delay=(delay+1)**m), name="send_log_tg")
   #  if isinstance(jid, int) is False:
-  else:
+  #  else:
+  if jid is None or not isinstance(jid, int):
     if n > 0:
       warn(f"send_log xmpp is busy: {n} text: {short(text)}")
     else:
