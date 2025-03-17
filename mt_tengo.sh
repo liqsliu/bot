@@ -286,27 +286,26 @@ chang_name_from_bifrost(){
   if [[ "${matrix_name: -12}" == ":libera.chat" ]]; then
     LABLE=I
     if [[ "${matrix_name:0:6}" == "_xmpp_" ]]; then
-      block_msg
+      # block_msg
       LABLE="X"
       matrix_name=${matrix_name:6}
       _chang_name_from_bifrost
-      return 0
+      return 2
     elif [[ "${matrix_name:0:9}" == "_discord_" ]]; then
-      block_msg
       LABLE="D"
+      return 2
     elif [[ "${matrix_name:0:9}" == "telegram_" ]]; then
-      block_msg
       LABLE="T"
+      return 2
     elif [[ "${matrix_name%%=40*}" == "_neb_rssbot_" ]]; then
-      block_msg
       LABLE="M"
       # NAME="rssbot"
       matrix_name=rssbot
-      return 0
+      return 2
     elif [[ "${matrix_name: -15}" == "[m]:libera.chat" ]]; then
       # from matrix to irc, then back to matrix
-      block_msg
       LABLE="T"
+      return 2
     fi
     return 1
   elif [[ "${matrix_name: -13}" == ":aria-net.org" ]]; then
@@ -317,29 +316,31 @@ chang_name_from_bifrost(){
     fi
   elif [[ "${matrix_name: -11}" == ":matrix.org" ]]; then
     if [[ "${matrix_name:0:6}" == "_xmpp_" ]]; then
-      block_msg
       LABLE="X"
       matrix_name=${matrix_name:6}
       _chang_name_from_bifrost
-      return 0
+      return 2
     elif [[ "${matrix_name%%=40*}" == "_neb_rssbot_" ]]; then
-      block_msg
       LABLE="M"
       # NAME="rssbot"
       matrix_name=rssbot
-      return 0
+      return 2
     fi
     return 1
   elif [[ "${matrix_name##*:}" == "t2bot.io" ]]; then
     if [[ "${matrix_name:0:9}" == "_discord_" ]]; then
-      block_msg
       LABLE="D"
+      matrix_name=dc_user_t2bot
+      return 2
     elif [[ "${matrix_name:0:9}" == "telegram_" ]]; then
-      block_msg
       LABLE="T"
+      matrix_name=tg_user_t2bot
+      return 2
     elif [[ "${matrix_name}" == "telegram:t2bot.io" ]]; then
-      block_msg
+      matrix_name=tg_channel_t2bot
+      return 2
     fi
+    return 0
   else
     return 1
   fi
@@ -347,12 +348,17 @@ chang_name_from_bifrost(){
 
 
 chang_name_from_matrix(){
+  local in_qt=$1
   # local matrix_name=$1
   # if is_bifrost "$matrix_name"; then
     # matrix_name=$(chang_name_from_bifrost "$matrix_name")
-  if chang_name_from_bifrost; then
-    :
-  else
+  chang_name_from_bifrost
+  local r=$?
+  if [[ "$r" == 2 ]]; then
+    if [[ -z "$in_qt" ]]; then
+      block_msg
+    fi
+  elif [[ "$r" == 1 ]]; then
     # if [[ "$(echo "$matrix_name" | cut -d':' -f2 )" == "matrix.org" ]]; then
     if [[ "${matrix_name##*:}" == "matrix.org" ]]; then
       matrix_name=$(echo "$matrix_name" | cut -d':' -f1)
@@ -362,6 +368,8 @@ chang_name_from_matrix(){
         matrix_name=$(echo "$matrix_name" | cut -d':' -f1)
       fi
     fi
+  else
+    :
   fi
   # echo -n "$matrix_name"
 }
@@ -373,9 +381,7 @@ chang_name_for_qt_from_matrix(){
 #      qt_tmp=$(echo "$qt_tmp" | sed "1s|^$username||" )
     qt_tmp=$(echo "$qt_tmp" | sed "1s|$username|matrix_username|" )
     username=$(echo "$username" | cut -d"@" -f2 | cut -d ">" -f1 )
-    # username=$(chang_name_from_matrix "$username")
-    username=$(matrix_name="$username"; chang_name_from_matrix; echo "$matrix_name")
-#      qt_tmp=$( echo -n "> M ${username}: "; echo "$qt_tmp")
+    username=$(matrix_name="$username"; chang_name_from_matrix 1; echo "$matrix_name")
     username="> M ${username}: "
     qt_tmp=$(echo "$qt_tmp" | sed "1s|matrix_username|$username|" )
   fi
@@ -385,7 +391,7 @@ chang_name_for_qt_from_matrix(){
 
   # NAME=$(chang_name_from_matrix "$NAME")
   matrix_name=$NAME
-  chang_name_from_matrix
+  chang_name_from_matrix || block_msg
   NAME=$matrix_name
 
   #for reply from matrix
