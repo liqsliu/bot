@@ -3614,12 +3614,12 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
   else:
     parse_mode = client.parse_mode
+  ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
+  if len(ts) > 1:
+    tmp_msg = False
+  k = 0
   async with lock:
-    ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
-    if len(ts) > 1:
-      tmp_msg = False
     info(f"send to tg: {chat_id}: {short(text)}")
-    k = 0
     for t in ts:
       await sleep(msg_delay_default)
       try:
@@ -3665,7 +3665,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
           no_send = False
         err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
         return False
-  info(f"send ok: {chat_id} {short(text)}")
+    info(f"send ok: {chat_id} {short(text)}")
   return True
 
 
