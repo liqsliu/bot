@@ -5370,6 +5370,8 @@ async def msgt(event):
         # bot2: t2bot
         if text.startswith("bot: "):
           text = text[5:]
+          if text[0] == "\n":
+            text = text[1:]
         #  elif " " not in  text.splei(": ", 1)[0]:
         elif text[1] != " ":
           text = "M " + text
