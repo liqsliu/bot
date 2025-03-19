@@ -8893,23 +8893,40 @@ async def init_cmd():
     s = str(s)
     s = s[2:]
     tmp = ""
-    k = len(s)%8
-    if k  != 0:
-      tmp = s[:k]
-      s = s[k:]
-      k = len(tmp)
-      if k > 4:
-        k = k%4
-        tmp = tmp[:k] + " " + tmp[k:]
-    for i in range(len(s)//4): 
+
+    #  k = len(s)%8
+    #  if k  != 0:
+    #    tmp = s[:k]
+    #    s = s[k:]
+    #    k = len(tmp)
+    #    if k > 4:
+    #      k = k%4
+    #      tmp = tmp[:k] + " " + tmp[k:]
+    #  for i in range(len(s)//4):
+    #    if i%8  == 0:
+    #      tmp += "\n\n"
+    #    elif i%2  == 0:
+    #      tmp += "\n"
+    #    else:
+    #      tmp += " "
+    #    tmp += s[i*4:i*4+4]
+    l = len(s)
+    for i in range(l//4):
       if i%8  == 0:
-        tmp += "\n\n" 
+        ss = "\n\n"
       elif i%2  == 0:
-        tmp += "\n" 
+        ss = "\n"
       else:
-        tmp += " "
-      tmp += s[i*4:i*4+4]
-    return tmp
+        ss = " "
+      tmp = "{}{}{}".format(s[l-i*4-4:l-i*4], ss, tmp)
+    k = l%8
+    if k > 4:
+      ss = " "
+    else:
+      ss = "\n"
+    tmp = "{}{}{}".format(s[:k], ss, tmp)
+
+    return tmp.strip()
   cmd_funs["bin"] = _
 
 
