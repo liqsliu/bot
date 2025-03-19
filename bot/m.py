@@ -1840,14 +1840,6 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           #  except TimeoutError:
           #    pass
 
-  #  tmp = ""
-  tmp = b""
-  res = ""
-  o = b""
-  e = b""
-  r = None
-  ds = None
-  d = None
   #  try:
   #    async with asyncio.timeout(interval) as cm:
   if isinstance(cmds, str):
@@ -1867,13 +1859,23 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     tmp.append(l)
   cmds = tmp
   info("run shell cmds: {!r}".format(cmds))
+
   cmds = list(f"{x}\n" for x in cmds)
   cmds.append("echo $?\n")
   eof = generand(16) + "\n"
   #  cmd.append(f"echo EOF\n")
   cmds.append(f"echo "+eof)
+
   eof = eof.encode()
   k =  len(cmds)
+  #  tmp = ""
+  tmp = b""
+  res = ""
+  o = b""
+  e = b""
+  r = None
+  ds = None
+  d = None
   async with myshell_lock:
 
     if not myshell_queue.empty():
