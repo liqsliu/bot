@@ -1809,11 +1809,6 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
   #  else:
   #    return
   p = myshell_p
-  if myshell_lock.locked():
-    if src == CHAT_ID:
-      warn(f"shell is busy: {cmds=}")
-    else:
-      send("前一次任务还没结束", src, tmp_msg=True)
     #  o = b""
     #  e = b""
     #  t1 = asyncio.create_task(p.stdout.readline())
@@ -1876,6 +1871,12 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
   r = None
   ds = None
   d = None
+
+  if myshell_lock.locked():
+    if src == CHAT_ID:
+      warn(f"shell is busy: {cmds=}")
+    else:
+      send("前一次任务还没结束", src, tmp_msg=True)
   async with myshell_lock:
 
     if not myshell_queue.empty():
