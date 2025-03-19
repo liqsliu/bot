@@ -2345,7 +2345,9 @@ async def my_exec(cmd, src=None, client=None, **args):
   )
 
   # Get `__ex` from local variables, call it and return the result
-  return await locals()['__ex']()
+  res = await locals()['__ex']()
+  #  if res is not None:
+  return "{!r}".format(res)
 
 
 my_exec2 = cross_thread(need_main=False)(my_exec)
@@ -7919,7 +7921,7 @@ async def init_cmd():
   cmd_for_admin.add('exec')
   async def _(cmds, src):
     if len(cmds) == 1:
-      return f"exec\nreturn res\n.{cmds[0]} $code"
+      return f"exec in main thread\nreturn res\n.{cmds[0]} $code"
     cmds.pop(0)
     return await my_exec(' '.join(cmds), src)
   cmd_funs["exec0"] = _
