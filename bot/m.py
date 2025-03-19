@@ -8911,24 +8911,21 @@ async def init_cmd():
     #      tmp += " "
     #    tmp += s[i*4:i*4+4]
     l = len(s)
+    ss = " "
     for i in range(l//4):
-      if i%8  == 0:
+      tmp = "{}{}{}".format(s[l-i*4-4:l-i*4], ss, tmp)
+      if i%8  == 7:
         ss = "\n\n"
-      elif i%2  == 0:
+      elif i%2  == 1:
         ss = "\n"
       else:
         ss = " "
-      tmp = "{}{}{}".format(s[l-i*4-4:l-i*4], ss, tmp)
-    if l%4 != 0:
-      k = l%8
-      if k > 4:
-        ss = " "
-        k = l%4
-      else:
-        if i%8 == 7:
-          ss = "\n\n"
-        else:
-          ss = "\n"
+    k = l%8
+    if k != 0:
+      #    if i%8 == 7:
+      #      ss = "\n\n"
+      #    else:
+      #      ss = "\n"
       tmp = "{}{}{}".format(s[:k], ss, tmp)
 
     return tmp.strip()
