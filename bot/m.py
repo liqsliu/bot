@@ -4040,8 +4040,9 @@ async def msgmt(msg):
   #      if name == "C Telegram: ":
   if gateway == "gateway1":
 
-    if '\n' in name:
-      qt = name.splitlines()
+    qt = name.splitlines()
+    #  if '\n' in name:
+    if len(qt) > 1:
       name = qt.pop(-1)
       #  rname = name[:-2]
       #  qt = '\n'.join(ls[:-1])
