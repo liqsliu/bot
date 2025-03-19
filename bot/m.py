@@ -8890,6 +8890,7 @@ async def init_cmd():
       s = bin(int(s))
     else:
       s = bin(int(s, 16))
+    s = str(s)
     s = s[2:]
     tmp = ""
     k = len(s)%8
