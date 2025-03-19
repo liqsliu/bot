@@ -1854,6 +1854,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
   else:
     #  cmds = list(shlex.quote(x) for x in cmds)
     #  cmds = ' '.join(cmds)
+    info("original cmds: {!r}".format(cmds))
     cmds = shlex.join(cmds)
   cmds = list(f"{x}\n" for x in cmds.splitlines())
   info(f"run shell cmds: {cmds}")
@@ -2340,7 +2341,7 @@ async def my_exec(cmd, src=None, client=None, **args):
   exec(
     f'async def __ex(): ' +
     ''.join(f'\n {l}' for l in cmd.split('\n'))
-    + "\n return 'end'"
+    #  + "\n return 'end'"
     #  + "\n" + ''.join(f'\n {l}' for l in res.split('\n'))
   )
 
