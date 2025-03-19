@@ -252,10 +252,10 @@ def info0(s):
   print("%s\r" % s.replace("\n", " "), end='')
 
 def info1(s):
-  print("%s" % s.replace("\n", " "), end='')
+  print(s.replace("\n", " "), end='')
 
 def info2(s):
-  print("%s" % s.replace("\n", " "))
+  print(s.replace("\n", " "))
 
 info = logger.info
 
