@@ -6726,6 +6726,7 @@ def get_mucs(muc):
   if muc == "gateway1":
     muc = main_group
   elif muc not in my_groups:
+    return [muc]
     return
   for s in sync_groups_all:
     if muc in s:
@@ -6734,6 +6735,7 @@ def get_mucs(muc):
         if m not in rooms:
           tmp.add(m)
       return s - tmp
+  return [muc]
   return set([muc])
 
 def wtf_str(s, for_what="nick"):
