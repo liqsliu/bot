@@ -8923,6 +8923,7 @@ async def init_cmd():
       k = l%8
       if k > 4:
         ss = " "
+        k = l%4
       else:
         ss = "\n"
       tmp = "{}{}{}".format(s[:k], ss, tmp)
