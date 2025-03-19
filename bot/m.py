@@ -4505,6 +4505,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
 #    return True
 
 #  async def mt_send(text="null", name="bot", gateway="test", qt=None):
+@exceptions_handler
 async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
   #  # api.xmpp
   #  MT_API = "127.0.0.1:4247"
@@ -4543,6 +4544,7 @@ async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
 #      #  os.system(f"{SH_PATH}/sm4gpt.sh {fn} {gateway}")
 #      return await asyncio.to_thread(os.system, f"{SH_PATH}/sm4gpt.sh {fn} {gateway}")
 
+@exceptions_handler
 @cross_thread(need_main=False)
 async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, **kwargs):
   if not isinstance(text, str):
@@ -7294,18 +7296,22 @@ async def msgx(msg):
             exqt = False
           qt.append("%s" % i[1:])
         elif i == "":
-          qt.append(i)
+          if qt:
+            qt.append(i)
         else:
+          if qt:
+            tmp = tmp[len(qt):]
+            text0='\n'.join(tmp)
+            tmp = qt
+            qt='\n'.join(qt)
+            text = f"{text0}\n\n{qt}"
+            qt2 = '\n> '.join(tmp)
+            username = f"> {qt2}\n{username}"
           break
-      if len(tmp) != len(qt):
-        tmp = tmp[len(qt):]
-        text0='\n'.join(tmp)
-        tmp = qt
-        qt='\n'.join(qt)
-        text = f"{text0}\n\n{qt}"
-        qt2 = '\n> '.join(tmp)
-        username = f"> {qt2}\n{username}"
-      info(f"delete qt: [text0]")
+        #  warn("fixme: {tmp} != {qt}")
+      info(f"delete qt: {text0}")
+      if type(qt) is list:
+        qt = None
     ms = get_mucs(muc)
     for m in ms - {muc}:
       asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
