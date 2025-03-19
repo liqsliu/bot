@@ -3608,7 +3608,7 @@ async def slow_mode(client, timeout=300):
 
 #  @exceptions_handler(no_send=True)
 @cross_thread
-async def _send_tg(client, lock, last, tmp_chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None):
+async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None):
   if qt is not None:
     parse_mode = "html"
     text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
