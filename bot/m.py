@@ -7366,7 +7366,7 @@ async def msgx(msg):
       qt=[]
       tmp= text.splitlines()
       exqt = False
-      k = 1
+      k = 0
       for i in tmp:
         if i.startswith('>> '):
           qt.append("%s" % i.split(' ', 1)[1])
