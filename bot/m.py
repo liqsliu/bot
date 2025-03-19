@@ -3091,7 +3091,9 @@ def send_log(text, jid=None, delay=1, fm=None):
       #  await sleep(delay*m)
     else:
       info(f"send_log tg: {text}")
-    t = asyncio.create_task(send_tg(text, jid, delay=(delay+1)**m), name="send_log_tg")
+    if jid is None:
+      tjid = CHAT_ID
+    t = asyncio.create_task(send_tg(text, tjid, delay=(delay+1)**m), name="send_log_tg")
   #  if isinstance(jid, int) is False:
   #  else:
   if jid is None or not isinstance(jid, int):
@@ -3099,7 +3101,9 @@ def send_log(text, jid=None, delay=1, fm=None):
       warn(f"send_log xmpp is busy: {n} text: {short(text)}")
     else:
       info(f"send_log xmpp: {text}")
-    t = asyncio.create_task(send_xmpp(text, jid, delay=(delay+1)**m), name="send_log_xmpp")
+    if jid is None:
+      tjid = log_group_private
+    t = asyncio.create_task(send_xmpp(text, tjid, delay=(delay+1)**m), name="send_log_xmpp")
 
   #  if jid is None:
   #    #  asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
@@ -3655,7 +3659,11 @@ async def _send_tg(client, lock, last, tmp_chats, text, chat_id=CHAT_ID, correct
           err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
         return False
       except Exception as e:
-        err(f"发送tg消息失败: {chat_id} {e=} {t=}")
+        if client is TB:
+          no_send = True
+        else:
+          no_send = False
+        err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
         return False
   info(f"send ok: {chat_id} {short(text)}")
   return True
