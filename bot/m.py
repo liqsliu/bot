@@ -8925,17 +8925,16 @@ async def init_cmd():
         ss = " "
         k = l%4
       else:
-        ss = "\n"
+        if i%8 == 7:
+          ss = "\n\n"
+        else:
+          ss = "\n"
       tmp = "{}{}{}".format(s[:k], ss, tmp)
 
     return tmp.strip()
   cmd_funs["bin"] = _
 
-
-
-
 bridges_tmp = {}
-
 
 @exceptions_handler
 async def run_cmd(*args, **kwargs):
