@@ -313,7 +313,7 @@ def get_cmd(text):
     if need_escape is True:
       need_escape = False
       if c == ' ' and in_quote is False:
-        tmp = tmp[:-1] + c
+        tmp = tmp[:-1] + ' '
         continue
     if in_quote is True:
       if c == '"':
@@ -604,7 +604,9 @@ def _exceptions_handler(no_send, send_to, e, *args, **kwargs):
   #    last_num = tb.tb_next.tb_lineno
   #    tb = tb.tb_next
   #  res = f'{tb.tb_frame.f_code.co_name} {tb.tb_frame.f_code.f_lineno} 内部错误 {e=}'
-  res = f'{lineno} {e=}'
+  #  res = f'{lineno} {e=}'
+  # https://docs.python.org/zh-cn/3.11/library/string.html#formatstrings
+  res = '{} {!r}'.format(lineno, e)
   #  print("print use logger")
   #  logger.error(res, exc_info=e, stack_info=True)
   #  print("print use logger ok")
@@ -647,7 +649,7 @@ def _exceptions_handler(no_send, send_to, e, *args, **kwargs):
     else:
       pass
   except UnicodeDecodeError:
-    pass
+    info("unicode 接码出错")
   except rpcerrorlist.FloodWaitError:
     no_send = True
     info(f"消息发送太快，被服务器当作洪水信息攻击了。")
@@ -8844,7 +8846,8 @@ async def init_cmd():
     if len(cmds) == 1:
       return f"unicode encode\n.{cmds[0]} $text"
     s = ' '.join(cmds[1:])
-    return s.encode("unicode-escape").decode()
+    #  return s.encode("unicode-escape").decode()
+    return ascii(s)[1:-1]
   cmd_funs["u"] = _
   cmd_funs["ue"] = _
   
@@ -8855,6 +8858,58 @@ async def init_cmd():
     return s.encode().decode("unicode-escape")
   cmd_funs["ud"] = _
 
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"hex encode\n.{cmds[0]} $text"
+    #  return ''.join(format(ord(c), '02X') for c in ' '.join(cmds[1:]))
+    # https://docs.python.org/zh-cn/3.11/library/stdtypes.html
+    return (' '.join(cmds[1:])).encode().hex().upper()
+  cmd_funs["he"] = _
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"hex decode\n.{cmds[0]} $text"
+    s = ' '.join(cmds[1:]))
+    if s.startswith("0x"):
+      s = s[2:]
+    #  s = s.replace(" ", "")
+    #  res = ""
+    #  for i in range(s)/2:
+    #    res += chr(int(s[:2], 16))
+    try:
+      return bytes.fromhex(s).decode()
+    except UnicodeDecodeError as e:
+      return "E: {!r}\n{}".format(e, bytes.fromhex(s).decode(errors="ignore"))
+  cmd_funs["hd"] = _
+
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"hex or int to bin\n.{cmds[0]} $text"
+    s = ' '.join(cmds[1:]))
+    if s.isnumeric():
+      s = bin(int(s))
+    else:
+      s = bin(int(s, 16))
+    s = s[2:]
+    tmp = ""
+    k = len(s)%8
+    if k  != 0:
+      tmp = s[:k]
+      s = s[k:]
+      k = len(tmp)
+      if k > 4:
+        k = k%4
+        tmp = tmp[:k] + " " + tmp[k:]
+    for i in range(len(s)/4): 
+      if i%8  == 0:
+        tmp += "\n\n" 
+      elif i%2  == 0:
+        tmp += "\n" 
+      else:
+        tmp += " "
+      tmp += s[i*4:i*4+4]
+    return tmp
+  cmd_funs["bin"] = _
 
 
 
