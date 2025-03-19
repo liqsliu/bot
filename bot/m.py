@@ -6606,7 +6606,9 @@ def send_typing(muc):
     # telegram
     chat_id = muc
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.chats.ChatMethods.action
-    asyncio.create_task(TB.action(chat_id, "typing"))
+    async def f():
+      await TB.action(chat_id, "typing")
+    asyncio.create_task(f())
     return
   ms = get_mucs(muc)
   if ms:
