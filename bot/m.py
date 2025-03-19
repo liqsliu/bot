@@ -8922,10 +8922,6 @@ async def init_cmd():
         ss = " "
     k = l%8
     if k != 0:
-      #    if i%8 == 7:
-      #      ss = "\n\n"
-      #    else:
-      #      ss = "\n"
       tmp = "{}{}{}".format(s[:k], ss, tmp)
 
     return tmp.strip()
