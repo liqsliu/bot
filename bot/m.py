@@ -2332,13 +2332,14 @@ async def my_py(cmd, src=None, client=None, **args):
 
 @exceptions_handler
 async def my_exec(cmd, src=None, client=None, **args):
-  res = """if "res" in locals():
-  return res"""
+  #  res = """if "res" in locals():
+  #  return res"""
   # https://stackoverflow.com/a/53255739
   exec(
     f'async def __ex(): ' +
     ''.join(f'\n {l}' for l in cmd.split('\n'))
-    + "\n" + ''.join(f'\n {l}' for l in res.split('\n'))
+    + "\n return end")
+    #  + "\n" + ''.join(f'\n {l}' for l in res.split('\n'))
   )
 
   # Get `__ex` from local variables, call it and return the result
@@ -7935,16 +7936,17 @@ async def init_cmd():
     if len(cmds) == 1:
       return f"exec\nreturn res\n.{cmds[0]} $code"
     cmds.pop(0)
-    res = await my_exec2(' '.join(cmds), src)
-    return f"{res}"
+    #  res = await my_exec2(' '.join(cmds), src)
+    #  if res is 0:
+    #    return "end"
+    return await my_exec2(' '.join(cmds), src)
   cmd_funs["exec"] = _
   cmd_for_admin.add('exec')
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"exec\nreturn res\n.{cmds[0]} $code"
     cmds.pop(0)
-    res = await my_exec(' '.join(cmds), src)
-    return f"{res}"
+    return await my_exec(' '.join(cmds), src)
   cmd_funs["exec0"] = _
   cmd_for_admin.add('exec0')
 
