@@ -672,14 +672,14 @@ def _exceptions_handler(no_send, send_to, e, *args, **kwargs):
 
   res = f"已忽略异常: {res}"
   if not no_send:
-    #  warn(res)
-    #  asyncio.create_task(mt_send(res))
-    #  asyncio.create_task(send(res, ME))
-    #  warn(res)
     info("check send_tg: {}".format(send_tg.__name__ in fs))
     info("check send_xmpp: {}".format(send_xmpp.__name__ in fs))
     if not allright.is_set():
       no_send = True
+    elif _send_tg.__name__ in fs:
+      no_send = True
+      no_send_tg = True
+      info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
     elif send_tg.__name__ in fs:
       no_send = True
       no_send_tg = True
@@ -3401,7 +3401,7 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
     for i in msg.body:
       text = msg.body[i]
       if text:
-        if qt:
+        if qt is not None:
           text = "> %s\n%s" % ("\n> ".join(qt), text)
           msg.body[i] = text
         break
@@ -3579,32 +3579,38 @@ async def _slow_mode(timeout=300):
   slow_mode_task = None
   warn("slow mode off")
 
-async def slow_mode(timeout=300):
+async def slow_mode(client, timeout=300):
   global slow_mode_task
   if slow_mode_task is not None:
     slow_mode_task.cancel()
   warn("slow mode on")
+  if msg_delay_default == 0:
+    if client is TB:
+      await send_tg2("slow mode on", CHAT_ID)
+    else:
+      await send_tg("slow mode on", CHAT_ID)
   slow_mode_task = asyncio.create_task(_slow_mode(timeout))
   await sleep(timeout)
-  warn("slow mode is ending")
+  warn("slow mode off")
+  if msg_delay_default == 0:
+    if client is TB:
+      await send_tg2("slow mode off", CHAT_ID)
+    else:
+      await send_tg("slow mode off", CHAT_ID)
   return True
 
 
 
-last_outmsg_bot = {}
-tmp_msg_chats_bot = set()
 
-
-
-@exceptions_handler(no_send=True)
+#  @exceptions_handler(no_send=True)
 @cross_thread
-async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None):
-  if qt:
+async def _send_tg(client, lock, last, tmp_chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None):
+  if qt is not None:
     parse_mode = "html"
     text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
   else:
-    parse_mode = TB.parse_mode
-  async with tg_send_lock:
+    parse_mode = client.parse_mode
+  async with lock:
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
       tmp_msg = False
@@ -3613,24 +3619,24 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
     for t in ts:
       await sleep(msg_delay_default)
       try:
-        if chat_id in last_outmsg_bot:
-          omsg = last_outmsg_bot[chat_id]
+        if chat_id in last:
+          omsg = last[chat_id]
           if correct is True:
             msg = await omsg.edit(t)
             correct = False
-          elif chat_id in tmp_msg_chats_bot:
+          elif chat_id in chats:
             msg = await omsg.edit(t, parse_mode=parse_mode)
           else:
-            msg = await TB.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode)
+            msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode)
         else:
-          msg = await TB.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode)
+          msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode)
         k += 1
         if k == len(ts):
-          last_outmsg_bot[chat_id] = msg
+          last[chat_id] = msg
           if tmp_msg:
-            tmp_msg_chats_bot.add(chat_id)
+            chats.add(chat_id)
           elif chat_id in tmp_msg_chats_bot:
-            tmp_msg_chats_bot.remove(chat_id)
+            chats.remove(chat_id)
 
         elif len(ts) > 1:
           await sleep(0.5)
@@ -3638,7 +3644,7 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
           await sleep(delay)
       except rpcerrorlist.FloodWaitError as e:
         warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
-        await slow_mode()
+        await slow_mode(client)
         return False
       except rpcerrorlist.MessageTooLongError as e:
         warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
@@ -3653,86 +3659,154 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
         return False
   info(f"send ok: {chat_id} {short(text)}")
   return True
+
 
 @exceptions_handler(no_send=True)
-@cross_thread
-async def send_tg2(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None):
-  #  if chat_id == GROUP_ID:
-  #    global tg_msg_cache_for_bot2
-  #    if "bot: " + text == tg_msg_cache_for_bot2:
-  #      tg_msg_cache_for_bot2 = None
-  #      info("重复消息，停止发送")
-  #      return True
-  async with tg_send_lock2:
-    ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
-    if len(ts) > 1:
-      tmp_msg = False
-    #  if chat_id in last_outmsg:
-    #    omsg = last_outmsg[chat_id]
-    #  else:
-    #    omsg = None
-    k = 0
-    for t in ts:
-      await sleep(msg_delay_default)
-      try:
-        #  if type(chat_id) is int and chat_id > 0:
-        #    # chat_id 此处可以不考虑符号
-        #    peer = await UB.get_input_entity(chat_id)
-        #  if omsg is not None and ( correct is True or chat_id in tmp_msg_chats ):
-        #      msg = await omsg.edit(t)
-        if chat_id in last_outmsg:
-          omsg = last_outmsg[chat_id]
-          if correct is True:
-            msg = await omsg.edit(t)
-            correct = False
-          elif chat_id in tmp_msg_chats:
-            msg = await omsg.edit(t)
-          else:
-            msg = await UB.send_message(chat_id, t)
-          #  omsg = None
-          #  last_outmsg.pop(chat_id)
-        else:
-          msg = await UB.send_message(chat_id, t)
-          #  msg = await UB.send_message(await get_entity(chat_id), t)
-        k += 1
-        if k == len(ts):
-          #  if chat_id == GROUP_ID:
-          #    #  wait_for_msg_form_bot2(msg, chat_id)
-          #    asyncio.create_task(wait_for_msg_form_bot2(msg, chat_id))
-          last_outmsg[chat_id] = msg
-          if tmp_msg:
-            tmp_msg_chats.add(chat_id)
-          elif chat_id in tmp_msg_chats:
-            tmp_msg_chats.remove(chat_id)
+async def send_tg(*args, **kwargs):
+  return await _send_tg(TB, tg_send_lock, last_outmsg, tmp_msg_chats, *args, **kwargs)
+#  @cross_thread
+#  async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None):
+  #  if qt is not None:
+  #    parse_mode = "html"
+  #    text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
+  #  else:
+  #    parse_mode = TB.parse_mode
+  #  async with tg_send_lock:
+  #    ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
+  #    if len(ts) > 1:
+  #      tmp_msg = False
+  #    info(f"send to tg: {chat_id}: {short(text)}")
+  #    k = 0
+  #    for t in ts:
+  #      await sleep(msg_delay_default)
+  #      try:
+  #        if chat_id in last_outmsg_bot:
+  #          omsg = last_outmsg_bot[chat_id]
+  #          if correct is True:
+  #            msg = await omsg.edit(t)
+  #            correct = False
+  #          elif chat_id in tmp_msg_chats_bot:
+  #            msg = await omsg.edit(t, parse_mode=parse_mode)
+  #          else:
+  #            msg = await TB.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode)
+  #        else:
+  #          msg = await TB.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode)
+  #        k += 1
+  #        if k == len(ts):
+  #          last_outmsg_bot[chat_id] = msg
+  #          if tmp_msg:
+  #            tmp_msg_chats_bot.add(chat_id)
+  #          elif chat_id in tmp_msg_chats_bot:
+  #            tmp_msg_chats_bot.remove(chat_id)
+  #
+  #        elif len(ts) > 1:
+  #          await sleep(0.5)
+  #        if delay is not None:
+  #          await sleep(delay)
+  #      except rpcerrorlist.FloodWaitError as e:
+  #        warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
+  #        await slow_mode()
+  #        return False
+  #      except rpcerrorlist.MessageTooLongError as e:
+  #        warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
+  #        await sleep(5)
+  #        return False
+  #      except ValueError as e:
+  #        if e.args[0] == 'Failed to parse message':
+  #          err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
+  #        return False
+  #      except Exception as e:
+  #        err(f"发送tg消息失败: {chat_id} {e=} {t=}")
+  #        return False
+  #  info(f"send ok: {chat_id} {short(text)}")
+  #  return True
 
-        elif len(ts) > 1:
-          await sleep(0.5)
-        if delay is not None:
-          await sleep(delay)
-      except rpcerrorlist.FloodWaitError as e:
-        warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
-        #  await sleep(300)
-        await slow_mode()
-        return False
-      except rpcerrorlist.MessageTooLongError as e:
-        warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
-        await sleep(5)
-        return False
-      except ValueError as e:
-        if e.args[0] == 'Failed to parse message':
-          err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
-        return False
-      except Exception as e:
-        err(f"发送tg消息失败: {chat_id} {e=} {t=}")
-        return False
-        #  raise
-      #  await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2+msg_delay_default)
-    #  if correct:
-    #    last_outmsg[chat_id] = msg
-  info(f"send ok: {chat_id} {short(text)}")
-  return True
-  chat = await get_entity(CHAT_ID, True)
-  await UB.send_message(chat, text)
+
+last_outmsg2 = {}
+tmp_msg_chats2 = set()
+
+
+@exceptions_handler(no_send=True)
+async def send_tg2(*args, **kwargs):
+  return await _send_tg(UB, tg_send_lock2, last_outmsg2, tmp_msg_chats2, *args, **kwargs)
+#  @cross_thread
+#  async def send_tg2(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None):
+#    #  if chat_id == GROUP_ID:
+#    #    global tg_msg_cache_for_bot2
+#    #    if "bot: " + text == tg_msg_cache_for_bot2:
+#    #      tg_msg_cache_for_bot2 = None
+#    #      info("重复消息，停止发送")
+#    #      return True
+#    async with tg_send_lock2:
+#      ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
+#      if len(ts) > 1:
+#        tmp_msg = False
+#      #  if chat_id in last_outmsg:
+#      #    omsg = last_outmsg[chat_id]
+#      #  else:
+#      #    omsg = None
+#      k = 0
+#      for t in ts:
+#        await sleep(msg_delay_default)
+#        try:
+#          #  if type(chat_id) is int and chat_id > 0:
+#          #    # chat_id 此处可以不考虑符号
+#          #    peer = await UB.get_input_entity(chat_id)
+#          #  if omsg is not None and ( correct is True or chat_id in tmp_msg_chats ):
+#          #      msg = await omsg.edit(t)
+#          if chat_id in last_outmsg:
+#            omsg = last_outmsg[chat_id]
+#            if correct is True:
+#              msg = await omsg.edit(t)
+#              correct = False
+#            elif chat_id in tmp_msg_chats:
+#              msg = await omsg.edit(t)
+#            else:
+#              msg = await UB.send_message(chat_id, t)
+#            #  omsg = None
+#            #  last_outmsg.pop(chat_id)
+#          else:
+#            msg = await UB.send_message(chat_id, t)
+#            #  msg = await UB.send_message(await get_entity(chat_id), t)
+#          k += 1
+#          if k == len(ts):
+#            #  if chat_id == GROUP_ID:
+#            #    #  wait_for_msg_form_bot2(msg, chat_id)
+#            #    asyncio.create_task(wait_for_msg_form_bot2(msg, chat_id))
+#            last_outmsg[chat_id] = msg
+#            if tmp_msg:
+#              tmp_msg_chats.add(chat_id)
+#            elif chat_id in tmp_msg_chats:
+#              tmp_msg_chats.remove(chat_id)
+#
+#          elif len(ts) > 1:
+#            await sleep(0.5)
+#          if delay is not None:
+#            await sleep(delay)
+#        except rpcerrorlist.FloodWaitError as e:
+#          warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
+#          #  await sleep(300)
+#          await slow_mode()
+#          return False
+#        except rpcerrorlist.MessageTooLongError as e:
+#          warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
+#          await sleep(5)
+#          return False
+#        except ValueError as e:
+#          if e.args[0] == 'Failed to parse message':
+#            err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
+#          return False
+#        except Exception as e:
+#          err(f"发送tg消息失败: {chat_id} {e=} {t=}")
+#          return False
+#          #  raise
+#        #  await sleep(len(t.encode())/MAX_MSG_BYTES_TG+0.2+msg_delay_default)
+#      #  if correct:
+#      #    last_outmsg[chat_id] = msg
+#    info(f"send ok: {chat_id} {short(text)}")
+#    return True
+#    chat = await get_entity(CHAT_ID, True)
+#    await UB.send_message(chat, text)
 
 @exceptions_handler(no_send=True)
 async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kwargs):
@@ -4529,7 +4603,7 @@ async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
   #  url="http://127.0.0.1:5555/api/message"
 #  if not username.startswith("C "):
 #    username = "T " + username
-  if qt:
+  if qt is not None:
     #  name = "{}\n\n{}".format("> " + "\n> ".join(qt.splitlines()), name)
     name = "> {}\n\n{}".format("\n> ".join(qt), name)
 #  gateway="gateway0"
@@ -7308,10 +7382,10 @@ async def msgx(msg):
             exqt = False
           qt.append("%s" % i[1:])
         elif i == "":
-          if qt:
+          if len(qt) > 0:
             qt.append(i)
         else:
-          if qt:
+          if len(qt) > 0:
             #  tmp = tmp[len(qt):]
             text0='\n'.join(tmp[k:])
             #  tmp = qt
