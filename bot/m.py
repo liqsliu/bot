@@ -1797,6 +1797,8 @@ async def init_myshell():
 #  async def myshell(*args,  **kwargs):
 #    return await run_run(_myshell(*args,  **kwargs) , False)
 
+
+SHELL_CMD_LINE_MAX = 1024
 #  async def myshell(cmd, max_time=interval, src=None):
 @exceptions_handler
 @cross_thread(need_main=False)
@@ -1856,8 +1858,16 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     #  cmds = ' '.join(cmds)
     info("original cmds: {!r}".format(cmds))
     cmds = shlex.join(cmds)
-  cmds = list(f"{x}\n" for x in cmds.splitlines())
-  info(f"run shell cmds: {cmds}")
+  cmds = cmds.splitlines()
+  tmp = []
+  for l in cmds:
+    while len(l) > SHELL_CMD_LINE_MAX:
+      tmp.append(l[:SHELL_CMD_LINE_MAX]+"\\\n")
+      l = l[SHELL_CMD_LINE_MAX:]
+    tmp.append(l)
+  cmds = tmp
+  info("run shell cmds: {!r}".format(cmds))
+  cmds = list(f"{x}\n" for x in cmds)
   cmds.append("echo $?\n")
   eof = generand(16) + "\n"
   #  cmd.append(f"echo EOF\n")
