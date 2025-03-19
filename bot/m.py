@@ -1849,7 +1849,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
   tmp = []
   for l in cmds:
     while len(l) > SHELL_CMD_LINE_MAX:
-      tmp.append(l[:SHELL_CMD_LINE_MAX]+"\\\n")
+      tmp.append(l[:SHELL_CMD_LINE_MAX]+"\\")
       l = l[SHELL_CMD_LINE_MAX:]
     tmp.append(l)
   cmds = tmp
