@@ -8901,7 +8901,7 @@ async def init_cmd():
       if k > 4:
         k = k%4
         tmp = tmp[:k] + " " + tmp[k:]
-    for i in range(len(s)/4): 
+    for i in range(len(s)//4): 
       if i%8  == 0:
         tmp += "\n\n" 
       elif i%2  == 0:
