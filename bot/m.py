@@ -520,7 +520,7 @@ def cross_thread(func=None, *, need_main=True):
       async def wrapper(*args, **kwargs):
         coro = func(*args, **kwargs)
         res = await run_run(coro, need_main=need_main)
-        info(f"done: {res}")
+        #  info(f"done: {res}")
         return res
     else:
       @wraps(func)
@@ -531,7 +531,7 @@ def cross_thread(func=None, *, need_main=True):
         #  else:
         #    return run_cb_in_thread(func, *args, **kwargs)
         res = run_cb(func, *args, **kwargs, need_main=need_main)
-        info(f"done: {res}")
+        #  info(f"done: {res}")
         return res
         fu = run_cb(func, *args, **kwargs, need_main=need_main)
         if not fu.done():
@@ -6160,14 +6160,6 @@ def run_cb(cb, *args, need_main=False, **kwargs):
       lp = loop2
   if safe:
     return cb(*args, **kwargs)
-
-    fu = asyncio.Future()
-    #  def cb2():
-
-    @exceptions_handler
-    def cb2(fu):
-      fu.set_result(cb(*args, **kwargs))
-    lp.call_soon(cb2, fu)
   else:
 
     @exceptions_handler
@@ -6177,31 +6169,7 @@ def run_cb(cb, *args, need_main=False, **kwargs):
     return fu.result()
 
     fu = asyncio.Future()
-    # for multi thread
 
-    @exceptions_handler
-    def cb2(fu):
-      #  lp.call_soon_threadsafe(partial(fu.set_result, partial(cb, *args, **kwargs)()))
-      #  lp.call_soon_threadsafe(partial(fu.set_result, cb(*args, **kwargs)))
-      info(f"start run cb: {cb.__name__}")
-      res = cb()
-      info(f"res: {res}")
-      olp.call_soon_threadsafe(partial(fu.set_result, res))
-      time.sleep(0.1)
-      info(f"fu: {fu.done()}")
-      if fu.done():
-        info(f"fu result: {fu.result()}")
-      else:
-        time.sleep(0.5)
-        if fu.done():
-          pass
-        else:
-          fu.set_result(res)
-          if fu.done():
-            info(f"fu result 1: {fu.result()}")
-          else:
-            info(f"fu result failed 1: {fu.result()}")
-    lp.call_soon_threadsafe(cb2, fu)
   return fu
 
 def run_cb2(cb, *args, need_main=False, **kwargs):
@@ -6252,16 +6220,17 @@ def run_cb2(cb, *args, need_main=False, **kwargs):
   return fu
 
 #  async def run_run(coro, *args, **kwargs, need_main=False):
+
 @exceptions_handler(no_send=True)
 async def run_run(coro, need_main=False):
   if need_main:
     #  if threading.current_thread() is loop2_thread:
       #  if asyncio.iscoroutine():
     if in_main_thread():
-      info(f"在主线程执行: {coro}")
+      #  info(f"在主线程执行: {coro}")
       return await coro
     elif loop2_thread.native_id == threading.get_native_id():
-      info(f"在副线程跨线程执行: {coro}")
+      #  info(f"在副线程跨线程执行: {coro}")
       fu = asyncio.run_coroutine_threadsafe(coro, loop)
       oloop = loop2
     else:
@@ -6272,12 +6241,12 @@ async def run_run(coro, need_main=False):
   else:
     #  if threading.current_thread() is loop2_thread:
     if in_main_thread():
-      info(f"在主线程跨线程执行: {coro}")
+      #  info(f"在主线程跨线程执行: {coro}")
       fu = asyncio.run_coroutine_threadsafe(coro, loop2)
       oloop = loop
     #  elif main_thread.native_id != threading.get_native_id():
     elif loop2_thread.native_id == threading.get_native_id():
-      info(f"在副线程执行: {coro}")
+      #  info(f"在副线程执行: {coro}")
       return await coro
     else:
       # 未知线程
@@ -6304,11 +6273,11 @@ async def run_run(coro, need_main=False):
     #  oloop.call_soon_threadsafe(partial(fua.set_result, fu.result()))
     #  fua.set_result(fu.result())
     res = fu.result()
-    info(f"fu.result: {res}")
+    #  info(f"fu.result: {res}")
     #  fua.set_result(res)
     oloop.call_soon_threadsafe(fua.set_result, res)
     #  oloop.call_soon(fua.set_result, res)
-    info(f"done")
+    #  info(f"done")
   fu.add_done_callback(cb_for_fu_result)
   return await fua
 
