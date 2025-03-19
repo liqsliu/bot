@@ -6828,7 +6828,7 @@ async def msgxp(msg):
           jid = str(item.jid.bare())
           res = f"上线{len(msg.xep0045_muc_user.items)}: {msg.from_} {jid} {item.nick} {item.role} {item.affiliation} {msg.status}"
           #  print(res)
-          info(res)
+          info0(res)
           if item.nick is None:
             rnick = msg.from_.resource
             #  info(f"空nick：{item.jid} {item.nick} -> {rnick} {msg}")
@@ -6999,7 +6999,7 @@ async def msgxp(msg):
         send(f"未知群组消息: {msg}")
     else:
       #  print(f"上线: {msg.from_} {msg.status}")
-      info(f"上线: {msg.from_} {msg.status}")
+      info0(f"上线: {msg.from_} {msg.status}")
       #  if muc != rssbot:
       #    send(f"上线: {msg.from_} {msg.status}")
     #  for i in msg.xep0045_muc_user.items:
@@ -7031,7 +7031,7 @@ async def msgxp(msg):
       warn(f"已拒绝状态订阅请求：{msg.from_} {res=}")
   elif msg.type_ == PresenceType.UNAVAILABLE:
     #  print(f"离线: {msg.from_} {msg.status}")
-    info(f"离线: {msg.from_} {msg.status}")
+    info0(f"离线: {msg.from_} {msg.status}")
     #  if muc in my_groups:
     #    pass
     #  else:
@@ -7154,58 +7154,20 @@ async def msgx(msg):
       warn(f"收到多语言消息: {muc} {msg.from_} {msg.body}")
   else:
     return
-  #  if text is None:
-  #    #  print("跳过空消息: %s %s %s %s" % (msg.type_, msg.from_, msg.to, msg.body))
-  #    return
-
-  #  if text == "ping":
-  #    #  send("pong", ME)
-  #    if msg.type_ == MessageType.GROUPCHAT:
-  #
-  #      nick = msg.from_.resource
-  #      ms = get_mucs(muc)
-  #      for m in ms - {muc}:
-  #        if await send1(f"**X {nick}:** {text}", m) is False:
-  #          return
-  #      if main_group in ms:
-  #        if await mt_send(text, name=f"X {nick}") is False:
-  #          return
-  #
-  #      #  pprint(msg.from_)
-  #      #  await sendg("pong1")
-  #      #  await sendg("pong2", get_jid(msg.from_))
-  #      await send("pong", msg.from_, gpm=True)
-  #      reply = msg.make_reply()
-  #      reply.body[None] = "pong"
-  #      await send(reply)
-  #      #  await mt_send("pong")
-  #    elif msg.type_ == MessageType.CHAT:
-  #
-  #      reply = msg.make_reply()
-  #      reply.body[None] = "pong"
-  #      await send(reply)
-  #    return
   is_admin = False
   if muc in my_groups:
 
-    #  if muc not in rooms:
-    #    if muc != log_group_private:
-    #      err(f"not found room: {muc}")
-    #    else:
-    #      err(f"not found room: {muc}", exc_info=True, stack_info=True)
-    #      await send(f"not found room: {muc}", jid=ME)
-    #    return
     room = rooms[muc]
     #  if str(msg.from_) == str(rooms[muc].me.conversation_jid.bare()):
     #  if msg.from_.resource == rooms[muc].me.nick:
     if room.me is not None and nick == room.me.nick:
-      info("跳过1: %s %s" % (msg.from_, short(text)))
+      info0("跳过1: %s %s" % (msg.from_, short(text)))
       return
 
     jids = users[muc]
     j = jids[myjid]
     if nick == j[0]:
-      info("跳过2: %s %s" % (msg.from_, short(text)))
+      info0("跳过2: %s %s" % (msg.from_, short(text)))
       return
 
     rejoin = False
@@ -10090,9 +10052,12 @@ async def loop_task():
   #    if XB.running:
   while XB.running:
     await sleep(60)
-    info("XB is running...")
+    info0("XB is running...")
 
   warn("xmppbot is not running, restart...", no_send=False)
+  await sleep(15)
+  await send_tg("xmpp bot 已断开，准备重启...")
+  await sleep(1)
   sys.exit(2)
   
   await UB.run_until_disconnected()
