@@ -8869,7 +8869,7 @@ async def init_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"hex decode\n.{cmds[0]} $text"
-    s = ' '.join(cmds[1:]))
+    s = ' '.join(cmds[1:])
     if s.startswith("0x"):
       s = s[2:]
     #  s = s.replace(" ", "")
@@ -8885,7 +8885,7 @@ async def init_cmd():
   async def _(cmds, src):
     if len(cmds) == 1:
       return f"hex or int to bin\n.{cmds[0]} $text"
-    s = ' '.join(cmds[1:]))
+    s = ' '.join(cmds[1:])
     if s.isnumeric():
       s = bin(int(s))
     else:
