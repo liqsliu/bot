@@ -4040,31 +4040,34 @@ async def msgmt(msg):
   #      if name == "C Telegram: ":
   if gateway == "gateway1":
 
-    text0 = text
     if '\n' in name:
-      ls = name.splitlines()
-      name = ls[-1]
-      rname = name[:-2]
-      qt = '\n'.join(ls[:-1])
-      text = f"{text}\n\n{qt}"
-      qt = '\n> '.join(ls[:-1])
-      name2 = f"> {qt}\n**{rname}:** "
+      qt = name.splitlines()
+      name = qt.pop(-1)
+      #  rname = name[:-2]
+      #  qt = '\n'.join(ls[:-1])
+      #  text = f"{text}\n\n{qt}"
+      #  qt = '\n> '.join(ls[:-1])
+      #  name2 = f"> {qt}\n**{rname}:** "
     else:
-      rname = name[:-2]
-      name2 = f"**{rname}:** "
+      qt = None
 
-    text2 = f"{name2}{text0}"
+    rname = name[:-2]
+    name2 = f"**{rname}:** "
+
+    text2 = f"{name2}{text}"
 
     for m in get_mucs(main_group):
       #  if await send1(text2, m, nick=rname) is False:
       #    warn(f"failed: {m} {text1}")
       #    return
-      asyncio.create_task( send_xmpp(text2, m, nick=rname) )
+      asyncio.create_task( send_xmpp(text2, m, nick=rname, qt=qt) )
 
 
-    await send_tg(text2, GROUP2_ID, topic=GROUP2_TOPIC)
+    await send_tg(text2, GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
 
-    res = await run_cmd(text, gateway, name, textq=text0)
+
+    #  res = await run_cmd("{}\n\n{}".format(text, "\n".join(qt)), gateway, name, qt=qt)
+    res = await run_cmd(text, gateway, name, qt=qt)
     if res is True:
       return
     if res:
@@ -8866,7 +8869,10 @@ async def run_cmd(*args, **kwargs):
   return res
 
 @exceptions_handler
-async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
+async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
+  text0 = text
+  if qt is not None:
+    text = "{}\n\n{}".format(text, "\n".join(qt))
   if text == "ping":
     return "pong"
   if text[0:1] == ".":
@@ -9060,12 +9066,8 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, textq=None):
   else:
     # tilebot
     tmp=""
-    if textq:
-      tt = textq
-    else:
-      tt = text
-    info(f"check url in: {tt}")
-    for i in tt.splitlines():
+    info(f"check url in: {text0}")
+    for i in text0.splitlines():
       if not i.startswith("> ") and  i != ">":
         tmp += i+"\n"
 
