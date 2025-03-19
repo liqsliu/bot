@@ -6606,10 +6606,10 @@ def send_typing(muc):
     # telegram
     chat_id = muc
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.chats.ChatMethods.action
-    async def f():
-      await TB.action(chat_id, "typing")
-    asyncio.create_task(f())
-    return
+    #  async def f():
+    #    await TB.action(chat_id, "typing")
+    #  asyncio.create_task(f())
+    return await TB.action(chat_id, "typing")
   ms = get_mucs(muc)
   if ms:
   #  if muc == "gateway1":
@@ -8949,99 +8949,106 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
       return
     #  print(f"> I: {cmds}")
     info("got cmds: {}".format(cmds))
-    send_typing(src)
-    cmd = cmds[0]
-    res = False
-    if cmd in cmd_for_admin:
-      if is_admin is False:
-        return "仅管理可用"
-      res = True
-    elif cmd in cmd_funs:
-      res = True
-    if res is True:
-      #  try:
-      #    res = await cmd_funs[cmd](cmds, src)
-      #  except Exception as e:
-      #    print("run_cmd error:", e)
-      #    res = get_lineno(e)
-      #    res = f"run_cmd error: {res} {e=}"
-      #    info(res, exc_info=e)
-      f = exceptions_handler(send_to=src)(cmd_funs[cmd])
-      res = await f(cmds, src)
-      info(f"res: {res}")
-      if type(res) is tuple:
-        if res[0] == 1 or res[0] == 3:
-          bot_name = res[1]
-          text = res[2]
-          #  mtmsgs, pid = await change_bridge(res[1], src, res[0])
-          #  #  gid = await send_to_tg_bot(text, pid)
-          #  #  gid = await send_to_tg_bot(text, bot_name)
-          #  gid = await send_tg(text, pid, return_id=True)
-          #  mtmsgs, pid = await change_bridge(res[1], src, res[2])
-          peer = await get_entity(bot_name)
-          pid = await UB.get_peer_id(peer)
-          if src not in mtmsgsg:
-            mtmsgsg[src] = {}
-          mtmsgs = mtmsgsg[src]
-          mtmsgs[pid] = [name]
+    st = send_typing(src)
+    if st is not None:
+      await st.__aenter__()
 
-          if pid in bridges:
-            bridges.pop(pid)
-          if pid not in bridges_tmp:
-            bridges_tmp[pid] = src
-          else:
-            osrc = bridges_tmp[pid]
+    try:
+      cmd = cmds[0]
+      res = False
+      if cmd in cmd_for_admin:
+        if is_admin is False:
+          return "仅管理可用"
+        res = True
+      elif cmd in cmd_funs:
+        res = True
+      if res is True:
+        #  try:
+        #    res = await cmd_funs[cmd](cmds, src)
+        #  except Exception as e:
+        #    print("run_cmd error:", e)
+        #    res = get_lineno(e)
+        #    res = f"run_cmd error: {res} {e=}"
+        #    info(res, exc_info=e)
+        f = exceptions_handler(send_to=src)(cmd_funs[cmd])
+        res = await f(cmds, src)
+        info(f"res: {res}")
+        if type(res) is tuple:
+          if res[0] == 1 or res[0] == 3:
+            bot_name = res[1]
+            text = res[2]
+            #  mtmsgs, pid = await change_bridge(res[1], src, res[0])
+            #  #  gid = await send_to_tg_bot(text, pid)
+            #  #  gid = await send_to_tg_bot(text, bot_name)
+            #  gid = await send_tg(text, pid, return_id=True)
+            #  mtmsgs, pid = await change_bridge(res[1], src, res[2])
+            peer = await get_entity(bot_name)
+            pid = await UB.get_peer_id(peer)
+            if src not in mtmsgsg:
+              mtmsgsg[src] = {}
+            mtmsgs = mtmsgsg[src]
+            mtmsgs[pid] = [name]
 
-            if osrc != src:
-              if type(osrc) is dict:
-                bridges_tmp[pid] = src
-              else:
-                #  await send("coming", src, tmp_msg=True)
-                #  await send("...", src, tmp_msg=True)
-                #  if mtmsgs:
-                #    await sleep(3)
-                info(f"stop link to {osrc}")
-                send("bye", osrc, tmp_msg=True)
-                bridges_tmp[pid] = src
-                info(f"link to {src}")
-                #  send("typing", src, tmp_msg=True)
-
-                if osrc in mtmsgsg:
-                  #  mtmsgsg.pop(osrc)
-                  mtmsgsg[osrc].clear()
-
-          await send_tg2(text, pid)
-          for i in bridges_tmp.copy():
-            if i != pid:
-              if bridges_tmp[i] == src:
-                bridges_tmp.pop(i)
-                if i in mtmsgs:
-                  mtmsgs.pop(i)
-                warn(f"stop link for {src}: {i} -> {pid}")
+            if pid in bridges:
+              bridges.pop(pid)
+            if pid not in bridges_tmp:
+              bridges_tmp[pid] = src
             else:
-              l = mtmsgs[i]
-              if len(l) > 1:
-                l[1].clear()
-                if len(l) > 2:
-                  l[2].clear()
+              osrc = bridges_tmp[pid]
 
-          # 加name是为了处理tg in消息时可以知道该消息是回复谁的
-          #  mtmsgs[src] = [name]
-        #  send_typing(src)
-        return True
-      if res:
-        return res
+              if osrc != src:
+                if type(osrc) is dict:
+                  bridges_tmp[pid] = src
+                else:
+                  #  await send("coming", src, tmp_msg=True)
+                  #  await send("...", src, tmp_msg=True)
+                  #  if mtmsgs:
+                  #    await sleep(3)
+                  info(f"stop link to {osrc}")
+                  send("bye", osrc, tmp_msg=True)
+                  bridges_tmp[pid] = src
+                  info(f"link to {src}")
+                  #  send("typing", src, tmp_msg=True)
+
+                  if osrc in mtmsgsg:
+                    #  mtmsgsg.pop(osrc)
+                    mtmsgsg[osrc].clear()
+
+            await send_tg2(text, pid)
+            for i in bridges_tmp.copy():
+              if i != pid:
+                if bridges_tmp[i] == src:
+                  bridges_tmp.pop(i)
+                  if i in mtmsgs:
+                    mtmsgs.pop(i)
+                  warn(f"stop link for {src}: {i} -> {pid}")
+              else:
+                l = mtmsgs[i]
+                if len(l) > 1:
+                  l[1].clear()
+                  if len(l) > 2:
+                    l[2].clear()
+
+            # 加name是为了处理tg in消息时可以知道该消息是回复谁的
+            #  mtmsgs[src] = [name]
+          #  send_typing(src)
+          return True
+        if res:
+          return res
+        else:
+          return True
+        #  reply = msg.make_reply()
+        #  reply.body[None] = "%s" % res
+        #  send(reply)
+        #  return True
       else:
-        return True
-      #  reply = msg.make_reply()
-      #  reply.body[None] = "%s" % res
-      #  send(reply)
-      #  return True
-    else:
-      #  res = await send_cmd_to_bash(src, name, text)
-      res = await send_cmd_to_bash(None, name, text)
-      if res:
-        return res
+        #  res = await send_cmd_to_bash(src, name, text)
+        res = await send_cmd_to_bash(None, name, text)
+        if res:
+          return res
+    finally:
+      if st is not None:
+        await st.__aexit__()
   #  elif text.isnumeric() and bridges[music_bot] != src:
   elif text.isnumeric():
 
