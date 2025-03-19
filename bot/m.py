@@ -6609,7 +6609,7 @@ def send_typing(muc):
     #  async def f():
     #    await TB.action(chat_id, "typing")
     #  asyncio.create_task(f())
-    return await TB.action(chat_id, "typing")
+    return TB.action(chat_id, "typing")
   ms = get_mucs(muc)
   if ms:
   #  if muc == "gateway1":
