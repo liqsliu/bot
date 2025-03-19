@@ -3639,7 +3639,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
           last[chat_id] = msg
           if tmp_msg:
             chats.add(chat_id)
-          elif chat_id in tmp_msg_chats_bot:
+          elif chat_id in chats:
             chats.remove(chat_id)
 
         elif len(ts) > 1:
