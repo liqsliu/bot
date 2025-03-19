@@ -7366,7 +7366,7 @@ async def msgx(msg):
       qt=[]
       tmp= text.splitlines()
       exqt = False
-      k = 0
+      k = 1
       for i in tmp:
         if i.startswith('>> '):
           qt.append("%s" % i.split(' ', 1)[1])
@@ -7392,15 +7392,17 @@ async def msgx(msg):
             #  tmp = tmp[len(qt):]
             text0='\n'.join(tmp[k:])
             #  tmp = qt
-            tmp='\n'.join(qt)
-            text = f"{text0}\n\n{tmp}"
+            #  tmp='\n'.join(qt)
+            #  text = f"{text0}\n\n{tmp}"
+            text = text0 + "\n\n" + "\n".join(qt)
             #  qt2 = '\n> '.join(tmp)
             #  username = f"> {qt2}\n{username}"
           break
         k += 1
         #  warn("fixme: {tmp} != {qt}")
-      info(f"delete qt: {text0}")
-      if type(tmp) is list:
+      if text0 != text:
+        info(f"delete qt: {text0}")
+      else:
         qt = None
     ms = get_mucs(muc)
     for m in ms - {muc}:
@@ -7446,7 +7448,7 @@ async def msgx(msg):
     send(reply)
     return
 
-  res = await run_cmd(text, get_src(msg), f"X {nick}: ", is_admin, text0)
+  res = await run_cmd(text0, get_src(msg), f"X {nick}: ", is_admin, qt)
   if res is True:
     return
   if res:
