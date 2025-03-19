@@ -8919,12 +8919,13 @@ async def init_cmd():
       else:
         ss = " "
       tmp = "{}{}{}".format(s[l-i*4-4:l-i*4], ss, tmp)
-    k = l%8
-    if k > 4:
-      ss = " "
-    else:
-      ss = "\n"
-    tmp = "{}{}{}".format(s[:k], ss, tmp)
+    if l%4 != 0:
+      k = l%8
+      if k > 4:
+        ss = " "
+      else:
+        ss = "\n"
+      tmp = "{}{}{}".format(s[:k], ss, tmp)
 
     return tmp.strip()
   cmd_funs["bin"] = _
