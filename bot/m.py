@@ -7278,6 +7278,7 @@ async def msgx(msg):
       qt=[]
       tmp= text.splitlines()
       exqt = False
+      k = 0
       for i in tmp:
         if i.startswith('>> '):
           qt.append("%s" % i.split(' ', 1)[1])
@@ -7300,14 +7301,15 @@ async def msgx(msg):
             qt.append(i)
         else:
           if qt:
-            tmp = tmp[len(qt):]
-            text0='\n'.join(tmp)
+            #  tmp = tmp[len(qt):]
+            text0='\n'.join(tmp[k:])
             tmp = qt
             qt='\n'.join(qt)
             text = f"{text0}\n\n{qt}"
             qt2 = '\n> '.join(tmp)
             username = f"> {qt2}\n{username}"
           break
+        k += 1
         #  warn("fixme: {tmp} != {qt}")
       info(f"delete qt: {text0}")
       if type(qt) is list:
