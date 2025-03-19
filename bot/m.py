@@ -3319,7 +3319,7 @@ def on_nick_changed(member, old_nick, new_nick, *, muc_status_codes=set(), **kwa
 send_locks = {}
 #  @cross_thread(need_main=True)
 @exceptions_handler(no_send=True)
-async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False, tmp_msg=False, tg_msg_id=None):
+async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False, tmp_msg=False, tg_msg_id=None, qt=None):
   #  info(f"{msg}")
   muc = str(msg.to.bare())
   #  if muc not in rooms:
@@ -3401,6 +3401,9 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
     for i in msg.body:
       text = msg.body[i]
       if text:
+        if qt:
+          text = "> %s\n%s" % ("\n> ".join(qt), text)
+          msg.body[i] = text
         break
 
     if text:
@@ -3595,7 +3598,12 @@ tmp_msg_chats_bot = set()
 
 @exceptions_handler(no_send=True)
 @cross_thread
-async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None):
+async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None):
+  if qt:
+    parse_mode = "html"
+    text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
+  else:
+    parse_mode = TB.parse_mode
   async with tg_send_lock:
     ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
     if len(ts) > 1:
@@ -3611,11 +3619,11 @@ async def send_tg(text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=Non
             msg = await omsg.edit(t)
             correct = False
           elif chat_id in tmp_msg_chats_bot:
-            msg = await omsg.edit(t)
+            msg = await omsg.edit(t, parse_mode=parse_mode)
           else:
-            msg = await TB.send_message(chat_id, t, reply_to=topic)
+            msg = await TB.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode)
         else:
-          msg = await TB.send_message(chat_id, t, reply_to=topic)
+          msg = await TB.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode)
         k += 1
         if k == len(ts):
           last_outmsg_bot[chat_id] = msg
@@ -4522,7 +4530,8 @@ async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
 #  if not username.startswith("C "):
 #    username = "T " + username
   if qt:
-    name = "{}\n\n{}".format("> " + "\n> ".join(qt.splitlines()), name)
+    #  name = "{}\n\n{}".format("> " + "\n> ".join(qt.splitlines()), name)
+    name = "> {}\n\n{}".format("\n> ".join(qt), name)
 #  gateway="gateway0"
   data = {
     "text": "{}".format(text),
@@ -7305,23 +7314,24 @@ async def msgx(msg):
           if qt:
             #  tmp = tmp[len(qt):]
             text0='\n'.join(tmp[k:])
-            tmp = qt
-            qt='\n'.join(qt)
-            text = f"{text0}\n\n{qt}"
-            qt2 = '\n> '.join(tmp)
-            username = f"> {qt2}\n{username}"
+            #  tmp = qt
+            tmp='\n'.join(qt)
+            text = f"{text0}\n\n{tmp}"
+            #  qt2 = '\n> '.join(tmp)
+            #  username = f"> {qt2}\n{username}"
           break
         k += 1
         #  warn("fixme: {tmp} != {qt}")
       info(f"delete qt: {text0}")
-      if type(qt) is list:
+      if type(tmp) is list:
         qt = None
     ms = get_mucs(muc)
     for m in ms - {muc}:
-      asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
+      #  asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
+      asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name, qt=qt) )
     if main_group in ms:
       asyncio.create_task( mt_send_for_long_text(text0, name=name, qt=qt) )
-      await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC)
+      await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
   #    pass
