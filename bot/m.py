@@ -2338,7 +2338,7 @@ async def my_exec(cmd, src=None, client=None, **args):
   exec(
     f'async def __ex(): ' +
     ''.join(f'\n {l}' for l in cmd.split('\n'))
-    + "\n return end"
+    + "\n return 'end'"
     #  + "\n" + ''.join(f'\n {l}' for l in res.split('\n'))
   )
 
