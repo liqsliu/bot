@@ -6602,15 +6602,18 @@ async def regisger_handler(client):
 
 @exceptions_handler(no_send=True)
 def send_typing(muc):
+  if type(muc) is int:
+    # telegram
+    chat_id = muc
+    # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.chats.ChatMethods.action
+    asyncio.create_task(TB.action(chat_id, "typing"))
+    return
   ms = get_mucs(muc)
   if ms:
   #  if muc == "gateway1":
   #    return True
   #  if muc in my_groups:
     type_=MessageType.GROUPCHAT
-  elif type(muc) is int:
-    # telegram
-    return
   else:
     type_=MessageType.CHAT
     ms = [muc]
