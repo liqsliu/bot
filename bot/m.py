@@ -3085,25 +3085,28 @@ def send_log(text, jid=None, delay=1, fm=None):
     elif j.get_name() == "send_log_xmpp":
       n += 1
 
-  if jid is None or isinstance(jid, int):
+  if jid is None:
+    tjid = CHAT_ID
+    jid = log_group_private
+  else:
+    tjid = jid
+
+  #  if jid is None or isinstance(jid, int):
+  if isinstance(tjid, int):
     if m > 0:
       warn(f"send_log tg is busy: {m} text: {short(text)}")
       #  await sleep(delay*m)
     else:
       info(f"send_log tg: {text}")
-    if jid is None:
-      tjid = CHAT_ID
     t = asyncio.create_task(send_tg(text, tjid, delay=(delay+1)**m), name="send_log_tg")
   #  if isinstance(jid, int) is False:
   #  else:
-  if jid is None or not isinstance(jid, int):
+  if not isinstance(jid, int):
     if n > 0:
       warn(f"send_log xmpp is busy: {n} text: {short(text)}")
     else:
       info(f"send_log xmpp: {text}")
-    if jid is None:
-      tjid = log_group_private
-    t = asyncio.create_task(send_xmpp(text, tjid, delay=(delay+1)**m), name="send_log_xmpp")
+    t = asyncio.create_task(send_xmpp(text, jid, delay=(delay+1)**m), name="send_log_xmpp")
 
   #  if jid is None:
   #    #  asyncio.create_task(send_tg(text, CHAT_ID, delay=(delay+1)**k), name="send_log")
