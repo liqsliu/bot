@@ -249,7 +249,7 @@ def get_lineno(e=None, fs=None):
     return f"{fm.f_code.co_name} {fm.f_lineno}"
 
 def info0(s):
-  print("%s\r" % s.replace("\n", " "), end='')
+  print(short("%s\r" % s.replace("\n", " ")), end='')
 
 def info1(s):
   print(s.replace("\n", " "), end='')
@@ -3516,7 +3516,7 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       #  if isawaitable(res):
       #  info(f"{type(res)}: {res} {msg}")
       if res is None:
-        info(f"sent: {jid} {short(text)}")
+        info0(f"sent: {jid} {text}")
       #  elif asyncio.iscoroutine(res) or type(res) is stream.StanzaToken:
       else:
         warn(f"res is not None: {res=} {client=} {room=} {jid=} {msg=}")
@@ -3641,7 +3641,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     tmp_msg = False
   k = 0
   async with lock:
-    info(f"send to tg: {chat_id}: {short(text)}")
+    #  info0(f"send: {chat_id}: {text}")
     for t in ts:
       await sleep(msg_delay_default)
       try:
@@ -3687,7 +3687,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
           no_send = False
         err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
         return False
-    info(f"send ok: {chat_id} {short(text)}")
+    info0(f"sent: {chat_id}: {text}")
   return True
 
 
@@ -6826,7 +6826,7 @@ async def msgxp(msg):
             continue
 
           jid = str(item.jid.bare())
-          res = f"上线{len(msg.xep0045_muc_user.items)}: {msg.from_} {jid} {item.nick} {item.role} {item.affiliation} {msg.status}"
+          res = f"上线: {len(msg.xep0045_muc_user.items)} {msg.from_} {jid} {item.nick} {item.role} {item.affiliation} {msg.status}"
           #  print(res)
           info0(res)
           if item.nick is None:
@@ -9840,7 +9840,7 @@ async def msgbo(event):
   text = msg.text
   if text:
     sender_id = event.sender_id
-    info(f"bot out msg: {chat_id} {sender_id}: {text}")
+    info0(f"bot out msg: {chat_id} {sender_id}: {text}")
 
 @exceptions_handler
 async def bot_start():
