@@ -3518,7 +3518,7 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       #  if isawaitable(res):
       #  info(f"{type(res)}: {res} {msg}")
       if res is None:
-        info0(f"sent: {jid} {text}")
+        info(f"sent: {jid} {short(text)}")
       #  elif asyncio.iscoroutine(res) or type(res) is stream.StanzaToken:
       else:
         warn(f"res is not None: {res=} {client=} {room=} {jid=} {msg=}")
@@ -3689,7 +3689,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
           no_send = False
         err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
         return False
-    info0(f"sent: {chat_id}: {text}")
+    info(f"sent: {chat_id}: {short(text)}")
   return True
 
 
@@ -5475,7 +5475,7 @@ async def msgt(event):
   sender_id = event.sender_id
   msg = event.message
   if chat_id is None:
-    warn(f"chat_id is None")
+    #  warn(f"chat_id is None")
     text = msg.text
     warn(f"chat_id is None: {chat_id} {sender_id}: {text}")
     chat_id = sender_id
@@ -7163,13 +7163,13 @@ async def msgx(msg):
     #  if str(msg.from_) == str(rooms[muc].me.conversation_jid.bare()):
     #  if msg.from_.resource == rooms[muc].me.nick:
     if room.me is not None and nick == room.me.nick:
-      info0("跳过1: %s %s" % (msg.from_, short(text)))
+      info("跳过1: %s %s" % (msg.from_, short(text)))
       return
 
     jids = users[muc]
     j = jids[myjid]
     if nick == j[0]:
-      info0("跳过2: %s %s" % (msg.from_, short(text)))
+      info("跳过2: %s %s" % (msg.from_, short(text)))
       return
 
     rejoin = False
@@ -7311,15 +7311,13 @@ async def msgx(msg):
     return
     #  pprint(msg)
 
-  info("%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
-
-
+  info0("%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
 
   j = get_msg_jid(msg)
   if j in last_outmsg:
     last_outmsg.pop(j)
 
-  info(f"original text: {text}")
+  info(f"original text: {short(text)}")
   text0 = text
   if msg.type_ == MessageType.GROUPCHAT:
     if muc == acg_group:
@@ -7372,7 +7370,7 @@ async def msgx(msg):
         k += 1
         #  warn("fixme: {tmp} != {qt}")
       if text0 != text:
-        info(f"delete qt: {text0}")
+        info(f"delete qt: {short(text0)}")
       else:
         qt = None
     ms = get_mucs(muc)
@@ -9842,7 +9840,7 @@ async def msgbo(event):
   text = msg.text
   if text:
     sender_id = event.sender_id
-    info0(f"bot out msg: {chat_id} {sender_id}: {text}")
+    info(f"bot out msg: {chat_id} {sender_id}: {short(text)}")
 
 @exceptions_handler
 async def bot_start():
