@@ -8848,37 +8848,27 @@ async def init_cmd():
       s = bin(int(s, 16))
     s = str(s)
     s = s[2:]
-    tmp = ""
 
-    #  k = len(s)%8
-    #  if k  != 0:
-    #    tmp = s[:k]
-    #    s = s[k:]
-    #    k = len(tmp)
-    #    if k > 4:
-    #      k = k%4
-    #      tmp = tmp[:k] + " " + tmp[k:]
-    #  for i in range(len(s)//4):
-    #    if i%8  == 0:
-    #      tmp += "\n\n"
-    #    elif i%2  == 0:
-    #      tmp += "\n"
-    #    else:
-    #      tmp += " "
-    #    tmp += s[i*4:i*4+4]
+    tmp = ""
     l = len(s)
-    ss = " "
+    #  ss = ""
     for i in range(l//4):
-      tmp = "{}{}{}".format(s[l-i*4-4:l-i*4], ss, tmp)
+      #  tmp = "{}{}{}".format(s[l-i*4-4:l-i*4], ss, tmp)
+      #  tmp = "{}{}{}".format(s[-4:], ss, tmp)
+      tmp = s[-4:] + tmp
+      s = s[:-4]
       if i%8  == 7:
-        ss = "\n\n"
+        #  ss = "\n\n"
+        tmp = "\n\n" + tmp
       elif i%2  == 1:
-        ss = "\n"
+        #  ss = "\n"
+        tmp = "\n" + tmp
       else:
-        ss = " "
+        #  ss = " "
+        tmp = " " + tmp
     k = l%4
     if k != 0:
-      tmp = "{}{}{}".format(s[:k], ss, tmp)
+      tmp = "{}{}".format(s[:k], tmp)
 
     return tmp.strip()
   cmd_funs["bin"] = _
