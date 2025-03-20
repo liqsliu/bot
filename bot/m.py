@@ -8879,22 +8879,22 @@ async def init_cmd():
     s = ' '.join(cmds[1:])
     s= s.replace(" ", "")
     #  s= s.replace(":", "")
-    tmp = []
     is_16 = False
     if ":" in s:
       sp = ":"
       is_16 = True
     else:
       sp="."
-      for s in s.split(sp):
-        if not s.isnumeric():
+      for i in s.split(sp):
+        if not i.isnumeric():
           is_16 = True
           break
+    tmp = []
     for s in s.split(sp):
       if len(s) == 0:
         tmp.append("\n")
       else:
-        if is_16:
+        if is_16 is True:
           s = bin(int(s, 16))
         else:
           s = bin(int(s))
