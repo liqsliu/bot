@@ -8861,7 +8861,8 @@ async def init_cmd():
       #  tmp = s[-4:] + tmp
       #  tmp.append(s[-4:])
       #  s = s[:-4]
-      tmp.append(s[l-i*4-4:l-i*4])
+      k = l-i*4-4
+      tmp.append(s[k:k+4])
       if i%8  == 7:
         #  ss = "\n\n"
         #  tmp = "\n\n" + tmp
