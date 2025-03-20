@@ -8876,6 +8876,8 @@ async def init_cmd():
     if k != 0:
       #  tmp = "{}{}".format(s[:k], tmp)
       tmp.append(s[:k])
+    else:
+      tmp.pop()
 
     #  return tmp.strip()
     tmp.reverse()
