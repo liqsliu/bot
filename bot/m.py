@@ -8839,15 +8839,6 @@ async def init_cmd():
   cmd_funs["hd"] = _
 
   def my_bin(s):
-    if len(s) == 0:
-      return "\n"
-    if s.isnumeric():
-      s = bin(int(s))
-    else:
-      s = bin(int(s, 16))
-    s = str(s)
-    s = s[2:]
-
     #  tmp = ""
     tmp = []
     l = len(s)
@@ -8889,12 +8880,27 @@ async def init_cmd():
     s= s.replace(" ", "")
     #  s= s.replace(":", "")
     tmp = []
+    is_16 = False
     if ":" in s:
       sp = ":"
+      is_16 = True
     else:
       sp="."
+      for s in s.split(sp):
+        if not s.isnumeric():
+          is_16 = True
+          break
     for s in s.split(sp):
-      tmp.append(my_bin(s))
+      if len(s) == 0:
+        tmp.append("\n")
+      else:
+        if is_16:
+          s = bin(int(s, 16))
+        else:
+          s = bin(int(s))
+        s = str(s)
+        s = s[2:]
+        tmp.append(my_bin(s))
     return "\n---\n".join(tmp)
   cmd_funs["bin"] = _
 
