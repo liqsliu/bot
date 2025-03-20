@@ -8880,7 +8880,8 @@ async def init_cmd():
       tmp.append(s[:k])
 
     #  return tmp.strip()
-    return "".join(tmp.reverse())
+    tmp.reverse()
+    return "".join(tmp)
   cmd_funs["bin"] = _
 
 bridges_tmp = {}
