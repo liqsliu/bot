@@ -92,7 +92,9 @@ import getpass, random, string
 import unicodedata
 
 
+# http://docs.python.org/zh-cn/3.13/library/collections.html#collections.deque
 from collections import deque
+
 from os.path import isdir
 
 
@@ -8849,28 +8851,36 @@ async def init_cmd():
     s = str(s)
     s = s[2:]
 
-    tmp = ""
+    #  tmp = ""
+    tmp = []
     l = len(s)
     #  ss = ""
     for i in range(l//4):
       #  tmp = "{}{}{}".format(s[l-i*4-4:l-i*4], ss, tmp)
       #  tmp = "{}{}{}".format(s[-4:], ss, tmp)
-      tmp = s[-4:] + tmp
-      s = s[:-4]
+      #  tmp = s[-4:] + tmp
+      #  tmp.append(s[-4:])
+      #  s = s[:-4]
+      tmp.append(s[l-i*4-4:l-i*4])
       if i%8  == 7:
         #  ss = "\n\n"
-        tmp = "\n\n" + tmp
+        #  tmp = "\n\n" + tmp
+        tmp.append("\n\n")
       elif i%2  == 1:
         #  ss = "\n"
-        tmp = "\n" + tmp
+        #  tmp = "\n" + tmp
+        tmp.append("\n")
       else:
         #  ss = " "
-        tmp = " " + tmp
+        #  tmp = " " + tmp
+        tmp.append(" ")
     k = l%4
     if k != 0:
-      tmp = "{}{}".format(s[:k], tmp)
+      #  tmp = "{}{}".format(s[:k], tmp)
+      tmp.append(s[:k])
 
-    return tmp.strip()
+    #  return tmp.strip()
+    return "".join(tmp.reverse())
   cmd_funs["bin"] = _
 
 bridges_tmp = {}
