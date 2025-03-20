@@ -8838,10 +8838,9 @@ async def init_cmd():
       return "E: {!r}\n{}".format(e, bytes.fromhex(s).decode(errors="ignore"))
   cmd_funs["hd"] = _
 
-  async def _(cmds, src):
-    if len(cmds) == 1:
-      return f"hex or int to bin\n.{cmds[0]} $text"
-    s = ' '.join(cmds[1:])
+  def my_bin(s):
+    if len(s) == 0:
+      return "\n"
     if s.isnumeric():
       s = bin(int(s))
     else:
@@ -8881,6 +8880,20 @@ async def init_cmd():
     #  return tmp.strip()
     tmp.reverse()
     return "".join(tmp)
+  async def _(cmds, src):
+    if len(cmds) == 1:
+      return f"hex or int to bin\n.{cmds[0]} $text"
+    s = ' '.join(cmds[1:])
+    s= s.replace(" ", "")
+    #  s= s.replace(":", "")
+    tmp = []
+    if ":" in s:
+      sp = ":"
+    else:
+      sp="."
+    for s in s.split(sp):
+      tmp.append(my_bin(s))
+    return "\n---\n".join(tmp)
   cmd_funs["bin"] = _
 
 bridges_tmp = {}
