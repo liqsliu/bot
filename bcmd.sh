@@ -139,16 +139,16 @@ cmds() {
       [[ -z "$ms" ]] && echo "超时" || echo "$ms"
     fi
     ;;
-  ai|AI)
-    shift
-    bash "$SH_PATH/ai.sh" "$@" || echo "E: $?"
-    ;;
-  py|img|di|lb|kl|you|hg|qw|qw2|music)
-    return 0
-    ;;
-  gtg|gptr|gtr|gtz|gse|voice)
-    return 0
-    ;;
+  # ai|AI)
+  #   shift
+  #   bash "$SH_PATH/ai.sh" "$@" || echo "E: $?"
+  #   ;;
+  # py|img|di|lb|kl|you|hg|qw|qw2|music)
+  #   return 0
+  #   ;;
+  # gtg|gptr|gtr|gtz|gse|voice)
+  #   return 0
+  #   ;;
   # gptmode)
   #   # return 0
   #   changeai gpt $gateway
@@ -161,16 +161,16 @@ cmds() {
   # botmode)
   #   changeai bot $gateway
   #   ;;
-  aimode)
-    changeai ai $gateway
-    ;;
-  bdmode)
-    changeai bd $gateway
-    ;;
-  dig)
-    shift
-    [[ -z "$2" ]] && echo "$(dig +short "$@" || echo "E: $?")" || echo "$(dig "$@" || echo "E: $?")"
-    ;;
+  # aimode)
+  #   changeai ai $gateway
+  #   ;;
+  # bdmode)
+  #   changeai bd $gateway
+  #   ;;
+  # dig)
+  #   shift
+  #   [[ -z "$2" ]] && echo "$(dig +short "$@" || echo "E: $?")" || echo "$(dig "$@" || echo "E: $?")"
+  #   ;;
   google | g)
     shift
     bash "$SH_PATH/google.sh" "$@" || echo "E: $?"
