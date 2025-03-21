@@ -9043,6 +9043,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
         if res:
           return res
     finally:
+      info("finally")
       try:
         pass
         #  if st is not None:
@@ -9842,14 +9843,15 @@ async def msgb(event):
         return
       #  res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
       res = await run_cmd(text, chat_id, f"G {MY_NAME}: ", is_admin=True)
+      info("end")
       if res is True:
-        return
-      if res:
+        pass
+      elif res:
         #  res = f"```\n{res}```"
         #  await UB.send_message(CHAT_ID, res)
         #  send(res, chat_id)
         await msg.reply(res)
-        return
+
     elif chat_id == MY_ID:
       if msg.is_reply:
         msg2 = await msg.get_reply_message()
@@ -9874,6 +9876,8 @@ async def msgb(event):
       else:
         await msg2.reply(f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})")
       await msg.reply("ok")
+    info("return")
+    return
 
 @exceptions_handler
 async def msgbo(event):
