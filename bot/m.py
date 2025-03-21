@@ -622,8 +622,17 @@ def _exceptions_handler(no_send, send_to, e, *args, **kwargs):
   except SystemExit:
     err(res, exc_info=True, stack_info=True)
     raise
+
+  except asyncio.CancelledError as e:
+    info("该任务被要求中止: {!r}, fs: {}".format(e, fs))
+    raise
+  except GeneratorExit as e:
+    # https://docs.python.org/zh-cn/3.13/library/exceptions.html#GeneratorExit
+    warn("fixme: {!r}, fs: {}".format(e, fs))
+
   except RuntimeError:
-    pass
+    warn("fixme: {!r}, fs: {}".format(e, fs))
+
   except AttributeError:
     pass
   except urllib.error.HTTPError:
@@ -8827,6 +8836,8 @@ async def init_cmd():
       return f"hex decode\n.{cmds[0]} $text"
     s = ' '.join(cmds[1:])
     if s.startswith("0x"):
+      s = s[2:]
+    elif s.startswith("0X"):
       s = s[2:]
     #  s = s.replace(" ", "")
     #  res = ""
