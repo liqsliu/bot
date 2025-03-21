@@ -8945,9 +8945,9 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
       return
     #  print(f"> I: {cmds}")
     info("got cmds: {}".format(cmds))
-    st = send_typing(src)
-    if st is not None:
-      await st.__aenter__()
+    #  st = send_typing(src)
+    #  if st is not None:
+    #    await st.__aenter__()
 
     try:
       cmd = cmds[0]
@@ -9043,14 +9043,15 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
         if res:
           return res
     finally:
-      if st is not None:
-        try:
-          await st.__aexit__()
-        except asyncio.CancelledError as e:
-          info("该任务被要求中止，无法清除输入状态。: {!r}".format(e))
-          raise
-        except GeneratorExit as e:
-          warn("fixme: 无法清除输入状态。{!r})".format(e))
+      try:
+        pass
+        #  if st is not None:
+        #    await st.__aexit__()
+      except asyncio.CancelledError as e:
+        info("该任务被要求中止，无法清除输入状态。: {!r}".format(e))
+        raise
+      except GeneratorExit as e:
+        warn("fixme: 无法清除输入状态。{!r})".format(e))
 
   #  elif text.isnumeric() and bridges[music_bot] != src:
   elif text.isnumeric():
