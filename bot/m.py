@@ -3176,8 +3176,8 @@ def sendme(*args, to=1, **kwargs):
 
 
 #  async def send_x(text, jid=None, *args, **kwargs):
-@exceptions_handler(no_send=True)
 #  async def send(text, jid=None, *args, **kwargs):
+@exceptions_handler(no_send=True)
 def send(text, jid=None, *args, **kwargs):
   if jid is None:
     if isinstance(text, str):
@@ -3266,8 +3266,9 @@ def send(text, jid=None, *args, **kwargs):
     asyncio.create_task( send_xmpp(text, jid=jid, *args, **kwargs) )
     return True
 
+
+
 @exceptions_handler(no_send=True)
-@cross_thread
 async def send_xmpp(text, jid=None, *args, **kwargs):
   # for short msg
   if type(text) is str:
@@ -3355,7 +3356,8 @@ def on_nick_changed(member, old_nick, new_nick, *, muc_status_codes=set(), **kwa
 
 send_locks = {}
 #  @cross_thread(need_main=True)
-@exceptions_handler(no_send=True)
+#  @exceptions_handler(no_send=True)
+@cross_thread
 async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, fromname=None, nick=None, delay=None, xmpp_only=False, tmp_msg=False, tg_msg_id=None, qt=None):
   #  info(f"{msg}")
   muc = str(msg.to.bare())
@@ -3850,6 +3852,7 @@ async def send_tg2(*args, **kwargs):
 #    await UB.send_message(chat, text)
 
 @exceptions_handler(no_send=True)
+@cross_thread
 async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kwargs):
   if name:
     text = f"{name}{text}"
@@ -3893,7 +3896,7 @@ async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kw
   #    return False
 
 
-#  @exceptions_handler
+@exceptions_handler
 async def mt_read():
   # api.xmpp
   MT_API = "127.0.0.1:4247"
@@ -4143,7 +4146,7 @@ async def send_to_tg_bot(text, chat_id):
 
 
 
-
+@exceptions_handler
 async def clear_history(src=None):
   if not allright.is_set():
     warn("wait for allright...")
@@ -8924,7 +8927,6 @@ async def run_cmd(*args, **kwargs):
     res = wtf_str(res, "xmpp")
   return res
 
-@exceptions_handler
 async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
   text0 = text
   if qt is not None:
@@ -9935,7 +9937,8 @@ async def xmpp_start():
     allright_task -= 1
     #  asyncio.create_task(xmpp_daemon(), name="xmpp")
   else:
-    await sendg("已重新启动xmppbot")
+    #  await sendg("已重新启动xmppbot")
+    await send_xmpp("已重新启动xmppbot")
     
   UPLOAD = None
   UPLOAD_MAX = 0
