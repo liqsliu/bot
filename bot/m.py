@@ -576,7 +576,7 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
           return await func(*args, **kwargs)
         #  except Exception as e:
         except BaseException as e:
-          return  _exceptions_handler(no_send, send_to, e, *args,  **kwargs)
+          return  _exceptions_handler(func, no_send, send_to, e, *args,  **kwargs)
     else:
       @wraps(func)
       def wrapper(*args, **kwargs):
@@ -584,7 +584,7 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
           return func(*args, **kwargs)
         #  except Exception as e:
         except BaseException as e:
-          return  _exceptions_handler(no_send, send_to, e, *args,  **kwargs)
+          return  _exceptions_handler(func, no_send, send_to, e, *args,  **kwargs)
     return wrapper
   if func is not None:
     return wrapper(func)
@@ -628,10 +628,10 @@ def _exceptions_handler(no_send, send_to, e, *args, **kwargs):
     raise
   except GeneratorExit as e:
     # https://docs.python.org/zh-cn/3.13/library/exceptions.html#GeneratorExit
-    warn("fixme: {!r}, fs: {}".format(e, fs))
+    warn("fixme: {!r}, fs: {}, func: {}(*{}, **{})".format(e, fs, func, args, kwargs))
 
   except RuntimeError:
-    warn("fixme: {!r}, fs: {}".format(e, fs))
+    warn("fixme: {!r}, fs: {}, func: {}(*{}, **{})".format(e, fs, func, args, kwargs))
 
   except AttributeError:
     pass
