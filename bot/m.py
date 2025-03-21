@@ -566,7 +566,7 @@ def auto_task(func, return_task=False):
 
 
 
-def exceptions_handler(func=None, *, no_send=False, send_to=None):
+def exceptions_handler(func=None, *, no_send=False):
   #  _no_send = no_send
   def wrapper(func):
     if asyncio.iscoroutinefunction(func):
@@ -576,7 +576,7 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
           return await func(*args, **kwargs)
         #  except Exception as e:
         except BaseException as e:
-          return  _exceptions_handler(func, no_send, send_to, e, *args,  **kwargs)
+          return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
     else:
       @wraps(func)
       def wrapper(*args, **kwargs):
@@ -584,13 +584,13 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
           return func(*args, **kwargs)
         #  except Exception as e:
         except BaseException as e:
-          return  _exceptions_handler(func, no_send, send_to, e, *args,  **kwargs)
+          return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
     return wrapper
   if func is not None:
     return wrapper(func)
   return wrapper
 
-def _exceptions_handler(func, no_send, send_to, e, *args, **kwargs):
+def _exceptions_handler(func, no_send, e, *args, **kwargs):
   #  no_send = _no_send
   more = True
   #  no_send = False
@@ -725,19 +725,18 @@ def _exceptions_handler(func, no_send, send_to, e, *args, **kwargs):
       warn(res)
   else:
     err(res, True)
-    if send_to:
-      send_log(res, send_to, 1)
-    else:
-      # wait is ok
-      #  await sleep(5)
-      #  send_log(res, 9)
-      if not no_send_tg:
-        send_log(res, CHAT_ID, 3)
-        
-      if not no_send_xmpp:
-        send_log(res, log_group_private, 2)
+    # wait is ok
+    #  await sleep(5)
+    #  send_log(res, 9)
+    if not no_send_tg:
+      send_log(res, CHAT_ID, 3)
+      
+    if not no_send_xmpp:
+      send_log(res, log_group_private, 2)
+
+  if no_send:
+    return res
   return
-  #  return res
 
 
 # https://www.utf8-chartable.de/unicode-utf8-table.pl
@@ -3153,7 +3152,7 @@ def send_log(text, jid=None, delay=1, fm=None):
   return True
 
 
-@exceptions_handler(no_send=True)
+@exceptions_handler
 def sendme(*args, to=1, **kwargs):
   if to != 2:
     #  send(*args, jid=CHAT_ID, **kwargs)
@@ -3177,7 +3176,7 @@ def sendme(*args, to=1, **kwargs):
 
 #  async def send_x(text, jid=None, *args, **kwargs):
 #  async def send(text, jid=None, *args, **kwargs):
-@exceptions_handler(no_send=True)
+@exceptions_handler
 def send(text, jid=None, *args, **kwargs):
   if jid is None:
     if isinstance(text, str):
@@ -3265,8 +3264,6 @@ def send(text, jid=None, *args, **kwargs):
     #  return await send1(text, jid=jid, *args, **kwargs)
     asyncio.create_task( send_xmpp(text, jid=jid, *args, **kwargs) )
     return True
-
-
 
 @exceptions_handler(no_send=True)
 async def send_xmpp(text, jid=None, *args, **kwargs):
@@ -4129,7 +4126,7 @@ async def msgmt(msg):
 
 
 
-@exceptions_handler(no_send=True)
+@exceptions_handler
 async def send_to_tg_bot(text, chat_id):
   peer = await get_entity(bot_name)
   #  chat = await get_entity(chat_id, True)
@@ -6304,7 +6301,7 @@ async def run_run(coro, need_main=False):
     #  fua.set_result(fu.result())
     try:
       #  res = fu.result()
-      f = exceptions_handler(fu.result)
+      f = exceptions_handler(no_send=True)(fu.result)
       res = f()
       info(f"fu.result: {res}")
     except Exception as e:
@@ -6620,7 +6617,7 @@ async def regisger_handler(client):
 
 
 
-@exceptions_handler(no_send=True)
+@exceptions_handler
 def send_typing(muc):
   if type(muc) is int:
     # telegram
@@ -8972,7 +8969,8 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
         #    res = get_lineno(e)
         #    res = f"run_cmd error: {res} {e=}"
         #    info(res, exc_info=e)
-        f = exceptions_handler(send_to=src)(cmd_funs[cmd])
+        #  f = exceptions_handler(send_to=src)(cmd_funs[cmd])
+        f = exceptions_handler(no_send=True)(cmd_funs[cmd])
         res = await f(cmds, src)
         info(f"res: {res}")
         if type(res) is tuple:
