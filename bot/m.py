@@ -6303,7 +6303,9 @@ async def run_run(coro, need_main=False):
     #  oloop.call_soon_threadsafe(partial(fua.set_result, fu.result()))
     #  fua.set_result(fu.result())
     try:
-      res = fu.result()
+      #  res = fu.result()
+      f = exceptions_handler(fu.result)
+      res = f()
       info(f"fu.result: {res}")
     except Exception as e:
       warn("failed", e=e)
