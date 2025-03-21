@@ -6830,7 +6830,7 @@ async def msgxp(msg):
           jid = str(item.jid.bare())
           res = f"上线: {len(msg.xep0045_muc_user.items)} {msg.from_} {jid} {item.nick} {item.role} {item.affiliation} {msg.status}"
           #  print(res)
-          info0(res)
+          info(res)
           if item.nick is None:
             rnick = msg.from_.resource
             #  info(f"空nick：{item.jid} {item.nick} -> {rnick} {msg}")
