@@ -6251,16 +6251,16 @@ def run_cb2(cb, *args, need_main=False, **kwargs):
 
 #  async def run_run(coro, *args, **kwargs, need_main=False):
 
-@exceptions_handler(no_send=True)
+#  @exceptions_handler(no_send=True)
 async def run_run(coro, need_main=False):
   if need_main:
     #  if threading.current_thread() is loop2_thread:
       #  if asyncio.iscoroutine():
     if in_main_thread():
-      #  info(f"在主线程执行: {coro}")
+      info(f"在主线程执行: {coro}")
       return await coro
     elif loop2_thread.native_id == threading.get_native_id():
-      #  info(f"在副线程跨线程执行: {coro}")
+      info(f"在副线程跨线程执行: {coro}")
       fu = asyncio.run_coroutine_threadsafe(coro, loop)
       oloop = loop2
     else:
@@ -6271,12 +6271,12 @@ async def run_run(coro, need_main=False):
   else:
     #  if threading.current_thread() is loop2_thread:
     if in_main_thread():
-      #  info(f"在主线程跨线程执行: {coro}")
+      info(f"在主线程跨线程执行: {coro}")
       fu = asyncio.run_coroutine_threadsafe(coro, loop2)
       oloop = loop
     #  elif main_thread.native_id != threading.get_native_id():
     elif loop2_thread.native_id == threading.get_native_id():
-      #  info(f"在副线程执行: {coro}")
+      info(f"在副线程执行: {coro}")
       return await coro
     else:
       # 未知线程
@@ -6303,11 +6303,11 @@ async def run_run(coro, need_main=False):
     #  oloop.call_soon_threadsafe(partial(fua.set_result, fu.result()))
     #  fua.set_result(fu.result())
     res = fu.result()
-    #  info(f"fu.result: {res}")
+    info(f"fu.result: {res}")
     #  fua.set_result(res)
     oloop.call_soon_threadsafe(fua.set_result, res)
     #  oloop.call_soon(fua.set_result, res)
-    #  info(f"done")
+    info(f"done")
   fu.add_done_callback(cb_for_fu_result)
   return await fua
 
