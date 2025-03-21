@@ -590,7 +590,7 @@ def exceptions_handler(func=None, *, no_send=False, send_to=None):
     return wrapper(func)
   return wrapper
 
-def _exceptions_handler(no_send, send_to, e, *args, **kwargs):
+def _exceptions_handler(func, no_send, send_to, e, *args, **kwargs):
   #  no_send = _no_send
   more = True
   #  no_send = False
