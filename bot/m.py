@@ -8951,9 +8951,9 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
       return
     #  print(f"> I: {cmds}")
     info("got cmds: {}".format(cmds))
-    #  st = send_typing(src)
-    #  if st is not None:
-    #    await st.__aenter__()
+    st = send_typing(src)
+    if st is not None:
+      await st.__aenter__()
 
     try:
       cmd = cmds[0]
@@ -9051,9 +9051,9 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
     finally:
       info("finally")
       try:
-        pass
-        #  if st is not None:
-        #    await st.__aexit__()
+        #  pass
+        if st is not None:
+          await st.__aexit__()
       except asyncio.CancelledError as e:
         info("该任务被要求中止，无法清除输入状态。: {!r}".format(e))
         raise
