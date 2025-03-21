@@ -6748,7 +6748,7 @@ def get_mucs(muc):
   if muc == "gateway1":
     muc = main_group
   elif muc not in my_groups:
-    return [muc]
+    return {muc}
     return
   for s in sync_groups_all:
     if muc in s:
@@ -6757,6 +6757,7 @@ def get_mucs(muc):
         if m not in rooms:
           tmp.add(m)
       return s - tmp
+  return {muc}
   return [muc]
   return set([muc])
 
@@ -7389,6 +7390,7 @@ async def msgx(msg):
       else:
         qt = None
     ms = get_mucs(muc)
+    #  for m in ms - {muc}:
     for m in ms - {muc}:
       #  asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
       asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name, qt=qt) )
