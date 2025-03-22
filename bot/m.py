@@ -2337,7 +2337,7 @@ def format_out_of_shell(res):
 #    return res
 #
 
-@exceptions_handler
+#  @exceptions_handler
 @cross_thread(need_main=False)
 async def my_py(cmd, src=None, client=None, **args):
   #  exec(cmd) #return always is None
@@ -2356,7 +2356,7 @@ async def my_py(cmd, src=None, client=None, **args):
   res = format_out_of_shell(res)
   return res
 
-@exceptions_handler
+#  @exceptions_handler
 async def my_exec(cmd, src=None, client=None, **args):
   #  res = """if "res" in locals():
   #  return res"""
@@ -2370,6 +2370,7 @@ async def my_exec(cmd, src=None, client=None, **args):
 
   # Get `__ex` from local variables, call it and return the result
   res = await locals()['__ex']()
+  info(f"exec res: {res}")
   #  if res is not None:
   return "{!r}".format(res)
 
@@ -2414,7 +2415,7 @@ my_exec2 = cross_thread(need_main=False)(my_exec)
 #    return await locals()['__ex']()
 
 
-@exceptions_handler
+#  @exceptions_handler
 @cross_thread(need_main=False)
 async def my_eval(cmd):
   res = eval(cmd)
