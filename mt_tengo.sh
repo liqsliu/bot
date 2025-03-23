@@ -702,6 +702,12 @@ if [[ -n "$4" ]] ; then
         #     QT_EXT=$(echo; echo "$QT"| sed '1d')
         #     QT=$(echo "$QT"| head -n1)
         #   fi
+        #
+        #   #⁧⁨liqs
+        #   #⁩⁨liu⁩
+        #
+        #   #⁧⁨liqs⁩⁦
+        #
         #   NAME=$(echo "$QT⁩"; echo "⁨$NAME⁩$QT_EXT")
         # else
         #   NAME=$(echo "$NAME"; echo "$QT")
