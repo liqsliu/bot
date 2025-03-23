@@ -5498,8 +5498,10 @@ async def msgt(event):
       global tg_msg_cache_for_bot2
       if sender_id == 420415423:
         # bot2: t2bot
-        if text.startswith("bot: "):
-          text = text[5:]
+        #  if text.startswith("bot: "):
+        #    text = text[5:]
+        if text.startswith("\u2067: "):
+          text = text[3:]
           if text[0] == "\n":
             text = text[1:]
         #  elif " " not in  text.splei(": ", 1)[0]:
