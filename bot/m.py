@@ -5502,6 +5502,9 @@ async def msgt(event):
         #    text = text[5:]
         if text.startswith("\u2067: "):
           text = text[3:]
+          #  if text.startswith("\u2066"):
+          while text.startswith("\u2066"):
+            text = text[1:]
           if text[0] == "\n":
             text = text[1:]
         #  elif " " not in  text.splei(": ", 1)[0]:
@@ -5534,6 +5537,8 @@ async def msgt(event):
         #  text2 = "bot: " + (msg.raw_text)
         text = text.splitlines()[0]
         text = text.strip()
+        while text.startswith("\u2066"):
+          text = text[1:]
         #  start_time = time.time()
         try:
           while True:
