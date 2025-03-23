@@ -696,31 +696,47 @@ if [[ -n "$4" ]] ; then
       # if [[ $(echo "$NAME" | wc -l) -ge 3 ]]; then
         # NAME=$(echo "$NAME" | tail -n1; echo "$NAME" | sed '/^$/,$d')
       if [[ -n "$QT" ]]; then
-        NAME=$(echo "$NAME"; echo "$QT")
+        if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
+          NAME=${NAME%: }
+          if [[ $(echo "$QT" | wc -l) -ge 2 ]]; then
+            QT_EXT=$(echo; echo "$QT"| sed '1d')
+            QT=$(echo "$QT"| head -n1)
+          fi
+          NAME=$(echo "$QT⁩"; echo "⁨$NAME⁩$QT_EXT")
+        else
+          NAME=$(echo "$NAME"; echo "$QT")
+        fi
       fi
     else
-  if [[ -n "$NAME" ]]; then
-    NAME="**${NAME% }** "
-    if [[ -n "$QT" ]]; then
-      NAME="$QT
+      if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
+        if [[ -n "$QT" ]]; then
+          if [[ -n "$NAME" ]]; then
+            NAME="**${NAME% }** "
+            NAME="
+$QT
 
 ${NAME}"
-    fi
-  fi
-      # if [[ "$NAME" == "C twitter: " ]]; then
-      #   TEXT=$(echo "$TEXT" | sed '2,$s/^/> /' | sed '2s/^/\n/')
-      # elif [[ "$NAME" == "C bot: " && "${1:0:16}" == "twitter to text:" ]]; then
-      #   TEXT=$(echo "$TEXT" | sed '2,$s/^/> /' | sed '2s/^/\n/')
-      # elif [[ "$NAME" == "C bot: " && "$( echo ${1} | cut -d":" -f2 )" == " twitter to text" ]]; then
-      #   TEXT=$(echo "$TEXT" | sed '2,$s/^/> /' | sed '2s/^/\n/')
-      # else
-      #   :
-      #   # if [[ -n "$(echo "$NAME" | sed '$d')" ]]; then
-      #   # if [[ "$(echo "$NAME" | wc -l)" -ge 3 ]]; then
-      #   #   QT=$(echo "$NAME" | sed '$d')
-      #   # fi
-      # fi
-      TEXT="$NAME$TEXT"
+          fi
+          TEXT="$NAME$TEXT"
+        else
+          NAME=${NAME%: }
+          if [[ $(echo "$TEXT" | wc -l) -ge 2 ]]; then
+            TEXT_EXT=$(echo; echo "$TEXT"| sed '1d')
+            TEXT=$(echo "$TEXT"| head -n1)
+          fi
+          TEXT="$TEXT⁩⁨$NAME⁩$TEXT_EXT"
+        fi
+      else
+        if [[ -n "$NAME" ]]; then
+          NAME="**${NAME% }** "
+          if [[ -n "$QT" ]]; then
+            NAME="$QT
+
+${NAME}"
+          fi
+        fi
+        TEXT="$NAME$TEXT"
+      fi
       unset NAME
     fi
     newline
