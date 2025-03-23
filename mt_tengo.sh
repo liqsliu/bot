@@ -696,24 +696,27 @@ if [[ -n "$4" ]] ; then
       # if [[ $(echo "$NAME" | wc -l) -ge 3 ]]; then
         # NAME=$(echo "$NAME" | tail -n1; echo "$NAME" | sed '/^$/,$d')
       if [[ -n "$QT" ]]; then
-        if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
-          NAME=${NAME%: }
-          if [[ $(echo "$QT" | wc -l) -ge 2 ]]; then
-            QT_EXT=$(echo; echo "$QT"| sed '1d')
-            QT=$(echo "$QT"| head -n1)
-          fi
-          NAME=$(echo "$QT⁩"; echo "⁨$NAME⁩$QT_EXT")
-        else
-          NAME=$(echo "$NAME"; echo "$QT")
-        fi
+        # if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
+        #   NAME=${NAME%: }
+        #   if [[ $(echo "$QT" | wc -l) -ge 2 ]]; then
+        #     QT_EXT=$(echo; echo "$QT"| sed '1d')
+        #     QT=$(echo "$QT"| head -n1)
+        #   fi
+        #   NAME=$(echo "$QT⁩"; echo "⁨$NAME⁩$QT_EXT")
+        # else
+        #   NAME=$(echo "$NAME"; echo "$QT")
+        # fi
+        NAME=$(echo "⁦$NAME"; echo "$QT")
+      else
+        block_msg
       fi
     else
-      if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
+      # if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
+      if false ; then
         if [[ -n "$QT" ]]; then
           if [[ -n "$NAME" ]]; then
             NAME="**${NAME% }** "
-            NAME="
-$QT
+            NAME="$QT
 
 ${NAME}"
           fi
@@ -730,12 +733,13 @@ ${NAME}"
         if [[ -n "$NAME" ]]; then
           NAME="**${NAME% }** "
           if [[ -n "$QT" ]]; then
-            NAME="$QT
+            NAME="
+$QT
 
 ${NAME}"
           fi
         fi
-        TEXT="$NAME$TEXT"
+        TEXT="⁦$NAME$TEXT"
       fi
       unset NAME
     fi
