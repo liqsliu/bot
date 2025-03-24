@@ -271,7 +271,7 @@ def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
     if e is None:
       fm = sys._getframe()
       fm = fm.f_back
-      send_log(text, fm=fm)
+      send_log(text, fm=fm, delay=2)
     else:
       text = "%s %s %s" % (get_lineno(e=e), text, e)
       send_log(text)
@@ -724,15 +724,15 @@ def _exceptions_handler(func, no_send, e, *args, **kwargs):
     else:
       warn(res)
   else:
-    err(res, True)
+    err(res)
     # wait is ok
     #  await sleep(5)
     #  send_log(res, 9)
-    if not no_send_tg:
-      send_log(res, CHAT_ID, 3)
-      
-    if not no_send_xmpp:
-      send_log(res, log_group_private, 2)
+    #  if not no_send_tg:
+    #    send_log(res, CHAT_ID, 3)
+    #
+    #  if not no_send_xmpp:
+    #    send_log(res, log_group_private, 2)
 
   if no_send:
     return res
@@ -9494,18 +9494,38 @@ async def _bypass(msg):
 @exceptions_handler
 def on_muc_role_request(form, submission_future):
   # https://docs.zombofant.net/aioxmpp/0.13/api/public/muc.html#aioxmpp.muc.Room.on_muc_role_request
-  print(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
   print(form)
   print(submission_future)
+  print(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
 
   #  send(f"发言申请: {form}")
-  if submission_future.done():
-    send_log(f"skip: 发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
-    return
-  send_log(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
+  #  if submission_future.done():
+  #    send_log(f"skip: 发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
+  #    return
+  #  send_log(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
   #默认拒绝
-  form.request_allow=False
-  submission_future.set_result(form)
+  if not submission_future.done():
+    while True:
+      try:
+        form.request_allow=False
+        break
+      except Exception as e:
+        warn("无法设置request_allow", e=e)
+      try:
+        form.request_allow.value=False
+        break
+      except Exception as e:
+        warn("无法设置request_allow", e=e)
+      try:
+        form.request_allow.field=False
+        break
+      except Exception as e:
+        err("无法设置request_allow", e=e)
+      return
+    submission_future.set_result(form)
+    send_log(f"已拒绝发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
+  else:
+    send_log(f"skip: 发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
 
 
 #  test_group = 'ipfs@salas.suchat.org'
