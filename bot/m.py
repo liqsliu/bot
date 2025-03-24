@@ -262,6 +262,8 @@ def info2(s):
 info = logger.info
 
 def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
+  if e is not None:
+    text = "%s %s %s" % (get_lineno(e=e), text, e)
   logger.error(text, exc_info=exc_info, stack_info=stack_info)
   #  raise ValueError
   if no_send:
@@ -273,11 +275,13 @@ def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
       fm = fm.f_back
       send_log(text, fm=fm, delay=2)
     else:
-      text = "%s %s %s" % (get_lineno(e=e), text, e)
+      #  text = "%s %s %s" % (get_lineno(e=e), text, e)
       send_log(text)
 
 
 def warn(text=None, more=False, no_send=True, e=None, exc_info=True, stack_info=True):
+  if e is not None:
+    text = "%s %s %s" % (get_lineno(e=e), text, e)
   if more:
     logger.warning(text, exc_info=exc_info, stack_info=stack_info)
   else:
@@ -292,7 +296,7 @@ def warn(text=None, more=False, no_send=True, e=None, exc_info=True, stack_info=
       fm = fm.f_back
       send_log(text, fm=fm)
     else:
-      text = "%s %s %s" % (get_lineno(e=e), text, e)
+      #  text = "%s %s %s" % (get_lineno(e=e), text, e)
       send_log(text)
 
 #  def dbg(text):
@@ -9518,6 +9522,11 @@ def on_muc_role_request(form, submission_future):
         warn("无法设置request_allow", e=e)
       try:
         form.request_allow.field=False
+        break
+      except Exception as e:
+        warn("无法设置request_allow", e=e)
+      try:
+        form.request_allow.field.value=False
         break
       except Exception as e:
         err("无法设置request_allow", e=e)
