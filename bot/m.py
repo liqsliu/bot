@@ -9488,6 +9488,7 @@ async def _bypass(msg):
 
 
 
+@exceptions_handler
 def on_muc_role_request(form, submission_future):
   # https://docs.zombofant.net/aioxmpp/0.13/api/public/muc.html#aioxmpp.muc.Room.on_muc_role_request
   print(f"发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
