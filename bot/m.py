@@ -7422,6 +7422,9 @@ async def msgx(msg):
       info("群内私聊: %s" % msg)
       #  await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
       send_log(f"群内私聊: {msg.type_} {msg.from_}: {text}")
+      reply = msg.make_reply()
+      reply.body[None] = "ok"
+      send(reply)
       return
     #  if get_jid(msg.to) in my_groups:
     #  if get_jid(msg.from_) in my_groups:
