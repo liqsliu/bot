@@ -1,18 +1,41 @@
 #!/bin/bash
 
-NAME="$2"
-SPLIT="_SPLIT_FOR_MT_"
-TEXT="$1"
-
+export SH_PATH=${SH_PATH:-$(cd $(dirname ${BASH_SOURCE[0]}) || exit; pwd )}
+# export SH_PATH=${SH_PATH:-$(cd $(dirname ${BASH_SOURCE[0]}) || exit; pwd )}
+# SM_LOCK2="$SH_PATH/SM_LOCK2"
 
 block_msg(){
   echo -n "blockthismessage"
   exit 0
 }
+
+if [[ "$3" = api.cmd ]]; then
+  :
+elif [[ "$8" = api.cmd ]]; then
+  :
+# elif [[ $6 = gateway6 ]]; then
+#   :
+# # elif [[ $2 = "wtfipfs" ]] && [[ $8 = xmpp.myxmpp ]]; then
+# #   block_msg
+# elif [[ $2 = "liqsliu" ]] && [[ $8 = api.cmd ]] && [[ $3 = xmpp.myxmpp ]]; then
+#   :
+elif [[ "$6" = gateway1 ]]; then
+  if [[ -e "$SH_PATH/STOP" ]]; then
+    block_msg
+  fi
+else
+  :
+fi
+
+
 # orig_msg(){
 #   echo -n "originalmessage"
 #   exit 0
 # }
+
+NAME="$2"
+SPLIT="_SPLIT_FOR_MT_"
+TEXT="$1"
 
 
 if [[ -z "$2" ]]; then
@@ -108,23 +131,6 @@ log_msg(){
 
 
 
-export SH_PATH=${SH_PATH:-$(cd $(dirname ${BASH_SOURCE[0]}) || exit; pwd )}
-# export SH_PATH=${SH_PATH:-$(cd $(dirname ${BASH_SOURCE[0]}) || exit; pwd )}
-# SM_LOCK2="$SH_PATH/SM_LOCK2"
-
-if [[ $3 = api.cmd ]]; then
-  :
-# elif [[ $6 = gateway6 ]]; then
-#   :
-# # elif [[ $2 = "wtfipfs" ]] && [[ $8 = xmpp.myxmpp ]]; then
-# #   block_msg
-# elif [[ $2 = "liqsliu" ]] && [[ $8 = api.cmd ]] && [[ $3 = xmpp.myxmpp ]]; then
-#   :
-else
-  if [[ -e "$SH_PATH/STOP" ]]; then
-    block_msg
-  fi
-fi
 
 # if [[ "$5" =~ acg|ipfsrss ]]; then
 #   :
