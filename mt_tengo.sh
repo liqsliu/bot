@@ -112,19 +112,19 @@ export SH_PATH=${SH_PATH:-$(cd $(dirname ${BASH_SOURCE[0]}) || exit; pwd )}
 # export SH_PATH=${SH_PATH:-$(cd $(dirname ${BASH_SOURCE[0]}) || exit; pwd )}
 # SM_LOCK2="$SH_PATH/SM_LOCK2"
 
-# if [[ $3 = api.cmd ]]; then
-#   :
+if [[ $3 = api.cmd ]]; then
+  :
 # elif [[ $6 = gateway6 ]]; then
 #   :
 # # elif [[ $2 = "wtfipfs" ]] && [[ $8 = xmpp.myxmpp ]]; then
 # #   block_msg
 # elif [[ $2 = "liqsliu" ]] && [[ $8 = api.cmd ]] && [[ $3 = xmpp.myxmpp ]]; then
 #   :
-# else
-#   if [[ -e "$SH_PATH/STOP" ]]; then
-#     block_msg
-#   fi
-# fi
+else
+  if [[ -e "$SH_PATH/STOP" ]]; then
+    block_msg
+  fi
+fi
 
 # if [[ "$5" =~ acg|ipfsrss ]]; then
 #   :
