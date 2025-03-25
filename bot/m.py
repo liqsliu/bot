@@ -7919,6 +7919,21 @@ async def init_cmd():
   cmd_for_admin.add('sh5')
 
   async def _(cmds, src):
+    cmds = f'''
+    if [[ -e "{SH_PATH}/STOP" ]]; then
+      rm "{SH_PATH}/STOP"
+      echo running
+    else
+      touch "{SH_PATH}/STOP"
+      echo stoped
+    fi
+    '''
+    res = await myshell(cmds)
+    return format_out_of_shell(res)
+  cmd_funs["stop"] = _
+  cmd_for_admin.add('stop')
+
+  async def _(cmds, src):
     if len(cmds) == 1:
       return f"python\n.{cmds[0]} $code"
     cmds.pop(0)
