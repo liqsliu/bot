@@ -1922,9 +1922,9 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
               await sleep(0.01)
               info("wait for more 2")
               if myshell_queue.empty():
-                #  await sleep(0.1)
-                #  info("wait for more 3")
-                #  if myshell_queue.empty():
+                await sleep(0.5)
+                info("wait for more 3")
+                if myshell_queue.empty():
                   info("wait for more fail")
                 #  if k > 0:
                   break
