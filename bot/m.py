@@ -5547,7 +5547,7 @@ async def msgt(event):
         try:
           while True:
             #  await tg_msg_cache_for_bot2_event.wait()
-            await asyncio.wait_for(tg_msg_cache_for_bot2_event.wait(), timeout=16)
+            await asyncio.wait_for(tg_msg_cache_for_bot2_event.wait(), timeout=60)
             await asyncio.sleep(0)
             #  if tg_msg_cache_for_bot2.startswith(text2):
             if text == tg_msg_cache_for_bot2:
