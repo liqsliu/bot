@@ -80,6 +80,32 @@ $text
 EOF
 }
 
+conv_other(){
+  text="$*"
+
+  text=$(echo "$text" | cut -d '\' --output-delimiter='\\' -f 1- )
+
+  text=$(echo "$text" | cut -d '>' --output-delimiter='\>' -f 1- )
+  text=$(echo "$text" | cut -d '#' --output-delimiter='\#' -f 1- )
+  text=$(echo "$text" | cut -d '+' --output-delimiter='\+' -f 1- )
+  text=$(echo "$text" | cut -d '-' --output-delimiter='\-' -f 1- )
+  text=$(echo "$text" | cut -d '=' --output-delimiter='\=' -f 1- )
+  text=$(echo "$text" | cut -d '{' --output-delimiter='\{' -f 1- )
+  text=$(echo "$text" | cut -d '}' --output-delimiter='\}' -f 1- )
+  text=$(echo "$text" | cut -d '.' --output-delimiter='\.' -f 1- )
+
+  text=$(echo "$text" | cut -d '~' --output-delimiter='\~' -f 1- )
+  text=$(echo "$text" | cut -d '!' --output-delimiter='\!' -f 1- )
+  text=$(echo "$text" | cut -d '|' --output-delimiter='\|' -f 1- )
+
+
+  # text="$(echo "$text" | cut -d '"' --output-delimiter='\"' -f 1- )"
+  cat << EOF
+$text
+EOF
+}
+
+
 
 
 
@@ -93,6 +119,10 @@ elif [[ "$2" == "v1" ]];then
   get_md "$1"
 elif [[ "$2" == "telethon" ]];then
   get_md_telethon "$1"
+elif [[ "$2" == "other" ]];then
+  conv_other "$1"
+elif [[ "$2" == "all" ]];then
+  conv_mdv2 "$1"
 elif [[ "$2" == "v2" ]];then
   conv_mdv2 "$1"
 else
