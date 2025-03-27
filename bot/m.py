@@ -1908,11 +1908,11 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
       k -= 1
       while r is None:
         #  if time.time() - start_time > run_shell_time_max*10:
-        if time.time() - start_time > max_time:
-          res = "end"
-          send(res, src)
-          r = 0
-          break
+        #  if time.time() - start_time > max_time:
+        #    res = "end"
+        #    send(res, src)
+        #    r = 0
+        #    break
         if k > 1:
           if myshell_queue.empty():
             await p.stdin.drain()
@@ -1933,7 +1933,8 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
           #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time/(k+1))
           info("waiting...")
-          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time)
+          #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max(0.3, min(start_time - time.time() + max_time, max_time)))
+          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time/( (start_time - time.time()) * 10 * max_time + 1 ) )
           if n == 1:
             if k == 0:
               #  if d == b'EOF\n':
@@ -3651,7 +3652,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
   else:
     parse_mode = client.parse_mode
-  info("parse_mode: {parse_mode}")
+  info(f"parse_mode: {parse_mode}")
   ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
   if len(ts) > 1:
     tmp_msg = False
