@@ -1932,9 +1932,14 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
         try:
           #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
           #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time/(k+1))
-          info("waiting...")
           #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max(0.3, min(start_time - time.time() + max_time, max_time)))
-          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time/( (time.time()-start_time) * 10 + 1 ) )
+          timeout = time.time()-start_time
+          if timeout + 1 < max_time:
+            timeout = max_time - timeout
+          else:
+            timeout = max_time/timeout/10 
+          info(f"waiting: timeout: {timeout}")
+          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=timeout )
           if n == 1:
             if k == 0:
               #  if d == b'EOF\n':
