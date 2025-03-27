@@ -7410,6 +7410,8 @@ async def msgx(msg):
     if main_group in ms:
       asyncio.create_task( mt_send_for_long_text(text0, name=name, qt=qt) )
       await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
+    elif muc in bot_groups:
+      await send_tg(f"{username}{text0}", CHAT_ID, qt=qt)
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
   #    pass
