@@ -1986,7 +1986,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
             #    break
             #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
             #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.01)
-            n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.3)
+            n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
             if n == 1:
               if k == 0:
                 if d == eof:
@@ -2005,6 +2005,9 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
               e += d
             tmp += d 
             print(f"got{n}: {d}")
+            if len(tmp) > MAX_MSG_BYTES_TG * 10:
+              info(f"too long: {short(tmp)}")
+              break
           if d == eof:
             break
           info(f"附带消息: {d}")
@@ -4836,7 +4839,9 @@ def hbyte(size):
 
 def short(text, length=64):
   # for log out
-  if not isinstance(text, str):
+  if isinstance(text, bytes):
+    text = text.decode("utf-8", errors="ignore")
+  elif not isinstance(text, str):
     text = "{!r}".format(text)
   text = text.replace("\n", "\\n")
   if len(text) > length:
