@@ -794,49 +794,49 @@ $TEXT"
     ;;
   telegram.*)
     # https://core.telegram.org/bots/api#markdownv2-style
-
-    if [[ "$NAME" == "C bot: " ]]; then
-      TEXT=$(bash "$SH_PATH/text2markdown.sh" "$TEXT" "other")
-    else
-      TEXT=$(bash "$SH_PATH/text2markdown.sh" "$TEXT")
-    fi
-
     # md_name
     if [[ -n "$NAME" ]]; then
-    # QT=""
-    # [[ $(echo "$NAME" | wc -l) -ge 3 ]] && QT=$(bash "$SH_PATH/text2markdown.sh" "$(echo "$NAME" | sed '/^$/,$d')" && echo)
-    if [[ -n "$QT" ]]; then
-      QT=$(echo "$QT" | sed 's/> //' )
-      tmp=$( echo "$QT" | head -n1 | grep -o -P '^\*\*\w+ .+?:\*\* ')
-      if [[ -n "$tmp" ]]; then
-        # NAME=$( echo "$line" | grep -o -P '^\*\*\w+ .+?:\*\* ' | sed -r 's/^\*\*(.+):\*\* /\1/')
-        NAME2=$( echo "$tmp" | sed -r 's/^\*\*(.+?):\*\* /\1/')
-        QT="${QT:$[${#NAME2}+6]}"
-        if [[ "$NAME2" == "C bot" ]]; then
-          QT=$(bash "$SH_PATH/text2markdown.sh" "$QT" "other")
-        else
-          QT=$(bash "$SH_PATH/text2markdown.sh" "$QT")
-        fi
-        M=${NAME2%% *}
-        NAME2=${NAME2#* }
-        NAME2=$(bash "$SH_PATH/text2markdown.sh" "$NAME2")
-        QT=$(echo "$M *$NAME2*: $QT" | sed 's/^/>/' )
+      if [[ "$NAME" == "C bot: " ]]; then
+        TEXT=$(bash "$SH_PATH/text2markdown.sh" "$TEXT" "other")
       else
-        QT=$(bash "$SH_PATH/text2markdown.sh" "$QT" | sed 's/^/>/' )
+        TEXT=$(bash "$SH_PATH/text2markdown.sh" "$TEXT")
       fi
-    fi
-    # NAME=$(bash "$SH_PATH/text2markdown.sh" "$(echo "$NAME" | tail -n1)")
-    NAME=$(bash "$SH_PATH/text2markdown.sh" "$NAME")
-    # echo -n "*$(echo "$NAME" | cut -d' ' -f 2- | sed '$s|: $||')*: "
-    # M=$(echo "$NAME" | cut -d' ' -f1)
-    # NAME=$(echo "$NAME" | cut -d' ' -f 2-)
-    M=${NAME%% *}
-    NAME=${NAME#* }
-    NAME=${NAME%: }
+      # QT=""
+      # [[ $(echo "$NAME" | wc -l) -ge 3 ]] && QT=$(bash "$SH_PATH/text2markdown.sh" "$(echo "$NAME" | sed '/^$/,$d')" && echo)
+      if [[ -n "$QT" ]]; then
+        QT=$(echo "$QT" | sed 's/> //' )
+        tmp=$( echo "$QT" | head -n1 | grep -o -P '^\*\*\w+ .+?:\*\* ')
+        if [[ -n "$tmp" ]]; then
+          # NAME=$( echo "$line" | grep -o -P '^\*\*\w+ .+?:\*\* ' | sed -r 's/^\*\*(.+):\*\* /\1/')
+          NAME2=$( echo "$tmp" | sed -r 's/^\*\*(.+?):\*\* /\1/')
+          QT="${QT:$[${#NAME2}+6]}"
+          if [[ "$NAME2" == "C bot" ]]; then
+            QT=$(bash "$SH_PATH/text2markdown.sh" "$QT" "other")
+          else
+            QT=$(bash "$SH_PATH/text2markdown.sh" "$QT")
+          fi
+          M=${NAME2%% *}
+          NAME2=${NAME2#* }
+          NAME2=$(bash "$SH_PATH/text2markdown.sh" "$NAME2")
+          QT=$(echo "$M *$NAME2*: $QT" | sed 's/^/>/' )
+        else
+          QT=$(bash "$SH_PATH/text2markdown.sh" "$QT" | sed 's/^/>/' )
+        fi
+      fi
+      # NAME=$(bash "$SH_PATH/text2markdown.sh" "$(echo "$NAME" | tail -n1)")
+      NAME=$(bash "$SH_PATH/text2markdown.sh" "$NAME")
+      # echo -n "*$(echo "$NAME" | cut -d' ' -f 2- | sed '$s|: $||')*: "
+      # M=$(echo "$NAME" | cut -d' ' -f1)
+      # NAME=$(echo "$NAME" | cut -d' ' -f 2-)
+      M=${NAME%% *}
+      NAME=${NAME#* }
+      NAME=${NAME%: }
 #     NAME="$QT
 # $M *$NAME*: "
-    NAME="$QT
+      NAME="$QT
 $M *$NAME*: "
+    else
+      TEXT=$(bash "$SH_PATH/text2markdown.sh" "$TEXT" "other")
     fi
     newline
     ;;
