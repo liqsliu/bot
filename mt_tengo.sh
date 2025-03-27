@@ -795,7 +795,7 @@ $TEXT"
   telegram.*)
     # https://core.telegram.org/bots/api#markdownv2-style
 
-    TEXT=$(bash "$SH_PATH/text2markdown.sh" "$TEXT")
+    # TEXT=$(bash "$SH_PATH/text2markdown.sh" "$TEXT")
 
     # md_name
     if [[ -n "$NAME" ]]; then
@@ -808,7 +808,7 @@ $TEXT"
         # NAME=$( echo "$line" | grep -o -P '^\*\*\w+ .+?:\*\* ' | sed -r 's/^\*\*(.+):\*\* /\1/')
         NAME2=$( echo "$tmp" | sed -r 's/^\*\*(.+?):\*\* /\1/')
         QT="${QT:$[${#NAME2}+6]}"
-        QT=$(bash "$SH_PATH/text2markdown.sh" "$QT")
+        # QT=$(bash "$SH_PATH/text2markdown.sh" "$QT")
         NAME2=$(bash "$SH_PATH/text2markdown.sh" "$NAME2")
         QT=$(echo "*$NAME2*: $QT" | sed 's/^/>/' )
       else
