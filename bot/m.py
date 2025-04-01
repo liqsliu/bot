@@ -4916,7 +4916,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     try:
       return await asyncio.wait_for(msg.download_media(path, progress_callback=cb), timeout=timeout)
     except TimeoutError as e:
-      err(f"下载失败(超时): {e=}")
+      err(f"下载失败(超时{timeout}s): {e=}")
 
 
   file_path = None
@@ -4961,7 +4961,8 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     err(f"下载失败 {e=}")
   finally:
     if file_path is None:
-      err(f"下载失败 got file_path is None")
+      text, nick, d = await print_tg_msg(msg)
+      err(f"下载失败 file_path is None: file_msg: {nick}: {text}")
     else:
       if not file_path.startswith("/"):
         file_path = path + file_path
