@@ -144,7 +144,7 @@ get_tw(){
   # name_id=$(echo "$tw_res" | jq -r ".user.screen_name")
   # text=$(echo "$tw_res" | jq -r ".text")
   # local res=$(get_tw_text "$tw_res")
-  get_tw_text "$tw_res"
+  get_tw_text "$tw_res" || return 1
 
   local tw_res_q=$(echo "$tw_res" | jq -r ".quoted_tweet")
   if [[ "$tw_res_q" != "null" ]]; then
@@ -279,8 +279,9 @@ twitter_to_text(){
     local id=$( echo "$URL" | grep -v -P "^>( >)* ?" | grep -o -P "^https://(mobile\.)?(twitter|x)\.com/[a-zA-Z0-9_./?=&%-]+$" | grep -i -o -E "/status/[0-9]{5,}" | grep -i -o -E "[0-9]{5,}" )
 
     if [[ -n "$id" ]]; then
-      echo $URL
-      get_tw $id "$@"
+      local tmp=$(get_tw $id "$@") || return 1
+      echo "$URL"
+      echo "$tmp"
     else
       echo "E: error twitter id"
     fi
