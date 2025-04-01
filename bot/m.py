@@ -7364,7 +7364,7 @@ async def msgx(msg):
       if is_admin:
         send(text, rssbot, name="")
       else:
-        send("仅管理可用", src)
+        send("仅管理可用", muc)
       return
 
     username=f"**X {nick}:** "
