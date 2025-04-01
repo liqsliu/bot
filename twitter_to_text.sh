@@ -43,6 +43,9 @@ get_tw_text(){
   local tw_res=$1
   local name=$(echo "$tw_res" | jq -r ".user.name")
   local name_id=$(echo "$tw_res" | jq -r ".user.screen_name")
+  if [[ "$name_id" == "null" ]]; then
+    exit 1
+  fi
   local text=$(echo "$tw_res" | jq -r ".text")
 
 
