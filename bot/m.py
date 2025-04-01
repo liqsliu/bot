@@ -2806,12 +2806,12 @@ async def backup(path, src=None, delete=False, no_wait=False):
       send(url, src)
   return url
 
-#  @exceptions_handler
-#  async def get_twitter(url, src=None, opts=[], max_time=run_shell_time_max):
-#    #  elif url.startswith("https://x.com/"):
-#    #  elif url.startswith("https://twitter.com/"):
-#    cmds = [f"{SH_PATH}/twitter_to_text.sh", url]
-#    return format_out_of_shell( await myshell(cmds, src=src, max_time=max_time))
+@exceptions_handler
+async def get_twitter(url, src=None, opts=[], max_time=run_shell_time_max):
+  #  elif url.startswith("https://x.com/"):
+  #  elif url.startswith("https://twitter.com/"):
+  cmds = [f"{SH_PATH}/twitter_to_text.sh", url]
+  return format_out_of_shell( await myshell(cmds, src=src, max_time=max_time))
 
 @exceptions_handler
 async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
