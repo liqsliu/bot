@@ -44,8 +44,7 @@ get_tw_text(){
   local name=$(echo "$tw_res" | jq -r ".user.name")
   local name_id=$(echo "$tw_res" | jq -r ".user.screen_name")
   if [[ "$name_id" == "null" ]]; then
-    # return 1
-    exit 1
+    return 1
   fi
   local text=$(echo "$tw_res" | jq -r ".text")
 
@@ -154,8 +153,6 @@ get_tw(){
     echo "引用推文: $(get_tw_url "$tw_res_q")"
     get_tw_text "$tw_res_q"
   fi
-
-
 }
 
 
@@ -280,7 +277,11 @@ twitter_to_text(){
     local id=$( echo "$URL" | grep -v -P "^>( >)* ?" | grep -o -P "^https://(mobile\.)?(twitter|x)\.com/[a-zA-Z0-9_./?=&%-]+$" | grep -i -o -E "/status/[0-9]{5,}" | grep -i -o -E "[0-9]{5,}" )
 
     if [[ -n "$id" ]]; then
-      local tmp=$(get_tw "$id" "$@") || return 1
+      # local tmp=$(get_tw "$id" "$@") || echo $?
+      local tmp
+      # tmp=$(get_tw "$id" "$@") || echo $?
+      tmp=$(get_tw "$id" "$@") || return 1
+      # echo $?
       echo "$URL"
       echo "$tmp"
     else
