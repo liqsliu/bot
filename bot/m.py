@@ -5516,6 +5516,7 @@ async def msgt(event):
         # bot2: t2bot
         #  if text.startswith("bot: "):
         #    text = text[5:]
+        text = text.splitlines()[0]
         if text.startswith("\u2067: "):
           text = text[3:]
           #  if text.startswith("\u2066"):
@@ -5528,29 +5529,28 @@ async def msgt(event):
             text = text.split(": ", 1)[1]
             if text.startswith("reply: "):
               text = text.split(": ", 1)[1]
+          elif text.startswith("G "):
+            warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {text}")
+            await msg.delete()
+            return
 
         #  elif " " not in  text.splei(": ", 1)[0]:
         #  elif text[1] != " ":
         else:
           #  text = "M " + text
           text = text.split(": ", 1)[1]
-        text = text.splitlines()[0]
         text = text.strip()
         #  if text[-1] == " ":
         #    text = text[:-1]
-        if text.startswith("G "):
-          warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {text}")
-          await msg.delete()
-          return
         async with tg_msg_cache_for_bot2_lock:
           i = 0
           #  while tg_msg_cache_for_bot2 is not None:
           await asyncio.sleep(0)
           while tg_msg_cache_for_bot2_event.is_set():
             if i>10:
-              info("bot2 wait for clear timeout: {short(text)}")
+              info(f"bot2 wait for clear timeout: {short(text)}")
               break
-            info("bot2 wait for clear: {short(text)}")
+            info(f"bot2 wait for clear: {short(text)}")
             await sleep(0.8)
             i+=1
           await asyncio.sleep(0)
