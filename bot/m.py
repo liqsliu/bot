@@ -5540,6 +5540,8 @@ async def msgt(event):
           #  text = "M " + text
           text = text.split(": ", 1)[1]
         text = text.strip()
+        while "  " in text:
+          text = text.replace("  ", " ")
         #  if text[-1] == " ":
         #    text = text[:-1]
         async with tg_msg_cache_for_bot2_lock:
@@ -5567,6 +5569,9 @@ async def msgt(event):
           text = text.split(": ", 1)[1]
           if text.startswith("reply: "):
             text = text.split(": ", 1)[1]
+        text = text.strip()
+        while "  " in text:
+          text = text.replace("  ", " ")
         #  start_time = time.time()
         try:
           while True:
