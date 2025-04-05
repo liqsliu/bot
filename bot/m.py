@@ -9557,11 +9557,6 @@ def on_muc_role_request(form, submission_future):
   if not submission_future.done():
     while True:
       try:
-        form.request_allow=False
-        break
-      except Exception as e:
-        warn("无法设置request_allow", e=e)
-      try:
         form.request_allow.field.value=False
         break
       except Exception as e:
@@ -9576,6 +9571,11 @@ def on_muc_role_request(form, submission_future):
         break
       except Exception as e:
         warn("4无法设置request_allow", e=e)
+      try:
+        form.request_allow=False
+        break
+      except Exception as e:
+        warn("无法设置request_allow", e=e)
       return
     submission_future.set_result(form)
     send_log(f"已拒绝发言申请: {form.roomnick}\njid: {form.jid}\nrole: {form.role}\n{form}")
