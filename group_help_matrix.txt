@@ -19,4 +19,4 @@ rss:
 matrix官方桥(几乎都是坏的，别用了): https://ems-docs.element.io/books/element-cloud-documentation/page/public-slack-bridge
 第三方维护的桥: 
 https://t2bot.io/
-https://aria-net.org/SitePages/Portal/Bridges.aspx
+https://archon.im/arianet/matrix-homeserver/services/ (旧链接: https://aria-net.org/SitePages/Portal/Bridges.aspx)
