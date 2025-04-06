@@ -8964,30 +8964,40 @@ async def init_cmd():
     if len(cmds) == 1:
       return f"hex or int to bin\n.{cmds[0]} $text"
     s = ' '.join(cmds[1:])
-    s= s.replace(" ", "")
+    s = s.replace(" ", "")
     #  s= s.replace(":", "")
-    is_16 = False
-    if ":" in s:
-      sp = ":"
-      is_16 = True
-    else:
-      sp="."
-      for i in s.split(sp):
-        if not i.isnumeric():
-          is_16 = True
-          break
+    try:
+      s = eval(s)
+    except Exception as e:
+      info(f"eval error: {e=}")
     tmp = []
-    for s in s.split(sp):
-      if len(s) == 0:
-        tmp.append("\n")
+    if type(s) is int:
+      s = bin(s)
+      s = str(s)
+      s = s[2:]
+      tmp.append(my_bin(s))
+    else:
+      is_16 = False
+      if ":" in s:
+        sp = ":"
+        is_16 = True
       else:
-        if is_16 is True:
-          s = bin(int(s, 16))
+        sp="."
+        for i in s.split(sp):
+          if not i.isnumeric():
+            is_16 = True
+            break
+      for s in s.split(sp):
+        if len(s) == 0:
+          tmp.append("\n")
         else:
-          s = bin(int(s))
-        s = str(s)
-        s = s[2:]
-        tmp.append(my_bin(s))
+          if is_16 is True:
+            s = bin(int(s, 16))
+          else:
+            s = bin(int(s))
+          s = str(s)
+          s = s[2:]
+          tmp.append(my_bin(s))
     return "\n---\n".join(tmp)
   cmd_funs["bin"] = _
 
