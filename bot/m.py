@@ -226,6 +226,8 @@ def get_lineno(e=None, fs=None):
   if e is None:
     fm = sys._getframe()
     fm = fm.f_back
+    if fm is None:
+      return
   else:
     tb = e.__traceback__
     if fs is not None:
@@ -441,6 +443,7 @@ UA = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) 
 #  urlre=re.compile(r'(^|\n|\s+)(https?://((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[0-9a-zA-Z$\-_\.\+\!\*\'\(\)\,\?\=%]+)*/?)')
 #  urlre = re.compile(r'(^|\n|\s+)(https?://((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[^\s\\\"\',?!，。？！“”‘’、【】…]+)*/?)')
 urlre = re.compile(r'(^|\n|\s+)(https?://((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|\[[\da-fA-F:]{4,}\])(:\d+)?(/[^\s]+)*/?)')
+url_only_re = re.compile(r'^(https?://((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|\[[\da-fA-F:]{4,}\])(:\d+)?(/[^\s]+)*/?)$')
 url_md_left=re.compile(r'\[[^\]]+\]\([^\)]+')
 #  shell_color_re=re.compile(r'\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]')
 shell_color_re=re.compile(r'\x1B|\[([0-9]{1,2}(;[0-9]{1,2}(;[0-9]{1,3}))??)?[m|K]')
@@ -523,14 +526,14 @@ def cross_thread(func=None, *, need_main=True):
   def wrapper(func):
     if asyncio.iscoroutinefunction(func):
       @wraps(func)
-      async def wrapper(*args, **kwargs):
+      async def _(*args, **kwargs):
         coro = func(*args, **kwargs)
         res = await run_run(coro, need_main=need_main)
         #  info(f"done: {res}")
         return res
     else:
       @wraps(func)
-      def wrapper(*args, **kwargs):
+      def _(*args, **kwargs):
         #  return func(*args, **kwargs)
         #  if need_main:
         #    return run_cb_in_main(func, *args, **kwargs)
@@ -546,7 +549,7 @@ def cross_thread(func=None, *, need_main=True):
             time.sleep(1)
             info(f"waiting for result: {func.__name__}({args}, {kwargs})")
         return fu.result()
-    return wrapper
+    return _
   #  if func is not None:
   #    return _cross_thread(func)
   #  return _cross_thread
@@ -571,28 +574,29 @@ def auto_task(func, return_task=False):
 
 
 def exceptions_handler(func=None, *, no_send=False):
-  #  _no_send = no_send
-  def wrapper(func):
-    if asyncio.iscoroutinefunction(func):
-      @wraps(func)
-      async def wrapper(*args, **kwargs):
-        try:
-          return await func(*args, **kwargs)
-        #  except Exception as e:
-        except BaseException as e:
-          return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
-    else:
-      @wraps(func)
-      def wrapper(*args, **kwargs):
-        try:
-          return func(*args, **kwargs)
-        #  except Exception as e:
-        except BaseException as e:
-          return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
-    return wrapper
   if func is not None:
-    return wrapper(func)
-  return wrapper
+    return __exceptions_handler(func, no_send)
+  return __exceptions_handler
+
+def __exceptions_handler(func, no_send=False):
+  if asyncio.iscoroutinefunction(func):
+    @wraps(func)
+    async def _(*args, **kwargs):
+      try:
+        return await func(*args, **kwargs)
+      #  except Exception as e:
+      except BaseException as e:
+        return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
+    return _
+  else:
+    @wraps(func)
+    def _(*args, **kwargs):
+      try:
+        return func(*args, **kwargs)
+      #  except Exception as e:
+      except BaseException as e:
+        return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
+    return _
 
 def _exceptions_handler(func, no_send, e, *args, **kwargs):
   #  no_send = _no_send
@@ -627,10 +631,11 @@ def _exceptions_handler(func, no_send, e, *args, **kwargs):
     err(res, exc_info=True, stack_info=True)
     raise
 
-  except asyncio.CancelledError as e:
+  except asyncio.CancelledError:
     info("该任务被要求中止: {!r}, fs: {}".format(e, fs))
     raise
-  except GeneratorExit as e:
+
+  except GeneratorExit:
     # https://docs.python.org/zh-cn/3.13/library/exceptions.html#GeneratorExit
     warn("fixme: {!r}, fs: {}, func: {}(*{}, **{})".format(e, fs, func, args, kwargs))
 
@@ -648,7 +653,7 @@ def _exceptions_handler(func, no_send, e, *args, **kwargs):
       res += ' some other error happened'
   except socket.timeout:
     res += ' socket timed out'
-  except ConnectionError as e:
+  except ConnectionError:
     no_send = True
     #  err("链接问题，退出吧 %s" % res, exc_info=True, stack_info=True)
     #  raise
@@ -678,12 +683,15 @@ def _exceptions_handler(func, no_send, e, *args, **kwargs):
         msg_delay_default = 0.4
     asyncio.create_task(f())
     return True
-  except OSError as e:
+  except OSError:
     no_send = True
     err("出错啦 OSError %s" % res, True)
     #  raise
   except Exception:
     pass
+  except BaseException:
+    err("出错啦 %s" % res)
+    raise
     #  err(f"W: {repr(e)} line: {e.__traceback__.tb_lineno}", exc_info=True, stack_info=True)
     #  print(f"W: {repr(e)} line: {e.__traceback__.tb_next.tb_next.tb_lineno}")
 
@@ -693,29 +701,14 @@ def _exceptions_handler(func, no_send, e, *args, **kwargs):
     info("check send_xmpp: {}".format(send_xmpp.__name__ in fs))
     if not allright.is_set():
       no_send = True
-    elif _send_tg.__name__ in fs:
-      no_send = True
-      no_send_tg = True
-      info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
     elif send_tg.__name__ in fs:
       no_send = True
-      no_send_tg = True
       info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
     elif send_tg2.__name__ in fs:
       no_send = True
-      no_send_tg = True
       info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
     elif send_xmpp.__name__ in fs:
       no_send = True
-      no_send_xmpp = True
-      info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-    elif send_tg.__name__ in res:
-      no_send = True
-      no_send_tg = True
-      info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-    elif send_xmpp.__name__ in res:
-      no_send = True
-      no_send_xmpp = True
       info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
 
     elif send_log.__name__ in fs:
@@ -855,11 +848,11 @@ def destr(s):
 
 
 
-def num2byte(num):
-    return bytes.fromhex(hex(num)[2:])
-
-def byte2num(b):
-    return int(b.hex(), 16)
+#  def num2byte(num):
+#      return bytes.fromhex(hex(num)[2:])
+#
+#  def byte2num(b):
+#      return int(b.hex(), 16)
 
 
 # def int_to_bytes(x: int) -> bytes:
@@ -868,6 +861,7 @@ def num2byte(x):
         return x.to_bytes((x.bit_length() + 7) // 8, 'big')
     else:
         warn("type error")
+        return b""
     
 # def int_from_bytes(xbytes: bytes) -> int:
 def byte2num(b):
@@ -875,6 +869,7 @@ def byte2num(b):
         return int.from_bytes(b, 'big')
     else:
         warn("type error")
+        return -1
 
 
 
@@ -1137,8 +1132,8 @@ async def ipfs_add(data, filename=None, url="https://ipfs.pixura.io/api/v0/add",
   try:
     url = load_str(url)
   except SyntaxError as e:
-    info = f"{e=}\n\n{url}"
-    print(info)
+    res = f"{e=}\n\n{url}"
+    print(res)
     return
 #  url = url["Hash"]
   #  url = "https://{}.ipfs.infura-ipfs.io/".format(url["Hash"])
@@ -1192,7 +1187,7 @@ async def itzmx(data, filename=None, *args, **kwargs):
     if not filename:
       filename = "txt_not_zip.zip"
   extra = {}
-  if not filename and filename.split(".")[-1] not in allowed:
+  if filename and filename.split(".")[-1] not in allowed:
     #  extra = { "randomname": "on" }
     filename += "_not_zip.zip"
   fieldname = "file"
@@ -1298,6 +1293,7 @@ def load_str(msg, no_ast=False):
     except Exception as e:
       err(f"failed2: {msg=}")
       #  raise e
+      return {}
 
 
 
@@ -1784,10 +1780,10 @@ async def init_myshell():
   #  info("wait for steam ok...")
   #  t1 = asyncio.create_task(myshell_p.stdout.readline())
   #  t2 = asyncio.create_task(myshell_p.stderr.readline())
-  t1 = asyncio.create_task(pr(p.stdout.read, 1))
-  t2 = asyncio.create_task(pr(p.stderr.read, 2))
+  asyncio.create_task(pr(p.stdout.read, 1))
+  asyncio.create_task(pr(p.stderr.read, 2))
 
-  t3 = asyncio.create_task(prr())
+  asyncio.create_task(prr())
   cmds = "source ~/.bash_profile"
   res = await myshell(cmds)
   info(f"init bash: {res}")
@@ -3112,6 +3108,8 @@ def send_log(text, jid=None, delay=1, fm=None):
   if fm is None:
     fm = sys._getframe()
     fm = fm.f_back
+  if fm is None:
+    return False
   if fm.f_code.co_name != "_exceptions_handler":
     text = f"{fm.f_code.co_name} {fm.f_lineno} {text}"
   #  if jid is None:
@@ -4433,10 +4431,10 @@ pb_list = {
 #async def pastebin(data="test", filename=None, url="https://fars.ee/?u=1", fieldname="c", extra={}, **kwargs):
 #  @cross_thread
 @exceptions_handler
-async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname="c", extra={}, ce=None, use=None, **kwargs):
+async def pastebin(data=None, filename=None, url=pb_list["fars"][0], fieldname="c", extra={}, ce=None, use=None, **kwargs):
   #  use = "0x0"
   if not data:
-    return
+    return False
   if use:
     if use not in pb_list:
       use = "fars"
@@ -4495,7 +4493,7 @@ async def pastebin(data="test", filename=None, url=pb_list["fars"][0], fieldname
   elif type(data) == FormData:
     d = data
   else:
-    return
+    return False
   if use_json:
     res, res_headers = await http(url=url, method="POST", json=d, headers=headers, return_headers=True, **kwargs)
   else:
@@ -6092,7 +6090,7 @@ async def stop(client=None):
 
 
 
-async def disco_info(jid, node=None, client=None):
+async def disco_info(jid=None, node=None, client=None):
   if client is None:
     client = XB
   if jid is None:
@@ -6665,7 +6663,7 @@ async def regisger_handler(client):
 
 
 
-@exceptions_handler
+#  @exceptions_handler
 def send_typing(muc):
   if type(muc) is int:
     # telegram
@@ -7715,12 +7713,13 @@ cmd_for_admin = set()
 
 async def init_cmd():
 
-  async def _(cmds, src):
-    return "pong"
+  #  async def _(cmds: list, src: str | int) -> str | bool | None:
+  async def _(cmds: list, src: str | int) -> tuple:
+    return 0, "pong"
   cmd_funs["ping"] = _
 
-  async def _(cmds, src):
-    cmds = set()
+  async def _(cmds: list, src: str | int) -> tuple:
+    tmp = set()
     cmds_admin = set()
     cmds_all = set()
     for k, v in cmd_funs.items():
@@ -7745,22 +7744,22 @@ async def init_cmd():
       if k in cmd_for_admin:
         cmds_admin.add(k1)
       else:
-        cmds.add(k1)
+        tmp.add(k1)
 
     res = '可用的命令:\n'
     #  res += '\n'.join(cmds)
-    res += '\n'.join(sorted(cmds))
+    res += '\n'.join(sorted(tmp))
     if cmds_admin:
       res += '\n\n仅管理可用的命令:\n'
       #  res += '\n'.join(cmds_admin)
     res += '\n'.join(sorted(cmds_admin))
-    return res
+    return 0, res
   cmd_funs["cmd"] = _
 
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"disco\n.{cmds[0]} $domain\nhttps://docs.zombofant.net/aioxmpp/devel/api/public/disco.html?highlight=disco#aioxmpp.DiscoClient"
+      return 0, f"disco\n.{cmds[0]} $domain\nhttps://docs.zombofant.net/aioxmpp/devel/api/public/disco.html?highlight=disco#aioxmpp.DiscoClient"
     if len(cmds) == 3:
       ns = cmds[2]
     else:
@@ -7773,13 +7772,13 @@ async def init_cmd():
       res = await disco_info(cmds[1], node=ns)
     if res:
       res = res.to_dict()
-    return res
+    return 0, res
   cmd_funs["disco"] = _
   cmd_for_admin.add('disco')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"discoi\n.{cmds[0]} $domain\nhttps://docs.zombofant.net/aioxmpp/devel/api/public/disco.html?highlight=disco#aioxmpp.DiscoClient"
+      return 0, f"discoi\n.{cmds[0]} $domain\nhttps://docs.zombofant.net/aioxmpp/devel/api/public/disco.html?highlight=disco#aioxmpp.DiscoClient"
     if len(cmds) == 3:
       ns = cmds[2]
     else:
@@ -7796,13 +7795,13 @@ async def init_cmd():
         tmp += "%s %s %s %s\n\n" % (i.name, i.node, i.jid, await get_server_name(i.jid))
       res = tmp
       
-    return res
+    return 0, res
   cmd_funs["discoi"] = _
   cmd_for_admin.add('discoi')
 
 
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
       return f"download file by url\n.{cmds[0]} $url [raw/curl/tg/clear[2]] [direct] [timeout]"
     if cmds[1] == "clear":
@@ -7810,13 +7809,13 @@ async def init_cmd():
         tg_download_tasks.remove(src)
       #  if src in music_bot_state:
       #    music_bot_state.pop(src)
-      return "ok"
+      return 0, "ok"
     elif cmds[1] == "clear2":
       tg_download_tasks.clear()
       #  music_bot_state.clear()
       await sleep(interval+1)
       tg_download_tasks.clear()
-      return "ok"
+      return 0, "ok"
     if len(cmds) == 3:
       if cmds[2] == "tg":
         try:
@@ -7824,10 +7823,10 @@ async def init_cmd():
           if len(cmds) == 3:
             if cmds[2] == "tg":
               res = await UB.send_file(CHAT_ID, file=cmds[1], caption=cmds[1])
-              return "sent in tg"
+              return 0, "sent in tg"
         except Exception as e:
           warn(f"通过tg远程下载失败: {e=}")
-          return "failed"
+          return 0, "failed"
     opts = cmds[2:4]
     while True:
       if len(opts) < 2:
@@ -7841,30 +7840,30 @@ async def init_cmd():
       max_time = run_shell_time_max
     opts.append(str(max_time))
     res = await get_title(cmds[1], src, opts=opts, max_time=max_time)
-    return f"{res}"
+    return 0, f"{res}"
   cmd_funs["down"] = _
   cmd_for_admin.add('down')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
+      return 0, f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
     res = await get_title(cmds[1], opts=cmds[2:4], src=src)
-    return f"{res}"
+    return 0, f"{res}"
   cmd_funs["tl"] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
+      return 0, f"get title\n.{cmds[0]} $url [raw/curl] [direct]"
     res = await get_title(cmds[1], src=src, opts=cmds[2:4])
   cmd_funs["tl2"] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"bash\n.{cmds[0]} $code"
-    return str(time.time())
+      return 0, f"bash\n.{cmds[0]} $code"
+    return 0, str(time.time())
   cmd_funs["now"] = _
 
-  #  async def _(cmds, src):
+  #  async def _(cmds: list, src: str | int) -> str | bool | None:
   #    if len(cmds) == 1:
   #      return f"bash\n.{cmds[0]} $code"
   #    cmds = cmds[0]
@@ -7877,60 +7876,61 @@ async def init_cmd():
       "free",
       "cal"
       ]:
-    async def _(cmds, src):
+    async def _(cmds: list, src: str | int) -> tuple:
       cmds = cmds[0]
       #  cmds = list(f"{x}\n" for x in cmds.splitlines())
       #  await run_run( myshell(cmds, src=src) , False)
       await myshell(cmds, src=src)
+      return 512,
     cmd_funs[i] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"bash\n.{cmds[0]} $code"
+      return 0, f"bash\n.{cmds[0]} $code"
     cmds.pop(0)
     #  res = await my_popen(cmds)
     #  res = await my_popen(' '.join(cmds), src=src, shell=True)
     #  res = await my_sexec(' '.join(cmds), src=src)
     res = await my_sshell(' '.join(cmds), src=src)
-    return format_out_of_shell(res)
+    return 0, format_out_of_shell(res)
   cmd_funs["sh3"] = _
   cmd_for_admin.add('sh3')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"bash -l\n.{cmds[0]} $code"
+      return 0, f"bash -l\n.{cmds[0]} $code"
     #  cmds[0] = "bash"
     cmds.pop(0)
     text = ' '.join(cmds)
     cmds = ["bash", "-c", text]
     res = await my_sexec(cmds, src=src)
-    return format_out_of_shell(res)
+    return 0, format_out_of_shell(res)
   cmd_funs["sh2"] = _
   cmd_for_admin.add('sh2')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     global myshell_p
     if len(cmds) == 1:
-      return f"bash -i\n.{cmds[0]} $code/stop/restart/err/kill\n'\\ '会翻译成空格再执行"
+      return 0, f"bash -i\n.{cmds[0]} $code/stop/restart/err/kill\n'\\ '会翻译成空格再执行"
     elif len(cmds) == 2:
       if cmds[1] == "restart":
         if await stop_sub(myshell_p):
           #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
           if await init_myshell():
-            return "ok"
-        return "failed"
+            return 0, "ok"
+        return 0, "failed"
       elif cmds[1] == "stop":
         if await stop_sub(myshell_p):
-          return "ok"
+          return 0, "ok"
         else:
-          return "failed"
+          return 0, "failed"
       elif cmds[1] == "kill":
         myshell_p.kill()
-        return "ok"
+        return 0, "ok"
       elif cmds[1] == "err":
         #  raise OSError("stop by sh3")
         raise SystemExit("stop by me, restart...")
-        return "ok"
+        return 0, "ok"
     cmds.pop(0)
     cmds = ' '.join(cmds)
     #  cmds = list(f"{x}\n" for x in cmds.splitlines())
@@ -7938,24 +7938,25 @@ async def init_cmd():
     #  res = await myshell(cmds, src=src)
     #  res = await run_run( myshell(cmds, src=src) , False)
     res = await myshell(cmds, src=src)
+    return 512,
     #  if res:
     #    res = f"```\n{res}```"
     #  return format_out_of_shell(res)
   cmd_funs["sh"] = _
   cmd_for_admin.add('sh')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     global myshell_p
     if len(cmds) == 1:
-      return f"bash -i\n不显示临时结果，只显示最终结果\n.{cmds[0]} $code"
+      return 0, f"bash -i\n不显示临时结果，只显示最终结果\n.{cmds[0]} $code"
     cmds.pop(0)
     cmds = ' '.join(cmds)
     res = await myshell(cmds)
-    return format_out_of_shell(res)
+    return 0, format_out_of_shell(res)
   cmd_funs["sh5"] = _
   cmd_for_admin.add('sh5')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     cmds = f'''
     if [[ -e "{SH_PATH}/STOP" ]]; then
       rm "{SH_PATH}/STOP"
@@ -7966,47 +7967,48 @@ async def init_cmd():
     fi
     '''
     res = await myshell(cmds)
-    return format_out_of_shell(res)
+    return 0, format_out_of_shell(res)
   cmd_funs["stop"] = _
   cmd_for_admin.add('stop')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"python\n.{cmds[0]} $code"
+      return 0, f"python\n.{cmds[0]} $code"
     cmds.pop(0)
     res = await my_py(' '.join(cmds), src)
-    return f"{res}"
+    return 0, f"{res}"
   cmd_funs["py"] = _
   cmd_for_admin.add('py')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"exec\nreturn res\n.{cmds[0]} $code"
+      return 0, f"exec\nreturn res\n.{cmds[0]} $code"
     cmds.pop(0)
     #  res = await my_exec2(' '.join(cmds), src)
     #  if res is 0:
     #    return "end"
-    return await my_exec2(' '.join(cmds), src)
+    return 0, await my_exec2(' '.join(cmds), src)
   cmd_funs["exec"] = _
   cmd_for_admin.add('exec')
-  async def _(cmds, src):
+
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"exec in main thread\nreturn res\n.{cmds[0]} $code"
+      return 0, f"exec in main thread\nreturn res\n.{cmds[0]} $code"
     cmds.pop(0)
-    return await my_exec(' '.join(cmds), src)
+    return 0, await my_exec(' '.join(cmds), src)
   cmd_funs["exec0"] = _
   cmd_for_admin.add('exec0')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"python eval()\n.{cmds[0]} $code"
+      return 0, f"python eval()\n.{cmds[0]} $code"
     cmds.pop(0)
     res = await my_eval(' '.join(cmds))
-    return f"{res}"
+    return 0, f"{res}"
   cmd_funs["eval"] = _
   cmd_for_admin.add('eval')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     #  if len(cmds) == 1:
     #    return f"{cmds[0]}\n.{cmds[0]}"
     global member_only_mode
@@ -8035,7 +8037,7 @@ async def init_cmd():
               i += 1
               if muc == src:
                 k += 1
-      return "%s, 禁言账户：%s/%s" % (reason, k, i)
+      return 0, "%s, 禁言账户：%s/%s" % (reason, k, i)
     else:
       member_only_mode = False
       reason = "非成员允许发言"
@@ -8068,16 +8070,16 @@ async def init_cmd():
           elif j[2] == 1:
             j[2] = "participant"
 
-      return "%s, 解除账户：%s/%s" % (reason, k, i)
+      return 0, "%s, 解除账户：%s/%s" % (reason, k, i)
   cmd_funs["mo"] = _
   cmd_for_admin.add('mo')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"{cmds[0]}\n.{cmds[0]} $jid/$nick"
+      return 0, f"{cmds[0]}\n.{cmds[0]} $jid/$nick"
     res = get_nick_room(cmds, src)
     if type(res) is str:
-      return res
+      return 0, res
     nick = res[0]
     room = res[1]
     reason = "cmds[0]命令"
@@ -8085,7 +8087,7 @@ async def init_cmd():
     for i in room.members:
       if i.nick == nick:
         res = await room.ban(i, reason)
-        return f"ok: {res}"
+        return 0, f"ok: {res}"
 
     res = get_jid_room(cmds, src)
     if type(res) is str:
@@ -8095,23 +8097,23 @@ async def init_cmd():
         res = await room.muc_set_role(nick, role, reason=reason)
       except Exception as e:
         muc = str(room.jid.bare())
-        return f"failed: {muc}"
-      return f"ok2: {res}"
+        return 0, f"failed: {muc}"
+      return 0, f"ok2: {res}"
     jid = res[0]
     room = res[1]
     #  muc = str(room.jid)
     #  unban(muc, jid=jid)
     affiliation = "outcast"
     res = await room.muc_set_affiliation(jid, affiliation, reason=reason)
-    return f"ok3: {res}"
+    return 0, f"ok3: {res}"
 
-    return "not found"
+    return 0, "not found"
   cmd_funs["ban"] = _
   cmd_for_admin.add('ban')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"{cmds[0]}\n.{cmds[0]} $jid/$nick"
+      return 0, f"{cmds[0]}\n.{cmds[0]} $jid/$nick"
 
     if '/' in cmds[1]:
       #  muc = cmds[1].split('/', 1)[0]
@@ -8125,7 +8127,7 @@ async def init_cmd():
           if muc in my_groups:
             nick = cmds[1].split('/', 1)[1]
         else:
-          return res
+          return 0, res
       else:
         nick = res[0]
     else:
@@ -8141,7 +8143,7 @@ async def init_cmd():
           res2 += f"\nok: {muc} {res}"
 
     if res2:
-      return f"ok: {nick}{res2}"
+      return 0, f"ok: {nick}{res2}"
 
     res2 = ""
     res3 = ""
@@ -8157,7 +8159,7 @@ async def init_cmd():
     if res2:
       res = f"ok2: {nick}{res2}\n--{res3}"
       err(res)
-      return res
+      return 0, res
 
     res = get_jid_room(cmds, src)
     if type(res) is str:
@@ -8180,9 +8182,9 @@ async def init_cmd():
 
         if jid is None:
           warn(f"没找到: {nick}")
-          return f"没找到: {nick}"
+          return 0, f"没找到: {nick}"
       else:
-        return res
+        return 0, res
     #    else:
     #      warn(res)
     else:
@@ -8203,13 +8205,13 @@ async def init_cmd():
       res = f"ok3: {nick} {jid}{res2}\n--{res3}"
     else:
       res = f"failed3: {nick} {jid}"
-    return res
+    return 0, res
   cmd_funs["banall"] = _
   cmd_for_admin.add('banall')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"临时踢出\n.{cmds[0]} $jid/$nick"
+      return 0, f"临时踢出\n.{cmds[0]} $jid/$nick"
 
     #  option = False
     #  if len(cmds) == 3:
@@ -8218,7 +8220,7 @@ async def init_cmd():
 
     res = get_nick_room(cmds, src)
     if type(res) is str:
-      return res
+      return 0, res
     nick = res[0]
     room = res[1]
     reason = "cmds[0]命令"
@@ -8229,14 +8231,14 @@ async def init_cmd():
     for i in room.members:
       if i.nick == nick:
         res = await room.kick(i, reason)
-        return f"ok: {res}"
-    return "not found"
+        return 0, f"ok: {res}"
+    return 0, "not found"
   cmd_funs["kick"] = _
   cmd_for_admin.add('kick')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"禁言\n.{cmds[0]} $jid/$nick [时间(默认300)]"
+      return 0, f"禁言\n.{cmds[0]} $jid/$nick [时间(默认300)]"
 
     option = 300
     if len(cmds) == 3:
@@ -8245,7 +8247,7 @@ async def init_cmd():
 
     res = get_nick_room(cmds, src)
     if type(res) is str:
-      return res
+      return 0, res
     nick = res[0]
     room = res[1]
     reason = "cmds[0]命令"
@@ -8267,16 +8269,16 @@ async def init_cmd():
         break
 
     res = await room.muc_set_role(nick, role, reason=reason)
-    return f"ok: {res}"
+    return 0, f"ok: {res}"
   cmd_funs["wtf"] = _
   cmd_for_admin.add('wtf')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"禁言\n.{cmds[0]} $jid/$nick"
+      return 0, f"禁言\n.{cmds[0]} $jid/$nick"
     res = get_nick_room(cmds, src)
     if type(res) is str:
-      return res
+      return 0, res
     nick = res[0]
     room = res[1]
 
@@ -8292,17 +8294,17 @@ async def init_cmd():
     #    role = "participant"
     role = "participant"
     res = await room.muc_set_role(nick, role, reason=reason)
-    return f"ok: {res}"
+    return 0, f"ok: {res}"
   cmd_funs["unban"] = _
   cmd_for_admin.add('unban')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"解除驱逐（添加成员身份）\n.{cmds[0]} $jid/$nick"
+      return 0, f"解除驱逐（添加成员身份）\n.{cmds[0]} $jid/$nick"
     reason = "cmds[0]命令"
     res = get_jid_room(cmds, src)
     if type(res) is str:
-      return res
+      return 0, res
     jid = res[0]
     room = res[1]
     #  muc = str(room.jid)
@@ -8312,7 +8314,7 @@ async def init_cmd():
 
     res = get_nick_room(cmds, src)
     if type(res) is str:
-      return res
+      return 0, res
     nick = res[0]
     room = res[1]
 
@@ -8323,32 +8325,32 @@ async def init_cmd():
     role = "participant"
     res2 = await room.muc_set_role(nick, role, reason=reason)
 
-    return f"ok: {res} {res2}"
+    return 0, f"ok: {res} {res2}"
   cmd_funs["op"] = _
   cmd_for_admin.add('op')
   cmd_funs["ub"] = _
   cmd_for_admin.add('ub')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"驱逐\n.{cmds[0]} $jid/$nick"
+      return 0, f"驱逐\n.{cmds[0]} $jid/$nick"
 
     res = get_jid_room(cmds, src)
     if type(res) is str:
-      return res
+      return 0, res
     jid = res[0]
     room = res[1]
 
     reason = "cmds[0]命令"
     affiliation = "outcast"
     res = await room.muc_set_affiliation(jid, affiliation, reason=reason)
-    return f"ok: {res}"
+    return 0, f"ok: {res}"
   cmd_funs["sb"] = _
   cmd_for_admin.add('sb')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"join all\n.{cmds[0]} all\n.{cmds[0]} $muc"
+      return 0, f"join all\n.{cmds[0]} all\n.{cmds[0]} $muc"
     if cmds[1] == "all":
       for tmuc in rooms:
         room =  rooms[tmuc]
@@ -8361,14 +8363,14 @@ async def init_cmd():
         room =  rooms[tmuc]
         await room.leave()
       res = await join(tmuc)
-      return "res: %s" % res
-    return "ok"
+      return 0, "res: %s" % res
+    return 0, "ok"
   cmd_funs["join"] = _
   cmd_for_admin.add('join')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"search\n.{cmds[0]} [clear/se/wtf/fix] $jid/$nick"
+      return 0, f"search\n.{cmds[0]} [clear/se/wtf/fix] $jid/$nick"
 
     if cmds[1] == "fix":
       res = ""
@@ -8418,7 +8420,7 @@ async def init_cmd():
               tmp.append(str(j))
           if tmp:
             res += "\n\n模糊查找结果\n" + "\n".join(tmp)
-        return res
+        return 0, res
       jid = res[0]
       room = res[1]
 
@@ -8450,11 +8452,11 @@ async def init_cmd():
           res = "%s" % j
         else:
           res = "not found"
-    return res
+    return 0, res
   cmd_funs["se"] = _
   cmd_for_admin.add('se')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     res = None
     if len(cmds) == 1:
       res = f"管理桥接\n.{cmds[0]} add $from $dst\n.{cmds[0]} del $id/$jid\n.{cmds[0]} se $id/$jid"
@@ -8492,12 +8494,13 @@ async def init_cmd():
         res += "\npeer id: %s" % await UB.get_peer_id(peer)
         res += "\n%s: %s\n--\n%s" % (type(peer), peer.stringify(), peer)
     send(f"{res}", src)
+    return 512,
   cmd_funs["br"] = _
   cmd_for_admin.add('br')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"添加好友\n.{cmds[0]} $jid"
+      return 0, f"添加好友\n.{cmds[0]} $jid"
     rc = XB.summon(aioxmpp.RosterClient)
     #  pprint(rc)
     res = rc.subscribe(JID.fromstr(cmds[1]))
@@ -8507,26 +8510,27 @@ async def init_cmd():
     res = rc.approve(JID.fromstr(cmds[1]))
     #  print(f"结果：{res}")
     send(f"结果：{res}", src)
+    return 512,
   cmd_funs["connect"] = _
   cmd_for_admin.add('connect')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     global print_msg
     print_msg = not print_msg
     if print_msg:
-      return "ok"
+      return 0, "ok"
     else:
-      return "hide"
+      return 0, "hide"
     #  send(f"结果：{res}", src)
   cmd_funs["printmsg"] = _
   cmd_for_admin.add('printmsg')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
       if src in my_groups:
         muc = src
         if muc not in rooms:
-          return f"没找到room: {muc}"
+          return 0, f"没找到room: {muc}"
         room = rooms[muc]
         jids = users[muc]
         tmp = []
@@ -8535,24 +8539,25 @@ async def init_cmd():
             if str(i.direct_jid.bare()) not in jids:
               jids[str(i.direct_jid.bare())] = [i.nick, i.affiliation, i.role]
           tmp.append(i.nick)
-        return "列表(%s)\n%s" % (len(tmp), '\n'.join(tmp))
+        return 0, "列表(%s)\n%s" % (len(tmp), '\n'.join(tmp))
       else:
-        return "need muc"
+        return 0, "need muc"
       #  rc = XB.summon(aioxmpp.RosterClient)
       #  return "items: %s" % rc.items
     elif cmds[1] == "json":
       rc = XB.summon(aioxmpp.RosterClient)
-      return "json:\n%s" % rc.export_as_json()
-    #  else:
+      return 0, "json:\n%s" % rc.export_as_json()
+    else:
+      return 0, "fixme"
     #    #  pc = XB.summon(aioxmpp.PresenceClient)
     #    #  res = XB.get_most_available_stanza(cmds[1])
     #    return res
   cmd_funs["list"] = _
   cmd_for_admin.add('list')
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"查询xmpp端口\n.{cmds[0]} $domain\n---\n.xmppi\n.xmpps"
+      return 0, f"查询xmpp端口\n.{cmds[0]} $domain\n---\n.xmppi\n.xmpps"
     res = await node.discover_connectors(cmds[1])
     o = [f"可用的xmpp端口: {cmds[1]}"]
     o += (str(x) for x in res)
@@ -8561,16 +8566,16 @@ async def init_cmd():
       o += ["服务列表", "name\tnode\tjid"]
     for i in res.items:
       o.append("%s\t%s\t%s" % (i.name, i.node, i.jid))
-    return "\n".join(o)
+    return 0, "\n".join(o)
   cmd_funs["xmpp"] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"xmpp服务列表\n.{cmds[0]} $domain"
+      return 0, f"xmpp服务列表\n.{cmds[0]} $domain"
     res = await disco_item(cmds[1])
     if len(cmds) == 3:
       if cmds[2] == "raw":
-        return f"{cmds[1]}\n{res}"
+        return 0, f"{cmds[1]}\n{res}"
     o = [cmds[1]]
     if res.items:
       o += ["name\tnode\tjid"]
@@ -8585,76 +8590,60 @@ async def init_cmd():
           res2 = await disco_info(i.jid)
           o += f"\n{res2.to_dict()}"
           send(o, src)
-        return
-    return "\n".join(o)
+        return 512,
+        return True
+    return 0, "\n".join(o)
   cmd_funs["xmpps"] = _
   
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"xmpp服务器信息\n.{cmds[0]} $domain"
+      return 0, f"xmpp服务器信息\n.{cmds[0]} $domain"
     res = await disco_info(cmds[1])
     if len(cmds) == 3:
       if cmds[2] == "raw":
-        return f"{cmds[1]}\n{res.to_dict()}"
-    return f"{cmds[1]}\n%s" % "\n".join(res.features)
+        return 0, f"{cmds[1]}\n{res.to_dict()}"
+    return 0, f"{cmds[1]}\n%s" % "\n".join(res.features)
   cmd_funs["xmppi"] = _
 
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"pastebin\n.{cmds[0]} text\n---\nhttps://fars.ee/"
+      return 0, f"pastebin\n.{cmds[0]} text\n---\nhttps://fars.ee/"
     text = ' '.join(cmds[1:])
-    return await pastebin(text)
+    return 0, await pastebin(text)
   cmd_funs["pb"] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://privatebin.info/directory/"
+      return 0, f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://privatebin.info/directory/"
     elif cmds[1] == "init":
       pvb_init()
     text = ' '.join(cmds[1:])
-    return await pvb(text)
+    return 0, await pvb(text)
   cmd_funs["pvb"] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://paste.ononoki.org/\nhttps://paste.i2pd.xyz/"
+      return 0, f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://paste.ononoki.org/\nhttps://paste.i2pd.xyz/"
     #  fu = pvb_init(server="https://0.0g.gg/")
     #  await fu
     text = ' '.join(cmds[1:])
-    return await pvb(text, server="https://0.0g.gg/")
+    return 0, await pvb(text, server="https://0.0g.gg/")
   cmd_funs["pvb2"] = _
 
 
 
-  #  async def _(cmds, src):
-  #    if len(cmds) == 1:
-  #      return f"阿里千问\n.{cmds[0]} $text"
-  #    text = ' '.join(cmds[1:])
-  #    return await qw(text)
-  #  cmd_funs["qw"] = _
-  #
-  #  async def _(cmds, src):
-  #    if len(cmds) == 1:
-  #      return f"阿里千问\n{cmds[0]} $text"
-  #    text = ' '.join(cmds[1:])
-  #    return await qw2(text)
-  #  cmd_funs["qw2"] = _
-  #
-  #
-
-
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"gpt(telegram bot) translate\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
+      return 0, f"gpt(telegram bot) translate\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
     text = ' '.join(cmds[1:])
     text = f'{PROMPT_TR_MY}“{text}”'
     return 1, gpt_bot
   cmd_funs["gtr"] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"gpt(telegram bot) translate 中文专用翻译\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
+      return 0, f"gpt(telegram bot) translate 中文专用翻译\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
     text = ' '.join(cmds[1:])
     text = f'{PROMPT_TR_ZH}“{text}”'
     return 1, gpt_bot
@@ -8669,12 +8658,12 @@ async def init_cmd():
   #    return 1, mid
   #  cmd_funs["gtg"] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"音乐下载(.163命令的简化版)\n.{cmds[0]} $text\n.{cmds[0]} clear\n--\ntelegram bot: https://t.me/{music_bot_name}"
+      return 0, f"音乐下载(.163命令的简化版)\n.{cmds[0]} $text\n.{cmds[0]} clear\n--\ntelegram bot: https://t.me/{music_bot_name}"
     if cmds[1] == "clear":
       await clear_history()
-      return "ok"
+      return 0, "ok"
     text = ' '.join(cmds[1:])
     #  music_bot_state[src] = 1
     text="/search "+text
@@ -8682,6 +8671,7 @@ async def init_cmd():
     #  return 1, mid
     return 1, music_bot, text
   cmd_funs["music"] = _
+
   short_cmds = {
       "s": "/start",
       "h": "/help",
@@ -8705,10 +8695,10 @@ async def init_cmd():
     #  bridges[pid] = src
     #  mtmsgsg[src] = {}
     #  @exceptions_handler
-    async def _(cmds, src):
+    async def _(cmds: list, src: str | int) -> tuple:
       if cmd2 is not None:
         if len(cmds) == 1:
-          return f"{cmds[0]} 是 {cmd1} {cmds2} 的快捷方式，要查看用法，请发送 {cmd1} {cmds2}"
+          return 0, f"{cmds[0]} 是 {cmd1} {cmds2} 的快捷方式，要查看用法，请发送 {cmd1} {cmds2}"
         cmds.insert(1, cmd2)
       if len(cmds) == 1:
         deleted_tg_msg_ids.clear()
@@ -8718,7 +8708,7 @@ async def init_cmd():
         if bot_name == "OPENAl_ChatGPT_bot":
           res += f"\n.{cmds[0]} /start: 更换ai模型(\"/start\"可以简写为\"s\")"
         res += f"\n---\n.{cmds[0]} /start: 某些bot通过该命令找到额外选项\n.{cmds[0]} /help: 某些bot通过该命令找到额外选项\n.{cmds[0]} /reset: 某些bot通过该命令清空bot记住的上下文\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并针对文件回复指定内容\n---\n其他ai接口命令：.gpt/.gpt4/.gm/.gm1/.gm2/.bai/.sd/.ai2/.ai3/.ds/.ds1\n---\nhttps://t.me/{bot_name}{cmds2}"
-        return res
+        return 0, res
       elif not no_file and urlre.fullmatch(cmds[-1]):
         cmds2 = [f"{SH_PATH}/title.sh", cmds[-1]]
         cmds2.extend(["", "", "", "just_path"])
@@ -8740,7 +8730,7 @@ async def init_cmd():
                     if len(cmds) > 2:
                       r =await msg.reply(' '.join(cmds[1:-1]))
                     await t
-                    return
+                    return 512,
                   else:
                     info("上传失败")
                 finally:
@@ -8753,7 +8743,7 @@ async def init_cmd():
             info(f"empty out of shell")
         else:
           info(f"下载失败")
-        return "发送失败"
+        return 0, "发送失败"
       text = ' '.join(cmds[1:])
       if text in short_cmds:
         text = short_cmds[text]
@@ -8789,73 +8779,9 @@ async def init_cmd():
   add_tg_bot("YTsavebot", "ytd2", no_file=True)
 
 
-  #  async def _(cmds, src):
-  #    bot_name = "littleb_gptBOT"
-  #    if len(cmds) == 1:
-  #      cmds2 = await get_commands2(bot_name, cmds[0])
-  #      return f"B.AI\n.{cmds[0]} $text\n.{cmds[0]} reset: 清空上下文\n--\nhttps://t.me/{bot_name}{cmds2}"
-  #    text = ' '.join(cmds[1:])
-  #    if text == "reset":
-  #      text = "/new_chat"
-  #    if text in short_cmds:
-  #      text = short_cmds[text]
-  #    return 3, bot_name, text
-  #  cmd_funs["bai"] = _
-
-  #  async def _(cmds, src):
-  #    if len(cmds) == 1:
-  #      return f"gemini 图像生成(仅支持英文)\n.{cmds[0]} $text"
-  #    text = ' '.join(cmds[1:])
-  #    return await ai_img(text)
-  #  cmd_funs["img"] = _
-  #
-  #  async def _(cmds, src):
-  #    if len(cmds) == 1:
-  #      return f"HuggingChat\n.{cmds[0]} $text\n\n--\nhttps://github.com/xtekky/gpt4free\n问答: hg/di/lb/kl/you/bd/ai"
-  #    text = ' '.join(cmds[1:])
-  #    return await hg(text, provider=Provider.HuggingChat)
-  #  cmd_funs["hg"] = _
-  #
-  #  async def _(cmds, src):
-  #    if len(cmds) == 1:
-  #      return f"HuggingChat deepseek\n.{cmds[0]} $text"
-  #    text = ' '.join(cmds[1:])
-  #    return await hgds(text)
-  #  cmd_funs["ds"] = _
-  #
-  #  async def _(cmds, src):
-  #    if len(cmds) == 1:
-  #      return f"DeepInfra\n.{cmds[0]} $text"
-  #    text = ' '.join(cmds[1:])
-  #    return  await ai(text, provider=Provider.DeepInfra)
-  #  cmd_funs["di"] = _
-  #
-  #  async def _(cmds, src):
-  #    if len(cmds) == 1:
-  #      return f"Liaobots\n.{cmds[0]} $text"
-  #    text = ' '.join(cmds[1:])
-  #    return await ai(text, provider=Provider.Liaobots)
-  #  cmd_funs["lb"] = _
-  #
-  #  async def _(cmds, src):
-  #    if len(cmds) == 1:
-  #      return f"Liaobots\n.{cmds[0]} $text"
-  #    text = ' '.join(cmds[1:])
-  #    return await ai(text, provider=Provider.Koala, proxy="http://127.0.0.1:6080")
-  #  cmd_funs["kl"] = _
-  #
-  #  async def _(cmds, src):
-  #    if len(cmds) == 1:
-  #      return f"You\n.{cmds[0]} $text\n\n--\nhttps://github.com/xtekky/gpt4free\n问答: hg/di/lb/kl/you/bd/ai"
-  #    text = ' '.join(cmds[1:])
-  #    return await ai(text, provider=Provider.You, proxy="http://127.0.0.1:6080")
-  #  cmd_funs["you"] = _
-  #
 
 
-
-
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     i = 0
     for g in mtmsgsg:
       i += 1
@@ -8869,7 +8795,7 @@ async def init_cmd():
       if cmds[1] == "all":
         await clear_history()
       else:
-        return "?"
+        return 0, "?"
     else:
       await clear_history(src)
     i = 0
@@ -8880,36 +8806,36 @@ async def init_cmd():
     #  for g in gid_src:
     #    i += 1
     #  return "ok {ii} -> {i}"
-    return f"清除状态\n.{cmds[0]} all\n--\n{ii} -> {i}"
+    return 0, f"清除状态\n.{cmds[0]} all\n--\n{ii} -> {i}"
   cmd_funs["clear"] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"unicode encode\n.{cmds[0]} $text"
+      return 0, f"unicode encode\n.{cmds[0]} $text"
     s = ' '.join(cmds[1:])
     #  return s.encode("unicode-escape").decode()
-    return ascii(s)[1:-1]
+    return 0, ascii(s)[1:-1]
   cmd_funs["u"] = _
   cmd_funs["ue"] = _
   
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"unicode decode\n.{cmds[0]} $text"
+      return 0, f"unicode decode\n.{cmds[0]} $text"
     s = ' '.join(cmds[1:])
-    return s.encode().decode("unicode-escape")
+    return 0, s.encode().decode("unicode-escape")
   cmd_funs["ud"] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"hex encode\n.{cmds[0]} $text"
+      return 0, f"hex encode\n.{cmds[0]} $text"
     #  return ''.join(format(ord(c), '02X') for c in ' '.join(cmds[1:]))
     # https://docs.python.org/zh-cn/3.11/library/stdtypes.html
-    return (' '.join(cmds[1:])).encode().hex().upper()
+    return 0, (' '.join(cmds[1:])).encode().hex().upper()
   cmd_funs["he"] = _
 
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"hex decode\n.{cmds[0]} $text"
+      return 0, f"hex decode\n.{cmds[0]} $text"
     s = ' '.join(cmds[1:])
     if s.startswith("0x"):
       s = s[2:]
@@ -8920,12 +8846,12 @@ async def init_cmd():
     #  for i in range(s)/2:
     #    res += chr(int(s[:2], 16))
     try:
-      return bytes.fromhex(s).decode()
+      return 0, bytes.fromhex(s).decode()
     except UnicodeDecodeError as e:
-      return "E: {!r}\n{}".format(e, bytes.fromhex(s).decode(errors="ignore"))
+      return 0, "E: {!r}\n{}".format(e, bytes.fromhex(s).decode(errors="ignore"))
   cmd_funs["hd"] = _
 
-  def my_bin(s):
+  def my_bin(s: str) -> str:
     #  tmp = ""
     tmp = []
     l = len(s)
@@ -8960,17 +8886,19 @@ async def init_cmd():
     #  return tmp.strip()
     tmp.reverse()
     return "".join(tmp)
-  async def _(cmds, src):
+  async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return f"hex or int to bin\n.{cmds[0]} $text"
+      return 0, f"hex or int to bin\n.{cmds[0]} $text"
     s = ' '.join(cmds[1:])
     s = s.replace(" ", "")
     #  s= s.replace(":", "")
     if src == CHAT_ID:
       try:
         s = eval(s)
-      except Exception as e:
+      except NameError as e:
         info(f"eval error: {e=}")
+      except Exception as e:
+        warn(f"eval error", e=e)
     tmp = []
     if type(s) is int:
       s = bin(s)
@@ -8999,8 +8927,11 @@ async def init_cmd():
           s = str(s)
           s = s[2:]
           tmp.append(my_bin(s))
-    return "\n---\n".join(tmp)
+    return 0, "\n---\n".join(tmp)
   cmd_funs["bin"] = _
+
+
+
 
 bridges_tmp = {}
 
@@ -9011,7 +8942,7 @@ async def run_cmd(*args, **kwargs):
     res = wtf_str(res, "xmpp")
   return res
 
-async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
+async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool | str:
   text0 = text
   if qt is not None:
     text = "{}\n\n{}".format(text, "\n".join(qt))
@@ -9019,14 +8950,14 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
     return "pong"
   if text[0:1] == ".":
     if text[1:2] == " ":
-      return
+      return True
     if text[1:2] == ".":
-      return
+      return True
     cmds = get_cmd(text[1:])
     if cmds:
       pass
     else:
-      return
+      return True
     #  print(f"> I: {cmds}")
     info("got cmds: {}".format(cmds))
     st = send_typing(src)
@@ -9052,10 +8983,19 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
         #    info(res, exc_info=e)
         #  f = exceptions_handler(send_to=src)(cmd_funs[cmd])
         f = exceptions_handler(no_send=True)(cmd_funs[cmd])
-        res = await f(cmds, src)
+        if asyncio.iscoroutinefunction(f):
+          res = await f(cmds, src)
+        else:
+          return True
+        #  res = await (exceptions_handler(no_send=True)(cmd_funs[cmd])(cmds, src))
         info(f"res: {res}")
         if type(res) is tuple:
-          if res[0] == 1 or res[0] == 3:
+          r = res[0]
+          if r == 512:
+            return True
+          if r == 0:
+            return str(res)
+          if r == 1 or r == 3:
             bot_name = res[1]
             text = res[2]
             #  mtmsgs, pid = await change_bridge(res[1], src, res[0])
@@ -9114,10 +9054,10 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None):
             #  mtmsgs[src] = [name]
           #  send_typing(src)
           return True
-        if res:
-          return res
-        else:
-          return True
+        #  if res:
+        #    return res
+        #  else:
+        #    return True
         #  reply = msg.make_reply()
         #  reply.body[None] = "%s" % res
         #  send(reply)
