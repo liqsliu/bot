@@ -723,7 +723,7 @@ if [[ -n "$4" ]] ; then
         block_msg
       fi
     else
-      # newline
+      newline
       # if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
       if false ; then
         if [[ -n "$QT" ]]; then

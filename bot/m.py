@@ -5516,7 +5516,6 @@ async def msgt(event):
         # bot2: t2bot
         #  if text.startswith("bot: "):
         #    text = text[5:]
-        text = text.splitlines()[0]
         if text.startswith("\u2067: "):
           text = text[3:]
           #  if text.startswith("\u2066"):
@@ -5539,6 +5538,7 @@ async def msgt(event):
         else:
           #  text = "M " + text
           text = text.split(": ", 1)[1]
+        text = text.splitlines()[0]
         text = text.strip()
         while "  " in text:
           text = text.replace("  ", " ")
