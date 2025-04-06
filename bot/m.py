@@ -5522,9 +5522,9 @@ async def msgt(event):
           #  if text.startswith("\u2066"):
           while text.startswith("\u2066"):
             text = text[1:]
-          if text[0] == " ":
-            text = text[1:]
-          if text[0] == "\n":
+          if text[:2] == " \n":
+            text = text[2:]
+          elif text[0] == "\n":
             text = text[1:]
             info(f"bot original text(delete enter): {text=}")
 
@@ -5567,10 +5567,10 @@ async def msgt(event):
       elif sender_id == 5864905002:
         # mybot
         #  text2 = "bot: " + (msg.raw_text)
-        text = text.splitlines()[0]
-        text = text.strip()
         while text.startswith("\u2066"):
           text = text[1:]
+        text = text.splitlines()[0]
+        text = text.strip()
         if text.startswith("M "):
           text = text.split(": ", 1)[1]
           if text.startswith("reply: "):
