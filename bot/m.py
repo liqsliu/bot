@@ -9746,6 +9746,7 @@ async def join(jid=None, nick=None, client=None):
 
 @exceptions_handler
 async def msgb(event):
+  # msg to TB
   if event.fwd_from:
     return
   chat_id = event.chat_id
@@ -9939,6 +9940,7 @@ async def msgb(event):
 
 @exceptions_handler
 async def msgbo(event):
+  # msg from TB
   msg = event.message
   chat_id = event.chat_id
   text = msg.text
