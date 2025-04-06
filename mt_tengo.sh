@@ -723,6 +723,7 @@ if [[ -n "$4" ]] ; then
         block_msg
       fi
     else
+      newline
       # if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
       if false ; then
         if [[ -n "$QT" ]]; then
@@ -755,7 +756,7 @@ ${NAME}"
       fi
       unset NAME
     fi
-    newline
+    # newline
     ;;
 #   slack.*)
 #     # if [[ "$(echo "$NAME" | wc -l)" -ge 3 ]]; then
@@ -838,7 +839,6 @@ $M *$NAME*: "
     else
       TEXT=$(bash "$SH_PATH/text2markdown.sh" "$TEXT" "other")
     fi
-    newline
     ;;
 #   api.cmd)
 #     if [[ -n "$NAME" ]]; then
