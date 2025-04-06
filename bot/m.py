@@ -9055,6 +9055,8 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
                 if len(l) > 2:
                   l[2].clear()
 
+        else:
+          warn(f"unknown res: {res}")
           # 加name是为了处理tg in消息时可以知道该消息是回复谁的
           #  mtmsgs[src] = [name]
         #  send_typing(src)
