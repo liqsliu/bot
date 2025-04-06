@@ -5522,6 +5522,8 @@ async def msgt(event):
           #  if text.startswith("\u2066"):
           while text.startswith("\u2066"):
             text = text[1:]
+          if text[0] == " ":
+            text = text[1:]
           if text[0] == "\n":
             text = text[1:]
             info(f"bot original text(delete enter): {text=}")
