@@ -8966,10 +8966,11 @@ async def init_cmd():
     s = ' '.join(cmds[1:])
     s = s.replace(" ", "")
     #  s= s.replace(":", "")
-    try:
-      s = eval(s)
-    except Exception as e:
-      info(f"eval error: {e=}")
+    if src == CHAT_ID:
+      try:
+        s = eval(s)
+      except Exception as e:
+        info(f"eval error: {e=}")
     tmp = []
     if type(s) is int:
       s = bin(s)
