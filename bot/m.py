@@ -3658,7 +3658,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
   else:
     parse_mode = client.parse_mode
-  info(f"parse_mode: {parse_mode}")
+  #  info(f"parse_mode: {parse_mode}")
   ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
   if len(ts) > 1:
     tmp_msg = False
