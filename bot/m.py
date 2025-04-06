@@ -5517,12 +5517,14 @@ async def msgt(event):
         #  if text.startswith("bot: "):
         #    text = text[5:]
         if text.startswith("\u2067: "):
+          info("bot original text: {text=}")
           text = text[3:]
           #  if text.startswith("\u2066"):
           while text.startswith("\u2066"):
             text = text[1:]
           if text[0] == "\n":
             text = text[1:]
+            info("bot original text(delete enter): {text=}")
 
           if text.startswith("M "):
             text = text.split(": ", 1)[1]
@@ -5532,12 +5534,14 @@ async def msgt(event):
             warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {text}")
             await msg.delete()
             return
+          info("bot original text(2): {text=}")
 
         #  elif " " not in  text.splei(": ", 1)[0]:
         #  elif text[1] != " ":
         else:
           #  text = "M " + text
           text = text.split(": ", 1)[1]
+          info("bot original text(3): {text=}")
         text = text.splitlines()[0]
         text = text.strip()
         while "  " in text:
