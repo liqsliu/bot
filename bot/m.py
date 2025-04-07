@@ -2442,8 +2442,7 @@ async def my_exec(cmd, src=None, client=None, **args):
   )
 
   # Get `__ex` from local variables, call it and return the result
-  #  res = await locals()['_']()
-  res = await _()
+  res = await locals()['_']()
   info(f"exec res: {res}")
   #  if res is not None:
   return "{!r}".format(res)
