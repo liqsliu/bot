@@ -2399,12 +2399,12 @@ async def run_coro(coro, lp, lp2):
     lp.call_soon_threadsafe(fu.set)
     #  return res
   #  info(f"lp2 is_running: {lp2.is_running()}")
-  t = lp2.create_task(f())
+  #  t = lp2.create_task(f())
   #  ts = []
   #  def f2():
   #    t= asyncio.create_task(f())
   #    ts.append(t)
-  #  lp2.call_soon_threadsafe(asyncio.create_task, f())
+  lp2.call_soon_threadsafe(asyncio.create_task, f())
   #  info(f"lp2 is_running: {lp2.is_running()}")
   await fu.wait()
   return ress[0]
@@ -6209,12 +6209,16 @@ async def get_server_name(jid):
 
 
 
+cross_thread_tasks = {}
+
 
 async def thread2_loop():
   info("副进程时间循环已启动")
   while True:
-    await sleep(60)
-    info("副进程时间循环运行中...")
+    await sleep(0.5)
+    info0("副进程时间循环运行中...")
+    for i in range(120):
+      await sleep(0.5)
 
 
 
