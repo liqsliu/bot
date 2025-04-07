@@ -1758,8 +1758,9 @@ async def init_myshell():
     tmp2 = b""
     while myshell_p.returncode is None:
       #  n,d = await myshell_queue1.get()
-      await data_ok.wait()
-      data_ok.clear()
+      if len(data) == 0:
+        await data_ok.wait()
+        data_ok.clear()
       n,d = data.popleft()
       while b"\n" in d:
         d = d.split(b"\n", 1)
