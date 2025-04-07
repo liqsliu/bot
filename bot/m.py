@@ -9792,7 +9792,8 @@ async def msgb(event):
 
   if event.is_private or chat_id == CHAT_ID:
     msg = event.message
-    text = msg.text
+    #  text = msg.text
+    text = msg.raw_text
     sender_id = event.sender_id
     if text:
       info(f"bot got msg: {chat_id} {sender_id}: {text}")
