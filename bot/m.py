@@ -571,7 +571,10 @@ def cross_thread(func=None, *, need_main=True):
               info(f"fu.result: {res}")
               return res
             info(f"loop2 is_running: {loop2.is_running()}")
-            t = loop2.create_task(f())
+            #  t = loop2.create_task(f())
+            def f2():
+              asyncio.create_task(f())
+            loop.call_soon_threadsafe(f2)
             info(f"loop2 is_running: {loop2.is_running()}")
             await fu.wait()
             if not t.done():
