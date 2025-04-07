@@ -591,17 +591,17 @@ def __exceptions_handler(func, no_send=False):
         return await func(*args, **kwargs)
       #  except Exception as e:
       except BaseException as e:
-        return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
+        return  _exceptions_handler(e, func, no_send, *args,  **kwargs)
   else:
     def _(*args, **kwargs):
       try:
         return func(*args, **kwargs)
       #  except Exception as e:
       except BaseException as e:
-        return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
+        return  _exceptions_handler(e, func, no_send, *args,  **kwargs)
   return wraps(func)(_)
 
-def _exceptions_handler(func, no_send, e, *args, **kwargs):
+def _exceptions_handler(e, func=None, no_send=False, *args, **kwargs):
   #  no_send = _no_send
   more = True
   #  no_send = False
@@ -6350,7 +6350,8 @@ async def run_coro(coro, lp, lp2):
       res = await coro
       info(f"fu.result: {res}")
     except Exception as e:
-      warn("failed", e=e)
+      #  warn("failed", e=e)
+      _exceptions_handler(e)
       res = None
     ress.append(res)
     lp.call_soon_threadsafe(fu.set)
@@ -9048,20 +9049,25 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
       elif cmd in cmd_funs:
         res = True
       if res is True:
-        #  try:
+        try:
         #    res = await cmd_funs[cmd](cmds, src)
-        #  except Exception as e:
+          f = cmd_funs[cmd]
+          res = await f(cmds, src)
+        except Exception as e:
+          _exceptions_handler(e)
+          return True
+          res = 512,
         #    print("run_cmd error:", e)
         #    res = get_lineno(e)
         #    res = f"run_cmd error: {res} {e=}"
         #    info(res, exc_info=e)
         #  f = exceptions_handler(send_to=src)(cmd_funs[cmd])
-        f = exceptions_handler(no_send=True)(cmd_funs[cmd])
-        if asyncio.iscoroutinefunction(f):
-          res = await f(cmds, src)
-        else:
-          warn(f"wtf: {f=}")
-          return True
+        #  f = exceptions_handler(no_send=True)(cmd_funs[cmd])
+        #  if asyncio.iscoroutinefunction(f):
+        #    res = await f(cmds, src)
+        #  else:
+        #    warn(f"wtf: {f=}")
+        #    return True
         #  res = await (exceptions_handler(no_send=True)(cmd_funs[cmd])(cmds, src))
         info(f"res: {res}")
         #  if type(res) is tuple:
