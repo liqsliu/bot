@@ -6209,17 +6209,17 @@ async def get_server_name(jid):
 
 
 
-cross_thread_tasks = {}
-
-
-async def thread2_loop():
-  info("副进程时间循环已启动")
-  while True:
-    await sleep(0.5)
-    info0("副进程时间循环运行中...")
-    for i in range(120):
-      await sleep(0.5)
-
+#  cross_thread_tasks = {}
+#
+#
+#  async def thread2_loop():
+#    info("副进程时间循环已启动")
+#    while True:
+#      await sleep(0.5)
+#      info0("副进程时间循环运行中...")
+#      for i in range(120):
+#        await sleep(0.5)
+#
 
 
 def thread2_daemon():
@@ -6230,7 +6230,7 @@ def thread2_daemon():
   global loop2
   loop2 = asyncio.new_event_loop()  # 创建新的事件循环
   asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
-  loop2.create_task(thread2_loop())
+  #  loop2.create_task(thread2_loop())
   loop2.run_forever()  # 启动事件循环
 
 def in_main_thread():
