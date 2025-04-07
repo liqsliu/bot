@@ -9155,22 +9155,21 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
         if res:
           return res
     finally:
-      info("finally")
+      #  info("finally")
       try:
-        #  pass
         if st is not None:
           await st.__aexit__()
       except asyncio.CancelledError as e:
-        info("该任务被要求中止，无法清除输入状态。: {!r}".format(e))
+        info("该任务被要求中止，无法清除输入状态: {!r}".format(e))
         raise
       except GeneratorExit as e:
-        warn("fixme: 无法清除输入状态。{!r})".format(e))
+        warn("fixme: 无法清除输入状态: {!r})".format(e))
 
+    return True
   #  elif text.isnumeric() and bridges[music_bot] != src:
   elif text.isnumeric():
 
-    src_o = src
-    
+    #  src_o = src
     pid = None
     if src in mtmsgsg:
       mtmsgs = mtmsgsg[src]
@@ -9203,7 +9202,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
 
     #  src = src_o
     if pid is None:
-      return
+      return False
 
     s = int(text)
     k = 0
@@ -9247,8 +9246,8 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
           bs = l[1]
           text += print_buttons(bs)
       send(f"没找到，请重新发送指令{text}", src)
-    return
 
+    return True
   else:
     # tilebot
     tmp=""
@@ -9266,11 +9265,11 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
       #  url=url[0]
       url=url[1]
       if url.startswith("https://t.me/"):
-        return
+        return False
       if url.startswith("https://conversations.im/j/"):
-        return
+        return False
       if url.startswith("https://icq.im"):
-        return
+        return False
       elif url.startswith("https://x.com/"):
         res = await get_twitter(url, max_time=8)
         return res
@@ -9983,7 +9982,7 @@ async def msgb(event):
         return
       #  res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
       res = await run_cmd(text, chat_id, f"G {MY_NAME}: ", is_admin=True)
-      info("end")
+      #  info("end")
       if res is True:
         pass
       elif res:
@@ -10016,7 +10015,7 @@ async def msgb(event):
       else:
         await msg2.reply(f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})")
       await msg.reply("ok")
-    info("return")
+    #  info("return")
     return
 
 @exceptions_handler
