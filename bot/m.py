@@ -531,12 +531,25 @@ def cross_thread(func=None, *, need_main=True):
         #  coro = func(*args, **kwargs)
         #  res = await run_run(coro, need_main=need_main)
         if need_main is True:
-          #  t = loop.create_task(func(*args, **kwargs))
-          def cb():
+          if in_main_thread():
+            info(f"在主线程执行: {func}")
+            return await func(*args, **kwargs)
+          else:
+            info(f"在副线程跨线程执行: {func}")
             return loop.run_until_complete(func(*args, **kwargs))
-          fu = run_cb_in_main(cb)
+            t = loop.create_task(func(*args, **kwargs))
+          #  def cb():
+          #    return loop.run_until_complete(func(*args, **kwargs))
+          #  fu = run_cb_in_main(cb)
+          fu = run_cb_in_thread(func, *args, **kwargs)
           res = await fu
         else:
+          if in_main_thread():
+            info(f"在主线程跨线程执行: {func}")
+            return loop2.run_until_complete(func(*args, **kwargs))
+          else:
+            info(f"在副线程执行: {func}")
+            return await func(*args, **kwargs)
           #  fu = run_cb_in_thread(func, *args, **kwargs)
           def cb():
             return loop2.run_until_complete(func(*args, **kwargs))
