@@ -526,46 +526,45 @@ def _cross_thread(func, *, need_main=True):
     #  fu = run_cb_in_thread(func, *args, **kwargs)
     #  res = await fu
     if need_main is True:
-      if in_main_thread():
-        async def _(*args, **kwargs):
-          info(f"在主线程执行: {func}")
-          coro = func(*args, **kwargs)
-          return await coro
-      else:
-        #  return loop.run_until_complete(func(*args, **kwargs))
-        async def _(*args, **kwargs):
+      async def _(*args, **kwargs):
+        if in_main_thread():
+            info(f"在主线程执行: {func}")
+            coro = func(*args, **kwargs)
+            return await coro
+        else:
+          #  return loop.run_until_complete(func(*args, **kwargs))
           info(f"跨线程在主线程执行: {func}")
           coro = func(*args, **kwargs)
           return await run_coro(coro, loop2, loop)
     else:
-      if in_main_thread():
-        async def _(*args, **kwargs):
-          info(f"跨线程在副线程执行: {func}")
-          coro = func(*args, **kwargs)
-          return await run_coro(coro, loop, loop2)
-      else:
-        async def _(*args, **kwargs):
+      async def _(*args, **kwargs):
+        if in_main_thread():
+          async def _(*args, **kwargs):
+            info(f"跨线程在副线程执行: {func}")
+            coro = func(*args, **kwargs)
+            return await run_coro(coro, loop, loop2)
+        else:
           info(f"在副线程执行: {func}")
           coro = func(*args, **kwargs)
           return await coro
   else:
     if need_main is True:
-      if in_main_thread():
-        def _(*args, **kwargs):
-          info(f"在主线程执行: {func}")
-          return func(*args, **kwargs)
-      else:
-        #  return loop.run_until_complete(func(*args, **kwargs))
-        def _(*args, **kwargs):
+      def _(*args, **kwargs):
+        if in_main_thread():
+            info(f"在主线程执行: {func}")
+            return func(*args, **kwargs)
+        else:
+          #  return loop.run_until_complete(func(*args, **kwargs))
+          #  def _(*args, **kwargs):
           info(f"跨线程在主线程执行: {func}")
           return run_cb3(loop, func, *args, **kwargs)
     else:
-      if in_main_thread():
-        def _(*args, **kwargs):
-          info(f"跨线程在副线程执行: {func}")
-          return run_cb3(loop2, func, *args, **kwargs)
-      else:
-        def _(*args, **kwargs):
+      def _(*args, **kwargs):
+        if in_main_thread():
+            info(f"跨线程在副线程执行: {func}")
+            return run_cb3(loop2, func, *args, **kwargs)
+        else:
+          #  def _(*args, **kwargs):
           info(f"在副线程执行: {func}")
           return func(*args, **kwargs)
     #  def _(*args, **kwargs):
