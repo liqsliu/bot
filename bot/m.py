@@ -528,8 +528,14 @@ def cross_thread(func=None, *, need_main=True):
     if asyncio.iscoroutinefunction(func):
       @wraps(func)
       async def _(*args, **kwargs):
-        coro = func(*args, **kwargs)
-        res = await run_run(coro, need_main=need_main)
+        #  coro = func(*args, **kwargs)
+        #  res = await run_run(coro, need_main=need_main)
+        if need_main is True:
+          fu = run_cb_in_main(func, *args, **kwargs)
+          res = await fu
+        else:
+          fu = run_cb_in_thread(func, *args, **kwargs)
+          res = await fu
         #  info(f"done: {res}")
         return res
     else:
@@ -588,7 +594,6 @@ def __exceptions_handler(func, no_send=False):
       #  except Exception as e:
       except BaseException as e:
         return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
-    return _
   else:
     @wraps(func)
     def _(*args, **kwargs):
@@ -597,7 +602,7 @@ def __exceptions_handler(func, no_send=False):
       #  except Exception as e:
       except BaseException as e:
         return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
-    return _
+  return _
 
 def _exceptions_handler(func, no_send, e, *args, **kwargs):
   #  no_send = _no_send
@@ -6188,7 +6193,7 @@ def in_main_thread():
 def run_cb_in_main(cb, *args, **kwargs):
   # fixme: 不支持多线程
   if in_main_thread():
-    info("in main")
+    info(f"在主线程执行: {cb}")
     #  return cb(*args, **kwargs)
     fu = asyncio.Future()
     @exceptions_handler
@@ -6196,7 +6201,7 @@ def run_cb_in_main(cb, *args, **kwargs):
       fu.set_result(cb(*args, **kwargs))
     loop.call_soon(cb2)
     return fu
-  info("not in main")
+  info(f"在副线程跨线程执行: {cb}")
   #  cb, fu = cb_for_future(cb, loop2, *args, **kwargs)
   cb, fu = cb_for_future(partial(cb, *args, **kwargs), loop2)
   loop.call_soon_threadsafe(cb)
@@ -6205,7 +6210,7 @@ def run_cb_in_main(cb, *args, **kwargs):
 def run_cb_in_thread(cb, *args, **kwargs):
   # fixme: 不支持多线程
   if in_main_thread():
-    info("in main")
+    info(f"在主线程跨线程执行: {cb}")
     #  fu = asyncio.Future()
     #  cb = cb_for_future(fu.set_result, cb, loop)
     #  loop2.call_soon_threadsafe(partial(cb, *args, **kwargs))
@@ -6213,7 +6218,7 @@ def run_cb_in_thread(cb, *args, **kwargs):
     cb, fu = cb_for_future(partial(cb, *args, **kwargs), loop)
     loop2.call_soon_threadsafe(cb)
     return fu
-  info("not in main")
+  info(f"在副线程执行: {cb}")
   #  return cb(*args, **kwargs)
   fu = asyncio.Future()
   @exceptions_handler
@@ -6223,33 +6228,42 @@ def run_cb_in_thread(cb, *args, **kwargs):
   return fu
 
 #  @exceptions_handler
-def cb_for_future(f2, oloop):
+def cb_for_future(cb, oloop):
   fu = asyncio.Future()
   # for multi thread
-  @exceptions_handler
+  #  @exceptions_handler
   def cb():
-    oloop.call_soon_threadsafe(partial(fu.set_result, f2()))
+    #  oloop.call_soon_threadsafe(partial(fu.set_result, f()))
+    try:
+      f = exceptions_handler(no_send=True)(partial(fu.set_result, cb()))
+      res = f()
+      info(f"fu.result: {res}")
+    except Exception as e:
+      warn("failed", e=e)
+      res = None
+    oloop.call_soon_threadsafe(fu.set_result, res)
+    info(f"done")
   return cb, fu
 
 def run_cb(cb, *args, need_main=False, **kwargs):
   if need_main:
     if in_main_thread():
-      info("in main")
+      info(f"在主线程执行: {cb}")
       safe = True
       lp = loop
     else:
-      info("not in main")
+      info(f"在副线程跨线程执行: {cb}")
       safe = False
       lp = loop
       olp = loop2
   else:
     if in_main_thread():
-      info("not in thread")
+      info(f"在主线程跨线程执行: {cb}")
       safe = False
       lp = loop2
       olp = loop
     else:
-      info("in thread")
+      info(f"在副线程执行: {cb}")
       safe = True
       lp = loop2
   if safe:
@@ -6313,7 +6327,6 @@ def run_cb2(cb, *args, need_main=False, **kwargs):
     fu0.add_done_callback(cb_for_fu_result)
   return fu
 
-#  async def run_run(coro, *args, **kwargs, need_main=False):
 
 #  @exceptions_handler(no_send=True)
 async def run_run(coro, need_main=False):
@@ -6361,6 +6374,7 @@ async def run_run(coro, need_main=False):
   #      oloop.call_soon_threadsafe(partial(fu.set_result, fu2.result()))
   #  cb = cb_for_future(fu.set_result, fu2.result, oloop)
   #  @exceptions_handler(no_send=True)
+
   @exceptions_handler
   def cb_for_fu_result(fu):
     #  oloop.call_soon_threadsafe(partial(f, f2()))
