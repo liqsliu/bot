@@ -1694,7 +1694,7 @@ async def init_myshell():
   #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, limit=64000000)
-  p = myshell_p
+  #  p = myshell_p
   #  def wrap_read(func):
   #    @wraps(func)
   #    async def wrapper(*args, **kwargs):
@@ -1733,24 +1733,24 @@ async def init_myshell():
   #  t2 = asyncio.create_task(pr(p.stderr.readline, 2))
   #  myshell_queue1 = asyncio.Queue()
   data = deque()
-  data_ok=asyncio.Event()
+  data_ok = asyncio.Event()
 
   async def pr(f, n=1):
     await sleep(1)
     #  if t1.done() or t2.done() or p.returncode is not None:
-    if p.returncode is not None:
+    if myshell_p.returncode is not None:
       warn(f"fixme: 管道无法保持开启")
       if myshell_p.returncode is None:
         await stop_sub(myshell_p)
       return
     info(f"myshell is ok, task of reading is running {f}")
     #  while True:
-    while p.returncode is None:
+    while myshell_p.returncode is None:
       d = await f(HTTP_FILE_MAX_BYTES)
       data.append((n, d))
       data_ok.set()
       #  await myshell_queue1.put((n, d))
-      #  print(f"put: {n} {len(d)} {short(d)}")
+      print(f"put: {n} {len(d)} {short(d)}")
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
   
   global myshell_queue
@@ -1794,8 +1794,8 @@ async def init_myshell():
   #  info("wait for steam ok...")
   #  t1 = asyncio.create_task(myshell_p.stdout.readline())
   #  t2 = asyncio.create_task(myshell_p.stderr.readline())
-  asyncio.create_task(pr(p.stdout.read, 1))
-  asyncio.create_task(pr(p.stderr.read, 2))
+  asyncio.create_task(pr(myshell_p.stdout.read, 1))
+  asyncio.create_task(pr(myshell_p.stderr.read, 2))
 
 
   cmds = "source ~/.bash_profile"
