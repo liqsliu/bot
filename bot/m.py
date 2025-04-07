@@ -6210,8 +6210,15 @@ async def get_server_name(jid):
 
 
 
+async def thread2_loop():
+  info("副进程时间循环已启动")
+  while True:
+    await sleep(60)
+    info("副进程时间循环运行中...")
 
-def run_run_loop():
+
+
+def thread2_daemon():
   info("独立线程，启动...")
   #  info("判断是否在主线程，应该是False: %s" % str(main_thread.native_id == threading.get_native_id()))
   #  info("判断是否在副线程，应该是True: %s" % str(loop2_thread.native_id == threading.get_native_id()))
@@ -6219,6 +6226,7 @@ def run_run_loop():
   global loop2
   loop2 = asyncio.new_event_loop()  # 创建新的事件循环
   asyncio.set_event_loop(loop2)  # 设置当前线程的事件循环
+  loop2.create_task(thread2_loop())
   loop2.run_forever()  # 启动事件循环
 
 def in_main_thread():
@@ -10188,7 +10196,7 @@ async def after_init():
 
   global loop2_thread, loop2, main_thread
   main_thread =  threading.main_thread()
-  loop2_thread = threading.Thread(target=run_run_loop, daemon=True)
+  loop2_thread = threading.Thread(target=thread2_daemon, daemon=True)
   loop2_thread.start()
   while True:
     if "loop2" in globals() and loop2.is_running():
