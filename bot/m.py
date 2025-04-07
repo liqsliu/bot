@@ -6347,8 +6347,8 @@ async def run_coro(coro, lp, lp2):
       info(f"fu.result: {res}")
     except Exception as e:
       #  warn("failed", e=e)
-      _exceptions_handler(e)
-      res = None
+      res = _exceptions_handler(e, no_send=True)
+      #  res = None
     ress.append(res)
     lp.call_soon_threadsafe(fu.set)
     info("done")
@@ -9051,8 +9051,8 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
           f = cmd_funs[cmd]
           res = await f(cmds, src)
         except Exception as e:
-          _exceptions_handler(e)
-          return True
+          return _exceptions_handler(e, no_send=True)
+          #  return True
           res = 512,
         #    print("run_cmd error:", e)
         #    res = get_lineno(e)
