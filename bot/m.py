@@ -539,7 +539,6 @@ def _cross_thread(func, *, need_main=True):
       async def _(*args, **kwargs):
         coro = func(*args, **kwargs)
         if in_main_thread():
-          async def _(*args, **kwargs):
             info(f"跨线程在副线程执行: {func}")
             return await run_coro(coro, loop, loop2)
         else:
