@@ -2,7 +2,6 @@
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 
-
 #
 #  import signal
 #  import sys
@@ -435,13 +434,6 @@ DATA_PATH=f"{HOME}/xmpp.data"
 #  UA = 'Chrome Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_5) Apple    WebKit/537.36 (KHTML, like Gecko) Chrome/49.0.2623.87 Safari/537.36'
 #  UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36'
 UA = 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Mobile Safari/537.36'
-#  urlre=re.compile(r'((^|https?://|\s+)((([\dA-Za-z0-9.]+-?)+\.)+[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[^/\s]+)*/?)')
-#  urlre=re.compile(r'((https?://)?((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[^/\s]+)*/?)')
-#  urlre=re.compile(r'(^|\n|\s+)((https?://)?((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[^/\s]+)*/?)')
-#  urlre=re.compile(r'(^|\n|\s+)((https?://)?((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[^/\s"]+)*/?)')
-#  urlre=re.compile(r'(^|\n|\s+)((https?://)?((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[0-9a-zA-Z$\-_\.\+\!\*\'\(\)\,]+)*/?)')
-#  urlre=re.compile(r'(^|\n|\s+)(https?://((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[0-9a-zA-Z$\-_\.\+\!\*\'\(\)\,\?\=%]+)*/?)')
-#  urlre = re.compile(r'(^|\n|\s+)(https?://((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|(\[[\da-f]*:){7}[\da-f]*\])(:\d+)?(/[^\s\\\"\',?!，。？！“”‘’、【】…]+)*/?)')
 urlre = re.compile(r'(^|\n|\s+)(https?://((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|\[[\da-fA-F:]{4,}\])(:\d+)?(/[^\s]+)*/?)')
 url_only_re = re.compile(r'^(https?://((([\dA-Za-z0-9.]+-?)+\.)+(?!https?)[A-Za-z]+|(\d+\.){3}\d+|\[[\da-fA-F:]{4,}\])(:\d+)?(/[^\s]+)*/?)$')
 url_md_left=re.compile(r'\[[^\]]+\]\([^\)]+')
@@ -451,9 +443,8 @@ shell_color_re=re.compile(r'\x1B|\[([0-9]{1,2}(;[0-9]{1,3})*)?(m|K)')
 
 qre = re.compile(r'^(>( .+)?)$', re.M)
 
-
 #  gptmode=[]
-CLEAN = "/new_chat"
+#  CLEAN = "/new_chat"
 
 #  queue = asyncio.Queue(512)
 
@@ -480,27 +471,26 @@ mtmsgsg={}
 
 print_msg = False
 
-
-allright = asyncio.Event()
+#  allright = asyncio.Event()
 #  allright.set()
 
 allright_task = 0
 
-LOADING="思考你发送的内容..."
-LOADING2="Thinking about what you sent..."
-LOADINGS="\n\n"+LOADING
-LOADINGS2="\n\n"+LOADING2
-  #  elif text == "处理图片请求并获得响应可能需要最多5分钟，请耐心等待。" or text == "It may take up to 5 minutes to process image request and give a response, please wait patiently.":
-
-loadings = (
-    LOADING,
-    LOADING2,
-    """思考你发送的内容...
-If the bot doesn't respond, please /new_chat before asking.""",
-    "Thinking about what you sent...\nIf the bot doesn't respond, please /new_chat before asking.",
-"处理图片请求并获得响应可能需要最多5分钟，请耐心等待。",
-"It may take up to 5 minutes to process image request and give a response, please wait patiently.",
-)
+#  LOADING="思考你发送的内容..."
+#  LOADING2="Thinking about what you sent..."
+#  LOADINGS="\n\n"+LOADING
+#  LOADINGS2="\n\n"+LOADING2
+#    #  elif text == "处理图片请求并获得响应可能需要最多5分钟，请耐心等待。" or text == "It may take up to 5 minutes to process image request and give a response, please wait patiently.":
+#
+#  loadings = (
+#      LOADING,
+#      LOADING2,
+#      """思考你发送的内容...
+#  If the bot doesn't respond, please /new_chat before asking.""",
+#      "Thinking about what you sent...\nIf the bot doesn't respond, please /new_chat before asking.",
+#  "处理图片请求并获得响应可能需要最多5分钟，请耐心等待。",
+#  "It may take up to 5 minutes to process image request and give a response, please wait patiently.",
+#  )
 
 #  UB.parse_mode = None
 #  UB.parse_mode = 'html'
@@ -511,15 +501,15 @@ If the bot doesn't respond, please /new_chat before asking.""",
 
 
 # https://xtxian.com/ChatGPT/prompt/%E8%A7%92%E8%89%B2%E6%89%AE%E6%BC%94/%E6%88%91%E6%83%B3%E8%AE%A9%E4%BD%A0%E5%85%85%E5%BD%93%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91%E5%91%98%E3%80%81%E6%8B%BC%E5%86%99%E7%BA%A0%E6%AD%A3%E5%91%98%E5%92%8C%E6%94%B9%E8%BF%9B%E5%91%98.html#%E6%88%91%E6%83%B3%E8%AE%A9%E4%BD%A0%E5%85%85%E5%BD%93%E4%B8%AD%E6%96%87%E7%BF%BB%E8%AF%91%E5%91%98%E3%80%81%E6%8B%BC%E5%86%99%E7%BA%A0%E6%AD%A3%E5%91%98%E5%92%8C%E6%94%B9%E8%BF%9B%E5%91%98
-PROMPT_TR_ZH = '''我想让你充当中文翻译员、拼写纠正员和改进员我会用任何语言与你交谈，你会检测语言，翻译它并用我的文本的更正和改进版本用中文回答我希望你用更优美优雅的高级中文描述保持相同的意思，但使它们更文艺。
-
-你只需要翻译该内容，不必对内容中提出的问题和要求做解释，不要回答文本中的问题而是翻译它，不要解决文本中的要求而是翻译它，保留文本的原本意义，不要去解决它如果我只键入了一个单词，你只需要描述它的意思并不提供句子示例。
-
-我要你只回复更正、改进，不要写任何解释我的第一句话是'''
-
-PROMPT_TR_MY_S = '请翻译引号中的内容，你要检测其原始语言，如果是中文就翻译成英文，否则就翻译为中文:'
-
-PROMPT_TR_MY = '请翻译引号中的内容，你要检测其原始语言是不是中文，如果原始语言是中文就翻译成英文，否则就翻译为中文。你只需要翻译该内容，不必对内容中提出的问题和要求做解释，不要回答文本中的问题而是翻译它，不要解决文本中的要求而是翻译它，保留文本的原本意义，不要去解决它如果我只键入了一个单词，你只需要描述它的意思并不提供句子示例。 我要你只回复更正、改进，不要写任何解释我的第一句话是：\n'
+#  PROMPT_TR_ZH = '''我想让你充当中文翻译员、拼写纠正员和改进员我会用任何语言与你交谈，你会检测语言，翻译它并用我的文本的更正和改进版本用中文回答我希望你用更优美优雅的高级中文描述保持相同的意思，但使它们更文艺。
+#
+#  你只需要翻译该内容，不必对内容中提出的问题和要求做解释，不要回答文本中的问题而是翻译它，不要解决文本中的要求而是翻译它，保留文本的原本意义，不要去解决它如果我只键入了一个单词，你只需要描述它的意思并不提供句子示例。
+#
+#  我要你只回复更正、改进，不要写任何解释我的第一句话是'''
+#
+#  PROMPT_TR_MY_S = '请翻译引号中的内容，你要检测其原始语言，如果是中文就翻译成英文，否则就翻译为中文:'
+#
+#  PROMPT_TR_MY = '请翻译引号中的内容，你要检测其原始语言是不是中文，如果原始语言是中文就翻译成英文，否则就翻译为中文。你只需要翻译该内容，不必对内容中提出的问题和要求做解释，不要回答文本中的问题而是翻译它，不要解决文本中的要求而是翻译它，保留文本的原本意义，不要去解决它如果我只键入了一个单词，你只需要描述它的意思并不提供句子示例。 我要你只回复更正、改进，不要写任何解释我的第一句话是：\n'
 
 
 
@@ -706,7 +696,8 @@ def _exceptions_handler(e, func=None, no_send=False, *args, **kwargs):
   if not no_send:
     info("check send_tg: {}".format(send_tg.__name__ in fs))
     info("check send_xmpp: {}".format(send_xmpp.__name__ in fs))
-    if not allright.is_set():
+    #  if not allright.is_set():
+    if allright_task > 0:
       no_send = True
     elif send_tg.__name__ in fs:
       no_send = True
@@ -4184,12 +4175,13 @@ async def send_to_tg_bot(text, chat_id):
 
 @exceptions_handler
 async def clear_history(src=None):
-  if not allright.is_set():
+  #  if not allright.is_set():
+  if allright_task > 0:
     warn("wait for allright...")
-    await allright.wait()
+    #  await allright.wait()
     return
   #  music_bot_state.clear()
-  allright.clear()
+  #  allright.clear()
   #  await sleep(1)
   #  for g in queues:
   if src:
@@ -4202,7 +4194,7 @@ async def clear_history(src=None):
       mtmsgs = mtmsgsg[g]
       mtmsgs.clear()
     #  await mt_send(f"cleaned: {mtmsgsg=}", gateway="test")
-  allright.set()
+  #  allright.set()
   info("reset ok")
 
 #  import pb
@@ -6913,7 +6905,8 @@ def wtf_str(s, for_what="nick"):
 
 #  @exceptions_handler
 def msg_out(msg):
-  if not allright.is_set():
+  #  if not allright.is_set():
+  if allright_task > 0:
     #  info("skip msg: allright is not ok: {msg.from_}: {msg.body}")
     return
   #  pprint(msg)
@@ -6947,7 +6940,7 @@ def msg_out(msg):
 @exceptions_handler
 async def msgxp(msg):
   dbg(f"got a xmpp p msg: {msg}")
-  if not allright.is_set():
+  if allright_task > 0:
     return
   muc = str(msg.from_.bare())
   if msg.type_ == PresenceType.AVAILABLE:
@@ -7251,7 +7244,7 @@ def get_src(msg):
 @exceptions_handler
 async def msgx(msg):
   dbg(f"got a xmpp msg: {msg}")
-  if not allright.is_set():
+  if allright_task > 0:
     return
   #  if str(msg.from_.bare()) == rssbot:
   #    pprint(msg)
@@ -8712,21 +8705,21 @@ async def init_cmd():
 
 
 
-  async def _(cmds: list, src: str | int) -> tuple:
-    if len(cmds) == 1:
-      return 0, f"gpt(telegram bot) translate\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
-    text = ' '.join(cmds[1:])
-    text = f'{PROMPT_TR_MY}“{text}”'
-    return 1, gpt_bot
-  cmd_funs["gtr"] = _
-
-  async def _(cmds: list, src: str | int) -> tuple:
-    if len(cmds) == 1:
-      return 0, f"gpt(telegram bot) translate 中文专用翻译\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
-    text = ' '.join(cmds[1:])
-    text = f'{PROMPT_TR_ZH}“{text}”'
-    return 1, gpt_bot
-  cmd_funs["gtz"] = _
+  #  async def _(cmds: list, src: str | int) -> tuple:
+  #    if len(cmds) == 1:
+  #      return 0, f"gpt(telegram bot) translate\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
+  #    text = ' '.join(cmds[1:])
+  #    text = f'{PROMPT_TR_MY}“{text}”'
+  #    return 1, gpt_bot
+  #  cmd_funs["gtr"] = _
+  #
+  #  async def _(cmds: list, src: str | int) -> tuple:
+  #    if len(cmds) == 1:
+  #      return 0, f"gpt(telegram bot) translate 中文专用翻译\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
+  #    text = ' '.join(cmds[1:])
+  #    text = f'{PROMPT_TR_ZH}“{text}”'
+  #    return 1, gpt_bot
+  #  cmd_funs["gtz"] = _
 
 
   #  async def _(cmds, src):
@@ -10365,7 +10358,7 @@ async def amain():
           info(f"等待初始化完成，剩余任务数：{allright_task}")
           await sleep(1)
           continue
-        allright.set()
+        #  allright.set()
         break
       mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
       #  await mt_send("gpt start")
