@@ -564,7 +564,7 @@ def cross_thread(func=None, *, need_main=True):
               res = await func(*args, **kwargs)
               loop.call_soon_threadsafe(fu.set)
               return res
-            t = loop.create_task(f())
+            t = loop2.create_task(f())
             await fu.wait()
             if not t.done():
               await sleep(0.3)
