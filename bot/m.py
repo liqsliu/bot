@@ -10411,10 +10411,10 @@ async def amain():
         await sleep(1)
       info(f"副线程发信息结果: {fu.result()}")
 
-      while not t.done():
-        info(f"通过副线程发信息(loop2): not done, loop is_running: {loop2.is_running()}")
-        await sleep(1)
-      info(f"副线程发信息结果(loop2): {t.result()}")
+      #  while not t.done():
+      #    info(f"通过副线程发信息(loop2): not done, loop is_running: {loop2.is_running()}")
+      #    await sleep(1)
+      #  info(f"副线程发信息结果(loop2): {t.result()}")
 
       info(f"初始化完成")
       sendme(f"启动成功，用时: {int(time.time()-start_time)}s", to=0)
