@@ -572,16 +572,23 @@ def cross_thread(func=None, *, need_main=True):
               return res
             info(f"loop2 is_running: {loop2.is_running()}")
             #  t = loop2.create_task(f())
+            ts = [None]
             def f2():
-              asyncio.create_task(f())
+              t= asyncio.create_task(f())
+              ts[0] = t
             loop.call_soon_threadsafe(f2)
             info(f"loop2 is_running: {loop2.is_running()}")
             await fu.wait()
-            if not t.done():
-              info("wait done")
-              await sleep(0.3)
-            info("done")
-            return t.result()
+            t = ts[0]
+            if t:
+              if not t.done():
+                info("wait done")
+                await sleep(0.3)
+              info("done")
+              return t.result()
+            else:
+              warn(f"wtf: {t}")
+              return
           else:
             info(f"在副线程执行: {func}")
             return await func(*args, **kwargs)
