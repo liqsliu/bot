@@ -522,36 +522,61 @@ def cross_thread(func=None, *, need_main=True):
 
 def _cross_thread(func, *, need_main=True):
   if asyncio.iscoroutinefunction(func):
-    async def _(*args, **kwargs):
-      coro = func(*args, **kwargs)
-      #  res = await run_run(coro, need_main=need_main)
-      #  fu = run_cb_in_thread(func, *args, **kwargs)
-      #  res = await fu
-      if need_main is True:
-        if in_main_thread():
+    #  res = await run_run(coro, need_main=need_main)
+    #  fu = run_cb_in_thread(func, *args, **kwargs)
+    #  res = await fu
+    if need_main is True:
+      if in_main_thread():
+        async def _(*args, **kwargs):
           info(f"在主线程执行: {func}")
+          coro = func(*args, **kwargs)
           return await coro
-        else:
-          info(f"跨线程在副线程执行: {func}")
-          #  return loop.run_until_complete(func(*args, **kwargs))
-          return await run_coro(coro, loop2, loop)
       else:
-        if in_main_thread():
+        #  return loop.run_until_complete(func(*args, **kwargs))
+        async def _(*args, **kwargs):
           info(f"跨线程在主线程执行: {func}")
+          coro = func(*args, **kwargs)
+          return await run_coro(coro, loop2, loop)
+    else:
+      if in_main_thread():
+        async def _(*args, **kwargs):
+          info(f"跨线程在副线程执行: {func}")
+          coro = func(*args, **kwargs)
           return await run_coro(coro, loop, loop2)
-        else:
+      else:
+        async def _(*args, **kwargs):
           info(f"在副线程执行: {func}")
+          coro = func(*args, **kwargs)
           return await coro
   else:
-    def _(*args, **kwargs):
+    if need_main is True:
+      if in_main_thread():
+        def _(*args, **kwargs):
+          info(f"在主线程执行: {func}")
+          return func(*args, **kwargs)
+      else:
+        #  return loop.run_until_complete(func(*args, **kwargs))
+        def _(*args, **kwargs):
+          info(f"跨线程在主线程执行: {func}")
+          return run_cb3(loop, func, *args, **kwargs)
+    else:
+      if in_main_thread():
+        def _(*args, **kwargs):
+          info(f"跨线程在副线程执行: {func}")
+          return run_cb3(loop2, func, *args, **kwargs)
+      else:
+        def _(*args, **kwargs):
+          info(f"在副线程执行: {func}")
+          return func(*args, **kwargs)
+    #  def _(*args, **kwargs):
       #  return func(*args, **kwargs)
       #  if need_main:
       #    return run_cb_in_main(func, *args, **kwargs)
       #  else:
       #    return run_cb_in_thread(func, *args, **kwargs)
-      res = run_cb(func, *args, **kwargs, need_main=need_main)
+      #  res = run_cb(func, *args, **kwargs, need_main=need_main)
       #  info(f"done: {res}")
-      return res
+      #  return res
   #  return _
   return wraps(func)(_)
 
@@ -6332,6 +6357,19 @@ def run_cb2(cb, *args, need_main=False, **kwargs):
       olp.call_soon_threadsafe(fu.set_result, fu0.result())
     fu0.add_done_callback(cb_for_fu_result)
   return fu
+
+async def _run_cb3(func, *args, **kwargs):
+  try:
+    res =  func(*args, **kwargs)
+    info(f"fu.result: {res}")
+  except Exception as e:
+    #  warn("failed", e=e)
+    res = _exceptions_handler(e, no_send=True)
+  return res
+
+def run_cb3(lp2, func, *args, **kwargs):
+  fu = asyncio.run_coroutine_threadsafe(_run_cb3(func, *args, **kwargs), lp2)
+  return fu.result()
 
 
 async def run_coro(coro, lp, lp2):
