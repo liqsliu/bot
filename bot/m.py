@@ -9936,6 +9936,10 @@ async def msgb(event):
         await msg.reply("msg url raw/fast/xmpp/direct/vps")
         return
       if text.startswith("id "):
+        full = False
+        if text.startswith("id f "):
+          full = True
+        url = text.split(' ')[-1]
         #  url = text.split(' ')[1]
         #  if url.startswith("https://t.me/"):
         #    username = url.split('/')[3]
@@ -9947,17 +9951,18 @@ async def msgb(event):
         #
         #  e = await UB.get_entity(username)
 
-        url = text.split(' ')[1]
         e = await get_entity(url, False)
         if type(e) is tuple:
           peer = e[0]
           gid = e[1]
           e = await UB.get_messages(peer, ids=gid)
           #  await UB.send_message(chat_id, f"{e.stringify()}")
-          await msg.reply(f"{e.stringify()}")
+          if full:
+            await msg.reply(f"{e.stringify()}")
           await msg.reply("peer id: %s" % await UB.get_peer_id(peer))
         elif e:
-          await msg.reply(f"{e.stringify()}")
+          if full:
+            await msg.reply(f"{e.stringify()}")
           pid = await UB.get_peer_id(e)
           #  res = "peer id: %s" % pid
           res = "peer id: %s %s %s" % (pid, e.first_name, e.last_name)
@@ -9984,12 +9989,14 @@ async def msgb(event):
                 await msg.reply(f"found {len(e)} msgs")
                 e = e[0]
               #  await UB.send_message(chat_id, f"{e.stringify()}")
-              await msg.reply(f"{e.stringify()}")
+              if full:
+                await msg.reply(f"{e.stringify()}")
               await msg.reply("using TB, peer id: %s" % await UB.get_peer_id(peer))
             else:
               await msg.reply("not fount entity")
           elif e:
-            await msg.reply(f"{e.stringify()}")
+            if full:
+              await msg.reply(f"{e.stringify()}")
             pid = await TB.get_peer_id(e)
             #  res = "peer id: %s" % pid
             res = "using TB, peer id: %s %s %s" % (pid, e.first_name, e.last_name)
