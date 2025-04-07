@@ -1688,7 +1688,7 @@ def format_byte(num):
 async def init_myshell():
   #  if "myshell_p" not in globals():
   info("start my shell...")
-  global myshell_p, myshell_lock, myshell_queue
+  global myshell_p, myshell_lock
   myshell_lock = asyncio.Lock()
   #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, preexec_fn=os.setpgrp)
   #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
@@ -1731,10 +1731,10 @@ async def init_myshell():
   #  #  t2 = asyncio.create_task(myshell_p.stderr.readline())
   #  t1 = asyncio.create_task(pr(p.stdout.readline, 1))
   #  t2 = asyncio.create_task(pr(p.stderr.readline, 2))
-  myshell_queue = asyncio.Queue()
   #  myshell_queue1 = asyncio.Queue()
   data = deque()
   data_ok=asyncio.Event()
+
   async def pr(f, n=1):
     await sleep(1)
     #  if t1.done() or t2.done() or p.returncode is not None:
@@ -1753,7 +1753,10 @@ async def init_myshell():
       #  print(f"put: {n} {len(d)} {short(d)}")
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
   
+  @cross_thread
   async def prr():
+    global myshell_queue
+    myshell_queue = asyncio.Queue()
     tmp1 = b""
     tmp2 = b""
     while myshell_p.returncode is None:
@@ -1825,8 +1828,8 @@ async def init_myshell():
 
 SHELL_CMD_LINE_MAX = 1024
 #  async def myshell(cmd, max_time=interval, src=None):
+#  @cross_thread(need_main=False)
 @exceptions_handler
-@cross_thread(need_main=False)
 async def myshell(cmds, max_time=run_shell_time_max, src=None):
   # 有个问题，不知道何时运行结束，目前想到两种方案：bash -i和最后发送echo end然后等出现end提示。
   #  if await init_myshell():
