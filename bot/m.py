@@ -562,7 +562,7 @@ def cross_thread(func=None, *, need_main=True):
             async def f():
               #  fu.set()
               res = await func(*args, **kwargs)
-              loop2.call_soon_threadsafe(fu.set)
+              loop.call_soon_threadsafe(fu.set)
               return res
             t = loop.create_task(f())
             await fu.wait()
