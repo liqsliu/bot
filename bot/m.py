@@ -1684,7 +1684,7 @@ def format_byte(num):
 #    #  if myshell_p.returncode is None:
 #    #    return True
 
-@cross_thread(need_main=False)
+#  @cross_thread(need_main=False)
 async def init_myshell():
   #  if "myshell_p" not in globals():
   info("start my shell...")
@@ -1746,7 +1746,7 @@ async def init_myshell():
     while p.returncode is None:
       d = await f(HTTP_FILE_MAX_BYTES)
       await myshell_queue1.put((n, d))
-      print(f"put: {n} {len(d)} {short(d)}")
+      #  print(f"put: {n} {len(d)} {short(d)}")
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
   
   async def prr():
@@ -1786,9 +1786,11 @@ async def init_myshell():
   asyncio.create_task(pr(p.stderr.read, 2))
 
   asyncio.create_task(prr())
+
   cmds = "source ~/.bash_profile"
   res = await myshell(cmds)
   info(f"init bash: {res}")
+
   cmds = "type dddd; type cv"
   res = await myshell(cmds)
   info(f"check: {res}")
@@ -1816,7 +1818,7 @@ async def init_myshell():
 SHELL_CMD_LINE_MAX = 1024
 #  async def myshell(cmd, max_time=interval, src=None):
 @exceptions_handler
-@cross_thread(need_main=False)
+#  @cross_thread(need_main=False)
 async def myshell(cmds, max_time=run_shell_time_max, src=None):
   # 有个问题，不知道何时运行结束，目前想到两种方案：bash -i和最后发送echo end然后等出现end提示。
   #  if await init_myshell():
