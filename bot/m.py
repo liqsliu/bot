@@ -2435,14 +2435,15 @@ async def my_exec(cmd, src=None, client=None, **args):
   #  return res"""
   # https://stackoverflow.com/a/53255739
   exec(
-    f'async def __ex(): ' +
+      f'async def _():' +
     ''.join(f'\n {l}' for l in cmd.split('\n'))
     #  + "\n return 'end'"
     #  + "\n" + ''.join(f'\n {l}' for l in res.split('\n'))
   )
 
   # Get `__ex` from local variables, call it and return the result
-  res = await locals()['__ex']()
+  #  res = await locals()['_']()
+  res = await _()
   info(f"exec res: {res}")
   #  if res is not None:
   return "{!r}".format(res)
