@@ -558,6 +558,7 @@ def cross_thread(func=None, *, need_main=True):
         else:
           if in_main_thread():
             info(f"在主线程跨线程执行: {func}")
+            fu = asyncio.Event()
             async def f():
               #  fu.set()
               res = await func(*args, **kwargs)
