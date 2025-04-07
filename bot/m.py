@@ -1684,7 +1684,7 @@ def format_byte(num):
 #    #  if myshell_p.returncode is None:
 #    #    return True
 
-#  @cross_thread(need_main=False)
+@cross_thread(need_main=False)
 async def init_myshell():
   #  if "myshell_p" not in globals():
   info("start my shell...")
@@ -1732,7 +1732,9 @@ async def init_myshell():
   #  t1 = asyncio.create_task(pr(p.stdout.readline, 1))
   #  t2 = asyncio.create_task(pr(p.stderr.readline, 2))
   myshell_queue = asyncio.Queue()
-  myshell_queue1 = asyncio.Queue()
+  #  myshell_queue1 = asyncio.Queue()
+  data = deque()
+  data_ok=asyncio.Event()
   async def pr(f, n=1):
     await sleep(1)
     #  if t1.done() or t2.done() or p.returncode is not None:
@@ -1745,7 +1747,8 @@ async def init_myshell():
     #  while True:
     while p.returncode is None:
       d = await f(HTTP_FILE_MAX_BYTES)
-      await myshell_queue1.put((n, d))
+      data.append((n, d))
+      #  await myshell_queue1.put((n, d))
       #  print(f"put: {n} {len(d)} {short(d)}")
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
   
@@ -1753,7 +1756,8 @@ async def init_myshell():
     tmp1 = b""
     tmp2 = b""
     while myshell_p.returncode is None:
-      n,d = await myshell_queue1.get()
+      #  n,d = await myshell_queue1.get()
+      n,d = data.popleft()
       while b"\n" in d:
         d = d.split(b"\n", 1)
         o = d[1]
@@ -1818,7 +1822,7 @@ async def init_myshell():
 SHELL_CMD_LINE_MAX = 1024
 #  async def myshell(cmd, max_time=interval, src=None):
 @exceptions_handler
-#  @cross_thread(need_main=False)
+@cross_thread(need_main=False)
 async def myshell(cmds, max_time=run_shell_time_max, src=None):
   # 有个问题，不知道何时运行结束，目前想到两种方案：bash -i和最后发送echo end然后等出现end提示。
   #  if await init_myshell():
