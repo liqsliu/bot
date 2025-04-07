@@ -525,8 +525,10 @@ PROMPT_TR_MY = '请翻译引号中的内容，你要检测其原始语言是不�
 
 def cross_thread(func=None, *, need_main=True):
   if func is not None:
+    return _cross_thread(func)
+  def _(func):
     return _cross_thread(func, need_main=need_main)
-  return _cross_thread
+  return _
 
 def _cross_thread(func, *, need_main=True):
   if asyncio.iscoroutinefunction(func):
@@ -540,12 +542,12 @@ def _cross_thread(func, *, need_main=True):
           info(f"在主线程执行: {func}")
           return await coro
         else:
-          info(f"在副线程跨线程执行: {func}")
+          info(f"跨线程在副线程执行: {func}")
           #  return loop.run_until_complete(func(*args, **kwargs))
           return await run_coro(coro, loop2, loop)
       else:
         if in_main_thread():
-          info(f"在主线程跨线程执行: {func}")
+          info(f"跨线程在主线程执行: {func}")
           return await run_coro(coro, loop, loop2)
         else:
           info(f"在副线程执行: {func}")
@@ -581,8 +583,10 @@ def auto_task(func, return_task=False):
 
 def exceptions_handler(func=None, *, no_send=False):
   if func is not None:
+    return __exceptions_handler(func)
+  def _(func):
     return __exceptions_handler(func, no_send)
-  return __exceptions_handler
+  return _
 
 def __exceptions_handler(func, no_send=False):
   if asyncio.iscoroutinefunction(func):
