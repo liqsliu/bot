@@ -539,66 +539,14 @@ def cross_thread(func=None, *, need_main=True):
           else:
             info(f"在副线程跨线程执行: {func}")
             #  return loop.run_until_complete(func(*args, **kwargs))
-            fu = asyncio.Event()
-            #  t = loop.create_task(func(*args, **kwargs))
-            #  def f(t):
-            #    #  fu.set()
-            #    loop2.call_soon_threadsafe(fu.set)
-            #  t.add_done_callback(f)
-            async def f():
-              #  fu.set()
-              res = await func(*args, **kwargs)
-              loop2.call_soon_threadsafe(fu.set)
-              info(f"fu.result: {res}")
-              return res
-            t = loop.create_task(f())
-            await fu.wait()
-            if not t.done():
-              info("wait done")
-              await sleep(0.3)
-            info("done")
-            return t.result()
+            return await run_coro(func(*args, **kwargs), loop2, loop)
         else:
           if in_main_thread():
             info(f"在主线程跨线程执行: {func}")
-            fu = asyncio.Event()
-            async def f():
-              #  return 0
-              #  fu.set()
-              info(f"run... {func}")
-              res = await func(*args, **kwargs)
-              loop.call_soon_threadsafe(fu.set)
-              info(f"fu.result: {res}")
-              return res
-            info(f"loop2 is_running: {loop2.is_running()}")
-            #  t = loop2.create_task(f())
-            ts = []
-            def f2():
-              t= asyncio.create_task(f())
-              ts.append(t)
-            loop2.call_soon_threadsafe(f2)
-            info(f"loop2 is_running: {loop2.is_running()}")
-            await fu.wait()
-            if ts:
-              t = ts[0]
-              if not t.done():
-                info("wait done")
-                await sleep(0.3)
-              info("done")
-              return t.result()
-            else:
-              warn(f"wtf: {t}")
-              return
+            return await run_coro(func(*args, **kwargs), loop, loop2)
           else:
             info(f"在副线程执行: {func}")
             return await func(*args, **kwargs)
-          #  fu = run_cb_in_thread(func, *args, **kwargs)
-          def cb():
-            return loop2.run_until_complete(func(*args, **kwargs))
-          fu = run_cb_in_main(cb)
-          res = await fu
-        #  info(f"done: {res}")
-        return res
     else:
       @wraps(func)
       def _(*args, **kwargs):
