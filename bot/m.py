@@ -2399,12 +2399,12 @@ async def run_coro(coro, lp, lp2):
     lp.call_soon_threadsafe(fu.set)
     #  return res
   #  info(f"lp2 is_running: {lp2.is_running()}")
-  #  t = loop2.create_task(f())
+  t = lp2.create_task(f())
   #  ts = []
   #  def f2():
   #    t= asyncio.create_task(f())
   #    ts.append(t)
-  lp2.call_soon_threadsafe(asyncio.create_task, f())
+  #  lp2.call_soon_threadsafe(asyncio.create_task, f())
   #  info(f"lp2 is_running: {lp2.is_running()}")
   await fu.wait()
   return ress[0]
