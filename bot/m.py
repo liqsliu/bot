@@ -1748,6 +1748,7 @@ async def init_myshell():
     while p.returncode is None:
       d = await f(HTTP_FILE_MAX_BYTES)
       data.append((n, d))
+      data_ok.set()
       #  await myshell_queue1.put((n, d))
       #  print(f"put: {n} {len(d)} {short(d)}")
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
@@ -1757,6 +1758,8 @@ async def init_myshell():
     tmp2 = b""
     while myshell_p.returncode is None:
       #  n,d = await myshell_queue1.get()
+      await data_ok.wait()
+      data_ok.clear()
       n,d = data.popleft()
       while b"\n" in d:
         d = d.split(b"\n", 1)
