@@ -549,11 +549,14 @@ def cross_thread(func=None, *, need_main=True):
               #  fu.set()
               res = await func(*args, **kwargs)
               loop2.call_soon_threadsafe(fu.set)
+              info(f"fu.result: {res}")
               return res
             t = loop.create_task(f())
             await fu.wait()
             if not t.done():
+              info("wait done")
               await sleep(0.3)
+            info("done")
             return t.result()
         else:
           if in_main_thread():
@@ -563,11 +566,14 @@ def cross_thread(func=None, *, need_main=True):
               #  fu.set()
               res = await func(*args, **kwargs)
               loop.call_soon_threadsafe(fu.set)
+              info(f"fu.result: {res}")
               return res
             t = loop2.create_task(f())
             await fu.wait()
             if not t.done():
+              info("wait done")
               await sleep(0.3)
+            info("done")
             return t.result()
           else:
             info(f"在副线程执行: {func}")
