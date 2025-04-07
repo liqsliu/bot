@@ -1691,8 +1691,8 @@ async def init_myshell():
   global myshell_p, myshell_lock, myshell_queue
   myshell_lock = asyncio.Lock()
   #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, preexec_fn=os.setpgrp)
-  #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+  #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   #  myshell_p = await asyncio.create_subprocess_shell("bash", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, limit=64000000)
   p = myshell_p
   #  def wrap_read(func):
@@ -1743,9 +1743,10 @@ async def init_myshell():
       return
     info(f"myshell is ok, task of reading is running {f}")
     #  while True:
-    while myshell_p.returncode is None:
+    while p.returncode is None:
       d = await f(HTTP_FILE_MAX_BYTES)
       await myshell_queue1.put((n, d))
+      print(f"put: {n} {len(d)} {short(d)}")
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
   
   async def prr():
