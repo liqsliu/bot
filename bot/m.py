@@ -542,7 +542,8 @@ def cross_thread(func=None, *, need_main=True):
             t = loop.create_task(func(*args, **kwargs))
             fu = asyncio.Event()
             def f(t):
-              fu.set()
+              #  fu.set()
+              loop2.call_soon_threadsafe(fu.set)
             t.add_done_callback(f)
             await fu.wait()
             return t.result()
@@ -553,7 +554,8 @@ def cross_thread(func=None, *, need_main=True):
             t = loop2.create_task(func(*args, **kwargs))
             fu = asyncio.Event()
             def f(t):
-              fu.set()
+              #  fu.set()
+              loop.call_soon_threadsafe(fu.set)
             t.add_done_callback(f)
             await fu.wait()
             return t.result()
