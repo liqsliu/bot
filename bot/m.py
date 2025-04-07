@@ -253,7 +253,7 @@ def get_lineno(e=None, fs=None):
     return f"{fm.f_code.co_name} {fm.f_lineno}"
 
 def info0(s):
-  print(short("%s\r" % s.replace("\n", " ")), end='')
+  print(short("%s \r" % s.replace("\n", " ")), end='')
 
 def info1(s):
   print(s.replace("\n", " "), end='')
@@ -10182,7 +10182,8 @@ async def loop_task():
   #    if XB.running:
   while XB.running:
     await sleep(60)
-    info0(f"XB is running {TB.parse_mode} {UB.parse_mode}")
+    #  info0(f"XB is running {TB.parse_mode} {UB.parse_mode}")
+    info0(f"XB is running")
 
   warn("xmppbot is not running, restart...", no_send=False)
   await sleep(15)
