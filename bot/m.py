@@ -2381,22 +2381,24 @@ def format_out_of_shell(res):
 
 async def run_coro(coro, lp, lp2):
   fu = asyncio.Event()
+
+  @exceptions_handler
   async def f():
     #  return 0
     #  fu.set()
-    info(f"run... {func}")
+    info("run...")
     res = await coro
     lp.call_soon_threadsafe(fu.set)
     info(f"fu.result: {res}")
     return res
-  info(f"loop2 is_running: {loop2.is_running()}")
+  info(f"lp2 is_running: {lp2.is_running()}")
   #  t = loop2.create_task(f())
   ts = []
   def f2():
     t= asyncio.create_task(f())
     ts.append(t)
   lp2.call_soon_threadsafe(f2)
-  info(f"loop2 is_running: {loop2.is_running()}")
+  info(f"lp2 is_running: {lp2.is_running()}")
   await fu.wait()
   if ts:
     t = ts[0]
