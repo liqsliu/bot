@@ -572,15 +572,15 @@ def cross_thread(func=None, *, need_main=True):
               return res
             info(f"loop2 is_running: {loop2.is_running()}")
             #  t = loop2.create_task(f())
-            ts = [None]
+            ts = []
             def f2():
               t= asyncio.create_task(f())
-              ts[0] = t
-            loop.call_soon_threadsafe(f2)
+              ts.append(t)
+            loop2.call_soon_threadsafe(f2)
             info(f"loop2 is_running: {loop2.is_running()}")
             await fu.wait()
-            t = ts[0]
-            if t:
+            if ts:
+              t = ts[0]
               if not t.done():
                 info("wait done")
                 await sleep(0.3)
@@ -2430,6 +2430,37 @@ def format_out_of_shell(res):
 #      res = await pastebin(res)
 #    return res
 #
+
+async def run_coro(coro, lp, lp2):
+  fu = asyncio.Event()
+  async def f():
+    #  return 0
+    #  fu.set()
+    info(f"run... {func}")
+    res = await coro
+    lp.call_soon_threadsafe(fu.set)
+    info(f"fu.result: {res}")
+    return res
+  info(f"loop2 is_running: {loop2.is_running()}")
+  #  t = loop2.create_task(f())
+  ts = []
+  def f2():
+    t= asyncio.create_task(f())
+    ts.append(t)
+  lp2.call_soon_threadsafe(f2)
+  info(f"loop2 is_running: {loop2.is_running()}")
+  await fu.wait()
+  if ts:
+    t = ts[0]
+    if not t.done():
+      info("wait done")
+      await sleep(0.3)
+    info("done")
+    return t.result()
+  else:
+    warn(f"wtf: {t}")
+    return
+
 
 #  @exceptions_handler
 @cross_thread(need_main=False)
