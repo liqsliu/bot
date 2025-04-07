@@ -1768,7 +1768,7 @@ async def init_myshell():
       data.append((n, d))
       data_ok.set()
       #  await myshell_queue1.put((n, d))
-      print(f"put: {n} {len(d)} {short(d)}")
+      #  print(f"put: {n} {len(d)} {short(d)}")
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
   
   global myshell_queue
