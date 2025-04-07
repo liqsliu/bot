@@ -539,25 +539,34 @@ def cross_thread(func=None, *, need_main=True):
           else:
             info(f"在副线程跨线程执行: {func}")
             #  return loop.run_until_complete(func(*args, **kwargs))
-            t = loop.create_task(func(*args, **kwargs))
             fu = asyncio.Event()
-            def f(t):
+            #  t = loop.create_task(func(*args, **kwargs))
+            #  def f(t):
+            #    #  fu.set()
+            #    loop2.call_soon_threadsafe(fu.set)
+            #  t.add_done_callback(f)
+            async def f():
               #  fu.set()
+              res = await func(*args, **kwargs)
               loop2.call_soon_threadsafe(fu.set)
-            t.add_done_callback(f)
+              return res
+            t = loop.create_task(f())
             await fu.wait()
+            if not t.done():
+              await sleep(0.3)
             return t.result()
         else:
           if in_main_thread():
             info(f"在主线程跨线程执行: {func}")
-            #  return loop2.run_until_complete(func(*args, **kwargs))
-            t = loop2.create_task(func(*args, **kwargs))
-            fu = asyncio.Event()
-            def f(t):
+            async def f():
               #  fu.set()
-              loop.call_soon_threadsafe(fu.set)
-            t.add_done_callback(f)
+              res = await func(*args, **kwargs)
+              loop2.call_soon_threadsafe(fu.set)
+              return res
+            t = loop.create_task(f())
             await fu.wait()
+            if not t.done():
+              await sleep(0.3)
             return t.result()
           else:
             info(f"在副线程执行: {func}")
