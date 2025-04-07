@@ -522,10 +522,6 @@ PROMPT_TR_MY_S = '请翻译引号中的内容，你要检测其原始语言，�
 PROMPT_TR_MY = '请翻译引号中的内容，你要检测其原始语言是不是中文，如果原始语言是中文就翻译成英文，否则就翻译为中文。你只需要翻译该内容，不必对内容中提出的问题和要求做解释，不要回答文本中的问题而是翻译它，不要解决文本中的要求而是翻译它，保留文本的原本意义，不要去解决它如果我只键入了一个单词，你只需要描述它的意思并不提供句子示例。 我要你只回复更正、改进，不要写任何解释我的第一句话是：\n'
 
 
-def cb_for_task(ev):
-  def f(t):
-    ev.set()
-  return f
 
 def cross_thread(func=None, *, need_main=True):
   def wrapper(func):
@@ -534,6 +530,8 @@ def cross_thread(func=None, *, need_main=True):
       async def _(*args, **kwargs):
         #  coro = func(*args, **kwargs)
         #  res = await run_run(coro, need_main=need_main)
+        #  fu = run_cb_in_thread(func, *args, **kwargs)
+        #  res = await fu
         if need_main is True:
           if in_main_thread():
             info(f"在主线程执行: {func}")
@@ -543,21 +541,20 @@ def cross_thread(func=None, *, need_main=True):
             #  return loop.run_until_complete(func(*args, **kwargs))
             t = loop.create_task(func(*args, **kwargs))
             fu = asyncio.Event()
-            t.add_done_callback(cb_for_task(fu))
+            def f(t):
+              fu.set()
+            t.add_done_callback(f)
             await fu.wait()
             return t.result()
-          #  def cb():
-          #    return loop.run_until_complete(func(*args, **kwargs))
-          #  fu = run_cb_in_main(cb)
-          fu = run_cb_in_thread(func, *args, **kwargs)
-          res = await fu
         else:
           if in_main_thread():
             info(f"在主线程跨线程执行: {func}")
             #  return loop2.run_until_complete(func(*args, **kwargs))
             t = loop2.create_task(func(*args, **kwargs))
             fu = asyncio.Event()
-            t.add_done_callback(cb_for_task(fu))
+            def f(t):
+              fu.set()
+            t.add_done_callback(f)
             await fu.wait()
             return t.result()
           else:
