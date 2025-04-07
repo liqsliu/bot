@@ -9959,26 +9959,50 @@ async def msgb(event):
         elif e:
           await msg.reply(f"{e.stringify()}")
           pid = await UB.get_peer_id(e)
-          if pid > 0:
-            await msg.reply("peer id: [%s](tg://openmessage?user_id=%s)" % (pid, pid))
+          #  res = "peer id: %s" % pid
+          res = "peer id: %s %s %s" % (pid, e.first_name, e.last_name)
+          if e.username:
+            res += " @%s" % e.username
           else:
-            await msg.reply("peer id: %s" % pid)
+            if pid > 0:
+              res += " [%s](tg://openmessage?user_id=%s) " % (pid, pid)
+          await msg.reply(res)
+
+          #  if pid > 0:
+          #    await msg.reply("peer id: [%s](tg://openmessage?user_id=%s)" % (pid, pid))
+          #  else:
+          #    await msg.reply("peer id: %s" % pid)
         else:
           e = await get_entity(url, False, client=TB)
           if type(e) is tuple:
             peer = e[0]
             gid = e[1]
             e = await TB.get_messages(peer, ids=gid)
-            #  await UB.send_message(chat_id, f"{e.stringify()}")
-            await msg.reply(f"{e.stringify()}")
-            await msg.reply("using TB, peer id: %s" % await UB.get_peer_id(peer))
+            if e:
+              #  if len(e) > 1:
+              if hasattr(e, "__len__"):
+                await msg.reply(f"found {len(e)} msgs")
+                e = e[0]
+              #  await UB.send_message(chat_id, f"{e.stringify()}")
+              await msg.reply(f"{e.stringify()}")
+              await msg.reply("using TB, peer id: %s" % await UB.get_peer_id(peer))
+            else:
+              await msg.reply("not fount entity")
           elif e:
             await msg.reply(f"{e.stringify()}")
             pid = await TB.get_peer_id(e)
-            if pid > 0:
-              await msg.reply("using TB, peer id: [%s](tg://openmessage?user_id=%s)" % (pid, pid))
+            #  res = "peer id: %s" % pid
+            res = "using TB, peer id: %s %s %s" % (pid, e.first_name, e.last_name)
+            if e.username:
+              res += " @%s" % e.username
             else:
-              await msg.reply("using TB, peer id: %s" % pid)
+              if pid > 0:
+                res += " [%s](tg://openmessage?user_id=%s) " % (pid, pid)
+            await msg.reply(res)
+            #  if pid > 0:
+            #    await msg.reply("using TB, peer id: [%s](tg://openmessage?user_id=%s)" % (pid, pid))
+            #  else:
+            #    await msg.reply("using TB, peer id: %s" % pid)
           else:
             await msg.reply("not fount entity")
         return
