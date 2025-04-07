@@ -265,7 +265,7 @@ info = logger.info
 
 def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
   if e is not None:
-    text = "%s %s %s" % (get_lineno(e=e), text, e)
+    text = "{} {}: {!r}".format(get_lineno(e=e), text, e)
   logger.error(text, exc_info=exc_info, stack_info=stack_info)
   #  raise ValueError
   if no_send:
@@ -283,7 +283,7 @@ def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
 
 def warn(text=None, more=False, no_send=True, e=None, exc_info=True, stack_info=True):
   if e is not None:
-    text = "%s %s %s" % (get_lineno(e=e), text, e)
+    text = "{} {}: {!r}".format(get_lineno(e=e), text, e)
   if more:
     logger.warning(text, exc_info=exc_info, stack_info=stack_info)
   else:
@@ -524,54 +524,44 @@ PROMPT_TR_MY = '请翻译引号中的内容，你要检测其原始语言是不�
 
 
 def cross_thread(func=None, *, need_main=True):
-  def wrapper(func):
-    if asyncio.iscoroutinefunction(func):
-      @wraps(func)
-      async def _(*args, **kwargs):
-        #  coro = func(*args, **kwargs)
-        #  res = await run_run(coro, need_main=need_main)
-        #  fu = run_cb_in_thread(func, *args, **kwargs)
-        #  res = await fu
-        if need_main is True:
-          if in_main_thread():
-            info(f"在主线程执行: {func}")
-            return await func(*args, **kwargs)
-          else:
-            info(f"在副线程跨线程执行: {func}")
-            #  return loop.run_until_complete(func(*args, **kwargs))
-            return await run_coro(func(*args, **kwargs), loop2, loop)
-        else:
-          if in_main_thread():
-            info(f"在主线程跨线程执行: {func}")
-            return await run_coro(func(*args, **kwargs), loop, loop2)
-          else:
-            info(f"在副线程执行: {func}")
-            return await func(*args, **kwargs)
-    else:
-      @wraps(func)
-      def _(*args, **kwargs):
-        #  return func(*args, **kwargs)
-        #  if need_main:
-        #    return run_cb_in_main(func, *args, **kwargs)
-        #  else:
-        #    return run_cb_in_thread(func, *args, **kwargs)
-        res = run_cb(func, *args, **kwargs, need_main=need_main)
-        #  info(f"done: {res}")
-        return res
-        fu = run_cb(func, *args, **kwargs, need_main=need_main)
-        if not fu.done():
-          time.sleep(0.3)
-          while not fu.done():
-            time.sleep(1)
-            info(f"waiting for result: {func.__name__}({args}, {kwargs})")
-        return fu.result()
-    return _
-  #  if func is not None:
-  #    return _cross_thread(func)
-  #  return _cross_thread
   if func is not None:
-    return wrapper(func)
-  return wrapper
+    return _cross_thread(func, need_main=need_main)
+  return _cross_thread
+
+def _cross_thread(func, *, need_main=True):
+  if asyncio.iscoroutinefunction(func):
+    async def _(*args, **kwargs):
+      coro = func(*args, **kwargs)
+      #  res = await run_run(coro, need_main=need_main)
+      #  fu = run_cb_in_thread(func, *args, **kwargs)
+      #  res = await fu
+      if need_main is True:
+        if in_main_thread():
+          info(f"在主线程执行: {func}")
+          return await coro
+        else:
+          info(f"在副线程跨线程执行: {func}")
+          #  return loop.run_until_complete(func(*args, **kwargs))
+          return await run_coro(coro, loop2, loop)
+      else:
+        if in_main_thread():
+          info(f"在主线程跨线程执行: {func}")
+          return await run_coro(coro, loop, loop2)
+        else:
+          info(f"在副线程执行: {func}")
+          return await coro
+  else:
+    def _(*args, **kwargs):
+      #  return func(*args, **kwargs)
+      #  if need_main:
+      #    return run_cb_in_main(func, *args, **kwargs)
+      #  else:
+      #    return run_cb_in_thread(func, *args, **kwargs)
+      res = run_cb(func, *args, **kwargs, need_main=need_main)
+      #  info(f"done: {res}")
+      return res
+  #  return _
+  return wraps(func)(_)
 
 def auto_task(func, return_task=False):
   # for callback
@@ -596,7 +586,6 @@ def exceptions_handler(func=None, *, no_send=False):
 
 def __exceptions_handler(func, no_send=False):
   if asyncio.iscoroutinefunction(func):
-    @wraps(func)
     async def _(*args, **kwargs):
       try:
         return await func(*args, **kwargs)
@@ -604,14 +593,13 @@ def __exceptions_handler(func, no_send=False):
       except BaseException as e:
         return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
   else:
-    @wraps(func)
     def _(*args, **kwargs):
       try:
         return func(*args, **kwargs)
       #  except Exception as e:
       except BaseException as e:
         return  _exceptions_handler(func, no_send, e, *args,  **kwargs)
-  return _
+  return wraps(func)(_)
 
 def _exceptions_handler(func, no_send, e, *args, **kwargs):
   #  no_send = _no_send
@@ -2378,36 +2366,6 @@ def format_out_of_shell(res):
 #      res = await pastebin(res)
 #    return res
 #
-
-async def run_coro(coro, lp, lp2):
-  fu = asyncio.Event()
-
-  ress = []
-
-  #  @exceptions_handler
-  async def f():
-    #  return 0
-    #  fu.set()
-    info("run...")
-    try:
-      res = await coro
-      info(f"fu.result: {res}")
-    except Exception as e:
-      warn("failed", e=e)
-      res = None
-    ress.append(res)
-    lp.call_soon_threadsafe(fu.set)
-    #  return res
-  #  info(f"lp2 is_running: {lp2.is_running()}")
-  #  t = lp2.create_task(f())
-  #  ts = []
-  #  def f2():
-  #    t= asyncio.create_task(f())
-  #    ts.append(t)
-  lp2.call_soon_threadsafe(asyncio.create_task, f())
-  #  info(f"lp2 is_running: {lp2.is_running()}")
-  await fu.wait()
-  return ress[0]
 
 
 #  @exceptions_handler
@@ -6380,6 +6338,35 @@ def run_cb2(cb, *args, need_main=False, **kwargs):
   return fu
 
 
+async def run_coro(coro, lp, lp2):
+  fu = asyncio.Event()
+  ress = []
+  #  @exceptions_handler
+  async def f():
+    #  return 0
+    #  fu.set()
+    info("run...")
+    try:
+      res = await coro
+      info(f"fu.result: {res}")
+    except Exception as e:
+      warn("failed", e=e)
+      res = None
+    ress.append(res)
+    lp.call_soon_threadsafe(fu.set)
+    info("done")
+    #  return res
+  #  info(f"lp2 is_running: {lp2.is_running()}")
+  #  t = lp2.create_task(f())
+  #  ts = []
+  #  def f2():
+  #    t= asyncio.create_task(f())
+  #    ts.append(t)
+  lp2.call_soon_threadsafe(asyncio.create_task, f())
+  #  info(f"lp2 is_running: {lp2.is_running()}")
+  await fu.wait()
+  return ress[0]
+
 #  @exceptions_handler(no_send=True)
 async def run_run(coro, need_main=False):
   if need_main:
@@ -6434,8 +6421,8 @@ async def run_run(coro, need_main=False):
     #  fua.set_result(fu.result())
     try:
       #  res = fu.result()
-      f = exceptions_handler(no_send=True)(fu.result)
-      res = f()
+      #  f = exceptions_handler(no_send=True)(fu.result)
+      res = fu.result()
       info(f"fu.result: {res}")
     except Exception as e:
       warn("failed", e=e)
