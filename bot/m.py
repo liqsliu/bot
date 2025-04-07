@@ -531,10 +531,16 @@ def cross_thread(func=None, *, need_main=True):
         #  coro = func(*args, **kwargs)
         #  res = await run_run(coro, need_main=need_main)
         if need_main is True:
-          fu = run_cb_in_main(func, *args, **kwargs)
+          #  t = loop.create_task(func(*args, **kwargs))
+          def cb():
+            return loop.run_until_complete(func(*args, **kwargs))
+          fu = run_cb_in_main(cb)
           res = await fu
         else:
-          fu = run_cb_in_thread(func, *args, **kwargs)
+          #  fu = run_cb_in_thread(func, *args, **kwargs)
+          def cb():
+            return loop2.run_until_complete(func(*args, **kwargs))
+          fu = run_cb_in_main(cb)
           res = await fu
         #  info(f"done: {res}")
         return res
