@@ -2382,34 +2382,32 @@ def format_out_of_shell(res):
 async def run_coro(coro, lp, lp2):
   fu = asyncio.Event()
 
-  @exceptions_handler
+  ress = []
+
+  #  @exceptions_handler
   async def f():
     #  return 0
     #  fu.set()
     info("run...")
-    res = await coro
+    try:
+      res = await coro
+      info(f"fu.result: {res}")
+    except Exception as e:
+      warn("failed", e=e)
+      res = None
+    ress.append(res)
     lp.call_soon_threadsafe(fu.set)
-    info(f"fu.result: {res}")
-    return res
-  info(f"lp2 is_running: {lp2.is_running()}")
+    #  return res
+  #  info(f"lp2 is_running: {lp2.is_running()}")
   #  t = loop2.create_task(f())
-  ts = []
-  def f2():
-    t= asyncio.create_task(f())
-    ts.append(t)
-  lp2.call_soon_threadsafe(f2)
-  info(f"lp2 is_running: {lp2.is_running()}")
+  #  ts = []
+  #  def f2():
+  #    t= asyncio.create_task(f())
+  #    ts.append(t)
+  lp2.call_soon_threadsafe(asyncio.create_task, f())
+  #  info(f"lp2 is_running: {lp2.is_running()}")
   await fu.wait()
-  if ts:
-    t = ts[0]
-    if not t.done():
-      info("wait done")
-      await sleep(0.3)
-    info("done")
-    return t.result()
-  else:
-    warn(f"wtf: {t}")
-    return
+  return ress[0]
 
 
 #  @exceptions_handler
