@@ -1785,6 +1785,7 @@ async def init_myshell():
       else:
         tmp2 += d
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
+  asyncio.create_task(prr())
 
   #  myshell_p.stdin.close()
   #  await myshell_p.stdin.wait_closed()
@@ -1796,7 +1797,6 @@ async def init_myshell():
   asyncio.create_task(pr(p.stdout.read, 1))
   asyncio.create_task(pr(p.stderr.read, 2))
 
-  asyncio.create_task(prr())
 
   cmds = "source ~/.bash_profile"
   res = await myshell(cmds)
