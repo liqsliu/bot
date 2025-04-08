@@ -1777,31 +1777,71 @@ async def init_myshell():
   async def prr():
     tmp1 = b""
     tmp2 = b""
+    tmp = b""
+    o = None
     while myshell_p.returncode is None:
       #  n,d = await myshell_queue1.get()
       if len(data) == 0:
         await data_ok.wait()
         data_ok.clear()
       n,d = data.popleft()
-      while b"\n" in d:
-        d = d.split(b"\n", 1)
-        o = d[1]
-        d = d[0]
-        if n == 1:
-          tmp1 += d + b"\n"
-          #  info(f"send data {tmp1}")
-          await myshell_queue.put((n, tmp1))
-          tmp1 = b""
-        else:
-          tmp2 += d + b"\n"
-          #  info(f"send data {tmp2}")
-          await myshell_queue.put((n, tmp2))
-          tmp2 = b""
-        d = o
+
       if n == 1:
-        tmp1 += d
+        tmp = tmp1
       else:
-        tmp2 += d
+        tmp = tmp2
+
+      if d[-1] == b"\n":
+        if d == b"\n" or d[-2] == b"\n":
+          d = tmp + d
+        else:
+          ds = d.rsplit(b"\n", 2)
+          if len(ds) > 2:
+            o = ds[-2] + "\n"
+          d = tmp + ds[0] + "\n"
+        tmp = b""
+      else:
+        ds = d.rsplit(b"\n", 1)
+        if len(ds) == 1:
+          tmp += ds[0]
+        else:
+          d = tmp + ds[0] + "\n"
+          tmp = ds[-1]
+
+      if d is not None:
+        await myshell_queue.put((n, d))
+        d = None
+        if o is not None:
+        #  if len(ds) > 2:
+          await myshell_queue.put((n, o))
+          o = None
+
+      if n == 1:
+        tmp1 = tmp
+      else:
+        tmp2 = tmp
+
+
+      #  while b"\n" in d:
+      #  if d[-1] == b"":
+      #    d = d[0].rsplit(b"\n", 1)
+      #  o = d[1]
+      #  d = d[0]
+      #    if n == 1:
+      #      tmp1 += d + b"\n"
+      #      #  info(f"send data {tmp1}")
+      #      await myshell_queue.put((n, tmp1))
+      #      tmp1 = b""
+      #    else:
+      #      tmp2 += d + b"\n"
+      #      #  info(f"send data {tmp2}")
+      #      await myshell_queue.put((n, tmp2))
+      #      tmp2 = b""
+      #  d = o
+      #  if n == 1:
+      #    tmp1 += d
+      #  else:
+      #    tmp2 += d
     warn(f"myshell is killed, returncode: {myshell_p.returncode}")
   asyncio.create_task(prr())
 
