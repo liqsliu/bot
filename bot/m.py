@@ -8870,7 +8870,7 @@ async def init_cmd():
   add_tg_bot("ChatGPTechBot", "gpt2")
   add_tg_bot("GPT3_Chat_Bot", "gpt3")
   add_tg_bot("Chat_GPT4_rubot", "gpt4")
-  add_tg_bot("GPT_TechSupport", "ai2")
+  #  add_tg_bot("GPT_TechSupport", "ai2")
   add_tg_bot("ChatGPT_General_Bot", "ai3")
   add_tg_bot("martii_chat_bot", "ai4")
   add_tg_bot("gpt3_unlim_chatbot", "ai5")
