@@ -1797,15 +1797,15 @@ async def init_myshell():
         else:
           ds = d.rsplit(b"\n", 2)
           if len(ds) > 2:
-            o = ds[-2] + "\n"
-          d = tmp + ds[0] + "\n"
+            o = ds[-2] + b"\n"
+          d = tmp + ds[0] + b"\n"
         tmp = b""
       else:
         ds = d.rsplit(b"\n", 1)
         if len(ds) == 1:
           tmp += ds[0]
         else:
-          d = tmp + ds[0] + "\n"
+          d = tmp + ds[0] + b"\n"
           tmp = ds[-1]
 
       if d is not None:
