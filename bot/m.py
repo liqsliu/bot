@@ -1797,12 +1797,14 @@ async def init_myshell():
           d = tmp + d
         else:
           ds = d.rsplit(b"\n", 2)
+          info(f"{ds=}")
           if len(ds) > 2:
             o = ds[-2] + b"\n"
           d = tmp + ds[0] + b"\n"
         tmp = b""
       else:
         ds = d.rsplit(b"\n", 1)
+        info(f"{ds=}")
         if len(ds) == 1:
           tmp += ds[0]
           d = None
@@ -1810,7 +1812,7 @@ async def init_myshell():
           d = tmp + ds[0] + b"\n"
           tmp = ds[-1]
 
-      info(f"{d=} {o=} {ds=}")
+      info(f"{d=} {o=}")
       if d is not None:
         await myshell_queue.put((n, d))
         d = None
@@ -2042,7 +2044,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           #    info(f"fixme: timeout: {c=} {cmd}")
           #    break
           warn(f"timeout: {cmds}")
-          res = "结束"
+          res = "shell: 结束等待"
           send(res, src)
           # fixme: 不知道该设为多少
           r = -512
