@@ -1791,6 +1791,7 @@ async def init_myshell():
       else:
         tmp = tmp2
 
+      ds = []
       if d[-1] == b"\n":
         if d == b"\n" or d[-2] == b"\n":
           d = tmp + d
@@ -1804,10 +1805,12 @@ async def init_myshell():
         ds = d.rsplit(b"\n", 1)
         if len(ds) == 1:
           tmp += ds[0]
+          d = None
         else:
           d = tmp + ds[0] + b"\n"
           tmp = ds[-1]
 
+      info(f"{d=} {o=} {ds=}")
       if d is not None:
         await myshell_queue.put((n, d))
         d = None
@@ -2011,7 +2014,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
             timeout = max_time - timeout
           else:
             timeout = max_time/timeout/10 
-          info(f"waiting: timeout: {timeout}")
+          info(f"waiting({timeout}s)...")
           n, d = await asyncio.wait_for( myshell_queue.get(), timeout=timeout )
           if n == 1:
             if k == 0:
