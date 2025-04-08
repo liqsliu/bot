@@ -1793,7 +1793,7 @@ async def init_myshell():
 
       #  ds = []
       if d[-1:] == b"\n": # 不能用d[-1]: int
-        if d == b"\n" or d[-2:-1]) == b"\n":
+        if d == b"\n" or d[-2:-1] == b"\n":
           d = tmp + d
         else:
           ds = d.rsplit(b"\n", 2)
