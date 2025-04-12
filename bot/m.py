@@ -7567,7 +7567,7 @@ async def msgx(msg):
     if msg.type_ == MessageType.ERROR:
       send_log("未知来源的消息(wtf) %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), f"{msg.from_=}", msg.to, msg.body))
       return
-    send(f"暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
+    send(f"暂时只支持ping命令，别的私聊消息会转发给管理。\n不要开启加密，bot暂时不支持。\n管理的xmpp账号: xmpp:{ME}\n群: xmpp:{main_group}?join", msg.from_)
     #  chat = await get_entity(CHAT_ID, True)
     #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
     #  send_log(f"{msg.type_} {msg.from_}: {text}")
@@ -10178,7 +10178,9 @@ async def msgb(event):
                 pass
               else:
                 tjid = tjidb
-              send(text, tjid)
+              send(text, tjid, name="**T admin:** ")
+              await msg.reply("ok")
+              return
             else:
               pass
       await msg.reply("?")
