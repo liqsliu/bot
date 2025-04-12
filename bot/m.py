@@ -5427,10 +5427,11 @@ async def msgtd(event):
   #    return
   #  chat_id = event.sender_id
   chat_id = event.chat_id
+  info(f"delete msg: {chat_id} {event.deleted_id} {event.deleted_ids}")
   if chat_id == GROUP_ID:
     return
   if chat_id is None:
-    warn(f"chat_id is None")
+    warn("chat_id is None")
   elif chat_id not in bridges_tmp:
     #  info(f"chat_id is not in bridges: {chat_id}")
     return
@@ -5438,7 +5439,6 @@ async def msgtd(event):
   #  src = bridges[chat_id]
     #  if src not in tmp_msg_chats:
   #  if chat_id is None:
-  info(f"delete msg: {chat_id} {event.deleted_id} {event.deleted_ids}")
   for i in event.deleted_ids:
     if i in forwarded_tg_msg_ids:
       for src in forwarded_tg_msg_ids[i]:
