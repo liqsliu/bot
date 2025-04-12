@@ -7497,11 +7497,61 @@ async def msgx(msg):
         
 
   elif muc == myjid:
-    #  print("跳过自己发送的消息%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
+    info0("跳过自己发送的消息: %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
     return
   elif muc in me:
     is_admin = True
     info(f"admin pm msg: {short(text)}")
+    if text.startswith("> "):
+      ts = text.splitlines()
+      if len(ts) > 1:
+        for i in range(ts):
+          if not ts[i].startswith(">"):
+            break
+        ts = ts[:i]
+        if len(ts) != 0:
+          if ts[0] == "":
+            ts = ts[:1]
+        if len(ts) == 0:
+          reply = msg.make_reply()
+          reply.body[None] = "skip empty msg"
+          send(reply)
+          return
+        if text.startswith("> id: "):
+          tid = int(text.split(" ", 3)[2])
+
+          send("\n".join(ts), tid)
+
+          reply = msg.make_reply()
+          reply.body[None] = "ok"
+          send(reply)
+          return
+        if text.startswith("> xmpp: "):
+
+          tt = text.split(" ", 3)[2]
+          tjid = text.split(" ", 4)[3][:-1]
+
+          tjidb = tjid.split("/")[0]
+          #  tj = JID.fromstr(tjid)
+          if tt == "MessageType.CHAT":
+            if tjidb in my_groups:
+              pass
+            else:
+              tjid = tjidb
+            #  send(text, tjid)
+            send("\n".join(ts), tjid)
+            reply = msg.make_reply()
+            reply.body[None] = "ok"
+            send(reply)
+            return
+          else:
+            pass
+
+
+      reply = msg.make_reply()
+      reply.body[None] = "?"
+      send(reply)
+      return
     nick = msg.from_.localpart
   elif muc == rssbot:
     #  if msg.type_ == None:
@@ -7520,7 +7570,9 @@ async def msgx(msg):
     send(f"暂时只支持ping命令，别的私聊消息会转发给管理。不要开启加密，bot暂时不支持。管理的xmpp账号: xmpp:{ME} 群: xmpp:{main_group}?join", msg.from_)
     #  chat = await get_entity(CHAT_ID, True)
     #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
-    send_log(f"{msg.type_} {msg.from_}: {text}")
+    #  send_log(f"{msg.type_} {msg.from_}: {text}")
+    send(f"xmpp: {msg.type_} {msg.from_}: {text}", MY_ID)
+    send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME)
     return
     #  pprint(msg)
 
@@ -9942,6 +9994,7 @@ async def msgb(event):
     return
 
   if event.is_private or chat_id == CHAT_ID:
+    # my private group
     msg = event.message
     #  text = msg.text
     text = msg.raw_text
@@ -10104,23 +10157,42 @@ async def msgb(event):
         if msg2.raw_text:
           text2 = msg2.raw_text
           if text2.startswith("id: "):
-            tid = int(text2.split(" ")[1])
+            tid = int(text2.split(" ", 2)[1])
             msg3 = await msg.forward_to(tid)
             await msg.reply("ok")
             return
+          if text2.startswith("xmpp: "):
+            text2 = msg2.raw_text
+            tt = text2.split(" ", 2)[1]
+            tjid = text2.split(" ", 3)[2][:-1]
+
+            tjidb = tjid.split("/")[0]
+            #  tj = JID.fromstr(tjid)
+            if tt == "MessageType.CHAT":
+              if tjidb in my_groups:
+                pass
+              else:
+                tjid = tjidb
+              send(text, tjid)
+            else:
+              pass
       await msg.reply("?")
     elif event.is_private:
       if text == 'id':
         await msg.reply(f"{chat_id}")
         return
       msg2 = await msg.forward_to(MY_ID)
+      send(msg.text, ME)
       if sender_id:
         #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
         #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
         #  await msg2.reply(f"id: [{sender_id}](tg://user?id={sender_id})", parse_mode="md")
-        await msg2.reply(f"id: [{sender_id}](tg://openmessage?user_id={sender_id})")
+        #  await msg2.reply(f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})")
+        res = f"id: [{sender_id}](tg://openmessage?user_id={sender_id})"
       else:
-        await msg2.reply(f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})")
+        res = f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})"
+      await msg2.reply(res)
+      send(res, ME)
       await msg.reply("ok")
     #  info("return")
     return
