@@ -7319,6 +7319,10 @@ def get_src(msg):
 #    #  return
 #    #  info("\n>>> msg: %s\n" % msg)
 
+
+
+private_locks = {}
+
 @auto_task
 @exceptions_handler
 async def msgx(msg):
@@ -7559,20 +7563,31 @@ async def msgx(msg):
     return
   else:
     info("未知来源的消息%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
-    if text == "ping":
-      reply = msg.make_reply()
-      reply.body[None] = "pong"
-      send(reply)
-      return
-    if msg.type_ == MessageType.ERROR:
-      send_log("未知来源的消息(wtf) %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), f"{msg.from_=}", msg.to, msg.body))
-      return
-    send(f"暂时只支持ping命令，别的私聊消息会转发给管理。\n不要开启加密，bot暂时不支持。\n管理的xmpp账号: xmpp:{ME}\n群: xmpp:{main_group}?join", msg.from_)
-    #  chat = await get_entity(CHAT_ID, True)
-    #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
-    #  send_log(f"{msg.type_} {msg.from_}: {text}")
-    send(f"xmpp: {msg.type_} {msg.from_}: {text}", MY_ID)
-    send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME, name="")
+    jid = str(msg.from_.bare())
+    if jid not in private_locks:
+      private_locks[jid] = asyncio.Lock()
+    try:
+      async with asyncio.timeout(60):
+        async with private_locks[jid]:
+          if text == "ping":
+            reply = msg.make_reply()
+            reply.body[None] = "pong"
+            send(reply)
+            await sleep(1)
+            return
+          if msg.type_ == MessageType.ERROR:
+            send_log("未知来源的消息(wtf) %s %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), f"{msg.from_=}", msg.to, msg.body))
+            await sleep(1)
+            return
+          send(f"暂时只支持ping命令，别的私聊消息会转发给管理。\n不要开启加密，bot暂时不支持。\n管理的xmpp账号: xmpp:{ME}\n群: xmpp:{main_group}?join", msg.from_)
+          #  chat = await get_entity(CHAT_ID, True)
+          #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
+          #  send_log(f"{msg.type_} {msg.from_}: {text}")
+          send(f"xmpp: {msg.type_} {msg.from_}: {text}", MY_ID)
+          send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME, name="")
+          await sleep(1)
+    except TimeoutError:
+      pass
     return
     #  pprint(msg)
 
@@ -7666,12 +7681,21 @@ async def msgx(msg):
 
       #  send_log(f"群内私聊: {msg.type_} {msg.from_}: {text}")
 
+      jid = str(msg.from_)
+      if jid not in private_locks:
+        private_locks[jid] = asyncio.Lock()
+      try:
+        async with asyncio.timeout(60):
+          async with private_locks[jid]:
 
-      send(f"xmpp: {msg.type_} {msg.from_}: {text}", MY_ID)
-      send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME, name="")
-      reply = msg.make_reply()
-      reply.body[None] = "ok"
-      send(reply)
+            send(f"xmpp: {msg.type_} {msg.from_}: {text}", MY_ID)
+            send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME, name="")
+            reply = msg.make_reply()
+            reply.body[None] = "ok"
+            send(reply)
+            await sleep(1)
+      except TimeoutError:
+        pass
       return
     #  if get_jid(msg.to) in my_groups:
     #  if get_jid(msg.from_) in my_groups:
@@ -10185,22 +10209,31 @@ async def msgb(event):
               pass
       await msg.reply("?")
     elif event.is_private:
-      if text == 'id':
-        await msg.reply(f"{chat_id}")
-        return
-      msg2 = await msg.forward_to(MY_ID)
-      send(msg.text, ME)
-      if sender_id:
-        #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
-        #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
-        #  await msg2.reply(f"id: [{sender_id}](tg://user?id={sender_id})", parse_mode="md")
-        #  await msg2.reply(f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})")
-        res = f"id: [{sender_id}](tg://openmessage?user_id={sender_id})"
-      else:
-        res = f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})"
-      await msg2.reply(res)
-      send(res, ME)
-      await msg.reply("ok")
+      try:
+        async with asyncio.timeout(60):
+          if chat_id not in private_locks:
+            private_locks[jid] = asyncio.Lock()
+          async with private_locks[chat_id]:
+            if text == 'id':
+              await msg.reply(f"{chat_id}")
+              return
+            msg2 = await msg.forward_to(MY_ID)
+            send(msg.text, ME)
+            if sender_id:
+              #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
+              #  await TB.send_message(MY_ID, f"id: [{sender_id}](tg://user?id={sender_id})")
+              #  await msg2.reply(f"id: [{sender_id}](tg://user?id={sender_id})", parse_mode="md")
+              #  await msg2.reply(f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})")
+              res = f"id: [{sender_id}](tg://openmessage?user_id={sender_id})"
+            else:
+              res = f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})"
+            await msg2.reply(res)
+            send(res, ME)
+            await msg.reply("ok")
+            await sleep(1)
+      except TimeoutError:
+        pass
+
     #  info("return")
     return
 
