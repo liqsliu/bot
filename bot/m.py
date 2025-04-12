@@ -7520,7 +7520,7 @@ async def msgx(msg):
         if text.startswith("> id: "):
           tid = int(text.split(" ", 3)[2])
 
-          send("\n".join(ts), tid)
+          send("\n".join(ts), tid, name="**X admin:** ")
 
           reply = msg.make_reply()
           reply.body[None] = "ok"
@@ -7539,7 +7539,7 @@ async def msgx(msg):
             else:
               tjid = tjidb
             #  send(text, tjid)
-            send("\n".join(ts), tjid)
+            send("\n".join(ts), tjid, name="**X admin:** ")
             reply = msg.make_reply()
             reply.body[None] = "ok"
             send(reply)
