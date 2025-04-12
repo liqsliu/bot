@@ -7572,7 +7572,7 @@ async def msgx(msg):
     #  await UB.send_message(chat, f"{msg.type_} {msg.from_}: {text}")
     #  send_log(f"{msg.type_} {msg.from_}: {text}")
     send(f"xmpp: {msg.type_} {msg.from_}: {text}", MY_ID)
-    send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME)
+    send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME, name="")
     return
     #  pprint(msg)
 
@@ -7668,7 +7668,7 @@ async def msgx(msg):
 
 
       send(f"xmpp: {msg.type_} {msg.from_}: {text}", MY_ID)
-      send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME)
+      send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME, name="")
       reply = msg.make_reply()
       reply.body[None] = "ok"
       send(reply)
