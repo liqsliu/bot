@@ -7374,6 +7374,7 @@ async def msgx(msg):
   else:
     return
   is_admin = False
+  jid = None
   if muc in my_groups:
 
     room = rooms[muc]
@@ -7670,39 +7671,41 @@ async def msgx(msg):
     warn(f"wtf: normal msg: {msg}")
     return
   elif msg.type_ == MessageType.CHAT:
-    if text == "ping":
-      reply = msg.make_reply()
-      reply.body[None] = "pong"
-      send(reply)
-      return
-    if is_admin is False:
-      info("群内私聊: %s" % msg)
-      #  await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
-
-      #  send_log(f"群内私聊: {msg.type_} {msg.from_}: {text}")
-
-      jid = str(msg.from_)
-      if jid not in private_locks:
-        private_locks[jid] = asyncio.Lock()
-      try:
-        async with asyncio.timeout(60):
-          async with private_locks[jid]:
-
-            send(f"xmpp: {msg.type_} {msg.from_}: {text}", MY_ID)
-            send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME, name="")
-            reply = msg.make_reply()
-            reply.body[None] = "ok"
-            send(reply)
-            await sleep(1)
-      except TimeoutError:
-        pass
-      return
     #  if get_jid(msg.to) in my_groups:
     #  if get_jid(msg.from_) in my_groups:
     if muc in my_groups:
       nick = msg.from_.resource
     else:
       nick = msg.from_.localpart
+    if is_admin is False:
+      info("群内私聊: %s: %s" % (msg.from_, short(text)))
+      #  await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
+
+      #  send_log(f"群内私聊: {msg.type_} {msg.from_}: {text}")
+
+      #  tjid = str(msg.from_)
+      if muc not in private_locks:
+        private_locks[muc] = asyncio.Lock()
+      try:
+        async with asyncio.timeout(60):
+          async with private_locks[jid]:
+            if text == "ping":
+              reply = msg.make_reply()
+              reply.body[None] = "pong"
+              send(reply)
+              await sleep(1)
+              return
+
+            res = f"xmpp: {msg.type_} {msg.from_}: {text}\njid: xmpp:{jid}"
+            send(res, MY_ID)
+            send(res, ME, name="")
+            reply = msg.make_reply()
+            reply.body[None] = "ok"
+            send(reply)
+            await sleep(1)
+      except TimeoutError:
+        warn(f"转发超时 {msg.from_}: {short(text)}")
+      return
   elif msg.type_ == MessageType.ERROR:
     warn(f"收到错误消息：{msg} {msg.error}")
     return
