@@ -7508,7 +7508,7 @@ async def msgx(msg):
         for i in range(len(ts)):
           if not ts[i].startswith(">"):
             break
-        ts = ts[:i]
+        ts = ts[i:]
         if len(ts) != 0:
           if ts[0] == "":
             ts = ts[:1]
