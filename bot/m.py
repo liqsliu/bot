@@ -7505,7 +7505,7 @@ async def msgx(msg):
     if text.startswith("> "):
       ts = text.splitlines()
       if len(ts) > 1:
-        for i in range(ts):
+        for i in range(len(ts)):
           if not ts[i].startswith(">"):
             break
         ts = ts[:i]
