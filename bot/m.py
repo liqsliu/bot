@@ -7663,7 +7663,12 @@ async def msgx(msg):
     if is_admin is False:
       info("群内私聊: %s" % msg)
       #  await sendme(f"群内私聊 {msg.type_} {msg.from_}: {text}")
-      send_log(f"群内私聊: {msg.type_} {msg.from_}: {text}")
+
+      #  send_log(f"群内私聊: {msg.type_} {msg.from_}: {text}")
+
+
+      send(f"xmpp: {msg.type_} {msg.from_}: {text}", MY_ID)
+      send(f"xmpp: {msg.type_} {msg.from_}: {text}", ME)
       reply = msg.make_reply()
       reply.body[None] = "ok"
       send(reply)
