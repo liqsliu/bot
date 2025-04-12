@@ -53,15 +53,16 @@ conv_mdv2(){
 
   text=$(echo "$text" | cut -d '\' --output-delimiter='\\' -f 1- )
 
-  text=$(echo "$text" | cut -d '_' --output-delimiter='\_' -f 1- )
   text=$(echo "$text" | cut -d '*' --output-delimiter='\*' -f 1- )
   # text=$(echo "$text" | cut -d '*' --output-delimiter='\*' -f 1- | sed 's/\\\*\\\*/\*\*/g')
+  text=$(echo "$text" | cut -d '_' --output-delimiter='\_' -f 1- )
   text=$(echo "$text" | cut -d '[' --output-delimiter='\[' -f 1- )
   text=$(echo "$text" | cut -d ']' --output-delimiter='\]' -f 1- )
   text=$(echo "$text" | cut -d '(' --output-delimiter='\(' -f 1- )
   text=$(echo "$text" | cut -d ')' --output-delimiter='\)' -f 1- )
   text=$(echo "$text" | cut -d '~' --output-delimiter='\~' -f 1- )
   text=$(echo "$text" | cut -d '`' --output-delimiter='\`' -f 1- )
+
   text=$(echo "$text" | cut -d '>' --output-delimiter='\>' -f 1- )
   text=$(echo "$text" | cut -d '#' --output-delimiter='\#' -f 1- )
   text=$(echo "$text" | cut -d '+' --output-delimiter='\+' -f 1- )
@@ -71,6 +72,7 @@ conv_mdv2(){
   text=$(echo "$text" | cut -d '{' --output-delimiter='\{' -f 1- )
   text=$(echo "$text" | cut -d '}' --output-delimiter='\}' -f 1- )
   text=$(echo "$text" | cut -d '.' --output-delimiter='\.' -f 1- )
+
   text=$(echo "$text" | cut -d '!' --output-delimiter='\!' -f 1- )
 
 
@@ -85,18 +87,25 @@ conv_other(){
 
   text=$(echo "$text" | cut -d '\' --output-delimiter='\\' -f 1- )
 
+  text=$(echo "$text" | cut -d '_' --output-delimiter='\_' -f 1- )
+  text=$(echo "$text" | cut -d '[' --output-delimiter='\[' -f 1- )
+  text=$(echo "$text" | cut -d ']' --output-delimiter='\]' -f 1- )
+  text=$(echo "$text" | cut -d '(' --output-delimiter='\(' -f 1- )
+  text=$(echo "$text" | cut -d ')' --output-delimiter='\)' -f 1- )
+  text=$(echo "$text" | cut -d '~' --output-delimiter='\~' -f 1- )
+  text=$(echo "$text" | cut -d '`' --output-delimiter='\`' -f 1- )
+
   text=$(echo "$text" | cut -d '>' --output-delimiter='\>' -f 1- )
   text=$(echo "$text" | cut -d '#' --output-delimiter='\#' -f 1- )
   text=$(echo "$text" | cut -d '+' --output-delimiter='\+' -f 1- )
   text=$(echo "$text" | cut -d '-' --output-delimiter='\-' -f 1- )
   text=$(echo "$text" | cut -d '=' --output-delimiter='\=' -f 1- )
+  text=$(echo "$text" | cut -d '|' --output-delimiter='\|' -f 1- )
   text=$(echo "$text" | cut -d '{' --output-delimiter='\{' -f 1- )
   text=$(echo "$text" | cut -d '}' --output-delimiter='\}' -f 1- )
   text=$(echo "$text" | cut -d '.' --output-delimiter='\.' -f 1- )
 
-  text=$(echo "$text" | cut -d '~' --output-delimiter='\~' -f 1- )
   text=$(echo "$text" | cut -d '!' --output-delimiter='\!' -f 1- )
-  text=$(echo "$text" | cut -d '|' --output-delimiter='\|' -f 1- )
 
 
   # text="$(echo "$text" | cut -d '"' --output-delimiter='\"' -f 1- )"
