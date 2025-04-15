@@ -8217,7 +8217,7 @@ async def init_cmd():
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"exec\nreturn res\n.{cmds[0]} $code"
+      return 0, f"exec\n.{cmds[0]} $code"
     cmds.pop(0)
     #  res = await my_exec2(' '.join(cmds), src)
     #  if res is 0:
@@ -8228,7 +8228,7 @@ async def init_cmd():
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"exec in main thread\nreturn res\n.{cmds[0]} $code"
+      return 0, f"exec in main thread\n.{cmds[0]} $code"
     cmds.pop(0)
     return 0, await my_exec(' '.join(cmds), src)
   cmd_funs["exec0"] = _
