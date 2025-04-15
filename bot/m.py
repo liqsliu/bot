@@ -10215,7 +10215,7 @@ async def msgb(event):
       try:
         async with asyncio.timeout(60):
           if chat_id not in private_locks:
-            private_locks[jid] = asyncio.Lock()
+            private_locks[chat_id] = asyncio.Lock()
           async with private_locks[chat_id]:
             if text == 'id':
               await msg.reply(f"{chat_id}")
