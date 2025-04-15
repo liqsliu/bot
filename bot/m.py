@@ -2930,7 +2930,8 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
         #  return "\n".join(s)
         return html.unescape("\n".join(s))
       else:
-        warn(f"fixme: {o=} {url}")
+        warn(f"fixme: {o=} {url=}")
+        return
         return s[-1]
     else:
       warn("empty out: %s\n--\nE: %s\n%s" % (o, r, e))
