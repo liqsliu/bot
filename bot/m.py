@@ -2159,7 +2159,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
         elif r == -512:
           pass
         else:
-          ds = ds.rsplit("\n", 1)[0] + f"\n===\nE: {r}"
+          ds = ds.rsplit("\n", 1)[0] + f"\n--\nE: {r}"
       send(ds, src)
   #  if e:
   if len(e) > 0:
