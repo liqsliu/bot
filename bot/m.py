@@ -5442,7 +5442,7 @@ async def msgtd(event):
   #    return
   #  chat_id = event.sender_id
   chat_id = event.chat_id
-  info(f"delete msg: {chat_id} {event.deleted_id} {event.deleted_ids}")
+  info(f"delete: {chat_id} {event.deleted_id} {event.deleted_ids}")
   if chat_id == GROUP_ID:
     return
   if chat_id is None:
