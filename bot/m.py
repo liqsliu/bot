@@ -2092,7 +2092,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
         except TimeoutError:
           info(f"no more")
           # 至少还有一条待执行的命令
-        if r is True:
+        if r is not None:
           break
         #  if k > 2:
         if k > 1:
