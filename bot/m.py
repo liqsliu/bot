@@ -2130,7 +2130,8 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           #    info("wait for more")
           #    if myshell_queue.empty():
           #      break
-  if o:
+  #  if o:
+  if len(o) > 0:
     o = o.decode("utf-8", errors="ignore")
     o = o.strip()
     if r is True:
@@ -2139,22 +2140,30 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
       o = '\n'.join(s[:-1])
   else:
     o = None
-  if e:
-    e = e.decode("utf-8", errors="ignore")
-    e = e.strip()
-  else:
-    e = None
-    
+
   if len(tmp) > 0:
     ds = tmp.decode("utf-8", errors="ignore")
     ds = re.sub(shell_color_re,  "", ds)
     ds = ds.strip()
     #  if ds:
     if len(ds) > 0:
-      if r == 0:
-        if ds.endswith("\n0"):
+      if type(r) is int:
+        if r == 0:
+          #  if ds.endswith("\n0"):
           ds = ds[:-2]
+        elif r == -512:
+          pass
+        else:
+          ds = ds.rsplit("\n", 1)[0] + f"\n===\nE: {r}"
       send(ds, src)
+  #  if e:
+  if len(e) > 0:
+    e = e.decode("utf-8", errors="ignore")
+    #  e = re.sub(shell_color_re,  "", e)
+    e = e.strip()
+  else:
+    e = None
+    
   #  if r is not None:
   #    return  (r, o, e)
   return  (r, o, e)
@@ -2378,7 +2387,7 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None):
 def format_out_of_shell(res):
   if res[0] == 0 and res[2] is None:
     return "%s" % res[1]
-  return "%s\n--\nE: %s\n%s" % (res[1],res[0], res[2])
+  return "%s\n---\nE: %s\n%s" % (res[1],res[0], res[2])
 
 
 
@@ -8173,7 +8182,7 @@ async def init_cmd():
     #  res = await my_sshell("bash -i", ext=' '.join(cmds), src=src)
     #  res = await myshell(cmds, src=src)
     #  res = await run_run( myshell(cmds, src=src) , False)
-    res = await myshell(cmds, src=src)
+    await myshell(cmds, src=src)
     return 512,
     #  if res:
     #    res = f"```\n{res}```"
