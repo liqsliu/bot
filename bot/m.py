@@ -2092,9 +2092,9 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
         except TimeoutError:
           info(f"no more")
           # 至少还有一条待执行的命令
-        if r is not None:
-          info(f"break: {r=}")
-          break
+        #  if r is not None:
+        #    info(f"break: {r=}")
+        #    break
         #  if k > 2:
         if k > 1:
           #  if len(tmp) < 512:
@@ -2103,23 +2103,23 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
               info(f"等一下，合并后续消息")
               #  if not e:
               break
+          if src is not None and len(tmp) > 0:
+            ds = tmp.decode("utf-8", errors="ignore")
+            #  info(f"got{n}: {ds[:16]}")
+            ds = re.sub(shell_color_re,  "", ds)
+            #  info(f"got{n}>: {ds[:16]}")
+            #  res += "\n" + ds
+            ds = ds.strip()
+            if ds:
+              #  info(f"send: {src} {type(ds)} {ds[:16]}")
+              #  send(f"```\n{ds}```", src)
+              send(ds, src)
+              last_send = time.time()
+              tmp = b""
         elif k == 1:
           if d == b"0\n":
             info(f"skip sending of returncode 0")
             break
-        if src is not None:
-          ds = tmp.decode("utf-8", errors="ignore")
-          #  info(f"got{n}: {ds[:16]}")
-          ds = re.sub(shell_color_re,  "", ds)
-          #  info(f"got{n}>: {ds[:16]}")
-          #  res += "\n" + ds
-          ds = ds.strip()
-          if ds:
-            #  info(f"send: {src} {type(ds)} {ds[:16]}")
-            #  send(f"```\n{ds}```", src)
-            send(ds, src)
-            last_send = time.time()
-            tmp = b""
         if k > 0:
           #  if k == 1:
           #    info(f"res {n}: {d}")
