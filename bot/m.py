@@ -2147,6 +2147,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     ds = ds.strip()
     #  if ds:
     if len(ds) > 0:
+      info(f"{r=}")
       if type(r) is int:
         if r == 0:
           #  if ds.endswith("\n0"):
