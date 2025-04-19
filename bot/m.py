@@ -339,6 +339,9 @@ def get_cmd(text):
           cmd.append(tmp)
           tmp = ""
           continue
+        elif len(cmd) == 1:
+          if tmp == "":
+            continue
     tmp += c
   if len(tmp) > 0:
     cmd.append(tmp)
