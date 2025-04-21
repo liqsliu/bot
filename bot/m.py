@@ -9030,6 +9030,7 @@ async def init_cmd():
   add_tg_bot("chatgpt_tfrbot", "gk")
   add_tg_bot("UltraYTBot", "ytd", no_file=True)
   add_tg_bot("YTsavebot", "ytd2", no_file=True)
+  add_tg_bot("CopilotOfficialBot", "cp")
 
 
 
