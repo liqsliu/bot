@@ -87,13 +87,16 @@ conv_other(){
 
   text=$(echo "$text" | cut -d '\' --output-delimiter='\\' -f 1- )
 
+  # text=$(echo "$text" | cut -d '*' --output-delimiter='\*' -f 1- )
+ 
   text=$(echo "$text" | cut -d '_' --output-delimiter='\_' -f 1- )
   text=$(echo "$text" | cut -d '[' --output-delimiter='\[' -f 1- )
   text=$(echo "$text" | cut -d ']' --output-delimiter='\]' -f 1- )
   text=$(echo "$text" | cut -d '(' --output-delimiter='\(' -f 1- )
   text=$(echo "$text" | cut -d ')' --output-delimiter='\)' -f 1- )
   text=$(echo "$text" | cut -d '~' --output-delimiter='\~' -f 1- )
-  text=$(echo "$text" | cut -d '`' --output-delimiter='\`' -f 1- )
+
+  # text=$(echo "$text" | cut -d '`' --output-delimiter='\`' -f 1- )
 
   text=$(echo "$text" | cut -d '>' --output-delimiter='\>' -f 1- )
   text=$(echo "$text" | cut -d '#' --output-delimiter='\#' -f 1- )

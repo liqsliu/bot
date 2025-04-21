@@ -5613,6 +5613,8 @@ async def msgt(event):
   if chat_id == GROUP_ID:
     if msg.raw_text:
       text = msg.raw_text
+      text = text.replace("*", "")
+      text = text.replace("`", "")
       global tg_msg_cache_for_bot2
       if sender_id == 420415423:
         # bot2: t2bot
