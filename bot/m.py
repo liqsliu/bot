@@ -8942,6 +8942,9 @@ async def init_cmd():
         bot_cmds[bot_name] = ""
         #  return ""
     return bot_cmds[bot_name]
+  
+  all_bots = set()
+
   def add_tg_bot(bot_name, cmd, cmd2=None, cmd1=None, no_file=False):
     #  peer = await get_entity(bot_name)
     #  pid = await UB.get_peer_id(peer)
@@ -8960,7 +8963,7 @@ async def init_cmd():
         res = f"{name}\n.{cmds[0]} $text"
         if bot_name == "OPENAl_ChatGPT_bot":
           res += f"\n.{cmds[0]} /start: 更换ai模型(\"/start\"可以简写为\"s\")"
-        res += f"\n---\n.{cmds[0]} /start: 某些bot通过该命令找到额外选项\n.{cmds[0]} /help: 某些bot通过该命令找到额外选项\n.{cmds[0]} /reset: 某些bot通过该命令清空bot记住的上下文\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并针对文件回复指定内容\n---\n其他ai接口命令：.gpt/.gpt4/.gm/.gm1/.gm2/.bai/.sd/.ai2/.ai3/.ds/.ds1\n---\nhttps://t.me/{bot_name}{cmds2}"
+        res += f"\n---\n.{cmds[0]} /start: 某些bot通过该命令找到额外选项\n.{cmds[0]} /help: 某些bot通过该命令找到额外选项\n.{cmds[0]} /reset: 某些bot通过该命令清空bot记住的上下文\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并针对文件回复指定内容\n---\n其他ai接口命令：.%s\n---\nhttps://t.me/{bot_name}{cmds2}" % "./".join(all_bots)
         return 0, res
       elif not no_file and urlre.fullmatch(cmds[-1]):
         cmds2 = [f"{SH_PATH}/title.sh", cmds[-1]]
