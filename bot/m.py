@@ -1509,9 +1509,9 @@ def format_byte(num):
 #      #      return msg
 #      if combine:
 #        if errs:
-#          res = "%s\n--\nE: %s\n%s" % (res, p.returncode, errs)
+#          res = "%s\n\nE: %s\n%s" % (res, p.returncode, errs)
 #        elif p.returncode:
-#          res = "%s\n--\nE: %s" % (res, p.returncode)
+#          res = "%s\n\nE: %s" % (res, p.returncode)
 #        if res:
 #          if len(res) > MAX_MSG_BYTES:
 #            res = await pastebin(res)
@@ -2162,7 +2162,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
         elif r == -512:
           pass
         else:
-          ds = ds.rsplit("\n", 1)[0] + f"\n--\nE: {r}"
+          ds = ds.rsplit("\n", 1)[0] + f"\n\nE: {r}"
       send(ds, src)
   #  if e:
   if len(e) > 0:
@@ -2395,7 +2395,7 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None):
 def format_out_of_shell(res):
   if res[0] == 0 and res[2] is None:
     return "%s" % res[1]
-  return "%s\n---\nE: %s\n%s" % (res[1],res[0], res[2])
+  return "%s\n\nE: %s\n%s" % (res[1],res[0], res[2])
 
 
 
@@ -2951,7 +2951,7 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
         return
         return s[-1]
     else:
-      warn("empty out: %s\n--\nE: %s\n%s" % (o, r, e))
+      warn("empty out: %s\n\nE: %s\n%s" % (o, r, e))
       return
   elif r == -512:
     if o:
@@ -2974,8 +2974,8 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
     else:
       return "timeout"
   else:
-    warn("%s\n--\nE: %s\n%s" % (o, r, e))
-    return "%s\n--\nE: %s\n%s" % (o, r, e)
+    warn("%s\n\nE: %s\n%s" % (o, r, e))
+    return "%s\n\nE: %s\n%s" % (o, r, e)
 
 
 
@@ -3018,8 +3018,8 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
 #        return out
 #    else:
 #      #  if err:
-#      warn("%s\n--\nE: %s\n%s" % (out, r, err))
-#      return "%s\n--\nE: %s\n%s" % (out, r, err)
+#      warn("%s\n\nE: %s\n%s" % (out, r, err))
+#      return "%s\n\nE: %s\n%s" % (out, r, err)
 
 
 
@@ -8410,7 +8410,7 @@ async def init_cmd():
       except Exception as e:
         res3 += f"\nfailed: {muc}"
     if res2:
-      res = f"ok2: {nick}{res2}\n--{res3}"
+      res = f"ok2: {nick}{res2}\n{res3}"
       err(res)
       return 0, res
 
@@ -8455,7 +8455,7 @@ async def init_cmd():
         res3 += f"\nfailed: {muc}"
 
     if res2:
-      res = f"ok3: {nick} {jid}{res2}\n--{res3}"
+      res = f"ok3: {nick} {jid}{res2}\n{res3}"
     else:
       res = f"failed3: {nick} {jid}"
     return 0, res
@@ -8713,7 +8713,7 @@ async def init_cmd():
     res = None
     if len(cmds) == 1:
       res = f"管理桥接\n.{cmds[0]} add $from $dst\n.{cmds[0]} del $id/$jid\n.{cmds[0]} se $id/$jid"
-      res += "\n--\n%s" % json.dumps(bridges, indent='  ')
+      res += "\n\n%s" % json.dumps(bridges, indent='  ')
     elif cmds[1] == "add":
       if len(cmds) != 4:
         res = "参数数量不对"
@@ -8745,7 +8745,7 @@ async def init_cmd():
       peer = await get_entity(addr)
       if peer:
         res += "\npeer id: %s" % await UB.get_peer_id(peer)
-        res += "\n%s: %s\n--\n%s" % (type(peer), peer.stringify(), peer)
+        res += "\n%s: %s\n\n%s" % (type(peer), peer.stringify(), peer)
     send(f"{res}", src)
     return 512,
   cmd_funs["br"] = _
@@ -8810,7 +8810,7 @@ async def init_cmd():
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"查询xmpp端口\n.{cmds[0]} $domain\n---\n.xmppi\n.xmpps"
+      return 0, f"查询xmpp端口\n.{cmds[0]} $domain\n\n.xmppi\n.xmpps"
     res = await node.discover_connectors(cmds[1])
     o = [f"可用的xmpp端口: {cmds[1]}"]
     o += (str(x) for x in res)
@@ -8861,14 +8861,14 @@ async def init_cmd():
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"pastebin\n.{cmds[0]} text\n---\nhttps://fars.ee/"
+      return 0, f"pastebin\n.{cmds[0]} text\n\nhttps://fars.ee/"
     text = ' '.join(cmds[1:])
     return 0, await pastebin(text)
   cmd_funs["pb"] = _
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://privatebin.info/directory/"
+      return 0, f"PrivateBin\n.{cmds[0]} text\n\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://privatebin.info/directory/"
     elif cmds[1] == "init":
       pvb_init()
     text = ' '.join(cmds[1:])
@@ -8877,7 +8877,7 @@ async def init_cmd():
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"PrivateBin\n.{cmds[0]} text\n---\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://paste.ononoki.org/\nhttps://paste.i2pd.xyz/"
+      return 0, f"PrivateBin\n.{cmds[0]} text\n\nhttps://github.com/r4sas/PBinCLI\nhttps://github.com/PrivateBin/PrivateBin\nhttps://paste.ononoki.org/\nhttps://paste.i2pd.xyz/"
     #  fu = pvb_init(server="https://0.0g.gg/")
     #  await fu
     text = ' '.join(cmds[1:])
@@ -8888,7 +8888,7 @@ async def init_cmd():
 
   #  async def _(cmds: list, src: str | int) -> tuple:
   #    if len(cmds) == 1:
-  #      return 0, f"gpt(telegram bot) translate\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
+  #      return 0, f"gpt(telegram bot) translate\n.{cmds[0]} $text\n\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
   #    text = ' '.join(cmds[1:])
   #    text = f'{PROMPT_TR_MY}“{text}”'
   #    return 1, gpt_bot
@@ -8896,7 +8896,7 @@ async def init_cmd():
   #
   #  async def _(cmds: list, src: str | int) -> tuple:
   #    if len(cmds) == 1:
-  #      return 0, f"gpt(telegram bot) translate 中文专用翻译\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
+  #      return 0, f"gpt(telegram bot) translate 中文专用翻译\n.{cmds[0]} $text\n\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
   #    text = ' '.join(cmds[1:])
   #    text = f'{PROMPT_TR_ZH}“{text}”'
   #    return 1, gpt_bot
@@ -8905,7 +8905,7 @@ async def init_cmd():
 
   #  async def _(cmds, src):
   #    if len(cmds) == 1:
-  #      return f"gpt bot\n.{cmds[0]} $text\n--\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
+  #      return f"gpt bot\n.{cmds[0]} $text\n\n所有数据来自telegram机器人: https://t.me/littleb_gptBOT"
   #    text = ' '.join(cmds[1:])
   #    mid = await send_to_tg_bot(text, gpt_bot, src)
   #    return 1, mid
@@ -8913,7 +8913,7 @@ async def init_cmd():
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"音乐下载(.163命令的简化版)\n.{cmds[0]} $text\n.{cmds[0]} clear\n--\ntelegram bot: https://t.me/{music_bot_name}"
+      return 0, f"音乐下载(.163命令的简化版)\n.{cmds[0]} $text\n.{cmds[0]} clear\n\ntelegram bot: https://t.me/{music_bot_name}"
     if cmds[1] == "clear":
       await clear_history()
       return 0, "ok"
@@ -8937,7 +8937,7 @@ async def init_cmd():
       chat_id = await UB.get_peer_id(peer)
       s = await get_commands(chat_id)
       if s:
-        bot_cmds[bot_name] = "\n---\n" + "\n".join(f".{cmd} {x}" for x in s.splitlines())
+        bot_cmds[bot_name] = "\n\n" + "\n".join(f".{cmd} {x}" for x in s.splitlines())
       else:
         bot_cmds[bot_name] = ""
         #  return ""
@@ -8964,7 +8964,7 @@ async def init_cmd():
         res = f"{name}\n.{cmds[0]} $text"
         if bot_name == "OPENAl_ChatGPT_bot":
           res += f"\n.{cmds[0]} /start: 更换ai模型(\"/start\"可以简写为\"s\")"
-        res += f"\n---\nhttps://t.me/{bot_name}{cmds2}\n---\n.{cmds[0]} /start: 某些bot通过该命令找到额外选项\n.{cmds[0]} /help: 某些bot通过该命令找到额外选项\n.{cmds[0]} /reset: 某些bot通过该命令清空bot记住的上下文\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并针对文件回复指定内容\n---\n其他ai接口命令: ." + "/.".join(all_bots)
+        res += f"\n\nhttps://t.me/{bot_name}{cmds2}\n\n.{cmds[0]} /start: 某些bot通过该命令找到额外选项\n.{cmds[0]} /help: 某些bot通过该命令找到额外选项\n.{cmds[0]} /reset: 某些bot通过该命令清空bot记住的上下文\n.{cmds[0]} /about\n.{cmds[0]} $file_url: 转发文件给bot\n.{cmds[0]} $text $file_url: 转发文件并针对文件回复指定内容\n\n其他ai接口命令: ." + "/.".join(all_bots)
         return 0, res
       elif not no_file and urlre.fullmatch(cmds[-1]):
         cmds2 = [f"{SH_PATH}/title.sh", cmds[-1]]
@@ -9064,7 +9064,7 @@ async def init_cmd():
     #  for g in gid_src:
     #    i += 1
     #  return "ok {ii} -> {i}"
-    return 0, f"清除状态\n.{cmds[0]} all\n--\n{ii} -> {i}"
+    return 0, f"清除状态\n.{cmds[0]} all\n\n{ii} -> {i}"
   cmd_funs["clear"] = _
 
   async def _(cmds: list, src: str | int) -> tuple:
@@ -9185,7 +9185,7 @@ async def init_cmd():
           s = str(s)
           s = s[2:]
           tmp.append(my_bin(s))
-    return 0, "\n---\n".join(tmp)
+    return 0, "\n\n".join(tmp)
   cmd_funs["bin"] = _
 
 
