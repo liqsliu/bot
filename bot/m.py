@@ -8946,6 +8946,7 @@ async def init_cmd():
   all_bots = set()
 
   def add_tg_bot(bot_name, cmd, cmd2=None, cmd1=None, no_file=False):
+    all_bots.add(cmd)
     #  peer = await get_entity(bot_name)
     #  pid = await UB.get_peer_id(peer)
     #  bridges[pid] = src
