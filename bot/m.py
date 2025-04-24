@@ -5734,7 +5734,11 @@ async def msgt(event):
           text = text.split(": ", 1)[1]
           if text.startswith("reply: "):
             text = text.split(": ", 1)[1]
-        text = text.replace("\u3000", " ")
+        #  text = text.replace("\u3000", " ")
+        for i in set(text):
+          #  if ord("\u3000") <= ord(i) <= ord("\u303f"):
+          if 0x3000 <= ord(i) <= 0x303f:
+            text = text.replace(i, " ")
         while "  " in text:
           text = text.replace("  ", " ")
         text = text.strip()
@@ -9130,6 +9134,7 @@ async def init_cmd():
       return 0, f"unicode encode\n.{cmds[0]} $text"
     s = ' '.join(cmds[1:])
     #  return s.encode("unicode-escape").decode()
+    s = "\n".join(s)
     return 0, ascii(s)[1:-1]
   cmd_funs["u"] = _
   cmd_funs["ue"] = _
@@ -9143,15 +9148,15 @@ async def init_cmd():
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"hex encode\n.{cmds[0]} $text"
-    #  return ''.join(format(ord(c), '02X') for c in ' '.join(cmds[1:]))
+      return 0, f"utf-8 encode\n.{cmds[0]} $text"
+    # return ''.join(format(ord(c), '02X') for c in ' '.join(cmds[1:]))
     # https://docs.python.org/zh-cn/3.11/library/stdtypes.html
     return 0, (' '.join(cmds[1:])).encode().hex().upper()
   cmd_funs["he"] = _
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"hex decode\n.{cmds[0]} $text"
+      return 0, f"utf-8 decode\n.{cmds[0]} $text"
     s = ' '.join(cmds[1:])
     if s.startswith("0x"):
       s = s[2:]
