@@ -196,6 +196,8 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
     if [[ -n "$s" ]]; then
       echo "${s:1:-1}"
       # echo null
+    else
+      echo "没找到标题"
     fi
   fi
   rm "$fn"
