@@ -3846,7 +3846,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         await sleep(5)
         return False
       except rpcerrorlist.EntityBoundsInvalidError as e:
-        err(f"failed to send tg msg: {chat_id=} {text=}")
+        err(f"failed to send tg msg: {chat_id=} {text=} {e=}")
         return await  _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None):
       except ValueError as e:
         if e.args[0] == 'Failed to parse message':
