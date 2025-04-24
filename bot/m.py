@@ -9138,7 +9138,7 @@ async def init_cmd():
     s = ' '.join(cmds[1:])
     #  return s.encode("unicode-escape").decode()
     s = "\n".join(s)
-    return 0, ascii(s)[1:-1]
+    return 0, ascii(s)[1:-1].replace("\\n", "\n")
   cmd_funs["u"] = _
   cmd_funs["ue"] = _
   
