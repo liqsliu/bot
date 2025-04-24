@@ -2412,8 +2412,26 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None):
   return p.returncode, o, e
     
 def format_out_of_shell(res):
-  if res[0] == 0 and res[2] is None:
-    return "%s" % res[1]
+  r = res[0]
+  o = res[1]
+  e = res[2]
+  info("%s\n\nE: %s\n%s" % (o, r, e))
+  res = ""
+  if e is None:
+    if r == 0:
+      return f"{o}"
+  if o is not None:
+    res = f"{o}\n\n"
+  res += f"E: {r}"
+  if e is not None:
+    res += f"\n{e}"
+  return res
+
+  if res[2] is None:
+    if res[0] == 0:
+      return "%s" % res[1]
+  if res[1] is None:
+    return "E: %s\n%s" % (res[0], res[2])
   return "%s\n\nE: %s\n%s" % (res[1],res[0], res[2])
 
 
@@ -2989,12 +3007,18 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
       else:
         warn(f"fixme: {o=} {url}")
         return "timeout"
-      return "\n".join(s)
+      #  return "\n".join(s)
+      return html.unescape("\n".join(s))
     else:
       return "timeout"
   else:
-    warn("%s\n\nE: %s\n%s" % (o, r, e))
-    return "%s\n\nE: %s\n%s" % (o, r, e)
+    if o is not None:
+      o = html.unescape(o)
+    if e is not None:
+      e = html.unescape(e)
+    return format_out_of_shell((o, r, e))
+    #  warn("%s\n\nE: %s\n%s" % (o, r, e))
+    #  return "%s\n\nE: %s\n%s" % (o, r, e)
 
 
 
