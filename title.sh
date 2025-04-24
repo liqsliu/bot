@@ -43,11 +43,12 @@ fn=${fn%%#*}
 # fn=${fn#-}
 fn=$(echo "$fn" | sed "s/^-*//g")
 if [[ -z "$fn" ]]; then
-  fn=$(date "+%Y%m%d_%H%M%S")
+  # fn=$(date "+%Y%m%d_%H%M%S")
+  fn=$(date "+%M%S")
 elif [[ "${fn}" == "index.html" ]]; then
-  fn=$(date "+%Y%m%d_%H%M%S")
+  fn=$(date "+%M%S")
 elif [[ "${fn}" == "index" ]]; then
-  fn=$(date "+%Y%m%d_%H%M%S")
+  fn=$(date "+%M%S")
 fi
 fno=$fn
 fn="$HOME/t/$fn"
