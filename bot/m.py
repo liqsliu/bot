@@ -5644,7 +5644,8 @@ async def wait_for_msg_form_bot2(msg, chat_id):
 
 @exceptions_handler
 async def msgt(event):
-  
+  # msg to UB
+
   #  if event.chat_id not in id2gateway:
   #    #  print("W: skip: got a unknown: chat_id: %s\nmsg: %s" % (event.chat_id, msg.stringify()))
   #    return
@@ -5703,9 +5704,9 @@ async def msgt(event):
           text = text.split(": ", 1)[1]
           info(f"bot original text(3): {text=}")
         text = text.splitlines()[0]
-        text = text.strip()
         while "  " in text:
           text = text.replace("  ", " ")
+        text = text.strip()
         #  if text[-1] == " ":
         #    text = text[:-1]
         async with tg_msg_cache_for_bot2_lock:
@@ -5733,9 +5734,10 @@ async def msgt(event):
           text = text.split(": ", 1)[1]
           if text.startswith("reply: "):
             text = text.split(": ", 1)[1]
-        text = text.strip()
+        text = text.replace("\u3000", " ")
         while "  " in text:
           text = text.replace("  ", " ")
+        text = text.strip()
         #  start_time = time.time()
         try:
           while True:
