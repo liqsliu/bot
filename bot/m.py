@@ -1991,7 +1991,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
         if d == eof:
           info("shell is ok")
           break
-        info("drop: %s" % str((n, d))
+        info("drop: %s: %s" % (n, d)
     except TimeoutError:
       err("shell is busy")
       return -512, None, None
