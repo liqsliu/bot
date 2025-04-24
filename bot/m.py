@@ -3847,10 +3847,10 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         return False
       except rpcerrorlist.EntityBoundsInvalidError as e:
         if parse_mode ==  "md":
-          err(f"failed to send tg msg: {chat_id=} {text=} {e=}")
+          err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
           return await  _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None)
         else:
-          err(f"failed to send tg msg(parse_mode=): {chat_id=} {text=} {e=}")
+          err(f"failed to send tg msg(parse_mode=): {chat_id=} {text=} {e=}", no_send=True)
       except ValueError as e:
         if e.args[0] == 'Failed to parse message':
           err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
