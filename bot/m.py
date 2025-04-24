@@ -3801,9 +3801,9 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     if parse_mode ==  "md":
       parse_mode = "html"
       text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
-  else:
-    if parse_mode ==  "md":
-      parse_mode = client.parse_mode
+  #  else:
+  #    if parse_mode ==  "md":
+  #      parse_mode = client.parse_mode
   #  info(f"parse_mode: {parse_mode}")
   ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
   if len(ts) > 1:
@@ -3848,7 +3848,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       except rpcerrorlist.EntityBoundsInvalidError as e:
         if parse_mode ==  "md":
           err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
-          return await  _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None)
+          return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None)
         else:
           err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=} {e=}", no_send=True)
       except ValueError as e:
