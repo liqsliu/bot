@@ -1975,11 +1975,26 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
   async with myshell_lock:
 
     if not myshell_queue.empty():
-      warn("clean shell out...")
+      warn("clean shell")
       #  await sleep(1)
       while not myshell_queue.empty():
-        info("drop old out: %s" % str(await myshell_queue.get()) )
+        info("drop: %s" % str(await myshell_queue.get()) )
       info("clean ok")
+
+
+
+    p.stdin.write( eof )
+    info(f"send eof: check: shell is ok")
+    try:
+      while True:
+        n, d = await asyncio.wait_for( myshell_queue.get(), timeout=run_shell_time_max )
+        if d == eof:
+          info("shell is ok")
+          break
+        info("drop: %s" % str((n, d))
+    except TimeoutError:
+      err("shell is busy")
+      return -512, None, None
 
     start_time = time.time()
     last_send = start_time
@@ -9442,7 +9457,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
         tmp += i+"\n"
 
     urls=urlre.findall(qre.sub("", tmp))
-    res=""
+    res = None
     #  M=' 🔗 '
     #  M='- '
     #  M=' ⤷ '
@@ -9461,15 +9476,17 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
       elif url.startswith("https://twitter.com/"):
         res = await get_twitter(url, max_time=8)
         return res
-      tmp = "%s" % await get_title(url, max_time=8)
+      tmp = "%s" % await get_title(url, max_time=15)
       if len(urls) == 1:
         res = tmp
       else:
-        if not res:
+        if res is None:
           res="[ %s urls ]" % len(urls)
-        res+="\n\n> %s\n%s" % (url, tmp)
+        #  res+="\n\n> %s\n%s" % (url, tmp)
+        res+="- \n[%s](%s)" % (url, tmp)
 
-    if res:
+    #  if res:
+    if res is not None:
       res = f"{name}{res}"
       #  res2 = await send_cmd_to_bash(src, "", text)
       #  if res2:
