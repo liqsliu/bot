@@ -188,15 +188,20 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   # echo "$html" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
   # cat "$fn" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
   # echo
-  s=$(grep --binary-file=text -o '<title>.*</title>'  "$fn") || {
-    # echo null
-    # exit
-    exit 0
-    exit $?
-  }
-  echo "${s:7:-8}"
+  s=$(grep --binary-file=text -o '<title>.*</title>'  "$fn")
+  if [[ -n "$s" ]]; then
+    echo "${s:7:-8}"
+  else
+    s=$(grep --binary-file=text -o '<title>.*</title>'  "$fn"  | grep -o '>.*<' )
+    if [[ -n "$s" ]]; then
+      echo "${s:1:-1}"
+      # echo null
+    fi
+  fi
   rm "$fn"
+  # exit
   exit 0
+  exit $?
 else
 
 
