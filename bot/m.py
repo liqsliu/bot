@@ -3850,6 +3850,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         if parse_mode ==  "md":
           err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
           resend = True
+          parse_mode = None
         else:
           err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=} {e=}", no_send=True)
       except ValueError as e:
@@ -3865,7 +3866,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         return False
 
   if resend:
-    return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None)
+    return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=parse_mode)
   info(f"sent: {chat_id}: {short(text)}")
   return True
 
