@@ -196,7 +196,7 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   }
   echo "${s:7:-8}"
   rm "$fn"
-  exit
+  exit 0
 else
 
 

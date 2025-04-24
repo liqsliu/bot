@@ -2959,26 +2959,31 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   #  if r == 0:
   #  res = await run_run(myshell(cmds, src=src) , False)
   r, o, e = await myshell(cmds, src=src, max_time=max_time)
+  if o:
+    s = o.splitlines()
+    if len(s) > 0:
+      if o.startswith(DOWNLOAD_PATH):
+        if os.path.exists(s[0]):
+          path = s.pop(0)
+          info("found file: %s" % path)
+          try:
+            t = asyncio.create_task(backup(path))
+            url = await upload(path, src)
+            await t
+            if url:
+              #  s[0] = f"\n- {url}"
+              s.append(f"\n- {url}")
+              info("add xmpp file url: %s" % url)
+          finally:
+            asyncio.create_task(backup(path, delete=True))
+        else:
+          warn("not found file: %s" % s.pop(0))
+      else:
+        warn("wtf: %s" % s.pop(0))
   #  if res:
   #    o = res
   if r == 0:
     if o:
-      s = o.splitlines()
-      if os.path.exists(s[0]):
-        path = s.pop(0)
-        info("found file: %s" % path)
-        try:
-          t = asyncio.create_task(backup(path))
-          url = await upload(path, src)
-          await t
-          if url:
-            #  s[0] = f"\n- {url}"
-            s.append(f"\n- {url}")
-            info("add xmpp file url: %s" % url)
-        finally:
-          asyncio.create_task(backup(path, delete=True))
-      else:
-        warn("not found file. delete path: %s" % s.pop(0))
       if len(s) > 0:
         #  path = s[-1]
         #  return "\n".join(s)
@@ -2993,23 +2998,14 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   elif r == -512:
     if o:
       s = o.splitlines()
-      if len(s) > 1:
-        if os.path.exists(s[0]):
-          path = s.pop(0)
-          info("found file: %s" % path)
-          t = asyncio.create_task(backup(path))
-          url = await t
-          if url:
-            s.append(url)
-          asyncio.create_task(backup(path, delete=True))
-        else:
-          warn("not found file. delete path: %s" % s.pop(0))
+      if len(s) > 0:
+        return html.unescape("\n".join(s))
       else:
         warn(f"fixme: {o=} {url}")
         return "timeout"
       #  return "\n".join(s)
-      return html.unescape("\n".join(s))
     else:
+      warn(f"fixme: {o=} {url}")
       return "timeout"
   else:
     if o is not None:
