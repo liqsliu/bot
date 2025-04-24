@@ -1988,7 +1988,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     try:
       while True:
         n, d = await asyncio.wait_for( myshell_queue.get(), timeout=run_shell_time_max )
-        if d == eof:
+        if n == 1 and d == eof:
           info("shell is ok")
           break
         info("drop: %s: %s" % (n, d) )
