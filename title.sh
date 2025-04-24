@@ -182,39 +182,44 @@ if [[ "$5" == "just_path" ]]; then
   exit
 fi
 
-  # ft=$(echo "$html" | file --mime-type -b -- -)
-  if [[ -z "$4" && "$ft" == "text/html" ]]; then
-    # echo "$html" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
-    # cat "$fn" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
-    # echo
-    s=$(grep --binary-file=text -o '<title>.*</title>'  "$fn") || exit $?
-    echo "${s:7:-8}"
-    rm "$fn"
-    exit
-  else
+# ft=$(echo "$html" | file --mime-type -b -- -)
+if [[ -z "$4" && "$ft" == "text/html" ]]; then
+  # echo "$html" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
+  # cat "$fn" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
+  # echo
+  s=$(grep --binary-file=text -o '<title>.*</title>'  "$fn") || {
+    # echo null
+    # exit
+    exit 0
+    exit $?
+  }
+  echo "${s:7:-8}"
+  rm "$fn"
+  exit
+else
 
 
-    # fs=$(du -b -- "$fn" | cut -f1)
-    fs=$(du -h -- "$fn" | cut -f1)
-    ft=$(file -i -b -- "$fn") 
-    ft3=$(file -b -- "$fn") 
+  # fs=$(du -b -- "$fn" | cut -f1)
+  fs=$(du -h -- "$fn" | cut -f1)
+  ft=$(file -i -b -- "$fn") 
+  ft3=$(file -b -- "$fn") 
 
 
-    # fe=$(file --extension -- "${fn}" | grep -o -P "[^\s/]+$")
-    # fe=$(echo "$html" | file --extension -b -- -)
-    # size=$(echo "$html" | wc -c)
-    # echo "$fn"
-    echo "$fs"
-    echo "$ft"
-    echo "$ft3"
-    echo
-    echo "- $(bash "$SH_PATH/file_to_ipfs.sh" "${fn}")"
+  # fe=$(file --extension -- "${fn}" | grep -o -P "[^\s/]+$")
+  # fe=$(echo "$html" | file --extension -b -- -)
+  # size=$(echo "$html" | wc -c)
+  # echo "$fn"
+  echo "$fs"
+  echo "$ft"
+  echo "$ft3"
+  echo
+  echo "- $(bash "$SH_PATH/file_to_ipfs.sh" "${fn}")"
 
-    # nohup mv "$fn" "$LP/$fno$fe" &>/dev/null &
-    echo
-    echo "- https://$DOMAIN/${fno}${fe}"
+  # nohup mv "$fn" "$LP/$fno$fe" &>/dev/null &
+  echo
+  echo "- https://$DOMAIN/${fno}${fe}"
 
-  fi
+fi
 # done
 
 
