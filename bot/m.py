@@ -9518,7 +9518,8 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
         res = await get_twitter(url, max_time=8)
         return res
 
-      tmp = "%s" % await get_title(url, max_time=15)
+      #  tmp = "%s" % await get_title(url, max_time=15)
+      tmp = await get_title(url, max_time=15)
       if len(urls) == 1:
         if tmp is None:
           return True
