@@ -3016,7 +3016,7 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
       o = html.unescape(o)
     if e is not None:
       e = html.unescape(e)
-    return format_out_of_shell((o, r, e))
+    return format_out_of_shell((r, o, e))
     #  warn("%s\n\nE: %s\n%s" % (o, r, e))
     #  return "%s\n\nE: %s\n%s" % (o, r, e)
 
