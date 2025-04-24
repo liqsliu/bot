@@ -192,7 +192,7 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   if [[ -n "$s" ]]; then
     echo "${s:7:-8}"
   else
-    s=$(grep --binary-file=text -o '<title>.*</title>'  "$fn"  | grep -o '>.*<' )
+    s=$(grep --binary-file=text -P -o '<title ?[^>]+>.*</title>' "$fn"  | grep -o '>.*<' )
     if [[ -n "$s" ]]; then
       echo "${s:1:-1}"
       # echo null
