@@ -9136,7 +9136,9 @@ async def init_cmd():
     if len(cmds) == 1:
       return 0, f"unicode encode\n.{cmds[0]} $text"
     elif cmds[1] == "f":
-      s = ' '.join(cmds[1:])
+      if len(cmds) == 2:
+        return 0, "缺少参数"
+      s = ' '.join(cmds[2:])
       res = f"{len(s)}:"
       k = 1
       for i in s:
