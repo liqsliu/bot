@@ -1985,14 +1985,14 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
 
     p.stdin.write( cmds[-1].encode() )
     await p.stdin.drain()
-    info(f"send eof: check: shell is ok")
+    info(f"send eof: check: shell is ok: {eof}")
     try:
       async with asyncio.timeout(run_shell_time_max) as cm:
         while True:
           #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=run_shell_time_max )
           n, d = await myshell_queue.get()
           if n == 1 and d == eof:
-            info("shell is ok")
+            info(f"shell is ok, got: {eof}")
             break
           warn("drop: %s: %s" % (n, d) )
           cm.reschedule(cm.when()+max_time/3)
@@ -3796,12 +3796,14 @@ async def slow_mode(client, timeout=300):
 
 #  @exceptions_handler(no_send=True)
 @cross_thread
-async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None):
+async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md"):
   if qt is not None:
-    parse_mode = "html"
-    text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
+    if parse_mode ==  "md":
+      parse_mode = "html"
+      text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
   else:
-    parse_mode = client.parse_mode
+    if parse_mode ==  "md":
+      parse_mode = client.parse_mode
   #  info(f"parse_mode: {parse_mode}")
   ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
   if len(ts) > 1:
@@ -3843,6 +3845,9 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
         await sleep(5)
         return False
+      except rpcerrorlist.EntityBoundsInvalidError as e:
+        err(f"failed to send tg msg: {chat_id=} {text=}")
+        return await  _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None):
       except ValueError as e:
         if e.args[0] == 'Failed to parse message':
           err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
