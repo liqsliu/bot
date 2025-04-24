@@ -10209,12 +10209,18 @@ async def msgb(event):
             await msg.reply(f"{e.stringify()}")
           pid = await UB.get_peer_id(e)
           #  res = "peer id: %s" % pid
-          res = "peer id: %s %s %s" % (pid, e.first_name, e.last_name)
+          if hasattr(e, "first_name"):
+            res = "peer id: %s\n%s.%s" % (pid, e.first_name, e.last_name)
+          else:
+            res = "peer id: %s\n%s" % (pid, e.title)
           if e.username:
             res += " @%s" % e.username
           else:
-            if pid > 0:
+            #  if pid > 0:
+            if hasattr(e, "first_name"):
               res += " [%s](tg://openmessage?user_id=%s) " % (pid, pid)
+            else:
+              res += " [%s](tg://openmessage?chat_id=%s) " % (pid, pid)
           await msg.reply(res)
 
           #  if pid > 0:
