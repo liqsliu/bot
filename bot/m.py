@@ -3809,6 +3809,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   if len(ts) > 1:
     tmp_msg = False
   k = 0
+  resend = False
   async with lock:
     #  info0(f"send: {chat_id}: {text}")
     for t in ts:
@@ -3848,7 +3849,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       except rpcerrorlist.EntityBoundsInvalidError as e:
         if parse_mode ==  "md":
           err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
-          return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None)
+          resend = True
         else:
           err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=} {e=}", no_send=True)
       except ValueError as e:
@@ -3862,7 +3863,10 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
           no_send = False
         err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
         return False
-    info(f"sent: {chat_id}: {short(text)}")
+
+  if resend:
+    return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None)
+  info(f"sent: {chat_id}: {short(text)}")
   return True
 
 
