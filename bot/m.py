@@ -2964,23 +2964,23 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   if r == 0:
     if o:
       s = o.splitlines()
+      if os.path.exists(s[0]):
+        path = s.pop(0)
+        info("found file: %s" % path)
+        try:
+          t = asyncio.create_task(backup(path))
+          url = await upload(path, src)
+          await t
+          if url:
+            #  s[0] = f"\n- {url}"
+            s.append(f"\n- {url}")
+            info("add xmpp file url: %s" % url)
+        finally:
+          asyncio.create_task(backup(path, delete=True))
+      else:
+        warn("not found file. delete path: %s" % s.pop(0))
       if len(s) > 1:
         #  path = s[-1]
-        if os.path.exists(s[0]):
-          path = s.pop(0)
-          info("found file: %s" % path)
-          try:
-            t = asyncio.create_task(backup(path))
-            url = await upload(path, src)
-            await t
-            if url:
-              #  s[0] = f"\n- {url}"
-              s.append(f"\n- {url}")
-              info("add xmpp file url: %s" % url)
-          finally:
-            asyncio.create_task(backup(path, delete=True))
-        else:
-          warn("not found file. delete path: %s" % s.pop(0))
         #  return "\n".join(s)
         return html.unescape("\n".join(s))
       else:
@@ -9517,14 +9517,17 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
       elif url.startswith("https://twitter.com/"):
         res = await get_twitter(url, max_time=8)
         return res
+
       tmp = "%s" % await get_title(url, max_time=15)
       if len(urls) == 1:
+        if tmp is None:
+          return True
         res = tmp
       else:
         if res is None:
           res="[ %s urls ]" % len(urls)
         #  res+="\n\n> %s\n%s" % (url, tmp)
-        res+="- \n[%s](%s)" % (url, tmp)
+        res += "- \n[%s](%s)" % (url, tmp)
 
     #  if res:
     if res is not None:
