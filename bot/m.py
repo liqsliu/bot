@@ -9135,10 +9135,23 @@ async def init_cmd():
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
       return 0, f"unicode encode\n.{cmds[0]} $text"
+    elif cmds[1] == "f":
+      s = ' '.join(cmds[1:])
+      res = f"{len(s)}:"
+      k = 1
+      for i in s:
+        res += f"{k}: "
+        if i == "\n":
+          res += "\\n: skip" + "\n"
+        else:
+          res += f"{i}: " + ascii(i)[1:-1] + "\n"
+        k += 1
+      return 0, res
     s = ' '.join(cmds[1:])
     #  return s.encode("unicode-escape").decode()
-    s = "\n".join(s)
-    return 0, ascii(s)[1:-1].replace("\\n", "\n")
+    #  s = "\n".join(s)
+    #  return 0, ascii(s)[1:-1].replace("\\n", "\n")
+    return 0, ascii(s)[1:-1]
   cmd_funs["u"] = _
   cmd_funs["ue"] = _
   
