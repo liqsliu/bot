@@ -1987,14 +1987,17 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     await p.stdin.drain()
     info(f"send eof: check: shell is ok")
     try:
-      while True:
-        n, d = await asyncio.wait_for( myshell_queue.get(), timeout=run_shell_time_max )
-        if n == 1 and d == eof:
-          info("shell is ok")
-          break
-        info("drop: %s: %s" % (n, d) )
+      async with asyncio.timeout(run_shell_time_max) as cm:
+        while True:
+          #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=run_shell_time_max )
+          n, d = await myshell_queue.get()
+          if n == 1 and d == eof:
+            info("shell is ok")
+            break
+          warn("drop: %s: %s" % (n, d) )
+          cm.reschedule(cm.when()+max_time/3)
     except TimeoutError:
-      err("shell is busy")
+      warn("shell is busy")
       return -512, None, None
 
     start_time = time.time()
