@@ -1984,6 +1984,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
 
 
     p.stdin.write( eof )
+    await p.stdin.drain()
     info(f"send eof: check: shell is ok")
     try:
       while True:
