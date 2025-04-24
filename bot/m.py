@@ -723,10 +723,10 @@ def _exceptions_handler(e, func=None, no_send=False, *args, **kwargs):
     #  if not allright.is_set():
     if allright_task > 0:
       no_send = True
-    elif send_tg.__name__ in fs:
+    elif _send_tg.__name__ in fs:
       no_send = True
       info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
-    elif send_tg2.__name__ in fs:
+    elif _send_xmpp.__name__ in fs:
       no_send = True
       info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
     elif send_xmpp.__name__ in fs:
@@ -3850,7 +3850,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
           err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
           return await  _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None)
         else:
-          err(f"failed to send tg msg(parse_mode=): {chat_id=} {text=} {e=}", no_send=True)
+          err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=} {e=}", no_send=True)
       except ValueError as e:
         if e.args[0] == 'Failed to parse message':
           err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
