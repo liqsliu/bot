@@ -5734,11 +5734,14 @@ async def msgt(event):
           text = text.split(": ", 1)[1]
           if text.startswith("reply: "):
             text = text.split(": ", 1)[1]
+
+        #  https://symbl.cc/cn/unicode/blocks/cjk-symbols-and-punctuation/
         #  text = text.replace("\u3000", " ")
         for i in set(text):
           #  if ord("\u3000") <= ord(i) <= ord("\u303f"):
           if 0x3000 <= ord(i) <= 0x303f:
             text = text.replace(i, " ")
+
         while "  " in text:
           text = text.replace("  ", " ")
         text = text.strip()
