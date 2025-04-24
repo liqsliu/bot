@@ -9134,26 +9134,30 @@ async def init_cmd():
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"unicode encode\n.{cmds[0]} $text"
+      return 0, f"unicode encode\n.{cmds[0]} [f/r] $text"
     elif cmds[1] == "f":
       if len(cmds) == 2:
         return 0, "缺少参数"
       s = ' '.join(cmds[2:])
-      res = f"[ {len(s)} ]\n"
-      k = 1
-      for i in s:
-        res += f"{k}: "
-        if i == "\n":
-          res += "\\n: skip" + "\n"
-        else:
-          res += f"{i}: " + ascii(i)[1:-1] + "\n"
-        k += 1
-      return 0, res
+      return 0, ascii(s)[1:-1]
+    elif cmds[1] == "r":
+      if len(cmds) == 2:
+        return 0, "缺少参数"
+      s = ' '.join(cmds[2:])
+      return 0, s.encode("unicode-escape").decode()
     s = ' '.join(cmds[1:])
-    #  return s.encode("unicode-escape").decode()
     #  s = "\n".join(s)
     #  return 0, ascii(s)[1:-1].replace("\\n", "\n")
-    return 0, ascii(s)[1:-1]
+    res = f"[ {len(s)} ]\n"
+    k = 1
+    for i in s:
+      res += f"{k}: "
+      if i == "\n":
+        res += "\\n: skip" + "\n"
+      else:
+        res += f"{i}: " + ascii(i)[1:-1] + "\n"
+      k += 1
+    return 0, res
   cmd_funs["u"] = _
   cmd_funs["ue"] = _
   
