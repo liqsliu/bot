@@ -9139,7 +9139,7 @@ async def init_cmd():
       if len(cmds) == 2:
         return 0, "缺少参数"
       s = ' '.join(cmds[2:])
-      res = f"{len(s)}:"
+      res = f"[ {len(s)} ]\n"
       k = 1
       for i in s:
         res += f"{k}: "
