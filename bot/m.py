@@ -20,7 +20,7 @@ from . import debug, WORK_DIR, PARENT_DIR, LOG_FILE, get_my_key, HOME, LOGGER
 
 from telethon import TelegramClient
 #  from tg.telegram import DOWNLOAD_PATH
-from telethon.tl.types import KeyboardButton, KeyboardButtonUrl, KeyboardButtonCallback, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument
+from telethon.tl.types import InputChannel, InputPeerChannel, InputPeerUser, InputPhoneContact, KeyboardButton, KeyboardButtonUrl, KeyboardButtonCallback, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument, InputPeerChat, InputPeerChannel, InputPeerUser
 from telethon import events, utils
 import telethon.errors
 from telethon.errors import rpcerrorlist
@@ -5220,7 +5220,7 @@ def print_buttons(bs, k=0):
   return text
 
 
-def parse_tg_url(url, wtf=1):
+async def parse_tg_url(url, wtf=1):
   peer = None
   gid = None
   url = url.rstrip("?single")
@@ -5231,20 +5231,29 @@ def parse_tg_url(url, wtf=1):
     url = url[13:]
     if url.startswith("c/"):
       url = url[2:]
-    if url:
+      if url:
+        peer = url.split('/',1)[0]
+        if peer.isnumeric():
+          peer = int(peer)
+    else:
       peer = url.split('/',1)[0]
-      if '/' in url:
+    if peer:
+      if "?comment=" in url:
+        fpeer = await get_full_entity(peer)
+        peer = fpeer.linked_chat_id
+        gid = url.rsplit('=', 1)[-1]
+      elif '/' in url:
         gid = url.rsplit('/', 1)[-1]
-  if peer:
-    #  if peer[0] != "-":
-    if peer.isnumeric():
-      if wtf == 1:
-        # channel or super group
-        peer = f"-100{peer}"
-        peer = int(peer)
-      elif wtf == 2:
-        peer = f"-{peer}"
-        peer = int(peer)
+  #  if peer:
+  #    #  if peer[0] != "-":
+  #    if peer.isnumeric():
+  #      if wtf == 1:
+  #        # channel or super group
+  #        peer = f"-100{peer}"
+  #        peer = int(peer)
+  #      elif wtf == 2:
+  #        peer = f"-{peer}"
+  #        peer = int(peer)
   if gid:
     gid = int(gid)
   return peer, gid
@@ -5265,7 +5274,12 @@ async def get_commands(chat_id):
 
 async def get_full_entity(chat_id):
   peer = await UB.get_input_entity(chat_id)
-  res = await UB( telethon.functions.users.GetFullUserRequest(id=peer) )
+  if isinstance(peer, InputPeerChannel):
+    res = await UB( telethon.functions.channels.GetFullChannelRequest(channel=peer) )
+  elif isinstance(peer, InputPeerChat):
+    res = await UB( telethon.functions.messages.GetFullChatRequest(chat_id=peer) )
+  else:
+    res = await UB( telethon.functions.users.GetFullUserRequest(id=peer) )
   #  print(type(res))
   #  res = await res
   #  print(res.stringify())
@@ -5304,7 +5318,7 @@ async def get_entity(chat_id, id_only=True, client=None):
       elif url.startswith("-") and  url[1:].isnumeric():
         peer = int(url)
       else:
-        p, gid = parse_tg_url(url)
+        p, gid = await parse_tg_url(url)
         if p:
           peer = p
         else:
@@ -10181,10 +10195,10 @@ async def msgb(event):
       return
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
-      if text == 'id':
+      if text == "id":
         await msg.reply(f"id @name https://t.me/name\nchat_id: {chat_id}")
         return
-      if text == 'msg':
+      if text == "msg":
         await msg.reply("msg url raw/fast/xmpp/direct/vps")
         return
       if text.startswith("id "):
@@ -10383,8 +10397,7 @@ async def msgbo(event):
 
 @exceptions_handler
 async def tg_start():
-  global UB
-  global MY_NAME, MY_ID
+  global UB, MY_NAME, MY_ID
   info("telegram user bot login...")
 
   #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, proxy=("socks5", '127.0.0.1', 6080))
@@ -10399,7 +10412,7 @@ async def tg_start():
   #  async with UB:
   await UB.__aenter__()
 
-  #  UB.parse_mode = 'md'
+  UB.parse_mode = 'md'
   #  UB.parse_mode = None
 
   me = await UB.get_me()
@@ -10408,7 +10421,7 @@ async def tg_start():
   MY_NAME = me.username
   print(f"tg account: {MY_NAME}: {MY_ID}")
 
-  @UB.on(events.MessageDeleted)
+  @UB.on(events.MessageDeleted())
   async def _(event):
     global parse_message_deleted_task
     parse_message_deleted_task = asyncio.create_task(msgtd(event))
@@ -10449,7 +10462,7 @@ async def bot_start():
 
   info("telegram bot 登陆成功2")
   #  TB.parse_mode = 'md'
-  #  TB.parse_mode = None
+  TB.parse_mode = None
 
   @TB.on(events.NewMessage(incoming=True))
   @TB.on(events.MessageEdited(incoming=True))
