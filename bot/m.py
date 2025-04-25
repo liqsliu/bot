@@ -5688,12 +5688,12 @@ async def msgt(event):
   sender_id = event.sender_id
   msg = event.message
   text = msg.text
+  info(f"{chat_id} {sender_id}: {msg.id} {short(text)}")
   if chat_id is None:
     #  warn(f"chat_id is None")
     warn(f"chat_id is None: {chat_id} {sender_id}: {text}")
     chat_id = sender_id
 
-  info(f"{chat_id} {sender_id}: {msg.id} {short(text)}")
   #  print(f"{chat_id} {sender_id}: {short(msg.text)}")
   if chat_id == GROUP_ID:
     if msg.raw_text:
@@ -10134,9 +10134,15 @@ async def join(jid=None, nick=None, client=None):
 @exceptions_handler
 async def msgb(event):
   # msg to TB
+
+  chat_id = event.chat_id
+  sender_id = event.sender_id
+  msg = event.message
+  text = msg.text
+  info(f"{chat_id} {sender_id}: {msg.id} {short(text)}")
+
   if event.fwd_from:
     return
-  chat_id = event.chat_id
   if chat_id == GROUP_ID:
     info("ignore msg from GROUP_ID")
     return
