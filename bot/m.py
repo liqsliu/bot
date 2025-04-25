@@ -54,7 +54,15 @@ def jaccard_similarity(s1, s2):
 
 #  print(jaccard_similarity("hello", "helo"))  # 输出 Jaccard 相似度
 
-from Levenshtein import ratio
+#  from Levenshtein import ratio
+
+from difflib import SequenceMatcher
+
+def similarity(s1, s2):
+    return SequenceMatcher(None, s1, s2).ratio()
+
+#  print(similarity("hello", "helo"))  # 输出相似度
+
 
 
 from inspect import isawaitable, currentframe
@@ -5763,7 +5771,8 @@ async def msgt(event):
             #  if tg_msg_cache_for_bot2.startswith(text2):
             #  if text == tg_msg_cache_for_bot2:
             #  if jaccard_similarity(text, tg_msg_cache_for_bot2) > 0.9:
-            if ratio(text, tg_msg_cache_for_bot2) > 0.9:
+            #  if ratio(text, tg_msg_cache_for_bot2) > 0.9:
+            if similarity(text, tg_msg_cache_for_bot2) > 0.8:
               tg_msg_cache_for_bot2_event.clear()
               await msg.delete()
               #  tg_msg_cache_for_bot2 = None
