@@ -10401,8 +10401,7 @@ async def bot_start():
   async with TB:
     info("telegram bot 登陆成功2")
     #  TB.parse_mode = None
-
-    TB.parse_mode = 'md'
+    #  TB.parse_mode = 'md'
 
     @TB.on(events.NewMessage(incoming=True))
     @TB.on(events.MessageEdited(incoming=True))
@@ -10708,7 +10707,9 @@ async def amain():
     #  await UB.start()
     async with UB:
 
-      UB.parse_mode = 'md'
+      #  UB.parse_mode = 'md'
+      #  UB.parse_mode = None
+
       me = await UB.get_me()
       #  print(me.stringify())
       MY_ID = me.id
