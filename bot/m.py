@@ -492,10 +492,6 @@ mtmsgsg={}
 
 print_msg = False
 
-#  allright = asyncio.Event()
-#  allright.set()
-
-allright_task = 0
 
 #  LOADING="思考你发送的内容..."
 #  LOADING2="Thinking about what you sent..."
@@ -738,10 +734,7 @@ def _exceptions_handler(e, func=None, no_send=False, *args, **kwargs):
   if not no_send:
     info("check send_tg: {}".format(send_tg.__name__ in fs))
     info("check send_xmpp: {}".format(send_xmpp.__name__ in fs))
-    #  if not allright.is_set():
-    if allright_task > 0:
-      no_send = True
-    elif _send_tg.__name__ in fs:
+    if _send_tg.__name__ in fs:
       no_send = True
       info(f"fixme: 要刷屏了 fs: {fs} res: {res} e: {e=}")
     elif _send_xmpp.__name__ in fs:
@@ -4330,13 +4323,7 @@ async def send_to_tg_bot(text, chat_id):
 
 @exceptions_handler
 async def clear_history(src=None):
-  #  if not allright.is_set():
-  if allright_task > 0:
-    warn("wait for allright...")
-    #  await allright.wait()
-    return
   #  music_bot_state.clear()
-  #  allright.clear()
   #  await sleep(1)
   #  for g in queues:
   if src:
@@ -4349,7 +4336,6 @@ async def clear_history(src=None):
       mtmsgs = mtmsgsg[g]
       mtmsgs.clear()
     #  await mt_send(f"cleaned: {mtmsgsg=}", gateway="test")
-  #  allright.set()
   info("reset ok")
 
 #  import pb
@@ -7093,10 +7079,6 @@ def wtf_str(s, for_what="nick"):
 
 #  @exceptions_handler
 def msg_out(msg):
-  #  if not allright.is_set():
-  if allright_task > 0:
-    #  info("skip msg: allright is not ok: {msg.from_}: {msg.body}")
-    return
   #  pprint(msg)
   j = get_msg_jid(msg)
   if j in last_outmsg:
@@ -7120,16 +7102,12 @@ def msg_out(msg):
 #  @exceptions_handler
 #  def xmpp_msg_p(msg):
 #    # 状态消息，在线离线等
-#    if not allright.is_set():
-#      return
 #    asyncio.create_task(_xmpp_msg_p(msg))
 
 @auto_task
 @exceptions_handler
 async def msgxp(msg):
   dbg(f"got a xmpp p msg: {msg}")
-  #  if allright_task > 0:
-  #    return
   muc = str(msg.from_.bare())
   if msg.type_ == PresenceType.AVAILABLE:
     if msg.xep0045_muc_user:
@@ -7416,9 +7394,6 @@ def get_src(msg):
 #  def gmsg(msg, member, source, **kwargs):
 #  @exceptions_handler
 #  def x_msg(msg):
-#    if not allright.is_set():
-#      #  info("skip msg: allright is not ok")
-#      return
 #    #  if hasattr(msg, "xep0203_delay"):
 #    #    pprint(msg.xep0203_delay)
 #    #    info("skip msg: delayed: {msg.xep0203_delay}")
@@ -7436,8 +7411,6 @@ private_locks = {}
 @exceptions_handler
 async def msgx(msg):
   dbg(f"got a xmpp msg: {msg}")
-  #  if allright_task > 0:
-  #    return
   #  if str(msg.from_.bare()) == rssbot:
   #    pprint(msg)
   muc = str(msg.from_.bare())
@@ -9931,6 +9904,7 @@ rooms = {}
 auto_input = False
 
 async def join_all():
+  info(f"join all groups...\n%s" % my_groups)
   tasks = set()
   groups = my_groups.copy()
   tmp = []
@@ -10398,9 +10372,8 @@ async def msgbo(event):
 
 @exceptions_handler
 async def tg_start():
-  global allright_task, UB
+  global UB
   global MY_NAME, MY_ID
-  allright_task += 1
   info("telegram user bot login...")
 
   #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, proxy=("socks5", '127.0.0.1', 6080))
@@ -10434,9 +10407,6 @@ async def tg_start():
   @UB.on(events.NewMessage(incoming=True))
   @UB.on(events.MessageEdited(incoming=True))
   async def _(event):
-    #  if not allright.is_set():
-    #    #  info("skip msg: allright is not ok")
-    #    return
     asyncio.create_task(msgt(event))
 
   @UB.on(events.NewMessage(outgoing=True))
@@ -10473,16 +10443,12 @@ async def bot_start():
   @TB.on(events.NewMessage(incoming=True))
   @TB.on(events.MessageEdited(incoming=True))
   async def _(event):
-    #  if not allright.is_set():
-    #    #  info("skip msg: allright is not ok")
-    #    return
     asyncio.create_task(msgb(event))
 
   @TB.on(events.NewMessage(outgoing=True))
   async def _(event):
     asyncio.create_task(msgbo(event))
 
-  #  if allright_task > 0:
     #  await TB.run_until_disconnected()
 
 
@@ -10503,7 +10469,8 @@ async def xmpp_start():
   t = asyncio.create_task(load_config())
   await t
   if await login():
-    info(f"join all groups...\n%s" % my_groups)
+    pass
+    #  info(f"join all groups...\n%s" % my_groups)
     #  await join()
     #  global mucsv
     #  mucsv = client.summon(aioxmpp.MUCClient)
@@ -10514,8 +10481,6 @@ async def xmpp_start():
     return
 
 
-  #  if allright_task > 0:
-  #    allright_task -= 1
   #    #  asyncio.create_task(xmpp_daemon(), name="xmpp")
   #  else:
   #    await sendg("已重新启动xmppbot")
@@ -10733,7 +10698,6 @@ async def amain():
       return
 
 
-    global allright_task
 
     xmpp = asyncio.create_task(xmpp_start(), name="xmpp")
     #  asyncio.create_task(wtf_loop())
@@ -10744,7 +10708,6 @@ async def amain():
     #  del api_hash
     #  #  del bot_token
 
-    #  allright_task += 1
     #  asyncio.create_task(other_init())
 
     # with UB:
@@ -10753,29 +10716,33 @@ async def amain():
     #  await UB.start()
     #  async with UB:
 
+    k = 0b000
     while True:
-      k = 0
       #  if allright_task > 0:
         #  info(f"等待初始化完成，剩余任务数：{allright_task}")
-      if not xmpp.done():
-        info(f"等待xmpp")
-        k += 1
+      if k & 0b100 == 0:
+        if not xmpp.done():
+          info(f"等待xmpp")
+        else:
+          xmpp = asyncio.create_task(join_all())
+          mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
+          k = k | 0b100
       if not tg.done():
         info(f"等待tg user bot")
-        k += 1
+      else:
+        k = k | 0b010
       if not bot.done():
         info(f"等待tg bot")
-        k += 1
-      if k != 0:
+      else:
+        k = k | 0b001
+      if k != 0b111:
         await sleep(1)
       else:
         break
 
     #  await mt_send("gpt start")
 
-    mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
     #  await join_all()
-    xmpp = asyncio.create_task(join_all())
 
     await after_init()
 
