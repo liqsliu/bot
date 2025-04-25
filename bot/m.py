@@ -5275,6 +5275,7 @@ async def get_commands(chat_id):
 async def get_full_entity(chat_id):
   peer = await UB.get_input_entity(chat_id)
   if isinstance(peer, InputPeerChannel):
+    # https://tl.telethon.dev/methods/channels/get_full_channel.html
     res = await UB( telethon.functions.channels.GetFullChannelRequest(channel=peer) )
   elif isinstance(peer, InputPeerChat):
     res = await UB( telethon.functions.messages.GetFullChatRequest(chat_id=peer) )
@@ -10207,7 +10208,7 @@ async def msgb(event):
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
       if text == "id":
-        await msg.reply(f"id @name https://t.me/name\nchat_id: {chat_id}")
+        await msg.reply(f"id [f] @name https://t.me/name\nchat_id: {chat_id}")
         return
       if text == "msg":
         await msg.reply("msg url raw/fast/xmpp/direct/vps")
@@ -10245,9 +10246,9 @@ async def msgb(event):
           pid = await UB.get_peer_id(e)
           #  res = "peer id: %s" % pid
           if hasattr(e, "first_name"):
-            res = "peer id: %s\ntype: %s\n%s.%s" % (pid, type(e), e.first_name, e.last_name)
+            res = "peer id: `%s`\ntype: %s\n%s.%s" % (pid, type(e), e.first_name, e.last_name)
           else:
-            res = "peer id: %s\ntype: %s\n%s" % (pid, type(e), e.title)
+            res = "peer id: `%s`\ntype: %s\n%s" % (pid, type(e), e.title)
           if e.username:
             res += " @%s" % e.username
           else:
@@ -10301,7 +10302,11 @@ async def msgb(event):
         return
       elif text.startswith("msg "):
         cmds = get_cmd(text)
-        url = cmds[1]
+        full = False
+        if text.startswith("msg f "):
+          full = True
+        #  url = cmds[1]
+        url = text.split(' ')[-1]
         if url:
           opts = 0
           peer, gid = await get_entity(url, return_gid=True)
@@ -10313,6 +10318,9 @@ async def msgb(event):
             if gid:
               tmsg = await UB.get_messages(peer, ids=gid)
               if tmsg:
+                if full:
+                  #  await msg.reply(f"{e.stringify()}")
+                  await send_tg(tmsg.stringify(), chat_id)
                 opts = 0
                 if len(cmds) == 3:
                   opts = cmds[2]
