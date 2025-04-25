@@ -204,7 +204,8 @@ upload_to_ipfs_gateway(){
           echo "not existed: $hash"
         fi
         # if [[ "$GATEWAY_URL" == 'https://api.nft.storage/upload' ]]; then
-        if [[ -n "$token" ]]; then
+        # if [[ -n "$token" ]]; then
+        if false; then
           if [[ -n "$debug" ]]; then
             echo "token: $token"
           fi

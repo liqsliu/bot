@@ -221,17 +221,17 @@ else
   echo "$ft"
   echo "$ft3"
   echo
+  echo "- https://$DOMAIN/${fno}${fe}"
+  echo
   echo "- $(bash "$SH_PATH/file_to_ipfs.sh" "${fn}")"
 
   # nohup mv "$fn" "$LP/$fno$fe" &>/dev/null &
-  echo
-  echo "- https://$DOMAIN/${fno}${fe}"
 
 fi
 # done
 
 
-       # sed 's|.*<title[^>]*>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||'
+# sed 's|.*<title[^>]*>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||'
 # while read -r URL; do
 #     echo -n "$URL --> "
 #     # title=$(wget --header='Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6' \
