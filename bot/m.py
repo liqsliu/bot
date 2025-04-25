@@ -5687,11 +5687,11 @@ async def msgt(event):
   chat_id = event.chat_id
   sender_id = event.sender_id
   msg = event.message
-  #  text = msg.text
+  text = msg.text
   #  info(f"{chat_id} {sender_id}: {msg.id} {short(text) if text is not None else type(msg.file)}")
   #  info(f"{chat_id} {sender_id}: {msg.id} {short(text) if text else type(msg.media)}")
-  text = msg.message
-  info(f"{chat_id} {sender_id}: {short(text) if text is not None else type(msg.media)} {msg.id}")
+  #  text = msg.message
+  info(f"{chat_id} {sender_id}: {short(text) if text is not None and len(text) > 0 else type(msg.media)} {msg.id}")
 
   if chat_id is None:
     #  warn(f"chat_id is None")
@@ -10142,8 +10142,8 @@ async def msgb(event):
   chat_id = event.chat_id
   sender_id = event.sender_id
   msg = event.message
-  text = msg.message
-  info(f"{chat_id} {sender_id}: {msg.id} {short(text) if text is not None else type(msg.media)} {msg.id}")
+  text = msg.text
+  info(f"{chat_id} {sender_id}: {short(text) if text is not None and len(text) > 0 else type(msg.media)} {msg.id}")
 
   if event.fwd_from:
     return
