@@ -5338,6 +5338,7 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
         #  if gid is not None:
         if return_gid:
           return peer, gid
+        return  peer
       except TypeError as e:
         err(f"E: {e=}, not found input entity: {peer}")
         return
@@ -5358,6 +5359,7 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
         #  if gid is not None:
         if return_gid:
           return peer, gid
+        return  peer
       except TypeError as e:
         err(f"E: {e=}, not found entity: {peer} {e=}")
         return
