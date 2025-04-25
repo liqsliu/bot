@@ -44,11 +44,11 @@ fn=${fn%%#*}
 fn=$(echo "$fn" | sed "s/^-*//g")
 if [[ -z "$fn" ]]; then
   # fn=$(date "+%Y%m%d_%H%M%S")
-  fn=$(date "+%M%S")
+  fn=$(date "+%H%M%S")
 elif [[ "${fn}" == "index.html" ]]; then
-  fn=$(date "+%M%S")
+  fn=$(date "+%H%M%S")
 elif [[ "${fn}" == "index" ]]; then
-  fn=$(date "+%M%S")
+  fn=$(date "+%H%M%S")
 fi
 fno=$fn
 fn="$HOME/t/$fn"
@@ -170,8 +170,12 @@ if [[ -n "$ext" ]]; then
   else
     fno=${fno%.${ext}}
   fi
-  if [[ ${#fno} -gt 4 ]]; then
-    fno=${fno::4}
+  if [[ ${#fno} -gt 6 ]]; then
+    # fno=${fno::6}
+    fno=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
+    if [[ ${#fno} -gt 6 ]]; then
+      fno=${fno: -6}
+    fi
     mv "$fn" "$HOME/t/$fno$fe"
     fn="$HOME/t/$fno$fe"
   fi
