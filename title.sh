@@ -170,11 +170,15 @@ if [[ -n "$ext" ]]; then
   else
     fno=${fno%.${ext}}
   fi
-  if [[ ${#fno} -gt 6 ]]; then
-    # fno=${fno::6}
-    fno=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
+  if [[ ${#fno} -ne 6 ]]; then
+    if [[ ${#fno} -gt 6 ]]; then
+      # fno=${fno::6}
+      fno=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
+    fi
     if [[ ${#fno} -gt 6 ]]; then
       fno=${fno: -6}
+    elif [[ ${#fno} -lt 6 ]]; then
+      fno+=$(date "+%H%M%S")
     fi
     mv "$fn" "$HOME/t/$fno$fe"
     fn="$HOME/t/$fno$fe"
