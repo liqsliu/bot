@@ -47,6 +47,16 @@ from aiohttp.client_exceptions import ClientPayloadError, ClientConnectorError
 
 
 
+
+def jaccard_similarity(s1, s2):
+    set1, set2 = set(s1), set(s2)
+    return len(set1 & set2) / len(set1 | set2)
+
+#  print(jaccard_similarity("hello", "helo"))  # 输出 Jaccard 相似度
+
+from Levenshtein import ratio
+
+
 from inspect import isawaitable, currentframe
 
 from functools import wraps
@@ -5641,13 +5651,6 @@ async def wait_for_msg_form_bot2(msg, chat_id):
     i+=1
 
 
-def jaccard_similarity(s1, s2):
-    set1, set2 = set(s1), set(s2)
-    return len(set1 & set2) / len(set1 | set2)
-
-#  print(jaccard_similarity("hello", "helo"))  # 输出 Jaccard 相似度
-
-
 @exceptions_handler
 async def msgt(event):
   # msg to UB
@@ -5759,7 +5762,8 @@ async def msgt(event):
             await asyncio.sleep(0)
             #  if tg_msg_cache_for_bot2.startswith(text2):
             #  if text == tg_msg_cache_for_bot2:
-            if jaccard_similarity(text, tg_msg_cache_for_bot2) > 0.9:
+            #  if jaccard_similarity(text, tg_msg_cache_for_bot2) > 0.9:
+            if ratio(text, tg_msg_cache_for_bot2) > 0.9:
               tg_msg_cache_for_bot2_event.clear()
               await msg.delete()
               #  tg_msg_cache_for_bot2 = None
