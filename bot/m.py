@@ -5285,7 +5285,7 @@ async def get_full_entity(chat_id):
   #  print(res.stringify())
   return res
 
-async def get_entity(chat_id, id_only=True, client=None):
+async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
   if client is None:
     client = UB
   #  if isinstance(peer, PeerUser):
@@ -5330,9 +5330,14 @@ async def get_entity(chat_id, id_only=True, client=None):
       peer = url
       #  return False
     if peer:
-      dbg(f"search inputpeer: {peer}")
+      info(f"search inputpeer: {peer}")
       try:
         peer = await client.get_input_entity(peer)
+        if id_only:
+          return peer
+        #  if gid is not None:
+        if return_gid:
+          return peer, gid
       except TypeError as e:
         err(f"E: {e=}, not found input entity: {peer}")
         return
@@ -5346,15 +5351,13 @@ async def get_entity(chat_id, id_only=True, client=None):
           return
         except ValueError as e:
           info(f"not found input entity: {peer} {e=}")
-      if id_only:
-        return peer
-      if gid is not None:
-        return peer, gid
 
-      dbg(f"search peer: {peer}")
+      info(f"search peer: {peer}")
       try:
-        entity = await client.get_entity(peer)
-        return entity
+        peer = await client.get_entity(peer)
+        #  if gid is not None:
+        if return_gid:
+          return peer, gid
       except TypeError as e:
         err(f"E: {e=}, not found entity: {peer} {e=}")
         return
@@ -5461,13 +5464,16 @@ async def print_tg_msg(event, to_xmpp=False):
 
 
 
-async def get_msg(url):
-  peer = await get_entity(url)
+async def get_msg(url, client=None):
+  if client is None:
+    client = UB
+  peer, ids = await get_entity(url, return_gid=True)
   if peer:
-    ss = url.split('/')
-    if len(ss) > 4:
-      ids = int(ss[-1])
-      msg = await UB.get_messages(peer, ids=ids)
+    #  ss = url.split('/')
+    #  if len(ss) > 4:
+      #  ids = int(ss[-1])
+    if ids:
+      msg = await client.get_messages(peer, ids=ids)
       return msg
 
 
@@ -10218,25 +10224,25 @@ async def msgb(event):
         #  e = await UB.get_entity(username)
 
         e = await get_entity(url, False)
-        if type(e) is tuple:
-          peer = e[0]
-          gid = e[1]
-          e = await UB.get_messages(peer, ids=gid)
-          #  await UB.send_message(chat_id, f"{e.stringify()}")
-          if full:
-            #  await msg.reply(f"{e.stringify()}")
-            await send_tg(e.stringify(), chat_id, topic=msg.id)
-          await msg.reply("peer id: %s" % await UB.get_peer_id(peer))
-        elif e:
+        #  if type(e) is tuple:
+        #    peer = e[0]
+        #    gid = e[1]
+        #    e = await UB.get_messages(peer, ids=gid)
+        #    #  await UB.send_message(chat_id, f"{e.stringify()}")
+        #    if full:
+        #      #  await msg.reply(f"{e.stringify()}")
+        #      await send_tg(e.stringify(), chat_id, topic=msg.id)
+        #    await msg.reply("peer id: %s %s" % (await UB.get_peer_id(peer), type(e)))
+        if e:
           if full:
             #  await msg.reply(f"{e.stringify()}")
             await send_tg(e.stringify(), chat_id, topic=msg.id)
           pid = await UB.get_peer_id(e)
           #  res = "peer id: %s" % pid
           if hasattr(e, "first_name"):
-            res = "peer id: %s\n%s.%s" % (pid, e.first_name, e.last_name)
+            res = "peer id: %s\ntype: %s\n%s.%s" % (pid, type(e), e.first_name, e.last_name)
           else:
-            res = "peer id: %s\n%s" % (pid, e.title)
+            res = "peer id: %s\ntype: %s\n%s" % (pid, type(e), e.title)
           if e.username:
             res += " @%s" % e.username
           else:
@@ -10293,12 +10299,13 @@ async def msgb(event):
         url = cmds[1]
         if url:
           opts = 0
-          peer = await get_entity(url)
+          peer, gid = await get_entity(url, return_gid=True)
           if peer:
             #  send(peer.stringify(), chat_id)
-            ss = url.split('/')
-            if len(ss) > 4:
-              gid = int(ss[-1])
+            #  ss = url.split('/')
+            #  if len(ss) > 4:
+            #    gid = int(ss[-1])
+            if gid:
               tmsg = await UB.get_messages(peer, ids=gid)
               if tmsg:
                 opts = 0
