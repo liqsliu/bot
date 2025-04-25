@@ -171,7 +171,7 @@ if [[ -n "$ext" ]]; then
     fno=${fno%.${ext}}
   fi
   tmp=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
-  if [[ -z "$tmp" || ${#tmp} -ne 6 || "$tmp" != "$fno"]]; then
+  if [[ -z "$tmp" || ${#tmp} -ne 6 || "$tmp" != "$fno" ]]; then
     fno=$tmp
     # if [[ ${#fno} -gt 6 ]]; then
     #   # fno=${fno::6}
