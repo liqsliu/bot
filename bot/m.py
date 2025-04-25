@@ -6145,7 +6145,8 @@ async def msgtout(event):
     if event.is_reply:
       r = await msg.get_reply_message()
       #  sendme(f"{r.stringify()}")
-      await msg.reply(f"{r.stringify()}")
+      #  await msg.reply(f"{r.stringify()}")
+      await send_tg(r.stringify())
     else:
       #  sendme(f"{event.chat_id}")
       await msg.reply(f"{event.chat_id}")
@@ -6163,21 +6164,27 @@ async def msgtout(event):
         await msg.reply(f"{msg.stringify()}")
       elif cmds[1] == "chat":
         e = await event.get_chat()
-        await msg.reply(f"{e.stringify()}")
+        #  await msg.reply(f"{e.stringify()}")
+        await send_tg(e.stringify(), chat_id, topic=msg.id)
       elif cmds[1] == "reply":
         if event.is_reply:
-          await msg.reply(event.reply_to.stringify())
+          #  await msg.reply(event.reply_to.stringify())
+          await send_tg(event.reply_to.stringify(), chat_id, topic=msg.id)
           e = await msg.get_reply_message()
-          await msg.reply(f"{e.stringify()}")
+          #  await msg.reply(f"{e.stringify()}")
+          await send_tg(e.stringify(), chat_id, topic=msg.id)
         else:
-          await msg.reply(f"not a reply: {msg.stringify()}")
+          #  await msg.reply(f"not a reply: {msg.stringify()}")
+          await send_tg(f"not a reply: {msg.stringify()}", chat_id, topic=msg.id)
       elif cmds[1] == "sender":
         if event.is_reply:
           e = await msg.get_reply_message()
           e = await e.get_sender()
-          await msg.reply(f"{e.stringify()}")
+          #  await msg.reply(f"{e.stringify()}")
+          await send_tg(e.stringify(), chat_id, topic=msg.id)
         else:
-          await msg.reply(f"not a reply: {msg.stringify()}")
+          #  await msg.reply(f"not a reply: {msg.stringify()}")
+          await send_tg(f"not a reply: {msg.stringify()}", chat_id, topic=msg.id)
       elif cmds[1] == "file":
         e = await msg.get_reply_message()
         tmsg = e
@@ -10157,7 +10164,8 @@ async def msgb(event):
       return
     if text == "raw chat":
       peer = await event.get_chat()
-      await msg.reply(peer.stringify())
+      #  await msg.reply(peer.stringify())
+      await send_tg(peer.stringify(), chat_id, topic=msg.id)
       return
     if text == "dc":
       try:
@@ -10202,11 +10210,13 @@ async def msgb(event):
           e = await UB.get_messages(peer, ids=gid)
           #  await UB.send_message(chat_id, f"{e.stringify()}")
           if full:
-            await msg.reply(f"{e.stringify()}")
+            #  await msg.reply(f"{e.stringify()}")
+            await send_tg(e.stringify(), chat_id, topic=msg.id)
           await msg.reply("peer id: %s" % await UB.get_peer_id(peer))
         elif e:
           if full:
-            await msg.reply(f"{e.stringify()}")
+            #  await msg.reply(f"{e.stringify()}")
+            await send_tg(e.stringify(), chat_id, topic=msg.id)
           pid = await UB.get_peer_id(e)
           #  res = "peer id: %s" % pid
           if hasattr(e, "first_name"):
@@ -10221,7 +10231,8 @@ async def msgb(event):
               res += " [%s](tg://openmessage?user_id=%s) " % (pid, pid)
             else:
               res += " [%s](tg://openmessage?chat_id=%s) " % (pid, pid)
-          await msg.reply(res)
+          #  await msg.reply(res)
+          await send_tg(res, chat_id, topic=msg.id)
 
           #  if pid > 0:
           #    await msg.reply("peer id: [%s](tg://openmessage?user_id=%s)" % (pid, pid))
