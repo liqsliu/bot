@@ -6259,6 +6259,12 @@ def get_jid(i, full=False):
 
 async def stop(client=None):
   if client is None:
+    if UB.is_connected():
+      info("开始断开UB")
+      await UB.__aexit__()
+    if TB.is_connected():
+      info("开始断开TB")
+      await TB.__aexit__()
     if 'XB' in globals():
       client = XB
     else:
@@ -7122,8 +7128,8 @@ def msg_out(msg):
 @exceptions_handler
 async def msgxp(msg):
   dbg(f"got a xmpp p msg: {msg}")
-  if allright_task > 0:
-    return
+  #  if allright_task > 0:
+  #    return
   muc = str(msg.from_.bare())
   if msg.type_ == PresenceType.AVAILABLE:
     if msg.xep0045_muc_user:
@@ -7430,8 +7436,8 @@ private_locks = {}
 @exceptions_handler
 async def msgx(msg):
   dbg(f"got a xmpp msg: {msg}")
-  if allright_task > 0:
-    return
+  #  if allright_task > 0:
+  #    return
   #  if str(msg.from_.bare()) == rssbot:
   #    pprint(msg)
   muc = str(msg.from_.bare())
@@ -10391,38 +10397,100 @@ async def msgbo(event):
     info(f"bot out msg: {chat_id} {sender_id}: {short(text)}")
 
 @exceptions_handler
+async def tg_start():
+  global allright_task, UB
+  global MY_NAME, MY_ID
+  allright_task += 1
+  info("telegram user bot login...")
+
+  #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, proxy=("socks5", '127.0.0.1', 6080))
+  api_id = int(get_my_key("TELEGRAM_API_ID"))
+  api_hash = get_my_key("TELEGRAM_API_HASH")
+  #  client = TelegramClient('anon', api_id, api_hash)
+  #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, proxy=("socks5", '172.23.176.1', 6084), loop=loop)
+  #  global loop
+  #  loop = asyncio.get_event_loop()
+  #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, loop=loop)
+  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash)
+  #  async with UB:
+  await UB.__aenter__()
+
+  #  UB.parse_mode = 'md'
+  UB.parse_mode = None
+
+  me = await UB.get_me()
+  #  print(me.stringify())
+  MY_ID = me.id
+  MY_NAME = me.username
+  print(f"tg account: {MY_NAME}: {MY_ID}")
+
+  @UB.on(events.MessageDeleted)
+  async def _(event):
+    global parse_message_deleted_task
+    parse_message_deleted_task = asyncio.create_task(msgtd(event))
+  global parse_message_deleted_task
+  parse_message_deleted_task = None
+
+  @UB.on(events.NewMessage(incoming=True))
+  @UB.on(events.MessageEdited(incoming=True))
+  async def _(event):
+    #  if not allright.is_set():
+    #    #  info("skip msg: allright is not ok")
+    #    return
+    asyncio.create_task(msgt(event))
+
+  @UB.on(events.NewMessage(outgoing=True))
+  async def _(event):
+    asyncio.create_task(msgtout(event))
+
+  #  @UB.on(events.UserUpdate)
+  @UB.on(events.UserUpdate())
+  async def _(event):
+    asyncio.create_task(msgtp(event))
+
+    #  await UB.run_until_disconnected()
+
+@exceptions_handler
 async def bot_start():
-  global allright_task
+  global TB
   info("telegram bot login...")
+
+  api_id = int(get_my_key("TELEGRAM_API_ID"))
+  api_hash = get_my_key("TELEGRAM_API_HASH")
+  #  TB = await TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash).start(bot_token=bot_token)
+  TB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash)
 
   bot_token = get_my_key("TELEGRAM_BOT_TOKEN")
   await TB.start(bot_token=bot_token)
   info("telegram bot 登陆成功")
-  async with TB:
-    info("telegram bot 登陆成功2")
-    #  TB.parse_mode = 'md'
-    TB.parse_mode = None
+  #  async with TB:
+  await TB.__aenter__()
 
-    @TB.on(events.NewMessage(incoming=True))
-    @TB.on(events.MessageEdited(incoming=True))
-    async def _(event):
-      #  if not allright.is_set():
-      #    #  info("skip msg: allright is not ok")
-      #    return
-      asyncio.create_task(msgb(event))
+  info("telegram bot 登陆成功2")
+  #  TB.parse_mode = 'md'
+  TB.parse_mode = None
 
-    @TB.on(events.NewMessage(outgoing=True))
-    async def _(event):
-      asyncio.create_task(msgbo(event))
+  @TB.on(events.NewMessage(incoming=True))
+  @TB.on(events.MessageEdited(incoming=True))
+  async def _(event):
+    #  if not allright.is_set():
+    #    #  info("skip msg: allright is not ok")
+    #    return
+    asyncio.create_task(msgb(event))
 
-    if allright_task > 0:
-      allright_task -= 1
-    await TB.run_until_disconnected()
+  @TB.on(events.NewMessage(outgoing=True))
+  async def _(event):
+    asyncio.create_task(msgbo(event))
+
+  #  if allright_task > 0:
+    #  await TB.run_until_disconnected()
+
 
 @exceptions_handler
 async def xmpp_start():
-  info("开始登录xmpp")
   global XB, myjid, UPLOAD, UPLOAD_MAX
+  info("开始登录xmpp")
+
   myjid = get_my_key("JID")
   password = get_my_key("JID_PASS")
   info(f"xmpp: {myjid} {password[:3]}...")
@@ -10440,19 +10508,17 @@ async def xmpp_start():
     #  global mucsv
     #  mucsv = client.summon(aioxmpp.MUCClient)
     #  for coro in asyncio.as_completed(map(join, my_groups),
-    await join_all()
+    #  await join_all()
   else:
     err(f"登陆失败：{myjid}")
     return
 
 
-  global allright_task
-  if allright_task > 0:
-    allright_task -= 1
-    #  asyncio.create_task(xmpp_daemon(), name="xmpp")
-  else:
-    #  await sendg("已重新启动xmppbot")
-    await send_xmpp("已重新启动xmppbot")
+  #  if allright_task > 0:
+  #    allright_task -= 1
+  #    #  asyncio.create_task(xmpp_daemon(), name="xmpp")
+  #  else:
+  #    await sendg("已重新启动xmppbot")
     
   UPLOAD = None
   UPLOAD_MAX = 0
@@ -10669,29 +10735,10 @@ async def amain():
 
     global allright_task
 
-    allright_task += 1
-    asyncio.create_task(xmpp_start(), name="xmpp")
-
+    xmpp = asyncio.create_task(xmpp_start(), name="xmpp")
     #  asyncio.create_task(wtf_loop())
-
-    global UB
-    api_id = int(get_my_key("TELEGRAM_API_ID"))
-    api_hash = get_my_key("TELEGRAM_API_HASH")
-    #  client = TelegramClient('anon', api_id, api_hash)
-    #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, proxy=("socks5", '172.23.176.1', 6084), loop=loop)
-    #  global loop
-    #  loop = asyncio.get_event_loop()
-    #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, loop=loop)
-    UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash)
-    #  UB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_userbot"), api_id, api_hash, proxy=("socks5", '127.0.0.1', 6080))
-    global TB
-    #  api_id = int(bot_token.split(":", 1)[0])
-    #  api_hash = bot_token.split(":", 1)[1]
-    #  TB = await TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash).start(bot_token=bot_token)
-    TB = TelegramClient('%s/.ssh/%s.session' % (HOME, "telegram_bot"), api_id, api_hash)
-
-    allright_task += 1
-    asyncio.create_task(bot_start(), name="bot")
+    tg = asyncio.create_task(tg_start(), name="tg")
+    bot = asyncio.create_task(bot_start(), name="bot")
 
     #  del api_id
     #  del api_hash
@@ -10703,84 +10750,75 @@ async def amain():
     # with UB:
     #  loop.run_until_complete(run())
 
-    global MY_NAME, MY_ID
     #  await UB.start()
-    async with UB:
+    #  async with UB:
 
-      #  UB.parse_mode = 'md'
-      UB.parse_mode = None
-
-      me = await UB.get_me()
-      #  print(me.stringify())
-      MY_ID = me.id
-      MY_NAME = me.username
-      print(f"tg account: {MY_NAME}: {MY_ID}")
-
-      await after_init()
-
-      
-      while True:
-        if allright_task > 0:
-          info(f"等待初始化完成，剩余任务数：{allright_task}")
-          await sleep(1)
-          continue
-        #  allright.set()
-        break
-      mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
-      #  await mt_send("gpt start")
-
-      @UB.on(events.MessageDeleted)
-      async def _(event):
-        global parse_message_deleted_task
-        parse_message_deleted_task = asyncio.create_task(msgtd(event))
-      global parse_message_deleted_task
-      parse_message_deleted_task = None
-
-      @UB.on(events.NewMessage(incoming=True))
-      @UB.on(events.MessageEdited(incoming=True))
-      async def _(event):
-        #  if not allright.is_set():
-        #    #  info("skip msg: allright is not ok")
-        #    return
-        asyncio.create_task(msgt(event))
-
-      @UB.on(events.NewMessage(outgoing=True))
-      async def _(event):
-        asyncio.create_task(msgtout(event))
-
-      @UB.on(events.UserUpdate)
-      async def _(event):
-        asyncio.create_task(msgtp(event))
-
-      await regisger_handler(XB)
-      await init_cmd()
-
-      info(f"测试通过副线程发信息")
-      #  fu = t
-      #  res = await t
-      t = loop2.create_task(send_tg("通过副线程发信息成功(loop2)", CHAT_ID)) # 测试结果: 必须放在下面这行代码上面，不然就无法执行task
-
-      fu = asyncio.run_coroutine_threadsafe(send_tg("通过副线程发信息成功"), loop2)
-      while not fu.done():
-        info(f"等待发送消息的任务结束: not done, loop is_running: {loop2.is_running()}")
+    while True:
+      k = 0
+      #  if allright_task > 0:
+        #  info(f"等待初始化完成，剩余任务数：{allright_task}")
+      if not xmpp.done():
+        info(f"等待xmpp")
+        k += 1
+      if not tg.done():
+        info(f"等待tg user bot")
+        k += 1
+      if not bot.done():
+        info(f"等待tg bot")
+        k += 1
+      if k != 0:
         await sleep(1)
-      info(f"副线程发信息结果: {fu.result()}")
+      else:
+        break
 
-      #  while not t.done():
-      #    info(f"通过副线程发信息(loop2): not done, loop is_running: {loop2.is_running()}")
-      #    await sleep(1)
-      #  info(f"副线程发信息结果(loop2): {t.result()}")
+    #  await mt_send("gpt start")
 
-      info(f"初始化完成")
-      sendme(f"启动成功，用时: {int(time.time()-start_time)}s", to=0)
-      #  send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
-      try:
-        await loop_task()
-      finally:
-        info("断开bot连接前需要清理")
-        await stop()
-        await stop_sub()
-        info("清理完成")
+    mt_read_task = asyncio.create_task(mt_read(), name="mt_read")
+    #  await join_all()
+    xmpp = asyncio.create_task(join_all())
+
+    await after_init()
+
+    info(f"测试通过副线程发信息")
+    #  fu = t
+    #  res = await t
+    t = loop2.create_task(send_tg("通过副线程发信息成功(loop2)", CHAT_ID)) # 测试结果: 必须放在下面这行代码上面，不然就无法执行task
+
+    fu = asyncio.run_coroutine_threadsafe(send_tg("通过副线程发信息成功"), loop2)
+    while not fu.done():
+      info(f"等待发送消息的任务结束: not done, loop is_running: {loop2.is_running()}")
+      await sleep(1)
+    info(f"副线程发信息结果: {fu.result()}")
+
+    #  while not t.done():
+    #    info(f"通过副线程发信息(loop2): not done, loop is_running: {loop2.is_running()}")
+    #    await sleep(1)
+    #  info(f"副线程发信息结果(loop2): {t.result()}")
+
+    await init_cmd()
+    await xmpp
+    await regisger_handler(XB)
+
+    info(f"初始化完成")
+    sendme(f"启动成功，用时: {int(time.time()-start_time)}s", to=0)
+    #  send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
+    try:
+      #  await loop_task()
+      while XB.running:
+        await sleep(60)
+        #  info0(f"XB is running {TB.parse_mode} {UB.parse_mode}")
+        info0(f"XB is running")
+
+      warn("xmppbot is not running, restart...", no_send=False)
+      await sleep(15)
+      await send_tg("xmpp bot 已断开，准备重启...")
+      await sleep(1)
+      sys.exit(2)
+    finally:
+      info("断开bot连接前需要清理")
+      await stop()
+      await stop_sub()
+      info("清理完成")
 
 
     info("主程序结束")
