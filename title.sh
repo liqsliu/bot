@@ -67,8 +67,8 @@ if [[ "$3" == direct ]]; then
   unset http_proxy
   unset https_proxy
   # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
-    # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
-    # wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+  # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+  # wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
   # }
 else
   export http_proxy="http://127.0.0.1:6080"
@@ -77,18 +77,18 @@ fi
 
 if [[ "$2" == curl ]]; then
   # curl -s -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || {
-    curl -v -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || exit $?
+  curl -v -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || exit $?
   # }
 
 elif [[ "$2" == raw ]]; then
   # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
-    # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
-    wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+  # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+  wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
   # }
 else
   # wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
-    # wget --server-response --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
-    wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+  # wget --server-response --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+  wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
   # }
 fi
 
@@ -118,47 +118,47 @@ ft=$(file --mime-type -b -- "$fn")  || exit $?
 mime_type=$ft
 # 定义 MIME 类型到扩展名的映射
 case "$mime_type" in
-    "image/jpeg")
-        ext="jpg"
-        ;;
-    "image/png")
-        ext="png"
-        ;;
-    "image/gif")
-        ext="gif"
-        ;;
-    "image/webp")
-        ext="webp"
-        ;;
-    "text/plain")
-        ext="txt"
-        ;;
-    "text/html")
-        ext="html"
-        ;;
-    "application/pdf")
-        ext="pdf"
-        ;;
-    "application/zip")
-        ext="zip"
-        ;;
-    "application/msword")
-        ext="doc"
-        ;;
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
-        ext="docx"
-        ;;
-    "audio/mpeg")
-        ext="mp3"
-        ;;
-    "video/mp4")
-        ext="mp4"
-        ;;
-    *)
-        # echo "未知 MIME 类型: $mime_type"
-        # exit 1
-        ext=""
-        ;;
+  "image/jpeg")
+    ext="jpg"
+    ;;
+  "image/png")
+    ext="png"
+    ;;
+  "image/gif")
+    ext="gif"
+    ;;
+  "image/webp")
+    ext="webp"
+    ;;
+  "text/plain")
+    ext="txt"
+    ;;
+  "text/html")
+    ext="html"
+    ;;
+  "application/pdf")
+    ext="pdf"
+    ;;
+  "application/zip")
+    ext="zip"
+    ;;
+  "application/msword")
+    ext="doc"
+    ;;
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+    ext="docx"
+    ;;
+  "audio/mpeg")
+    ext="mp3"
+    ;;
+  "video/mp4")
+    ext="mp4"
+    ;;
+  *)
+    # echo "未知 MIME 类型: $mime_type"
+    # exit 1
+    ext=""
+    ;;
 esac
 
 unset fe
@@ -170,11 +170,13 @@ if [[ -n "$ext" ]]; then
   else
     fno=${fno%.${ext}}
   fi
-  if [[ ${#fno} -ne 6 ]]; then
-    if [[ ${#fno} -gt 6 ]]; then
-      # fno=${fno::6}
-      fno=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
-    fi
+  tmp=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
+  if [[ -z "$tmp" || ${#tmp} -ne 6 || "$tmp" != "$fno"]]; then
+    fno=$tmp
+    # if [[ ${#fno} -gt 6 ]]; then
+    #   # fno=${fno::6}
+    #   fno=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
+    # fi
     if [[ ${#fno} -gt 6 ]]; then
       fno=${fno: -6}
     elif [[ ${#fno} -lt 6 ]]; then
