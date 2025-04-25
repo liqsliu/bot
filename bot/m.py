@@ -5984,7 +5984,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
   elif tmsg.file:
     file = tmsg.file
     file_size = file.size
-    send(f"file: {type(file)}\nname: {file.name}\nsize: {file.size}", chat_id)
+    send(f"direct send...\nfile: {type(file)}\nname: {file.name}\nsize: {file.size}", chat_id)
     res = None
     #  if tmsg.text:
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
@@ -6006,7 +6006,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
 
       if opts == 1:
-        return
+        return True
     except rpcerrorlist.ChatForwardsRestrictedError as e:
       if e.args[0] == "You can't forward messages from a protected chat (caused by SendMediaRequest)":
         warn("内容被保护，无法直接转发")
@@ -6024,7 +6024,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         elif tmsg.media:
           res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
         if opts == 1:
-          return
+          return True
       except Exception as e:
         err(f"fixme: {e=} {file=}")
 
@@ -6059,7 +6059,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       if file is not None:
         res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
         if opts == 1:
-          return
+          return True
         
     #  src = log_group_private
     src = chat_id
@@ -6112,7 +6112,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             #  res = await UB.send_file(chat_id, file=url, caption=url)
             res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=url)
             if opts == 3:
-              return
+              return True
           except rpcerrorlist.WebpageCurlFailedError as e:
             send(xmpp_url, chat_id)
             err(f"文件url有问题: {e=} {url}")
@@ -6143,7 +6143,9 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if res is None or opts == 2:
           try:
             res = await tg_upload_media(path, src, chat_id=chat_id, caption=url, max_time=get_timeout(file_size))
+            return True
           except Exception as e:
+            send(url, chat_id)
             err(f"上传失败 {e=}")
 
       finally:
@@ -6247,27 +6249,27 @@ async def msgtout(event):
     return
 
   #  if chat_id == MY_ID or chat_id == CHAT_ID:
-  if chat_id == MY_ID or chat_id == CHAT_ID:
-    if chat_id == CHAT_ID:
-      if event.fwd_from:
-        #  await msg.reply(event.fwd_from.stringify())
-        await send_tg(event.fwd_from.stringify())
-        tmsg = event
-        cmds = get_cmd(text)
-        opts = 0
-        if len(cmds) == 3:
-          opts = cmds[2]
-        await save_tg_msg(tmsg, chat_id, opts)
-        if tmsg.document:
-          file = tmsg.document
-          await send_tg(f"document type: {type(file)}")
-          #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
-        return
-      #  elif event.is_reply:
-      #    sendme(event.reply_to.stringify())
-      #    return
-    if not text:
+  #  if chat_id == MY_ID or chat_id == CHAT_ID:
+  if chat_id == CHAT_ID:
+    tmsg = event
+    if tmsg.document:
+      #  file = tmsg.document
+      await send_tg2(f"document type: {type(tmsg.document)}\nfile type: {type(tmsg.file)}\n$get reply/file", chat_id)
+    if event.fwd_from:
+      #  await msg.reply(event.fwd_from.stringify())
+      #  await send_tg(event.fwd_from.stringify(), chat_id)
+      opts = 0
+      #  cmds = get_cmd(text)
+      #  if len(cmds) == 3:
+      #    opts = cmds[2]
+      await save_tg_msg(tmsg, chat_id, opts)
+        #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
       return
+    #  elif event.is_reply:
+    #    sendme(event.reply_to.stringify())
+    #    return
+    #  if not text:
+    #    return
 
 
 
