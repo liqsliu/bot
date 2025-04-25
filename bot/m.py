@@ -6252,9 +6252,9 @@ async def msgtout(event):
   #  if chat_id == MY_ID or chat_id == CHAT_ID:
   if chat_id == CHAT_ID:
     tmsg = event
-    if tmsg.document:
+    if tmsg.document or tmsg.file or tmsg.media:
       #  file = tmsg.document
-      await send_tg2(f"document type: {type(tmsg.document)}\nfile type: {type(tmsg.file)}\n$get reply/file", chat_id)
+      await send_tg2(f"document type: {type(tmsg.document)}\nfile type: {type(tmsg.file)}\nmedia type: {type(tmsg.media)}\n$get reply/file", chat_id)
     if event.fwd_from:
       #  await msg.reply(event.fwd_from.stringify())
       #  await send_tg(event.fwd_from.stringify(), chat_id)
