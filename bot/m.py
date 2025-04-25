@@ -5641,6 +5641,13 @@ async def wait_for_msg_form_bot2(msg, chat_id):
     i+=1
 
 
+def jaccard_similarity(s1, s2):
+    set1, set2 = set(s1), set(s2)
+    return len(set1 & set2) / len(set1 | set2)
+
+#  print(jaccard_similarity("hello", "helo"))  # 输出 Jaccard 相似度
+
+
 @exceptions_handler
 async def msgt(event):
   # msg to UB
@@ -5723,7 +5730,7 @@ async def msgt(event):
           tg_msg_cache_for_bot2 = text
           tg_msg_cache_for_bot2_event.set()
       elif sender_id == 5864905002:
-        # mybot
+        # msg from my tg bot received by tg user bot
         #  text2 = "bot: " + (msg.raw_text)
         while text.startswith("\u2066"):
           text = text[1:]
@@ -5751,7 +5758,8 @@ async def msgt(event):
             await asyncio.wait_for(tg_msg_cache_for_bot2_event.wait(), timeout=300)
             await asyncio.sleep(0)
             #  if tg_msg_cache_for_bot2.startswith(text2):
-            if text == tg_msg_cache_for_bot2:
+            #  if text == tg_msg_cache_for_bot2:
+            if jaccard_similarity(text, tg_msg_cache_for_bot2) > 0.9:
               tg_msg_cache_for_bot2_event.clear()
               await msg.delete()
               #  tg_msg_cache_for_bot2 = None
