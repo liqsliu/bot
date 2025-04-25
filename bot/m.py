@@ -5996,12 +5996,6 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         file = tmsg.file
       info(f"try send file type: {type(file)}")
       res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
-      if tmsg.video:
-        res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
-      elif tmsg.photo:
-        res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
-      elif tmsg.media:
-        res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
 
       if opts == 1:
         return
@@ -6012,6 +6006,19 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         warn(f"fixme: {e=} {file=}")
     except AttributeError as e:
       err(f"fixme: {e=} {file=}")
+    except Exception as e:
+      err(f"fixme: {e=} {file=}")
+      try:
+        if tmsg.video:
+          res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
+        elif tmsg.photo:
+          res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
+        elif tmsg.media:
+          res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
+        if opts == 1:
+          return
+      except Exception as e:
+        err(f"fixme: {e=} {file=}")
 
     if res is None:
       file = None
@@ -6022,25 +6029,29 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
           file = utils.pack_bot_file_id(tmsg.document)
       except AttributeError as e:
         err(f"fixme: {e=} {type(file)}")
+      except Exception as e:
+        err(f"fixme: {e=}")
+      if file is None:
         try:
           # AttributeError("'PhotoSize' object has no attribute 'location'")
           #  file = utils.pack_bot_file_id(tmsg.file)
-          if file is None:
+          if file is None and tmsg.photo:
             file = utils.pack_bot_file_id(tmsg.photo)
-          if file is None:
+          if file is None and tmsg.document:
             file = utils.pack_bot_file_id(tmsg.document)
-          if file is None:
+          if file is None and tmsg.media:
             file = utils.pack_bot_file_id(tmsg.media)
           if file is None:
             err(f"wtf: {tmsg.stringify()}")
-            return
-          res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
-          if opts == 1:
-            return
+            #  return
         except AttributeError as e:
           err(f"fixme: {e=}")
-      except Exception as e:
-        err(f"fixme: {e=}")
+        except Exception as e:
+          err(f"fixme: {e=}")
+      if file is not None:
+        res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+        if opts == 1:
+          return
         
     #  src = log_group_private
     src = chat_id
