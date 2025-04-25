@@ -224,10 +224,10 @@ else
   echo "$fs"
   echo "$ft"
   echo "$ft3"
-  echo
-  echo "- https://$DOMAIN/${fno}${fe}"
-  echo
-  echo "- $(bash "$SH_PATH/file_to_ipfs.sh" "${fn}")"
+  # echo
+  # echo "- https://$DOMAIN/${fno}${fe}"
+  # echo
+  # echo "- $(bash "$SH_PATH/file_to_ipfs.sh" "${fn}")"
 
   # nohup mv "$fn" "$LP/$fno$fe" &>/dev/null &
 
