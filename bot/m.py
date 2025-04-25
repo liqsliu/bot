@@ -2928,7 +2928,11 @@ async def save_data():
 #    return res
 
 async def backup(path, src=None, delete=False, no_wait=False, name=None):
-  url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
+  if name is not None:
+    npath = path.rsplit("/", 1)[0] + "/" + name
+  else:
+    npath = path
+  url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: npath[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
   info(f"url: {url}")
   #  shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
   if delete:
