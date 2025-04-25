@@ -96,14 +96,14 @@ get_tw_text(){
         fi
         res+="]($url_v)"
         if [[ $j -ne $[length_v-1] ]]; then
-          res+=" /"
+          res+=" ||"
         fi
         res+=" "
       done
       if [[ -n "$m3u8" ]]; then
-        res+="/ $m3u8"
+        res+="|| $m3u8"
       fi
-      res+="[photo]($(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https"))"
+      res+="| [photo]($(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https"))"
     else
       res+=$(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https")
     fi
