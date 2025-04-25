@@ -2999,7 +2999,6 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
       return
   elif r == -512:
     if o:
-      s = o.splitlines()
       if len(s) > 0:
         return html.unescape("\n".join(s))
       else:
