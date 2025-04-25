@@ -2927,7 +2927,7 @@ async def save_data():
 #      warn(res)
 #    return res
 
-async def backup(path, src=None, delete=False, no_wait=False):
+async def backup(path, src=None, delete=False, no_wait=False, name=None):
   url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: path[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
   info(f"url: {url}")
   #  shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
@@ -2935,8 +2935,12 @@ async def backup(path, src=None, delete=False, no_wait=False):
     info(f"delete: {path}")
     shell_cmd=["rm", path]
   else:
-    info(f"backup: {path}")
-    shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
+    if name is not None:
+      info(f"backup: {path} rename to: {name}")
+      shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"+name]
+    else:
+      info(f"backup: {path}")
+      shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
   #  res = await run_my_bash(shell_cmd, shell=False)
   #  res = await my_sexec(shell_cmd)
   if no_wait:
@@ -6072,7 +6076,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         else:
           info(f"转换失败 {path} {r}")
 
-      t = asyncio.create_task(backup(path))
+      t = asyncio.create_task(backup(path, name=str(int(time.time()))+path.split("/")[-1]))
       try:
 
         #  if opts == 2 or res is None or opts == 0:
