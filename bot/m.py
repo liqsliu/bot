@@ -5334,11 +5334,10 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
       try:
         peer = await client.get_input_entity(peer)
         if id_only:
-          return peer
         #  if gid is not None:
-        if return_gid:
-          return peer, gid
-        return  peer
+          if return_gid:
+            return peer, gid
+          return  peer
       except TypeError as e:
         err(f"E: {e=}, not found input entity: {peer}")
         return
@@ -5347,6 +5346,10 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
         try:
           pid = await client.get_peer_id(peer)
           peer = await client.get_input_entity(pid)
+          if id_only:
+            if return_gid:
+              return peer, gid
+            return  peer
         except TypeError as e:
           err(f"E: {e=}, not found input entity(use get_peer_id): {peer}")
           return
