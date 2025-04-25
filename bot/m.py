@@ -5240,7 +5240,7 @@ async def parse_tg_url(url, wtf=1):
     if peer:
       if "?comment=" in url:
         fpeer = await get_full_entity(peer)
-        peer = fpeer.linked_chat_id
+        peer = fpeer.full_chat.linked_chat_id
         gid = url.rsplit('=', 1)[-1]
       elif '/' in url:
         gid = url.rsplit('/', 1)[-1]
