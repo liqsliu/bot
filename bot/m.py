@@ -10449,7 +10449,7 @@ async def bot_start():
 
   info("telegram bot 登陆成功2")
   #  TB.parse_mode = 'md'
-  TB.parse_mode = None
+  #  TB.parse_mode = None
 
   @TB.on(events.NewMessage(incoming=True))
   @TB.on(events.MessageEdited(incoming=True))
