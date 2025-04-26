@@ -2946,7 +2946,8 @@ async def backup(path, src=None, delete=False, no_wait=False, rename=False):
       ext = "." + name.split(".")[-1]
     else:
       ext = ""
-    npath = path.rsplit("/", 1)[0] + "/" + await shasum(path) + ext
+    name = await shasum(path) + ext
+    npath = path.rsplit("/", 1)[0] + "/" + name
   else:
     npath = path
   #  if name is not None:
@@ -2961,11 +2962,12 @@ async def backup(path, src=None, delete=False, no_wait=False, rename=False):
     shell_cmd=["rm", path]
   else:
     #  if name is not None:
-    #    info(f"backup: {path} rename to: {name}")
-    #    shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"+name]
-    #  else:
-    info(f"backup: {path}")
-    shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
+    if rename:
+      info(f"backup: {path} rename to: {name}")
+      shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"+name]
+    else:
+      info(f"backup: {path}")
+      shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
   #  res = await run_my_bash(shell_cmd, shell=False)
   #  res = await my_sexec(shell_cmd)
   if no_wait:
