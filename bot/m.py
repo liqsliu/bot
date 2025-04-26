@@ -9621,6 +9621,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
     #  M=' 🔗 '
     #  M='- '
     #  M=' ⤷ '
+    k = 1
     for url in urls:
       #  url=url[0]
       url=url[1]
@@ -9645,9 +9646,10 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
         res = tmp
       else:
         if res is None:
-          res="[ %s urls ]" % len(urls)
+          res="[ %s urls ]\n" % len(urls)
         #  res+="\n\n> %s\n%s" % (url, tmp)
-        res += "- \n[%s](%s)" % (url, tmp)
+        res += "\n%s. \n[%s](%s)" % (k, url, tmp)
+      k += 1
 
     #  if res:
     if res is not None:
@@ -10412,7 +10414,8 @@ async def msgb(event):
         #  res = f"```\n{res}```"
         #  await UB.send_message(CHAT_ID, res)
         #  send(res, chat_id)
-        await msg.reply(res)
+        #  await msg.reply(res)
+        await send_tg(res, chat_id, topic=msg.id)
 
     elif chat_id == MY_ID:
       if msg.is_reply:
