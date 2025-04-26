@@ -215,7 +215,7 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
       echo "没找到标题"
     fi
   fi
-  rm "$fn"
+  # rm "$fn"
   # exit
   exit 0
   exit $?
