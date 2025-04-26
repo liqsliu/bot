@@ -6163,6 +6163,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     await send_tg(tmsg.text, chat_id)
   else:
     await send_tg(tmsg.stringify(), chat_id)
+  await send_tg("done", chat_id)
 
 
 delete_next_msg = False
@@ -6218,10 +6219,14 @@ async def msgtout(event):
         e = await event.get_chat()
         #  await msg.reply(f"{e.stringify()}")
         await send_tg(e.stringify(), chat_id, topic=msg.id)
-      elif cmds[1] == "reply":
+      elif cmds[1] == "r":
         if event.is_reply:
           #  await msg.reply(event.reply_to.stringify())
-          await send_tg(event.reply_to.stringify(), chat_id, topic=msg.id)
+          await send_tg("in event: %s" % event.reply_to.stringify(), chat_id, topic=msg.id)
+        else:
+          await send_tg(f"not a reply: {msg.stringify()}", chat_id, topic=msg.id)
+      elif cmds[1] == "reply":
+        if event.is_reply:
           e = await msg.get_reply_message()
           #  await msg.reply(f"{e.stringify()}")
           await send_tg(e.stringify(), chat_id, topic=msg.id)
