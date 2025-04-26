@@ -5730,6 +5730,7 @@ async def msgt(event):
 
   #  print(f"{chat_id} {sender_id}: {short(msg.text)}")
   if chat_id == GROUP_ID:
+    # my group
     if msg.raw_text:
       text = msg.raw_text
       text = text.replace("*", "")
@@ -5949,22 +5950,25 @@ async def msgt(event):
       if backup_task is not None:
         await backup_task
         asyncio.create_task(backup(path, delete=True))
+    return
 
-  elif chat_id in bridges:
+  global bridges
+  if chat_id in bridges:
     src = bridges[chat_id]
-    if isinstance(src, dict):
-      bridges.pop(chat_id)
-      warn(f"delete old bridge: {src}")
-      return
+    #  if isinstance(src, dict):
+    #    bridges.pop(chat_id)
+    #    warn(f"delete old bridge: {src}")
+    #    return
     res, nick, delay = await print_tg_msg(event)
     if res:
-      info(f"sync: {chat_id} -> {bridges[chat_id]}: {short(res)}")
+      info(f"sync to xmpp: {chat_id} -> {src}: {short(res)}")
       send(res, src, name=f"**{nick}:** ", nick=nick, delay=delay)
     else:
-      info(f"忽略空白信息: {msg.text} {res=} {nick=}")
+      err(f"忽略空白信息: {res=} {nick=} {msg.text=}")
+    return
   elif event.is_private:
-      info(f"忽略私聊 {chat_id=} {short(msg.text)}")
-      return
+    info(f"忽略私聊 {chat_id=} {short(msg.text)}")
+    return
   else:
     #  info(f"{chat_id=} {short(msg.text)}")
     #  res, nick, delay = await print_tg_msg(event)
@@ -5981,8 +5985,7 @@ async def msgt(event):
     #    if res:
     #      #  await send(res, jid=log_group, name="", nick=nick, delay=delay)
     #      await send(res, jid=log_group, name="", delay=delay)
-
-    return
+    #  return
 
 
 async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
