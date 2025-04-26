@@ -3381,6 +3381,8 @@ def send(text, jid=None, *args, **kwargs):
     if isinstance(text, str):
       return False
   elif isinstance(jid, int):
+    if "tg_msg_id" in kwargs:
+      kwargs.pop("tg_msg_id")
     #  return await send_tg(text=text, chat_id=jid, *args, **kwargs)
     asyncio.create_task(send_tg(text=text, chat_id=jid, *args, **kwargs) )
     return True
@@ -3839,11 +3841,13 @@ async def slow_mode(client, timeout=300):
 
 #  @exceptions_handler(no_send=True)
 @cross_thread
-async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md"):
+async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None):
   if qt is not None:
     if parse_mode ==  "md":
       parse_mode = "html"
       text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
+  if name is not None:
+    text = f"{name}{text}"
   #  else:
   #    if parse_mode ==  "md":
   #      parse_mode = client.parse_mode
@@ -3909,7 +3913,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         return False
 
   if resend:
-    return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=parse_mode)
+    return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=parse_mode, name=name)
   info(f"sent: {chat_id}: {short(text)}")
   return True
 
@@ -5416,8 +5420,8 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
 
 async def print_tg_msg(event, to_xmpp=False):
   msg = event.message
-  res = ''
-  nick= "G None"
+  #  res = ''
+  nick= "G "
   if event.is_private:
     delay = None
     res += "@"
@@ -5425,12 +5429,15 @@ async def print_tg_msg(event, to_xmpp=False):
     peer = await event.get_chat()
     if peer is not None:
       if peer.last_name is not None:
-        res += " [%s %s]" % (peer.first_name, peer.last_name)
-        nick = "G [%s %s]" % (peer.first_name, peer.last_name)
+        #  res += " [%s %s]" % (peer.first_name, peer.last_name)
+        #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
+        nick += "%s %s" % (peer.first_name, peer.last_name)
       else:
-        res += " [%s]" % peer.first_name
-        nick = "G [%s]" % peer.first_name
+        #  res += " [%s]" % peer.first_name
+        #  nick = "G [%s]" % peer.first_name
+        nick += "%s" % peer.first_name
   else:
+
     if event.is_group:
       delay = 2
       res += "+"
@@ -5442,10 +5449,12 @@ async def print_tg_msg(event, to_xmpp=False):
     peer = await get_entity(event.chat_id, False)
     #  peer = await event.get_chat()
     if peer is not None:
-      res += " %s" % peer.title
-      nick = "G %s" % peer.title
+      #  res += " %s" % peer.title
+      #  nick = "G %s" % peer.title
+      nick += " %s" % peer.title
     #  print(event.chat_id, event.sender_id, event.from_id)
     #  if event.sender_id: # 如果和chat_id相同就没啥意义,这时候from_id是None
+
     if event.from_id:
       #  peer = await get_entity(event.from_id)
       peer = await event.get_sender()
@@ -5454,24 +5463,30 @@ async def print_tg_msg(event, to_xmpp=False):
       #  peer = await UB.get_entity(event.from_id)
       if peer is not None:
         if isinstance(peer, User):
-          if peer.last_name is not None:
-            res += " [%s %s]" % (peer.first_name, peer.last_name)
-            nick = "G [%s %s]" % (peer.first_name, peer.last_name)
+          if peer.last_name is None:
+            #  res += " [%s]" % peer.first_name
+            #  nick = "G [%s]" % peer.first_name
+            nick += "[%s]" % peer.first_name
           else:
-            res += " [%s]" % peer.first_name
-            nick = "G [%s]" % peer.first_name
+            #  res += " [%s %s]" % (peer.first_name, peer.last_name)
+            #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
+            nick += "[%s %s]" % (peer.first_name, peer.last_name)
         else:
         #  if isinstance(peer, Channel):
-          res += " %s" % peer.title
-    else:
-      res += " []"
+          #  res += " %s" % peer.title
+          nick += " %s" % peer.title
+    #  else:
+    #    res += " []"
   #  res2 = None
   #  res1 = res
   if msg.text:
     #  if not event.is_private:
     #    res2 = f"{res}: {msg.text}"
     #  res += ": %s" % msg.text.splitlines()[0][:64]
-    res += ": " + msg.text
+    #  res += ": " + msg.text
+    res = msg.text
+  else:
+    res = ""
   #  elif res == "":
   #    res = None
   if msg.file:
@@ -5861,6 +5876,11 @@ async def msgt(event):
         #    await sleep(0.3)
         #    i+=1
     return
+
+  if msg.edit_date:
+    correct = True
+  else:
+    correct = False
   #  if src in mtmsgsg:
   if chat_id in bridges_tmp:
     src = bridges_tmp[chat_id]
@@ -5927,10 +5947,6 @@ async def msgt(event):
           text += "\n\n"
         text += file_info
 
-      if msg.edit_date:
-        correct = True
-      else:
-        correct = False
       text = f"{l[0]}{text}"
       #  if len(l) == 2:
       #    l.append(set())
@@ -5954,7 +5970,7 @@ async def msgt(event):
         if gid - 1 in forwarded_tg_msg_ids:
           info(f"too many tg msg: {gid} for {chat_id}")
           await sleep(0.5)
-        send(text, src, correct=correct, tg_msg_id=msg.id)
+        send(text, src, correct=correct, tg_msg_id=gid)
     finally:
       if backup_task is not None:
         await backup_task
@@ -5963,8 +5979,8 @@ async def msgt(event):
 
   global bridges
   if chat_id in bridges:
-    if chat_id == -1001354974109:
-      err("fixme: 检查一下重复执行的原因: %s" % event.stringify())
+    #  if chat_id == -1001354974109:
+    #    err("fixme: 检查一下重复执行的原因: %s" % event.stringify())
     src = bridges[chat_id]
     #  if isinstance(src, dict):
     #    bridges.pop(chat_id)
@@ -5973,7 +5989,8 @@ async def msgt(event):
     res, nick, delay = await print_tg_msg(event)
     if res:
       info(f"sync to xmpp: {chat_id} -> {src}: {short(res)}")
-      send(res, src, name=f"**{nick}:** ", nick=nick, delay=delay)
+      gid = msg.id
+      send(res, src, name=f"**{nick}:** ", nick=nick, delay=delay, correct=correct, tg_msg_id=gid)
     else:
       err(f"忽略空白信息: {res=} {nick=} {msg.text=}")
     return
