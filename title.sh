@@ -44,11 +44,12 @@ fn=${fn%%#*}
 fn=$(echo "$fn" | sed "s/^-*//g")
 if [[ -z "$fn" ]]; then
   # fn=$(date "+%Y%m%d_%H%M%S")
-  fn=$(date "+%H%M%S")
+  # fn=$(date "+%H%M%S")
+  fn=tmp
 elif [[ "${fn}" == "index.html" ]]; then
-  fn=$(date "+%H%M%S")
+  fn=tmp
 elif [[ "${fn}" == "index" ]]; then
-  fn=$(date "+%H%M%S")
+  fn=tmp
 fi
 fno=$fn
 fn="$HOME/t/$fn"
@@ -170,18 +171,22 @@ if [[ -n "$ext" ]]; then
   else
     fno=${fno%.${ext}}
   fi
-  tmp=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
-  if [[ -z "$tmp" || ${#tmp} -ne 6 || "$tmp" != "$fno" ]]; then
-    fno=$tmp
-    # if [[ ${#fno} -gt 6 ]]; then
-    #   # fno=${fno::6}
-    #   fno=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
-    # fi
-    if [[ ${#fno} -gt 6 ]]; then
-      fno=${fno: -6}
-    elif [[ ${#fno} -lt 6 ]]; then
-      fno+=$(date "+%H%M%S")
-    fi
+  # tmp=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
+  # if [[ -z "$tmp" || ${#tmp} -ne 6 || "$tmp" != "$fno" ]]; then
+  #   fno=$tmp
+  #   # if [[ ${#fno} -gt 6 ]]; then
+  #   #   # fno=${fno::6}
+  #   #   fno=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
+  #   # fi
+  #   if [[ ${#fno} -gt 6 ]]; then
+  #     fno=${fno: -6}
+  #   elif [[ ${#fno} -lt 6 ]]; then
+  #     fno+=$(date "+%H%M%S")
+  #   fi
+  #
+  if true; then
+    fno=$(shasum "$fn" | awk '{print $1}')
+
     mv "$fn" "$HOME/t/$fno$fe"
     fn="$HOME/t/$fno$fe"
   fi

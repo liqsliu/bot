@@ -2928,7 +2928,6 @@ async def save_data():
 #    return res
 
 async def shasum(path):
-  info(f"backup: {path}")
   shell_cmd=["shasum", path]
   res = await myshell(shell_cmd)
   if res:
