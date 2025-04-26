@@ -55,11 +55,13 @@ def jaccard_similarity(s1, s2):
 #  print(jaccard_similarity("hello", "helo"))  # 输出 Jaccard 相似度
 
 #  from Levenshtein import ratio
+#  ratio("test", "testt")
 
 from difflib import SequenceMatcher
 
 def similarity(s1, s2):
-    return SequenceMatcher(None, s1, s2).ratio()
+    #  return SequenceMatcher(None, s1, s2).ratio()
+    return SequenceMatcher(lambda x: x in " \t\r\n", s1, s2).ratio()
 
 #  print(similarity("hello", "helo"))  # 输出相似度
 
@@ -5820,7 +5822,8 @@ async def msgt(event):
             #  if text == tg_msg_cache_for_bot2:
             #  if jaccard_similarity(text, tg_msg_cache_for_bot2) > 0.9:
             #  if ratio(text, tg_msg_cache_for_bot2) > 0.9:
-            if similarity(text, tg_msg_cache_for_bot2) > 0.8:
+            r = similarity(text, tg_msg_cache_for_bot2)
+            if r > 0.8:
               tg_msg_cache_for_bot2_event.clear()
               await msg.delete()
               #  tg_msg_cache_for_bot2 = None
@@ -5831,7 +5834,7 @@ async def msgt(event):
               #  if time.time() - start_time > 5:
               #  await sleep(0.2)
               #  info(f"bot1 miss: {short(text)} != {short(tg_msg_cache_for_bot2)}")
-              info(f"bot1 miss: {text=} != {tg_msg_cache_for_bot2=}")
+              info(f"bot1 miss: {r=} {text=} != {tg_msg_cache_for_bot2=}")
               await asyncio.sleep(0)
         except TimeoutError as e:
           info(f"bot1 timeout: {short(text)}")
