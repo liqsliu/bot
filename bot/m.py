@@ -10350,12 +10350,13 @@ async def msgb(event):
               res = "[%s](tg://openmessage?user_id=%s)" % (pid, pid)
             else:
               res = "[%s](tg://openmessage?chat_id=%s)" % (pid, pid)
+          res += "\n"
           #  res = "peer id: %s" % pid
           if hasattr(e, "first_name"):
-            res += "\n%s.%s" % (e.first_name, e.last_name)
+            res += "%s.%s " % (e.first_name, e.last_name)
           else:
-            res += "\n%s" % e.title
-          res += " type: %s" % type(e)
+            res += "%s " % e.title
+          res += "type: %s" % type(e)
           res += "\npeer id: `%s`" % pid
 
           if e.username:
