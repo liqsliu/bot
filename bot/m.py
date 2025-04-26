@@ -10358,9 +10358,11 @@ async def msgb(event):
           res += " type: %s" % type(e)
           res += "\npeer id: `%s`" % pid
 
+          if e.username:
+            res += "\nhttps://t.me/%s/" % e.username
           # https://docs.telethon.dev/en/stable/concepts/chats-vs-channels.html#converting-ids
           # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.resolve_id
-          res += "\nhttps://t.me/c/%s/1 " % utils.resolve_id(pid)[0]
+          res += "\nhttps://t.me/c/%s/" % utils.resolve_id(pid)[0]
 
           #  await msg.reply(res)
           await send_tg(res, chat_id, topic=msg.id)
