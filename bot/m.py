@@ -8901,7 +8901,7 @@ async def init_cmd():
           addr = load_chat_id(addr)
         if addr in bridges:
           res = f"delete: {addr} -> {bridges[addr]}"
-          bridges.pop(get_addr(cmds[2]))
+          bridges.pop(addr)
         else:
           res = "没找到"
     elif cmds[1] == "se":
