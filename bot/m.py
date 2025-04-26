@@ -8889,8 +8889,7 @@ async def init_cmd():
         if addr in bridges:
           res = "existed"
         else:
-          bridges[addr] = get_addr(cmds[3])
-          #  res = f"added: {get_addr(cmds[2])} -> {get_addr(cmds[3])}"
+          bridges[addr] = load_chat_id(cmds[3])
           res = f"added: {addr} -> {bridges[addr]}"
     elif cmds[1] == "del":
       if len(cmds) != 3:
