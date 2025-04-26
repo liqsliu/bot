@@ -5827,17 +5827,17 @@ async def msgt(event):
               tg_msg_cache_for_bot2_event.clear()
               await msg.delete()
               #  tg_msg_cache_for_bot2 = None
-              info(f"bot1 found: {short(text)}")
+              info(f"消息重复: {r=} {short(text)}")
               break
             else:
               tg_msg_cache_for_bot2_event.clear()
               #  if time.time() - start_time > 5:
               #  await sleep(0.2)
               #  info(f"bot1 miss: {short(text)} != {short(tg_msg_cache_for_bot2)}")
-              info(f"bot1 miss: {r=} {text=} != {tg_msg_cache_for_bot2=}")
+              info(f"匹配失败: {r=} {text=} != {tg_msg_cache_for_bot2=}")
               await asyncio.sleep(0)
         except TimeoutError as e:
-          info(f"bot1 timeout: {short(text)}")
+          info(f"等待超时，未找到重复消息: {short(text)}")
         #  i = 0
         #  while i<18:
         #    if tg_msg_cache_for_bot2 is None:
