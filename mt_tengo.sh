@@ -835,7 +835,7 @@ $TEXT"
 #     NAME="$QT
 # $M *$NAME*: "
       NAME="$QT
-$M *$NAME*: "
+*$M $NAME:* "
     else
       TEXT=$(bash "$SH_PATH/text2markdown.sh" "$TEXT" "other")
     fi

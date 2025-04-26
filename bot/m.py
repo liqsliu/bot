@@ -5736,8 +5736,9 @@ async def msgt(event):
   #  print(f"{chat_id} {sender_id}: {short(msg.text)}")
   if chat_id == GROUP_ID:
     # my group
-    if msg.raw_text:
-      text = msg.raw_text
+    #  if msg.raw_text:
+    #    text = msg.raw_text
+    if text:
       text = text.replace("*", "")
       text = text.replace("`", "")
       global tg_msg_cache_for_bot2
