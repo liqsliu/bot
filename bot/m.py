@@ -5338,6 +5338,8 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
   #  else:
   gid = None
   try:
+    if type(chat_id) is str:
+      chat_id = load_chat_id(chat_id)
     url = chat_id
     #  chat_id = get_addr(chat_id)
     if type(chat_id) is int:
@@ -5349,10 +5351,10 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
       if url.startswith("@"):
         #  peer = url[1:]
         peer = url
-      elif url.isnumeric():
-        peer = int(url)
-      elif url.startswith("-") and  url[1:].isnumeric():
-        peer = int(url)
+      #  elif url.isnumeric():
+      #    peer = int(url)
+      #  elif url.startswith("-") and  url[1:].isnumeric():
+      #    peer = int(url)
       else:
         p, gid = await parse_tg_url(url)
         if p:
@@ -8090,13 +8092,13 @@ def get_nick_room(cmds, src):
 
 
 
-def get_addr(s):
-  if s.startswith('-'):
-    if s.isnumeric():
-      s = s[1:]
-      return -1*int(s)
+def load_chat_id(s):
   if s.isnumeric():
     return int(s)
+  if s.startswith('-'):
+    if s[1:].isnumeric():
+      s = s[1:]
+      return -1*int(s)
   return s
   #  raise ValueError("需要数字")
 
@@ -8880,7 +8882,9 @@ async def init_cmd():
         res = "参数数量不对"
       else:
         #  if cmds[2].isnumeric():
-        addr = get_addr(cmds[2])
+        addr = cmds[2]
+        if addr not in bridges:
+          addr = load_chat_id(addr)
         #  bridges[get_addr(cmds[2])] = get_addr(cmds[3])
         if addr in bridges:
           res = "existed"
@@ -8892,15 +8896,19 @@ async def init_cmd():
       if len(cmds) != 3:
         res = "参数数量不对"
       else:
-        addr = get_addr(cmds[2])
+        addr = cmds[2]
+        if addr not in bridges:
+          addr = load_chat_id(addr)
         if addr in bridges:
-          res = "没找到"
-        else:
           res = f"delete: {addr} -> {bridges[addr]}"
           bridges.pop(get_addr(cmds[2]))
+        else:
+          res = "没找到"
     elif cmds[1] == "se":
       res = ''
-      addr = get_addr(cmds[2])
+      addr = cmds[2]
+      if addr not in bridges:
+        addr = load_chat_id(addr)
       if addr in bridges:
         res += f"existed: {addr} -> {bridges[addr]}"
       peer = await get_entity(addr)
