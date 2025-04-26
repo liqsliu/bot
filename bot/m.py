@@ -2006,7 +2006,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
             info(f"shell is ok, got: {eof}")
             break
           warn("drop: %s: %s" % (n, d) )
-          cm.reschedule(cm.when()+max_time/3)
+          cm.reschedule(min(cm.when()+max_time/3, loop.time()+run_shell_time_max))
     except TimeoutError:
       warn("shell is busy")
       return -512, None, None
