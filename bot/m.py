@@ -2927,11 +2927,31 @@ async def save_data():
 #      warn(res)
 #    return res
 
-async def backup(path, src=None, delete=False, no_wait=False, name=None):
-  if name is not None:
-    npath = path.rsplit("/", 1)[0] + "/" + name
+async def shasum(path):
+  info(f"backup: {path}")
+  shell_cmd=["shasum", path]
+  res = await myshell(shell_cmd)
+  if res:
+    info(f"res: {res} {shell_cmd}")
+    res = res.split(" ")[0]
+    return res
+  else:
+    return str(int(time.time()))
+
+async def backup(path, src=None, delete=False, no_wait=False, rename=False):
+  if rename:
+    name = path.split("/")[-1]
+    if "." in name:
+      ext = "." + name.split(".")[-1]
+    else:
+      ext = ""
+    npath = path.rsplit("/", 1)[0] + "/" + await shasum(path) + ext
   else:
     npath = path
+  #  if name is not None:
+  #    npath = path.rsplit("/", 1)[0] + "/" + name
+  #  else:
+  #    npath = path
   url = "https://%s%s/%s" % (DOMAIN, URL_PATH, (urllib.parse.urlencode({1: npath[len(DOWNLOAD_PATH):]})).replace('+', '%20')[5:])
   info(f"url: {url}")
   #  shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
@@ -2939,12 +2959,12 @@ async def backup(path, src=None, delete=False, no_wait=False, name=None):
     info(f"delete: {path}")
     shell_cmd=["rm", path]
   else:
-    if name is not None:
-      info(f"backup: {path} rename to: {name}")
-      shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"+name]
-    else:
-      info(f"backup: {path}")
-      shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
+    #  if name is not None:
+    #    info(f"backup: {path} rename to: {name}")
+    #    shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"+name]
+    #  else:
+    info(f"backup: {path}")
+    shell_cmd=["cp", path, DOWNLOAD_PATH0+"/"]
   #  res = await run_my_bash(shell_cmd, shell=False)
   #  res = await my_sexec(shell_cmd)
   if no_wait:
@@ -6080,7 +6100,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         else:
           info(f"转换失败 {path} {r}")
 
-      t = asyncio.create_task(backup(path, name=str(int(time.time()))+path.split("/")[-1]))
+      #  t = asyncio.create_task(backup(path, name=str(int(time.time()))+path.split("/")[-1]))
+      t = asyncio.create_task(backup(path, rename=True))
       try:
 
         #  if opts == 2 or res is None or opts == 0:
