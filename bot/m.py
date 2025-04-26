@@ -5424,7 +5424,7 @@ async def print_tg_msg(event, to_xmpp=False):
   nick= "G "
   if event.is_private:
     delay = None
-    res += "@"
+    #  res += "@"
     #  peer = await get_entity(event.chat_id, False)
     peer = await event.get_chat()
     if peer is not None:
