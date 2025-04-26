@@ -2933,6 +2933,7 @@ async def shasum(path):
   res = await myshell(shell_cmd)
   if res:
     info(f"res: {res} {shell_cmd}")
+    res = res[1]
     res = res.split(" ")[0]
     return res
   else:
