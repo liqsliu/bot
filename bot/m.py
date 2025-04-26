@@ -5877,11 +5877,10 @@ async def msgt(event):
         #    i+=1
     return
 
-  if msg.edit_date:
-    correct = True
-  else:
+  if msg.edit_date is None:
     correct = False
-  #  if src in mtmsgsg:
+  else:
+    correct = True
   if chat_id in bridges_tmp:
     src = bridges_tmp[chat_id]
     if src not in mtmsgsg:
