@@ -9649,9 +9649,9 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
         res = tmp
       else:
         if res is None:
-          res="[ %s urls ]\n" % len(urls)
+          res="[ %s urls ]" % len(urls)
         #  res+="\n\n> %s\n%s" % (url, tmp)
-        res += "\n%s. \n[%s](%s)" % (k, url, tmp)
+        res += "\n\n%s. %s\n%s" % (k, url, tmp)
       k += 1
 
     #  if res:
