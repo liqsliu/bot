@@ -5466,7 +5466,7 @@ async def print_tg_msg(event, to_xmpp=False):
     else:
       res += " []"
   #  res2 = None
-  res1 = res
+  #  res1 = res
   if msg.text:
     #  if not event.is_private:
     #    res2 = f"{res}: {msg.text}"
@@ -5499,11 +5499,11 @@ async def print_tg_msg(event, to_xmpp=False):
   #    send(res2, name="", nick=nick, delay=1)
   #  if not event.is_private:
   #  print(f"{res1}: {short(res)}")
-  if print_msg:
-    print(short(res))
+  #  if print_msg:
+  #    print(short(res))
   #    return None, nick, delay
-  #  return res, nick, delay
-  return msg.text, nick, delay
+  return res, nick, delay
+  #  return msg.text, nick, delay
 
 
 
