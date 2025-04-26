@@ -10340,20 +10340,28 @@ async def msgb(event):
           if full:
             #  await msg.reply(f"{e.stringify()}")
             await send_tg(e.stringify(), chat_id, topic=msg.id)
-          pid = await UB.get_peer_id(e)
-          #  res = "peer id: %s" % pid
-          if hasattr(e, "first_name"):
-            res = "peer id: `%s`\ntype: %s\n%s.%s" % (pid, type(e), e.first_name, e.last_name)
-          else:
-            res = "peer id: `%s`\ntype: %s\n%s" % (pid, type(e), e.title)
+          #  pid = await UB.get_peer_id(e)
+          pid = utils.get_peer_id(e)
           if e.username:
-            res += " @%s" % e.username
+            res = "@%s" % e.username
           else:
             #  if pid > 0:
             if hasattr(e, "first_name"):
-              res += " [%s](tg://openmessage?user_id=%s) " % (pid, pid)
+              res = "[%s](tg://openmessage?user_id=%s)" % (pid, pid)
             else:
-              res += " [%s](tg://openmessage?chat_id=%s) " % (pid, pid)
+              res = "[%s](tg://openmessage?chat_id=%s)" % (pid, pid)
+          #  res = "peer id: %s" % pid
+          if hasattr(e, "first_name"):
+            res += "\n%s.%s" % (e.first_name, e.last_name)
+          else:
+            res += "\n%s" % e.title
+          res += " type: %s" % type(e)
+          res += "\npeer id: `%s`" % pid
+
+          # https://docs.telethon.dev/en/stable/concepts/chats-vs-channels.html#converting-ids
+          # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.resolve_id
+          res += "\nhttps://t.me/c/%s/1 " % utils.resolve_id(pid)[0]
+
           #  await msg.reply(res)
           await send_tg(res, chat_id, topic=msg.id)
 
