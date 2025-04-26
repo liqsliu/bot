@@ -61,7 +61,7 @@ from difflib import SequenceMatcher
 
 def similarity(s1, s2):
     #  return SequenceMatcher(None, s1, s2).ratio()
-    return SequenceMatcher(lambda x: x in " \t\r\n", s1, s2).ratio()
+    return SequenceMatcher(lambda x: x in " \t\r\n`", s1, s2).ratio()
 
 #  print(similarity("hello", "helo"))  # 输出相似度
 
