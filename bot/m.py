@@ -5440,11 +5440,11 @@ async def print_tg_msg(event, to_xmpp=False):
 
     if event.is_group:
       delay = 2
-      res += "+"
+      nick += "+"
     else:
       delay = 5
       #  if event.is_channel:
-      res += "#"
+      nick += "#"
 
     peer = await get_entity(event.chat_id, False)
     #  peer = await event.get_chat()
