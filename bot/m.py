@@ -5963,6 +5963,8 @@ async def msgt(event):
 
   global bridges
   if chat_id in bridges:
+    if chat_id == -1001354974109:
+      err("fixme: 检查一下重复执行的原因: %s" % event.stringify())
     src = bridges[chat_id]
     #  if isinstance(src, dict):
     #    bridges.pop(chat_id)
