@@ -5859,10 +5859,10 @@ async def msgt(event):
             text = text.split(": ", 1)[1]
             if text.startswith("reply: "):
               text = text.split(": ", 1)[1]
-          elif text.startswith("G "):
-            warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {text}")
-            await msg.delete()
-            return
+          #  elif text.startswith("G "):
+          #    warn(f"fixme: 多余的消息，mt的过滤规则需要修改: {text}")
+          #    await msg.delete()
+          #    return
           info(f"bot original text(2): {text=}")
 
         #  elif " " not in  text.splei(": ", 1)[0]:
