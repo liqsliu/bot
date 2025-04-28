@@ -5463,7 +5463,7 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
     return None, gid
 
 
-async def print_entity(e):
+def print_entity(e):
   res = ""
   pid = utils.get_peer_id(e)
 
