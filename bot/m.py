@@ -3845,45 +3845,43 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
 
   if qt is not None:
+    qtr = "\n".join(qt)
+    if qtr.startswith("**G "):
+      qtr = qtr.split(":** ", 1)[1]
+      if qtr.startswith(f"https://{DOMAIN}") and urlre.fullmatch(qtr):
+        qtr = None
+    info(f"{qtr=}")
     topic_orig = topic
-    if topic is None:
-      qtr = "\n".join(qt)
-      if qtr.startswith("**G "):
-        qtr = qtr.split(":** ", 1)[1]
-      info(f"{qtr=}")
-      k = 0
-      async for msg in client.iter_messages(chat_id):
-        text = msg.text
-        if text:
-          if text.startswith("**G "):
-            text = text.split(":** ", 1)[1]
-          if similarity(text, qtr) > 0.9:
-            info(f"found: {text=} {qtr=}")
-            topic = msg.id
+    k = 0
+    if qtr is not None:
+      if topic is None:
+        async for msg in client.iter_messages(chat_id):
+          text = msg.text
+          if text:
+            if text.startswith("**G "):
+              text = text.split(":** ", 1)[1]
+            if similarity(text, qtr) > 0.9:
+              info(f"found: {text=} {qtr=}")
+              topic = msg.id
+              break
+            info(f"skip: {text=}")
+          k += 1
+          if k > 9:
             break
-          info(f"skip: {text=}")
-        k += 1
-        if k > 9:
-          break
-    else:
-      qtr = "\n".join(qt)
-      if qtr.startswith("**G "):
-        qtr = qtr.split(":** ", 1)[1]
-      info(f"{qtr=}")
-      k = 0
-      async for msg in client.iter_messages(chat_id, reply_to=topic):
-        text = msg.text
-        if text:
-          if text.startswith("**G "):
-            text = text.split(":** ", 1)[1]
-          if similarity(text, qtr) > 0.9:
-            info(f"found: {text=} {qtr=}")
-            topic = msg.id
+      else:
+        async for msg in client.iter_messages(chat_id, reply_to=topic):
+          text = msg.text
+          if text:
+            if text.startswith("**G "):
+              text = text.split(":** ", 1)[1]
+            if similarity(text, qtr) > 0.9:
+              info(f"found: {text=} {qtr=}")
+              topic = msg.id
+              break
+            info(f"skip: {text=}")
+          k += 1
+          if k > 9:
             break
-          info(f"skip: {text=}")
-        k += 1
-        if k > 9:
-          break
 
     if topic_orig == topic:
       info("not found")
