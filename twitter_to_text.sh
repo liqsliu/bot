@@ -65,7 +65,7 @@ get_tw_text(){
     text=$( echo "$text" | sed "s|$url1| $url2 |" )
   done
   # echo "$res"
-  echo "[$name]($URL) @$name_id:
+  echo "[$name]($URL) @$name_id
 $text"
 
   local media_num=$(echo "$tw_res" | jq -r ".mediaDetails|length")
