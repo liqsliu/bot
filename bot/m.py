@@ -5578,6 +5578,11 @@ async def get_msg(url, client=None):
       #  ids = int(ss[-1])
     if ids:
       msg = await client.get_messages(peer, ids=ids)
+      if issubclass(type(msg), list):
+        # https://docs.telethon.dev/en/stable/modules/helpers.html#telethon.helpers.TotalList
+        if len(msg) > 0:
+          return msg[0]
+        return
       return msg
 
 
@@ -10383,21 +10388,27 @@ async def msgb(event):
         #      await send_tg(e.stringify(), chat_id, topic=msg.id)
         #    await msg.reply("peer id: %s %s" % (await UB.get_peer_id(peer), type(e)))
         if e:
+          res = ""
           if gid is not None:
-            info(f"get msg: {e} {gid}")
-            msg = await UB.get_messages(e, ids=gid)
-            if msg is None:
-              info(f"get msg(TB): {e} {gid}")
-              msg = await get_msg(url, TB)
-            if msg is not None:
-              e = ee
+            if msg.is_group:
+              info(f"get msg: {e} {gid}")
+              msg = await UB.get_messages(e, ids=gid)
+              if msg is None:
+                info(f"get msg(TB): {e} {gid}")
+                msg = await get_msg(url, TB)
+              if msg is not None:
+                ee = await msg.get_sender()
+                if ee is None:
+                  res += "E: sender: None"
+                else:
+                  e = ee
+
           if full:
             #  await msg.reply(f"{e.stringify()}")
             await send_tg(e.stringify(), chat_id, topic=msg.id)
           #  pid = await UB.get_peer_id(e)
           pid = utils.get_peer_id(e)
 
-          res = ""
           if hasattr(e, "first_name"):
             res += "name: %s.%s " % (e.first_name, e.last_name)
           else:
