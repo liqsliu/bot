@@ -3440,6 +3440,7 @@ def send(text, jid=None, *args, **kwargs):
   #  if muc in my_groups:
     #  info(f"准备发送同步消息到: {ms} {text=}")
     if main_group in ms:
+      asyncio.create_task( send_tg(f"{name}{text0}", GROUP_ID) )
       asyncio.create_task( send_tg(f"{name}{text0}", GROUP2_ID, topic=GROUP2_TOPIC) )
       if xmpp_only:
         #  for m in ms:
@@ -4356,6 +4357,7 @@ async def msgmt(msg):
       asyncio.create_task( send_xmpp(text2, m, nick=rname, qt=qt) )
 
 
+    await send_tg(text2, GROUP_ID, qt=qt)
     await send_tg(text2, GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
 
 
@@ -4372,6 +4374,7 @@ async def msgmt(msg):
         #    warn(f"failed: {m} {res}")
         #    return
         asyncio.create_task( send_xmpp(res, m, nick="C bot") )
+      await send_tg(res, GROUP_ID)
       await send_tg(res, GROUP2_ID, topic=GROUP2_TOPIC)
     #    if await send1(f"{name}{text}", m, name) is False:
     #      return
@@ -5492,107 +5495,112 @@ def print_entity(e):
   res += "\nhttps://t.me/c/%s/" % utils.resolve_id(pid)[0]
   return res
 
-async def print_tg_msg(event, to_xmpp=False):
-  msg = event.message
+async def parse_tg_file_msg(msg):
+  path = None
+  backup_task = None
+
+  file = msg.file
+  file_name = file.name
+  if file.size:
+    if file.size > FILE_DOWNLOAD_MAX_BYTES:
+      file_info = f"文件过大，终止下载: ({hbyte(file.size)})"
+    else:
+      file_info = ""
+      #  path = await tg_download_media(msg)
+      path = await tg_download_media(msg, src=msg.chat_id, max_wait_time=get_timeout(msg.file.size))
+      if path is not None:
+        #  t = asyncio.create_task(backup(path))
+        #  url = await t
+        url, backup_task = await backup(path, no_wait=True)
+        #  xmpp_url = await upload(path, src)
+        #  if xmpp_url:
+        #    url = f"- {xmpp_url}\n\n- {url}"
+        #  file_info += "\n"
+        if file_name:
+          file_info += f"[{file_name}]({url})"
+        else:
+          file_info += url
+  else:
+    file_info = "文件大小未知，终止下载"
+  return file_info, path, backup_task
+
+
+async def print_tg_msg(msg, download_file=False):
+  #  msg = event.message
   #  res = ''
-  nick= "G "
-  if event.is_private:
+  nick = ""
+  if msg.is_private:
     delay = None
     #  res += "@"
     #  peer = await get_entity(event.chat_id, False)
-    peer = await event.get_chat()
+    #  peer = await event.get_chat()
+    peer = await msg.get_chat()
     if peer is not None:
+      nick += "%s" % peer.first_name
       if peer.last_name is not None:
         #  res += " [%s %s]" % (peer.first_name, peer.last_name)
         #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
-        nick += "%s %s" % (peer.first_name, peer.last_name)
-      else:
-        #  res += " [%s]" % peer.first_name
-        #  nick = "G [%s]" % peer.first_name
-        nick += "%s" % peer.first_name
+        nick += " %s" % peer.last_name
   else:
 
-    if event.is_group:
+    peer = await get_entity(msg.chat_id, False)
+    #  if event.is_group:
+    if msg.is_group:
       delay = 2
-      nick += "+"
+      #  nick += "+"
+      nick += "G "
     else:
       delay = 5
       #  if event.is_channel:
       nick += "#"
 
-    peer = await get_entity(event.chat_id, False)
-    #  peer = await event.get_chat()
-    if peer is not None:
-      #  res += " %s" % peer.title
-      #  nick = "G %s" % peer.title
-      nick += " %s" % peer.title
+      #  peer = await event.get_chat()
+      if peer is not None:
+        #  res += " %s" % peer.title
+        #  nick = "G %s" % peer.title
+        nick += "%s" % peer.title
     #  print(event.chat_id, event.sender_id, event.from_id)
     #  if event.sender_id: # 如果和chat_id相同就没啥意义,这时候from_id是None
 
-    if event.from_id:
+    if msg.from_id:
       #  peer = await get_entity(event.from_id)
-      peer = await event.get_sender()
+      peer = await msg.get_sender()
       #  peer = await get_entity(event.sender_id, False)
       #  peer = await UB.get_input_entity(event.sender_id)
       #  peer = await UB.get_entity(event.from_id)
       if peer is not None:
         if isinstance(peer, User):
-          if peer.last_name is None:
-            #  res += " [%s]" % peer.first_name
-            #  nick = "G [%s]" % peer.first_name
-            nick += "[%s]" % peer.first_name
-          else:
-            #  res += " [%s %s]" % (peer.first_name, peer.last_name)
-            #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
-            nick += "[%s %s]" % (peer.first_name, peer.last_name)
+          nick += "%s" % peer.first_name
+          if peer.last_name is not None:
+            nick += " %s" % peer.last_name
         else:
         #  if isinstance(peer, Channel):
           #  res += " %s" % peer.title
-          nick += " %s" % peer.title
-    #  else:
-    #    res += " []"
-  #  res2 = None
-  #  res1 = res
+          nick += "#%s" % peer.title
   if msg.text:
-    #  if not event.is_private:
-    #    res2 = f"{res}: {msg.text}"
-    #  res += ": %s" % msg.text.splitlines()[0][:64]
-    #  res += ": " + msg.text
-    res = msg.text
+    text = msg.text
   else:
-    res = ""
-  #  elif res == "":
-  #    res = None
+    text = ""
   if msg.file:
-  #  if False and msg.file:
-    #  path = await tg_download_media(msg)
-    #  if path is not None:
-    #    if res:
-    #      res += "\n--\nfile: %s" % path
-    #      #  text = f"{text} file: {path}"
-    #    else:
-    #      res = "file: %s" % path
-        #  text = f"file: {path}"
-        #  send(text, jid=jid)
-        #  return
+    if download_file is True:
+      backup_task = None
+      try:
+        file_info, path, backup_task = await parse_tg_file_msg(msg)
+        if file_info:
+          if text:
+            text += "\n\n"
+          text += file_info
 
-    #  res += " %s" % msg.file
-    if msg.file.size:
-      res += " %s" % hbyte(msg.file.size)
-    if msg.file.name:
-      res += " %s" % msg.file.name
-      #  if res2:
-      #    res2 += "\n%s" % msg.file.name
-  #  if res2:
-  #    #  send(res2, jid=log_group, name="", nick=nick, delay=1)
-  #    send(res2, name="", nick=nick, delay=1)
-  #  if not event.is_private:
-  #  print(f"{res1}: {short(res)}")
-  #  if print_msg:
-  #    print(short(res))
-  #    return None, nick, delay
-  return res, nick, delay
-  #  return msg.text, nick, delay
+      finally:
+        if backup_task is not None:
+          await backup_task
+          asyncio.create_task(backup(path, delete=True))
+    else:
+      if msg.file.size:
+        text += " %s" % hbyte(msg.file.size)
+      if msg.file.name:
+        text += " %s" % msg.file.name
+  return text, nick, delay
 
 
 
@@ -5997,51 +6005,36 @@ async def msgt(event):
     backup_task = None
     try:
       if msg.file:
-        file = msg.file
-        file_name = file.name
-        if file_name:
-          file_info = f"file: {file_name}"
-        else:
-          file_info = ""
-        if file.size:
-          if file.size > FILE_DOWNLOAD_MAX_BYTES:
-            file_info += f"\n文件过大，终止下载({hbyte(file.size)})"
-          else:
-            #  path = await tg_download_media(msg)
-            path = await tg_download_media(msg, src=src, max_wait_time=get_timeout(msg.file.size))
-            if path is not None:
-              #  t = asyncio.create_task(backup(path))
-              #  url = await t
-              url, backup_task = await backup(path, no_wait=True)
-              #  xmpp_url = await upload(path, src)
-              #  if xmpp_url:
-              #    url = f"- {xmpp_url}\n\n- {url}"
-              file_info += "\n"
-              file_info += url
-                #  await send(text, jid=jid)
-                #  return
-        else:
-          file_info = "\n文件大小未知，终止下载"
-        if text and file_info:
-          text += "\n\n"
-        text += file_info
+        file_info, path, backup_task = await parse_tg_file_msg(msg)
+        #  file = msg.file
+        #  file_name = file.name
+        #  if file_name:
+        #    file_info = f"file: {file_name}"
+        #  else:
+        #    file_info = ""
+        #  if file.size:
+        #    if file.size > FILE_DOWNLOAD_MAX_BYTES:
+        #      file_info += f"\n文件过大，终止下载({hbyte(file.size)})"
+        #    else:
+        #      #  path = await tg_download_media(msg)
+        #      path = await tg_download_media(msg, src=src, max_wait_time=get_timeout(msg.file.size))
+        #      if path is not None:
+        #        #  t = asyncio.create_task(backup(path))
+        #        #  url = await t
+        #        url, backup_task = await backup(path, no_wait=True)
+        #        #  xmpp_url = await upload(path, src)
+        #        #  if xmpp_url:
+        #        #    url = f"- {xmpp_url}\n\n- {url}"
+        #        file_info += "\n"
+        #        file_info += url
+        #  else:
+        #    file_info = "\n文件大小未知，终止下载"
+        if file_info:
+          if text:
+            text += "\n\n"
+          text += file_info
 
       text = f"{l[0]}{text}"
-      #  if len(l) == 2:
-      #    l.append(set())
-      #  else:
-      #    if len(l[2]) > 0:
-      #      await sleep(0.5)
-      #  if parse_message_deleted_task is not None:
-      #    if not parse_message_deleted_task.done():
-      #      info(f"等待处理完tg的消息删除事件 {parse_message_deleted_task}")
-      #      await parse_message_deleted_task
-      #      info("处理完成 parse_message_deleted_task")
-      #    else:
-      #      info("parse_message_deleted_task: done")
-      #  else:
-      #    info(f"None {parse_message_deleted_task=}")
-      #  l[2].add(msg.id)
       if type(src) is int:
         send(text, src, correct=correct)
       else:
@@ -6065,7 +6058,7 @@ async def msgt(event):
     #    bridges.pop(chat_id)
     #    warn(f"delete old bridge: {src}")
     #    return
-    res, nick, delay = await print_tg_msg(event)
+    res, nick, delay = await print_tg_msg(msg)
     if res:
       info(f"sync to xmpp: {chat_id} -> {src}: {short(res)}")
       gid = msg.id
@@ -6080,7 +6073,7 @@ async def msgt(event):
     #  info(f"{chat_id=} {short(msg.text)}")
     #  res, nick, delay = await print_tg_msg(event)
     if print_msg:
-      await print_tg_msg(event)
+      await print_tg_msg(msg)
     #  if res:
     #    info(f"{nick}{res}")
     return
@@ -7940,6 +7933,7 @@ async def msgx(msg):
       asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name, qt=qt) )
     if main_group in ms:
       asyncio.create_task( mt_send_for_long_text(text0, name=name, qt=qt) )
+      await send_tg(f"{username}{text0}", GROUP_ID, qt=qt)
       await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
     elif muc in bot_groups:
       await send_tg(f"{username}{text0}", CHAT_ID, qt=qt)
@@ -10312,45 +10306,56 @@ async def msgb(event):
 
   if event.fwd_from:
     return
+  need_forward = False
   if chat_id == GROUP_ID:
-    info("ignore msg from GROUP_ID")
-    return
-  if chat_id == GROUP2_ID:
-    msg = event.message
-    #  if msg.is_reply:
-    if msg.reply_to is not None:
-      if msg.reply_to.reply_to_top_id == GROUP2_TOPIC or msg.reply_to.reply_to_msg_id == GROUP2_TOPIC:
-        text = msg.text
-        peer = await event.get_sender()
-        #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
-        name = "G %s" % peer.first_name
-        name2 = "**G %s:** " % peer.first_name
-        qt = None
-        if msg.is_reply and msg.reply_to.reply_to_msg_id != GROUP2_TOPIC:
-          msg2 = await msg.get_reply_message()
-          peer = await msg2.get_sender()
-          qt = "G %s: %s" % (peer.first_name, msg.text)
-
-        asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
-        ms = get_mucs(main_group)
-        for m in ms:
-          asyncio.create_task( send_xmpp(f"{name2}{text}", m, name=name) )
-        #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
-        if qt is not None:
-          res = await run_cmd(f"{text}\n\n{qt}", chat_id, f"X {name}: ", False, text)
-        else:
-          res = await run_cmd(text, chat_id, f"X {name}: ", False)
-        if res is True:
-          return
-        if res:
-          send(res, main_group)
-    else:
+    need_forward = True
+  #    info("ignore msg from GROUP_ID")
+  #    return
+  elif chat_id == GROUP2_ID:
+    if msg.reply_to is None:
       info("fixme: unknown msg: %s" % msg.stringify())
+    elif msg.reply_to.reply_to_top_id == GROUP2_TOPIC or msg.reply_to.reply_to_msg_id == GROUP2_TOPIC:
+      need_forward = True
+
+  #  if chat_id == GROUP2_ID:
+  if need_forward is True:
+    #  text = msg.text
+    #  peer = await event.get_sender()
+    #  #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
+    #  name = "G %s" % peer.first_name
+    #  name2 = "**G %s:** " % peer.first_name
+
+    text, name, _ = await print_tg_msg(msg, True)
+    name2 = f"**{name}:** "
+
+    qt = None
+    if msg.is_reply:
+      if chat_id == GROUP_ID or msg.reply_to.reply_to_msg_id != GROUP2_TOPIC:
+        msgr = await msg.get_reply_message()
+        #  peer = await msgr.get_sender()
+        #  qto = "**G %s%s:** %s" % (peer.first_name, " " + peer.last_name if peer.last_name is not None else "", msgr.text)
+        qto, namer, _ = await print_tg_msg(msgr, True)
+        qto = f"**{namer}:** {qto}"
+        qt = qto.splitlines()
+
+    asyncio.create_task( send_tg(f"{name2}{text}", GROUP_ID, qt=qt) )
+    asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
+    ms = get_mucs(main_group)
+    for m in ms:
+      asyncio.create_task( send_xmpp(f"{name2}{text}", m, name=name) )
+    #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
+    if qt is not None:
+      res = await run_cmd(f"{text}\n\n{qto}", chat_id, f"X {name}: ", False, text)
+    else:
+      res = await run_cmd(text, chat_id, f"X {name}: ", False)
+    if res is True:
+      return
+    if res:
+      send(res, main_group)
     return
 
   if event.is_private or chat_id == CHAT_ID:
     # my private group
-    msg = event.message
     #  text = msg.text
     text = msg.raw_text
     sender_id = event.sender_id
