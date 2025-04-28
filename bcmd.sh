@@ -60,7 +60,7 @@ cmds() {
       return 0
     #   echo -n "$username"
     #   bash "$SH_PATH/gpt.sh" "$text" || echo "E: $?"
-    elif echo "$text" | tail -n1 | grep -q -G "^> " && echo "$text" | head -n1 | grep -q -G "^> "; then
+    elif echo "$text" | tail -n1 | grep -q -G "^> " && echo "$text" | head -n1 | grep -q -G '^> '; then
       return 0
     elif [[ -e $SH_PATH/.mode_for_tr_$gateway ]]; then
       echo -n "$username"
@@ -132,8 +132,8 @@ cmds() {
       # fi
 
     else
-      local host=$(echo "$2" | grep -o -P "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -n1)
-      [[ -z "$host" ]] && host=$(echo "$2" | grep -o -P "[0-9a-zA-Z.-]+\.[a-zA-Z]+" | head -n1)
+      local host=$(echo "$2" | grep -o -P '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
+      [[ -z "$host" ]] && host=$(echo "$2" | grep -o -P '[0-9a-zA-Z.-]+\.[a-zA-Z]+' | head -n1)
       echo -n "${host}: "
       local ms=$(ping -W 5 -c 1 $host | cut -d "=" -s -f4)
       [[ -z "$ms" ]] && echo "超时" || echo "$ms"
@@ -196,8 +196,8 @@ cmds() {
       echo "https://github.com/out0fmemory/nali"
     else
       if [[ "$1" == ".ip" ]]; then
-        if [[ $(echo "$2" | grep -c -P "[0-9a-zA-Z.-]+\.[a-zA-Z]+" | head -n1) -eq 1 ]]; then
-          local host=$(echo "$2" | grep -o -P "[0-9a-zA-Z.-]+\.[a-zA-Z]+" | head -n1)
+        if [[ $(echo "$2" | grep -c -P '[0-9a-zA-Z.-]+\.[a-zA-Z]+' | head -n1) -eq 1 ]]; then
+          local host=$(echo "$2" | grep -o -P '[0-9a-zA-Z.-]+\.[a-zA-Z]+' | head -n1)
           echo "$host"
           echo -n "from us: "
           nali-dig +short "$host" || echo "E: $?"
@@ -241,11 +241,11 @@ cmds() {
               echo -n "no ipv6"
             fi
           } || echo "E: $?"
-        elif [[ $(echo "$2" | grep -c -P "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+") -eq 1 ]]; then
-          local host=$(echo "$2" | grep -o -P "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -n1)
+        elif [[ $(echo "$2" | grep -c -P '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+') -eq 1 ]]; then
+          local host=$(echo "$2" | grep -o -P '[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+' | head -n1)
           echo "$host"
           echo -n "纯真: "
-          nali "$host" | grep -o -P "\[.*\]" | grep -o -P "[^[\]]+" || echo "E: $?"
+          nali "$host" | grep -o -P '\[.*\]' | grep -o -P '[^[\]]+' || echo "E: $?"
           # echo "$res"
         else
           echo "W: 格式不正确: $2"
@@ -261,8 +261,8 @@ cmds() {
     if [[ -z "$2" ]]; then
       echo "ip6 \$domain/\$ip"
     else
-      if echo "$2" | grep -q -P "[0-9a-zA-Z.-]+\.[a-zA-Z]+"; then
-        local host=$(echo "$2" | grep -o -P "[0-9a-zA-Z.-]+\.[a-zA-Z]+" | head -n1)
+      if echo "$2" | grep -q -P '[0-9a-zA-Z.-]+\.[a-zA-Z]+'; then
+        local host=$(echo "$2" | grep -o -P '[0-9a-zA-Z.-]+\.[a-zA-Z]+' | head -n1)
         echo "$host"
         echo -n "fake cn: "
         nali-dig @8.8.8.8 +subnet=114.114.114.114/24 +short aaaa "$host" || echo "E: $?"
@@ -291,8 +291,8 @@ cmds() {
             echo -n "no ipv6"
           fi
         } || echo "E: $?"
-      elif echo "$2" | grep -q -P "[0-9a-fA-F:]+"; then
-        local ip6=$(echo "$2" | grep -o -P "[0-9a-fA-F:]+")
+      elif echo "$2" | grep -q -P '[0-9a-fA-F:]+'; then
+        local ip6=$(echo "$2" | grep -o -P '[0-9a-fA-F:]+')
         if [[ -n "$ip6" ]]; then
           echo $ip6
           curl -m 5 -s "https://api.iplocation.net/?ip=$(echo "$ip6"|tail -n1|sed 's/.* //')"
@@ -307,8 +307,8 @@ cmds() {
   xp|xmpp)
     if [[ -z "$2" ]]; then
       echo ".xp \$domain"
-    elif echo "$2" | grep -q -P "[0-9a-zA-Z.-]+\.[a-zA-Z]+"; then
-      local host=$(echo "$2" | grep -o -P "[0-9a-zA-Z.-]+\.[a-zA-Z]+" | head -n1)
+    elif echo "$2" | grep -q -P '[0-9a-zA-Z.-]+\.[a-zA-Z]+'; then
+      local host=$(echo "$2" | grep -o -P '[0-9a-zA-Z.-]+\.[a-zA-Z]+' | head -n1)
       local srv=$(dig +short srv "_xmpp-client._tcp.$host"|head -n1)
       echo "SRV _xmpp-client._tcp.$2:"
       if [[ -n "$srv" ]]; then
@@ -502,12 +502,12 @@ if [[ "$text" == "ping" ]]; then
 elif [[ "$text" == "help" ]]; then
   text=".help"
 elif [[ $(echo "$text" | wc -l) -eq 1 ]]; then
-if echo "$text" | grep -q -P "^https://(mobile\.)?(twitter|x)\.com/[a-zA-Z0-9_./?=&%-]+$"; then
+if echo "$text" | grep -q -P '^https://(mobile\.)?(twitter|x)\.com/[a-zA-Z0-9_./?=&%-]+$'; then
   # :
   text=".tw $text"
-elif echo "$text" | grep -q -P "^http(s)?://[0-9a-zA-Z.-]+\.[a-zA-Z]+(:[0-9]+)?/?[\S]*(jpe?g|png|mp4|gif|txt)$"; then
+elif echo "$text" | grep -q -P '^http(s)?://[0-9a-zA-Z.-]+\.[a-zA-Z]+(:[0-9]+)?/?[\S]*(jpe?g|png|mp4|gif|txt)$'; then
   text=".ipfs $text only"
-elif echo "$text" | grep -q -P "^http(s)?://[0-9a-zA-Z.-]+\.[a-zA-Z]+(:[0-9]+)?/?[\S]*$"; then
+elif echo "$text" | grep -q -P '^http(s)?://[0-9a-zA-Z.-]+\.[a-zA-Z]+(:[0-9]+)?/?[\S]*$'; then
   text=".type $text autocheck"
 fi
 fi
