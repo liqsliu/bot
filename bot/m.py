@@ -5453,14 +5453,14 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
         return  peer
       except TypeError as e:
         err(f"E: {e=}, not found entity: {peer} {e=}")
-        return
       except ValueError as e:
         info(f"not found entity: {peer=} {e=}")
   except Exception as e:
     #  err(f"{e=}")
     err(e)
-    return
   #  raise ValueError(f"无法获取entity: {chat_id=} {peer=}")
+  if return_gid:
+    return None, gid
 
 
 
@@ -10372,7 +10372,7 @@ async def msgb(event):
         #
         #  e = await UB.get_entity(username)
 
-        e = await get_entity(url, False)
+        e, gid = await get_entity(url, False)
         #  if type(e) is tuple:
         #    peer = e[0]
         #    gid = e[1]
@@ -10383,30 +10383,40 @@ async def msgb(event):
         #      await send_tg(e.stringify(), chat_id, topic=msg.id)
         #    await msg.reply("peer id: %s %s" % (await UB.get_peer_id(peer), type(e)))
         if e:
+          if gid is not None:
+            info(f"get msg: {e} {gid}")
+            msg = await UB.get_messages(e, ids=gid)
+            if msg is None:
+              info(f"get msg(TB): {e} {gid}")
+              msg = await TB.get_messages(e, ids=gid)
+            if msg is not None:
+              e = ee
           if full:
             #  await msg.reply(f"{e.stringify()}")
             await send_tg(e.stringify(), chat_id, topic=msg.id)
           #  pid = await UB.get_peer_id(e)
           pid = utils.get_peer_id(e)
+
+          res = ""
+          if hasattr(e, "first_name"):
+            res += "name: %s.%s " % (e.first_name, e.last_name)
+          else:
+            res += "title: %s " % e.title
+          res += "\ntype: %s" % type(e)
+          res += "\n"
           if e.username:
-            res = "@%s" % e.username
+            res += "@%s" % e.username
+            res += "\nhttps://t.me/%s/" % e.username
           else:
             #  if pid > 0:
             if hasattr(e, "first_name"):
-              res = "[%s](tg://openmessage?user_id=%s)" % (pid, pid)
+              res += "[%s](tg://openmessage?user_id=%s)" % (pid, pid)
             else:
-              res = "[%s](tg://openmessage?chat_id=%s)" % (pid, pid)
-          res += "\n"
-          #  res = "peer id: %s" % pid
-          if hasattr(e, "first_name"):
-            res += "%s.%s " % (e.first_name, e.last_name)
-          else:
-            res += "%s " % e.title
-          res += "type: %s" % type(e)
-          res += "\npeer id: `%s`" % pid
+              res += "[%s](tg://openmessage?chat_id=%s)" % (pid, pid)
 
-          if e.username:
-            res += "\nhttps://t.me/%s/" % e.username
+          #  res = "peer id: %s" % pid
+          res += "\n\npeer id: `%s`" % pid
+
           # https://docs.telethon.dev/en/stable/concepts/chats-vs-channels.html#converting-ids
           # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.resolve_id
           res += "\nhttps://t.me/c/%s/" % utils.resolve_id(pid)[0]
