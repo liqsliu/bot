@@ -5463,6 +5463,34 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
     return None, gid
 
 
+async def print_entity(e):
+  res = ""
+  pid = utils.get_peer_id(e)
+
+  if hasattr(e, "first_name"):
+    res += "name: %s.%s " % (e.first_name, e.last_name)
+  else:
+    res += "title: %s " % e.title
+  res += "\ntype: %s" % type(e)
+
+  res += "\n"
+  if e.username:
+    res += "@%s" % e.username
+    res += "\nhttps://t.me/%s/" % e.username
+  else:
+    #  if pid > 0:
+    if hasattr(e, "first_name"):
+      res += "[%s](tg://openmessage?user_id=%s)" % (pid, pid)
+    else:
+      res += "[%s](tg://openmessage?chat_id=%s)" % (pid, pid)
+
+  #  res = "peer id: %s" % pid
+  res += "\npeer id: `%s`" % pid
+
+  # https://docs.telethon.dev/en/stable/concepts/chats-vs-channels.html#converting-ids
+  # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.resolve_id
+  res += "\nhttps://t.me/c/%s/" % utils.resolve_id(pid)[0]
+  return res
 
 async def print_tg_msg(event, to_xmpp=False):
   msg = event.message
@@ -10391,12 +10419,18 @@ async def msgb(event):
           res = ""
           if gid is not None:
             if msg.is_group:
+              res += "chat:\n"
+              res += print_entity(e)
+              res += "\n\nsender:\n"
+
               info(f"get msg: {e} {gid}")
               msg = await UB.get_messages(e, ids=gid)
               if msg is None:
                 info(f"get msg(TB): {e} {gid}")
                 msg = await get_msg(url, TB)
               if msg is not None:
+                if full:
+                  await send_tg(msg.stringify(), chat_id, topic=msg.id)
                 ee = await msg.get_sender()
                 if ee is None:
                   res += "E: sender: None"
@@ -10407,30 +10441,7 @@ async def msgb(event):
             #  await msg.reply(f"{e.stringify()}")
             await send_tg(e.stringify(), chat_id, topic=msg.id)
           #  pid = await UB.get_peer_id(e)
-          pid = utils.get_peer_id(e)
-
-          if hasattr(e, "first_name"):
-            res += "name: %s.%s " % (e.first_name, e.last_name)
-          else:
-            res += "title: %s " % e.title
-          res += "\ntype: %s" % type(e)
-          res += "\n"
-          if e.username:
-            res += "@%s" % e.username
-            res += "\nhttps://t.me/%s/" % e.username
-          else:
-            #  if pid > 0:
-            if hasattr(e, "first_name"):
-              res += "[%s](tg://openmessage?user_id=%s)" % (pid, pid)
-            else:
-              res += "[%s](tg://openmessage?chat_id=%s)" % (pid, pid)
-
-          #  res = "peer id: %s" % pid
-          res += "\n\npeer id: `%s`" % pid
-
-          # https://docs.telethon.dev/en/stable/concepts/chats-vs-channels.html#converting-ids
-          # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.resolve_id
-          res += "\nhttps://t.me/c/%s/" % utils.resolve_id(pid)[0]
+          res += print_entity(e)
 
           #  await msg.reply(res)
           await send_tg(res, chat_id, topic=msg.id)
