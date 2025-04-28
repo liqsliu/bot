@@ -232,6 +232,7 @@ else
   # fe=$(echo "$html" | file --extension -b -- -)
   # size=$(echo "$html" | wc -c)
   # echo "$fn"
+  # echo -n "[file]($URL): "
   echo "$fs"
   echo "$ft"
   echo "$ft3"
