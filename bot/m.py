@@ -3842,10 +3842,58 @@ async def slow_mode(client, timeout=300):
 #  @exceptions_handler(no_send=True)
 @cross_thread
 async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None):
+  # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
+
   if qt is not None:
-    if parse_mode ==  "md":
-      parse_mode = "html"
-      text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
+    topic_orig = topic
+    if topic is None:
+      qtr = "\n".join(qt)
+      if qtr.startswith("**G "):
+        qtr = qtr.split(":** ", 1)[1]
+      info(f"{qtr=}")
+      k = 0
+      async for msg in client.iter_messages(chat_id):
+        text = msg.text
+        if text:
+          if text.startswith("**G "):
+            text = text.split(":** ", 1)[1]
+          if similarity(text, qtr) > 0.9:
+            info(f"found: {text=} {qtr=}")
+            topic = msg.id
+            break
+          info(f"skip: {text=}")
+        k += 1
+        if k > 9:
+          break
+    else:
+      qtr = "\n".join(qt)
+      if qtr.startswith("**G "):
+        qtr = qtr.split(":** ", 1)[1]
+      info(f"{qtr=}")
+      k = 0
+      async for msg in client.iter_messages(chat_id, reply_to=topic):
+        text = msg.text
+        if text:
+          if text.startswith("**G "):
+            text = text.split(":** ", 1)[1]
+          if similarity(text, qtr) > 0.9:
+            info(f"found: {text=} {qtr=}")
+            topic = msg.id
+            break
+          info(f"skip: {text=}")
+        k += 1
+        if k > 9:
+          break
+
+    if topic_orig == topic:
+      info("not found")
+      if parse_mode ==  "md":
+        parse_mode = "html"
+      if parse_mode ==  "html":
+        text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text)
+      else:
+        text = "%s\n%s" % ("\n> ".join(qt), text)
+
   if name is not None:
     text = f"{name}{text}"
   #  else:
