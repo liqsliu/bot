@@ -9752,7 +9752,7 @@ async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool 
       if len(urls) == 1:
         if tmp is None:
           return True
-        res = f"[URL](url): {tmp}"
+        res = f"[URL]({url}): {tmp}"
       else:
         if res is None:
           res=" %s urls" % len(urls)
