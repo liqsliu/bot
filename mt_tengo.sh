@@ -753,7 +753,8 @@ ${NAME}"
           fi
         fi
         if echo "$TEXT" | grep -q -P '^http(s)?://[0-9a-zA-Z.-]+\.[a-zA-Z]+(:[0-9]+)?/?[\S]*$'; then
-          TEXT="\`$TEXT\`"
+          # TEXT="\`$TEXT\`"
+          TEXT="[$TEXT]($TEXT)"
         fi
         TEXT="⁦$NAME$TEXT"
       fi
