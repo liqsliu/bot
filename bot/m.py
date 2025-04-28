@@ -5571,7 +5571,7 @@ async def print_tg_msg(event, to_xmpp=False):
 async def get_msg(url, client=None):
   if client is None:
     client = UB
-  peer, ids = await get_entity(url, return_gid=True)
+  peer, ids = await get_entity(url, client=client, return_gid=True)
   if peer:
     #  ss = url.split('/')
     #  if len(ss) > 4:
@@ -10372,7 +10372,7 @@ async def msgb(event):
         #
         #  e = await UB.get_entity(username)
 
-        e, gid = await get_entity(url, False)
+        e, gid = await get_entity(url, False, return_gid=True)
         #  if type(e) is tuple:
         #    peer = e[0]
         #    gid = e[1]
@@ -10388,7 +10388,7 @@ async def msgb(event):
             msg = await UB.get_messages(e, ids=gid)
             if msg is None:
               info(f"get msg(TB): {e} {gid}")
-              msg = await TB.get_messages(e, ids=gid)
+              msg = await get_msg(url, TB)
             if msg is not None:
               e = ee
           if full:
