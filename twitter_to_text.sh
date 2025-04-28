@@ -65,7 +65,8 @@ get_tw_text(){
     text=$( echo "$text" | sed "s|$url1| $url2 |" )
   done
   # echo "$res"
-  echo "$name@$name_id: $text"
+  echo "[$name]($URL) @$name_id:
+$text"
 
   local media_num=$(echo "$tw_res" | jq -r ".mediaDetails|length")
   local res=''
@@ -150,7 +151,8 @@ get_tw(){
   if [[ "$tw_res_q" != "null" ]]; then
     echo
     echo "---"
-    echo "引用推文: $(get_tw_url "$tw_res_q")"
+    URL=$(get_tw_url "$tw_res_q")
+    echo -n "引用推文: "
     get_tw_text "$tw_res_q"
   fi
 }
@@ -265,7 +267,8 @@ $type: $url"
 
 #twitter link to text
 twitter_to_text(){
-  local URL="$1"
+  # local URL="$1"
+  URL="$1"
   shift
   if [[ "$URL" == "" ]]; then
     return 1
@@ -282,7 +285,7 @@ twitter_to_text(){
       # tmp=$(get_tw "$id" "$@") || echo $?
       tmp=$(get_tw "$id" "$@") || return 1
       # echo $?
-      echo "$URL"
+      # echo "$URL"
       echo "$tmp"
     else
       echo "E: error twitter id"
