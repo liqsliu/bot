@@ -5527,6 +5527,7 @@ async def parse_tg_file_msg(msg):
 
 async def print_tg_msg(msg, download_file=False):
   #  msg = event.message
+  chat_id = msg.chat_id
   #  res = ''
   nick = ""
   if msg.is_private:
@@ -5543,12 +5544,14 @@ async def print_tg_msg(msg, download_file=False):
         nick += " %s" % peer.last_name
   else:
 
-    peer = await get_entity(msg.chat_id, False)
+    peer = await get_entity(chat_id, False)
     #  if event.is_group:
     if msg.is_group:
       delay = 2
       #  nick += "+"
       nick += "G "
+      if chat_id == GROUP2_ID:
+        nick += " "
     else:
       delay = 5
       #  if event.is_channel:
@@ -5869,8 +5872,11 @@ async def msgt(event):
               text = text.split(": ", 1)[1]
           elif text.startswith("G "):
             warn(f"fixme: {text=}")
-            await msg.delete()
-            return
+            if text.startswith("G  "):
+              pass
+            else:
+              await msg.delete()
+            #  return
           info(f"bot original text(2): {text=}")
 
         #  elif " " not in  text.splei(": ", 1)[0]:
