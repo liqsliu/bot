@@ -7895,11 +7895,12 @@ async def msgx(msg):
           warn(f"有人刷屏: {nick}\njid: {jid}\nmuc: {muc}\nnow: {w[0]}/{wtf_limit}/{w[1]}\n{res}")
           send(f"检测到刷屏，禁言{wtf_ban_time}s: {nick} {w[0]}/{wtf_limit}", jid=muc)
         elif need_warn:
-          if w[1] == 1 and w[0] > wtf_limit/2:
-            send(f"{nick}, 不要刷屏 {w[0]}/{wtf_limit}", jid=muc)
-            w[0] = wtf_limit/2
-          elif w[0] > wtf_limit/2:
-            send(f"{nick}, 不要刷屏（第一次警告） {w[0]}/{wtf_limit}", jid=muc)
+          if w[0] > wtf_limit/2:
+            if w[1] == 1:
+              send(f"{nick} 不要刷屏 {int(w[0])}/{wtf_limit}", jid=muc)
+              w[0] = wtf_limit/2
+            else:
+              send(f"{nick} 不要刷屏（第一次警告） {int(w[0])}/{wtf_limit}", jid=muc)
         
 
   elif muc == myjid:
