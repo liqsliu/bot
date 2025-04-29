@@ -6175,9 +6175,13 @@ async def msgt(event):
       #  if src == GROUP_ID or src == GROUP2_ID or type(src) is str:
       if True:
         gid = msg.id
-        if gid - 1 in forwarded_tg_msg_ids:
-          info(f"too many tg msg: {gid} for {chat_id}")
-          await sleep(0.3 + len(text)/512)
+        #  if gid - 1 in forwarded_tg_msg_ids:
+        for i in forwarded_tg_msg_ids:
+          s = forwarded_tg_msg_ids[i]
+          if src in s or gid - i < 5:
+            info(f"too many tg msg: {gid} for {chat_id}")
+            await sleep(0.3 + len(text)/4096)
+            break
         await sleep(0)
         send(text, src, correct=correct, tg_msg_id=gid)
         #  if src == GROUP_ID or src == GROUP2_ID:
