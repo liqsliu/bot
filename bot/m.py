@@ -10339,7 +10339,7 @@ async def msgb(event):
         qt = qto.splitlines()
 
     if chat_id == GROUP_ID:
-      asyncio.create_task( send_tg(f"{name2}{text}", GROUP2_ID, qt=qt) )
+      asyncio.create_task( send_tg(f"{name2}{text}", GROUP2_ID, qt=qt, topic=GROUP2_TOPIC) )
     elif chat_id == GROUP2_ID:
       asyncio.create_task( send_tg(f"{name2}{text}", GROUP_ID, qt=qt) )
     asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
