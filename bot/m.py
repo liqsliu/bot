@@ -3978,6 +3978,10 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         k += 1
         if k == len(ts):
           last[chat_id] = msg
+          if tmp_msg:
+            chats.add(chat_id)
+          elif chat_id in chats:
+            chats.remove(chat_id)
 
           jid = chat_id
           if tg_msg_id is None:
@@ -3996,7 +4000,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
                 forwarded_tg_msg_ids.pop(i)
             #  forwarded_tg_msg_ids.clear()
           elif tg_msg_id in deleted_tg_msg_ids:
-            tmp_msg_chats.add(jid)
+            #  tmp_msg_chats.add(jid)
+            chats.add(jid)
             return
           else:
             #  clean_forwarded_tg_msg_ids(jid)
@@ -4009,10 +4014,6 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
               forwarded_tg_msg_ids[tg_msg_id] = set()
             forwarded_tg_msg_ids[tg_msg_id].add(jid)
 
-          if tmp_msg:
-            chats.add(chat_id)
-          elif chat_id in chats:
-            chats.remove(chat_id)
 
         elif len(ts) > 1:
           await sleep(0.5)
