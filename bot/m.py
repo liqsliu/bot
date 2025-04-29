@@ -3326,7 +3326,7 @@ def send_log(text, jid=None, delay=1, fm=None):
       #  await sleep(delay*m)
     else:
       info(f"send_log tg: {text}")
-    t = asyncio.create_task(send_tg(text, tjid, delay=(delay+1)**m), name="send_log_tg")
+    t = asyncio.create_task(send_tg(text, tjid, delay=(delay+1)**m, parse_mode=None, resend=-1), name="send_log_tg")
   #  if isinstance(jid, int) is False:
   #  else:
   if not isinstance(jid, int):
