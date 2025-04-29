@@ -3452,6 +3452,8 @@ def send(text, jid=None, exclude=[], *args, **kwargs):
         #  text = text.body[None]
         text = text.body.any()
     exclude.append(muc)
+  else:
+    warn(f"not send: {muc=} in {exclude=}")
 
   #  ms = get_mucs(muc) - {muc}
   ms = get_mucs(muc) - set(exclude)
