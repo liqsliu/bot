@@ -3845,6 +3845,12 @@ async def slow_mode(client, timeout=300):
 async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None):
   # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
 
+    if name is None:
+      if chat_id == GROUP_ID or chat_id == GROUP2_ID:
+        name = "**C bot:** "
+      else:
+        name = ""
+    #  text = name + text
   if qt is not None:
     qtr = "\n".join(qt)
     if qtr.startswith("**G "):
@@ -3857,12 +3863,12 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     if qtr is not None:
       if topic is None:
         async for msg in client.iter_messages(chat_id):
-          text = msg.text
-          if text:
-            if text.startswith("**G "):
-              text = text.split(":** ", 1)[1]
-            if similarity(text, qtr) > 0.9:
-              info(f"found: {text=} {qtr=}")
+          textr = msg.text
+          if textr:
+            if textr.startswith("**G "):
+              textr = textr.split(":** ", 1)[1]
+            if similarity(textr, qtr) > 0.9:
+              info(f"found: {textr=} {qtr=}")
               topic = msg.id
               break
             info(f"skip: {text=}")
@@ -3871,12 +3877,12 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
             break
       else:
         async for msg in client.iter_messages(chat_id, reply_to=topic):
-          text = msg.text
-          if text:
-            if text.startswith("**G "):
-              text = text.split(":** ", 1)[1]
-            if similarity(text, qtr) > 0.9:
-              info(f"found: {text=} {qtr=}")
+          textr = msg.text
+          if textr:
+            if textr.startswith("**G "):
+              textr = textr.split(":** ", 1)[1]
+            if similarity(textr, qtr) > 0.9:
+              info(f"found: {textr=} {qtr=}")
               topic = msg.id
               break
             info(f"skip: {text=}")
@@ -3893,13 +3899,13 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       else:
         text = "%s\n%s" % ("\n> ".join(qt), text)
 
-  if name is not None:
-    text = f"{name}{text}"
+  #  if name is not None:
+  #    text = f"{name}{text}"
   #  else:
   #    if parse_mode ==  "md":
   #      parse_mode = client.parse_mode
   #  info(f"parse_mode: {parse_mode}")
-  ts = await split_long_text(text, MAX_MSG_BYTES_TG, tmp_msg)
+  ts = await split_long_text(name + text, MAX_MSG_BYTES_TG, tmp_msg)
   if len(ts) > 1:
     tmp_msg = False
   k = 0
@@ -6041,14 +6047,21 @@ async def msgt(event):
           text += file_info
 
       text = f"{l[0]}{text}"
-      if type(src) is int:
-        send(text, src, correct=correct)
-      else:
+      if src == GROUP_ID or src == GROUP2_ID or type(src) is str:
         gid = msg.id
         if gid - 1 in forwarded_tg_msg_ids:
           info(f"too many tg msg: {gid} for {chat_id}")
           await sleep(0.5)
-        send(text, src, correct=correct, tg_msg_id=gid)
+        if src == GROUP_ID or src == GROUP2_ID:
+          send(text, GROUP_ID, correct=correct)
+          send(text, GROUP2_ID, correct=correct)
+          await sleep(0)
+          send(text, main_group, correct=correct, tg_msg_id=gid)
+        else:
+          send(text, src, correct=correct, tg_msg_id=gid)
+      else:
+      #  if type(src) is int:
+        send(text, src, correct=correct)
     finally:
       if backup_task is not None:
         await backup_task
