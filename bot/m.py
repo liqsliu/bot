@@ -3454,6 +3454,7 @@ def send(text, jid=None, exclude=[], *args, **kwargs):
 
   ms = get_mucs(muc) - {muc}
   if len(ms) == 0:
+    info("ms is empty")
     return True
 
   if 'xmpp_only' in kwargs:
@@ -10378,8 +10379,6 @@ async def msgb(event):
   text = event.text
   info(f"{chat_id} {sender_id}: {short(text) if text is not None and len(text) > 0 else type(msg.media)}_{msg.id}")
 
-  if event.fwd_from:
-    return
   need_forward = False
   if chat_id == GROUP_ID:
     need_forward = True
@@ -10436,6 +10435,8 @@ async def msgb(event):
     return
 
   if event.is_private or chat_id == CHAT_ID:
+    if event.fwd_from:
+      return
     # my private group
     #  text = msg.text
     text = msg.raw_text
