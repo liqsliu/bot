@@ -4035,26 +4035,35 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
           await sleep(0.5)
         if delay is not None:
           await sleep(delay)
-    except rpcerrorlist.FloodWaitError as e:
-      warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
-      await slow_mode(client)
-      return False
+
     except rpcerrorlist.MessageTooLongError as e:
       warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
-      await sleep(5)
+      await sleep(3)
       return False
+    except rpcerrorlist.MessageIdInvalidError as e:
+      err(f"找不到对应id的消息，大概已经被删除了: {e=} {chat_id} {short(t)}", no_send=True)
+      if chat_id in last:
+        last.pop(chat_id)
+        info("deleted msg log")
+      if resend >= 0:
+        resend += 1
     except rpcerrorlist.EntityBoundsInvalidError as e:
       if parse_mode ==  "md":
         err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
-        parse_mode = None
         #  resend = True
         if resend >= 0:
           resend += 1
       else:
         err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=} {e=}", no_send=True)
+    except rpcerrorlist.FloodWaitError as e:
+      warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
+      await slow_mode(client)
+      return False
     except ValueError as e:
       if e.args[0] == 'Failed to parse message':
         err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
+      else:
+        err(f"发送tg消息失败, wtf: {chat_id} {type(t)} {e=} {t=}")
       return False
     except Exception as e:
       if client is TB:
