@@ -6151,7 +6151,8 @@ async def msgt(event):
           text += file_info
 
       text = f"{l[0]}{text}"
-      if src == GROUP_ID or src == GROUP2_ID or type(src) is str:
+      #  if src == GROUP_ID or src == GROUP2_ID or type(src) is str:
+      if True:
         gid = msg.id
         if gid - 1 in forwarded_tg_msg_ids:
           info(f"too many tg msg: {gid} for {chat_id}")
