@@ -10338,7 +10338,10 @@ async def msgb(event):
         qto = f"**{namer}:** {qto}"
         qt = qto.splitlines()
 
-    asyncio.create_task( send_tg(f"{name2}{text}", GROUP_ID, qt=qt) )
+    if chat_id == GROUP_ID:
+      asyncio.create_task( send_tg(f"{name2}{text}", GROUP2_ID, qt=qt) )
+    elif chat_id == GROUP2_ID:
+      asyncio.create_task( send_tg(f"{name2}{text}", GROUP_ID, qt=qt) )
     asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
     ms = get_mucs(main_group)
     for m in ms:
