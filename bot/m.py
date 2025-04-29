@@ -3394,19 +3394,18 @@ def send(text, jid=None, *args, **kwargs):
     #  else:
     #    return await send_t(text, jid, *args, **kwargs)
 
-  nick = None
   if 'name' in kwargs:
-    name = kwargs["name"]
-    nick = name
+    nameo = kwargs["name"]
     #  kwargs.pop("name")
-    if name is None:
-      name = "**C bot:** "
-    elif name == "":
-      pass
-    else:
-      name = f"**{name}:** "
+    if nameo is None:
+      nameo = "C bot"
   else:
-    name = "**C bot:** "
+    nameo = "C bot"
+
+  if nameo == "":
+    name = nameo
+  else:
+    name = f"**{nameo}:** "
 
   #  muc = None
   muc = jid
@@ -3451,8 +3450,9 @@ def send(text, jid=None, *args, **kwargs):
   #  if muc in my_groups:
     #  info(f"准备发送同步消息到: {ms} {text=}")
     if main_group in ms:
-      asyncio.create_task( send_tg(text0, GROUP_ID, name=nick) )
-      asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, name=nick) )
+      asyncio.create_task( send_tg(text0, GROUP_ID, name=nameo) )
+      asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, name=nameo) )
+      await sleep(0)
       if xmpp_only:
         #  for m in ms:
         #    #  send_typing(m)
@@ -3460,9 +3460,8 @@ def send(text, jid=None, *args, **kwargs):
         #  await send1(text, jid=log_group_private, *args, **kwargs)
         asyncio.create_task( send_xmpp(text, jid=log_group_private, *args, **kwargs) )
         return True
-        ms = set()
       else:
-        asyncio.create_task( mt_send_for_long_text(text0, name=nick) )
+        asyncio.create_task( mt_send_for_long_text(text0, name=nameo) )
     for m in ms:
       #  if await send1(text, jid=m, *args, **kwargs):
       #    if isinstance(text, aioxmpp.Message):
@@ -4359,24 +4358,24 @@ async def msgmt(msg):
     #  if '\n' in name:
     if len(qt) > 1:
       name = qt.pop(-1)
-      #  rname = name[:-2]
+      #  nameo = name[:-2]
       #  qt = '\n'.join(ls[:-1])
       #  text = f"{text}\n\n{qt}"
       #  qt = '\n> '.join(ls[:-1])
-      #  name2 = f"> {qt}\n**{rname}:** "
+      #  name2 = f"> {qt}\n**{nameo}:** "
     else:
       qt = None
 
-    rname = name[:-2]
-    name2 = f"**{rname}:** "
+    nameo = name[:-2]
+    name2 = f"**{nameo}:** "
 
     text2 = f"{name2}{text}"
 
     for m in get_mucs(main_group):
-      #  if await send1(text2, m, nick=rname) is False:
+      #  if await send1(text2, m, nick=nameo) is False:
       #    warn(f"failed: {m} {text1}")
       #    return
-      asyncio.create_task( send_xmpp(text2, m, nick=rname, qt=qt) )
+      asyncio.create_task( send_xmpp(text2, m, nick=nameo, qt=qt) )
 
 
     await send_tg(text2, GROUP_ID, qt=qt)
@@ -4384,7 +4383,7 @@ async def msgmt(msg):
 
 
     #  res = await run_cmd("{}\n\n{}".format(text, "\n".join(qt)), gateway, name, qt=qt)
-    res = await run_cmd(text, gateway, rname, qt=qt)
+    res = await run_cmd(text, gateway, nameo, qt=qt)
     if res is True:
       return
     if res:
