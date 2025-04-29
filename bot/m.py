@@ -3808,6 +3808,7 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
 
 def save_msg_id(jid, chats, tg_msg_id, tmp_msg):
   # for sync correct between tg and xmpp
+  await sleep(0)
   if tg_msg_id is None:
     if tmp_msg is False:
       #  clean_forwarded_tg_msg_ids(jid)
@@ -5802,7 +5803,6 @@ async def msgtd(event):
   #    return
   #  chat_id = event.sender_id
   chat_id = event.chat_id
-  info(f"delete: {chat_id}: {event.deleted_id if len(event.deleted_ids) == 1 else event.deleted_ids}")
   if chat_id == GROUP_ID:
     return
   if chat_id is None:
@@ -5810,6 +5810,7 @@ async def msgtd(event):
   elif chat_id not in bridges_tmp:
     #  info(f"chat_id is not in bridges: {chat_id}")
     return
+  info(f"delete: {chat_id}: {event.deleted_id if len(event.deleted_ids) == 1 else event.deleted_ids}")
   deleted_tg_msg_ids.update(event.deleted_ids)
   #  src = bridges[chat_id]
     #  if src not in tmp_msg_chats:
@@ -6178,7 +6179,8 @@ async def msgt(event):
         gid = msg.id
         if gid - 1 in forwarded_tg_msg_ids:
           info(f"too many tg msg: {gid} for {chat_id}")
-          await sleep(0.5)
+          await sleep(0.3 + len(text)/512)
+        await sleep(0)
         send(text, src, correct=correct, tg_msg_id=gid)
         #  if src == GROUP_ID or src == GROUP2_ID:
         #    send(text, GROUP_ID, correct=correct)
