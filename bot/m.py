@@ -6016,6 +6016,8 @@ async def msgt(event):
               pass
             else:
               await msg.delete()
+              if chat_id in last_outmsg:
+                last_outmsg.pop(chat_id)
             #  return
           info(f"bot original text(2): {text=}")
 
@@ -6081,6 +6083,8 @@ async def msgt(event):
             if r > 0.8:
               tg_msg_cache_for_bot2_event.clear()
               await msg.delete()
+              if chat_id in last_outmsg:
+                last_outmsg.pop(chat_id)
               #  tg_msg_cache_for_bot2 = None
               info(f"消息重复: {r=} {short(text)}")
               break
