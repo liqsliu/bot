@@ -10436,6 +10436,7 @@ async def msgb(event):
 
   if event.is_private or chat_id == CHAT_ID:
     if event.fwd_from:
+      info(f"goto msgtout")
       return
     # my private group
     #  text = msg.text
