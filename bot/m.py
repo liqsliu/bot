@@ -3436,23 +3436,25 @@ def send(text, jid=None, exclude=[], *args, **kwargs):
   #    kwargs["name"] = None
   #    nick = name
 
-  if isinstance(muc, int):
-    #  if "tg_msg_id" in kwargs:
-    #    kwargs.pop("tg_msg_id")
-    #  return await send_tg(text=text, chat_id=jid, *args, **kwargs)
+  if muc not in exclude:
+    if isinstance(muc, int):
+      #  if "tg_msg_id" in kwargs:
+      #    kwargs.pop("tg_msg_id")
+      #  return await send_tg(text=text, chat_id=jid, *args, **kwargs)
 
-    if muc == GROUP2_ID:
-      asyncio.create_task(send_tg(text=text0, chat_id=muc, topic=GROUP2_TOPIC, *args, **kwargs) )
+      if muc == GROUP2_ID:
+        asyncio.create_task(send_tg(text=text0, chat_id=muc, topic=GROUP2_TOPIC, *args, **kwargs) )
+      else:
+        asyncio.create_task(send_tg(text=text0, chat_id=muc, *args, **kwargs) )
     else:
-      asyncio.create_task(send_tg(text=text0, chat_id=muc, *args, **kwargs) )
-  else:
-    asyncio.create_task( send_xmpp(text, jid=muc, *args, **kwargs) )
-    if isinstance(text, aioxmpp.Message):
-      #  text = text.body[None]
-      text = text.body.any()
-  exclude.append(muc)
+      asyncio.create_task( send_xmpp(text, jid=muc, *args, **kwargs) )
+      if isinstance(text, aioxmpp.Message):
+        #  text = text.body[None]
+        text = text.body.any()
+    exclude.append(muc)
 
-  ms = get_mucs(muc) - {muc}
+  #  ms = get_mucs(muc) - {muc}
+  ms = get_mucs(muc) - set(exclude)
   if len(ms) == 0:
     info("ms is empty")
     return True
@@ -3482,8 +3484,8 @@ def send(text, jid=None, exclude=[], *args, **kwargs):
         asyncio.create_task( mt_send_for_long_text(text0, name=nameo) )
 
   for m in ms:
-    if m in exclude:
-      continue
+    #  if m in exclude:
+    #    continue
     #  if await send1(text, jid=m, *args, **kwargs):
     #    if isinstance(text, aioxmpp.Message):
     #      text = text.body[None]
@@ -8068,7 +8070,7 @@ async def msgx(msg):
     #    await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
     #  elif muc in bot_groups:
     #    await send_tg(f"{username}{text0}", CHAT_ID, qt=qt)
-    send(text0, main_group, name=name, qt=qt, exclude=[muc])
+    send(text0, muc, name=name, qt=qt, exclude=[muc])
     await sleep(0)
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
