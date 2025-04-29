@@ -3452,7 +3452,6 @@ def send(text, jid=None, *args, **kwargs):
     if main_group in ms:
       asyncio.create_task( send_tg(text0, GROUP_ID, name=nameo) )
       asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, name=nameo) )
-      await sleep(0)
       if xmpp_only:
         #  for m in ms:
         #    #  send_typing(m)
