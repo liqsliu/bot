@@ -3839,17 +3839,16 @@ async def slow_mode(client, timeout=300):
 
 
 
-
 #  @exceptions_handler(no_send=True)
 @cross_thread
 async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None):
   # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
 
-    if name is None:
-      if chat_id == GROUP_ID or chat_id == GROUP2_ID:
-        name = "**C bot:** "
-      else:
-        name = ""
+  if name is None:
+    if chat_id == GROUP_ID or chat_id == GROUP2_ID:
+      name = "**C bot:** "
+    else:
+      name = ""
     #  text = name + text
   if qt is not None:
     qtr = "\n".join(qt)
@@ -6059,6 +6058,9 @@ async def msgt(event):
           send(text, main_group, correct=correct, tg_msg_id=gid)
         else:
           send(text, src, correct=correct, tg_msg_id=gid)
+          await sleep(0)
+          send(text, GROUP_ID, correct=correct)
+          send(text, GROUP2_ID, correct=correct)
       else:
       #  if type(src) is int:
         send(text, src, correct=correct)
