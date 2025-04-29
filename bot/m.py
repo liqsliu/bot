@@ -3872,19 +3872,19 @@ async def slow_mode(client, timeout=300):
 
 #  @exceptions_handler(no_send=True)
 @cross_thread
-async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None, tg_msg_id=None):
+async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None, tg_msg_id=None, resend=0):
   # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
 
   if name is None:
     #  name = ""
     if chat_id == GROUP_ID or chat_id == GROUP2_ID:
-      name = "**C bot:** "
+      name2 = "**C bot:** "
     else:
-      name = ""
+      name2 = ""
   elif name == "":
-    pass
+    name2 = ""
   else:
-    name = f"**{name}:** "
+    name2 = f"**{name}:** "
 
     #  text = name + text
   if qt is not None:
@@ -3941,11 +3941,11 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   #    if parse_mode ==  "md":
   #      parse_mode = client.parse_mode
   #  info(f"parse_mode: {parse_mode}")
-  ts = await split_long_text(name + text, MAX_MSG_BYTES_TG, tmp_msg)
+  ts = await split_long_text(name2 + text, MAX_MSG_BYTES_TG, tmp_msg)
   if len(ts) > 1:
     tmp_msg = False
   k = 0
-  resend = False
+  #  resend = False
   async with lock:
     #  info0(f"send: {chat_id}: {text}")
     try:
@@ -3968,7 +3968,6 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         k += 1
         if k == len(ts):
           last[chat_id] = msg
-
 
           jid = chat_id
           if tg_msg_id is None:
@@ -4020,8 +4019,10 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     except rpcerrorlist.EntityBoundsInvalidError as e:
       if parse_mode ==  "md":
         err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
-        resend = True
         parse_mode = None
+        #  resend = True
+        if resend >= 0:
+          resend += 1
       else:
         err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=} {e=}", no_send=True)
     except ValueError as e:
@@ -4036,10 +4037,28 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
       return False
 
-  if resend:
-    return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=parse_mode, name=name, tg_msg_id=tg_msg_id)
+  if resend > 0:
+    info(f"resend: {short(text)}")
+    res = await _send_tg(client, lock, last, chats, raw_md(text), chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1)
+    if res is False:
+      info(f"resend2: {short(text)}")
+      return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1)
+
   info(f"sent: {chat_id}: {short(text)}")
   return True
+
+
+def raw_md(text):
+  text = text.replace("\\", "\\\\")
+
+  text = text.replace("*", "\\*")
+  text = text.replace("_", "\\_")
+  text = text.replace("`", "\\`")
+  text = text.replace("[", "\\[")
+  text = text.replace("]", "\\]")
+  text = text.replace("(", "\\(")
+  text = text.replace(")", "\\)")
+  return text
 
 
 @exceptions_handler(no_send=True)
