@@ -3464,7 +3464,7 @@ def send(text, jid=None, exclude=[], *args, **kwargs):
 
 #  if muc in my_groups:
   #  info(f"准备发送同步消息到: {ms} {text=}")
-  if main_group in ms:
+  if muc == main_group or main_group in ms:
     if GROUP_ID not in exclude:
       asyncio.create_task( send_tg(text0, GROUP_ID, *args, **kwargs) )
     if GROUP2_ID not in exclude:
@@ -3480,6 +3480,7 @@ def send(text, jid=None, exclude=[], *args, **kwargs):
     else:
       if "gateway1" not in exclude:
         asyncio.create_task( mt_send_for_long_text(text0, name=nameo) )
+
   for m in ms:
     if m in exclude:
       continue
@@ -8062,7 +8063,7 @@ async def msgx(msg):
   if text == "ping":
     reply = msg.make_reply()
     reply.body[None] = "pong"
-    send(reply)
+    send(reply, muc)
     return
 
   res = await run_cmd(text0, get_src(msg), f"X {nick}", is_admin, qt)
@@ -8071,7 +8072,7 @@ async def msgx(msg):
   if res:
     reply = msg.make_reply()
     reply.body[None] = res
-    send(reply)
+    send(reply, muc)
     return
 
   return
@@ -10431,7 +10432,7 @@ async def msgb(event):
     if res is True:
       return
     if res:
-      send(res, main_group)
+      send(res, chat_id)
     return
 
   if event.is_private or chat_id == CHAT_ID:
