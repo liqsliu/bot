@@ -3397,15 +3397,15 @@ def send(text, jid=None, *args, **kwargs):
   if 'name' in kwargs:
     nameo = kwargs["name"]
     #  kwargs.pop("name")
-    if nameo is None:
-      nameo = "C bot"
+    #  if nameo is None:
+    #    nameo = "C bot"
   else:
     nameo = "C bot"
 
-  if nameo == "":
-    name = nameo
-  else:
-    name = f"**{nameo}:** "
+  #  if nameo == "":
+  #    name = nameo
+  #  else:
+  #    name = f"**{nameo}:** "
 
   #  muc = None
   muc = jid
@@ -3421,14 +3421,14 @@ def send(text, jid=None, *args, **kwargs):
     #  text0 = text.body[None]
     text0 = text.body.any()
     #  text.body[None] = f"{name}{text0}"
-    for i in text.body:
-      text.body[i] = f"{name}{text0}"
-      break
+    #  for i in text.body:
+    #    text.body[i] = f"{name}{text0}"
+    #    break
   else:
     #  if jid is None:
     #    return
     text0 = text
-    text = f"{name}{text}"
+    #  text = f"{name}{text}"
 
   #  if name:
   #    kwargs["name"] = name[2:-4]
@@ -3450,8 +3450,8 @@ def send(text, jid=None, *args, **kwargs):
   #  if muc in my_groups:
     #  info(f"准备发送同步消息到: {ms} {text=}")
     if main_group in ms:
-      asyncio.create_task( send_tg(text0, GROUP_ID, name=nameo) )
-      asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, name=nameo) )
+      asyncio.create_task( send_tg(text0, GROUP_ID, *args, **kwargs) )
+      asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, *args, **kwargs) )
       if xmpp_only:
         #  for m in ms:
         #    #  send_typing(m)
@@ -3526,40 +3526,6 @@ async def send_xmpp(text, jid=None, *args, **kwargs):
   else:
     err(f"text类型不对: {type(text)}")
     return False
-
-
-on_nick_changed_futures = {}
-
-def on_nick_changed(member, old_nick, new_nick, *, muc_status_codes=set(), **kwargs):
-  #  jid = str(member.conversation_jid)
-  #  jid = str(member.direct_jid.bare())
-  muc = str(member.conversation_jid.bare())
-  #  info(f"nick changed: {muc} {jid} {old_nick} -> {new_nick} {member.conversation_jid}")
-  #  if (jid, muc) in on_nick_changed_futures:
-  if muc in on_nick_changed_futures:
-    try:
-      on_nick_changed_futures[muc].set_result(new_nick)
-    except asyncio.exceptions.InvalidStateError as e:
-      info(f"无法保存nick到future: {muc} {on_nick_changed_futures[muc]} {e=}")
-      #  on_nick_changed_futures.pop(muc)
-  #  info(f"nick changed: {jid} {muc} {old_nick} -> {new_nick}")
-
-
-
-#  def clean_forwarded_tg_msg_ids(jid):
-#    d = set()
-#    for i in forwarded_tg_msg_ids:
-#      s = forwarded_tg_msg_ids[i]
-#      if jid in s:
-#        s.remove(jid)
-#        info(f"delete forward log for {jid}: {i}")
-#        if len(s) == 0:
-#          info(f"delete empty log: {i}")
-#          d.add(i)
-#    for i in d:
-#      forwarded_tg_msg_ids.pop(i)
-#
-
 
 
 send_locks = {}
@@ -3643,11 +3609,19 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
             #  else:
             #    info(f"not found room: {msg.to}")
 
+    if name is None:
+      name = "**C bot:** "
+    elif name == "":
+      pass
+    else:
+      name = f"**{name}:** "
+
     text = None
     #  text = msg.body.any() # ValueError("any() on empty map")
     for i in msg.body:
       text = msg.body[i]
       if text:
+        text = name + text
         if qt is not None:
           text = "> %s\n%s" % ("\n> ".join(qt), text)
           msg.body[i] = text
@@ -3804,6 +3778,40 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       if delay is not None:
         await sleep(delay)
   return True
+
+
+
+on_nick_changed_futures = {}
+
+def on_nick_changed(member, old_nick, new_nick, *, muc_status_codes=set(), **kwargs):
+  #  jid = str(member.conversation_jid)
+  #  jid = str(member.direct_jid.bare())
+  muc = str(member.conversation_jid.bare())
+  #  info(f"nick changed: {muc} {jid} {old_nick} -> {new_nick} {member.conversation_jid}")
+  #  if (jid, muc) in on_nick_changed_futures:
+  if muc in on_nick_changed_futures:
+    try:
+      on_nick_changed_futures[muc].set_result(new_nick)
+    except asyncio.exceptions.InvalidStateError as e:
+      info(f"无法保存nick到future: {muc} {on_nick_changed_futures[muc]} {e=}")
+      #  on_nick_changed_futures.pop(muc)
+  #  info(f"nick changed: {jid} {muc} {old_nick} -> {new_nick}")
+
+
+
+#  def clean_forwarded_tg_msg_ids(jid):
+#    d = set()
+#    for i in forwarded_tg_msg_ids:
+#      s = forwarded_tg_msg_ids[i]
+#      if jid in s:
+#        s.remove(jid)
+#        info(f"delete forward log for {jid}: {i}")
+#        if len(s) == 0:
+#          info(f"delete empty log: {i}")
+#          d.add(i)
+#    for i in d:
+#      forwarded_tg_msg_ids.pop(i)
+#
 
 
 
@@ -10389,7 +10397,7 @@ async def msgb(event):
     asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
     ms = get_mucs(main_group)
     for m in ms:
-      asyncio.create_task( send_xmpp(text, m, name=name) )
+      asyncio.create_task( send_xmpp(text, m, name=name, qt=qt) )
 
     #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
     if qt is not None:
