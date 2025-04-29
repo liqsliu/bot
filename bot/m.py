@@ -3758,8 +3758,7 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       elif jid in tmp_msg_chats:
         tmp_msg_chats.remove(jid)
 
-
-
+      await sleep(0)
       if save_msg_id(jid, tmp_msg_chats, tg_msg_id, tmp_msg) is True:
         return True
 
@@ -3808,7 +3807,6 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
 
 def save_msg_id(jid, chats, tg_msg_id, tmp_msg):
   # for sync correct between tg and xmpp
-  await sleep(0)
   if tg_msg_id is None:
     if tmp_msg is False:
       #  clean_forwarded_tg_msg_ids(jid)
@@ -4028,10 +4026,10 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
           elif chat_id in chats:
             chats.remove(chat_id)
 
+          await sleep(0)
           #  jid = chat_id
           if save_msg_id(chat_id, chats, tg_msg_id, tmp_msg) is True:
             return True
-
 
         elif len(ts) > 1:
           await sleep(0.5)
