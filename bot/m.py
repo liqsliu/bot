@@ -7943,6 +7943,7 @@ async def msgx(msg):
       await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
     elif muc in bot_groups:
       await send_tg(f"{username}{text0}", CHAT_ID, qt=qt)
+    await sleep(0)
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
   #    pass
@@ -10349,6 +10350,7 @@ async def msgb(event):
     elif chat_id == GROUP2_ID:
       asyncio.create_task( send_tg(f"{name2}{text}", GROUP_ID, qt=qt) )
     asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
+    await sleep(0)
     ms = get_mucs(main_group)
     for m in ms:
       asyncio.create_task( send_xmpp(f"{name2}{text}", m, name=name) )
