@@ -3437,8 +3437,8 @@ def send(text, jid=None, exclude=[], *args, **kwargs):
   #    nick = name
 
   if isinstance(muc, int):
-    if "tg_msg_id" in kwargs:
-      kwargs.pop("tg_msg_id")
+    #  if "tg_msg_id" in kwargs:
+    #    kwargs.pop("tg_msg_id")
     #  return await send_tg(text=text, chat_id=jid, *args, **kwargs)
 
     if muc == GROUP2_ID:
@@ -3872,7 +3872,7 @@ async def slow_mode(client, timeout=300):
 
 #  @exceptions_handler(no_send=True)
 @cross_thread
-async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None):
+async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None, tg_msg_id=None):
   # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
 
   if name is None:
@@ -3948,9 +3948,12 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   resend = False
   async with lock:
     #  info0(f"send: {chat_id}: {text}")
-    for t in ts:
-      await sleep(msg_delay_default)
-      try:
+    try:
+      for t in ts:
+        await sleep(msg_delay_default)
+        if tg_msg_id in deleted_tg_msg_ids:
+          return True
+
         if chat_id in last:
           omsg = last[chat_id]
           if correct is True:
@@ -3965,6 +3968,38 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         k += 1
         if k == len(ts):
           last[chat_id] = msg
+
+
+          jid = chat_id
+          if tg_msg_id is None:
+            if tmp_msg is False:
+              #  clean_forwarded_tg_msg_ids(jid)
+              d = set()
+              for i in forwarded_tg_msg_ids:
+                s = forwarded_tg_msg_ids[i]
+                if jid in s:
+                  s.remove(jid)
+                  info(f"delete forward log for {jid}: {i}")
+                  if len(s) == 0:
+                    info(f"delete empty log: {i}")
+                    d.add(i)
+              for i in d:
+                forwarded_tg_msg_ids.pop(i)
+            #  forwarded_tg_msg_ids.clear()
+          elif tg_msg_id in deleted_tg_msg_ids:
+            tmp_msg_chats.add(jid)
+            return
+          else:
+            #  clean_forwarded_tg_msg_ids(jid)
+            for i in forwarded_tg_msg_ids:
+              s = forwarded_tg_msg_ids[i]
+              if jid in s:
+                s.remove(jid)
+                info(f"delete forward log for {jid}: {i}")
+            if tg_msg_id not in forwarded_tg_msg_ids:
+              forwarded_tg_msg_ids[tg_msg_id] = set()
+            forwarded_tg_msg_ids[tg_msg_id].add(jid)
+
           if tmp_msg:
             chats.add(chat_id)
           elif chat_id in chats:
@@ -3974,35 +4009,35 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
           await sleep(0.5)
         if delay is not None:
           await sleep(delay)
-      except rpcerrorlist.FloodWaitError as e:
-        warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
-        await slow_mode(client)
-        return False
-      except rpcerrorlist.MessageTooLongError as e:
-        warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
-        await sleep(5)
-        return False
-      except rpcerrorlist.EntityBoundsInvalidError as e:
-        if parse_mode ==  "md":
-          err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
-          resend = True
-          parse_mode = None
-        else:
-          err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=} {e=}", no_send=True)
-      except ValueError as e:
-        if e.args[0] == 'Failed to parse message':
-          err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
-        return False
-      except Exception as e:
-        if client is TB:
-          no_send = True
-        else:
-          no_send = False
-        err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
-        return False
+    except rpcerrorlist.FloodWaitError as e:
+      warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
+      await slow_mode(client)
+      return False
+    except rpcerrorlist.MessageTooLongError as e:
+      warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
+      await sleep(5)
+      return False
+    except rpcerrorlist.EntityBoundsInvalidError as e:
+      if parse_mode ==  "md":
+        err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
+        resend = True
+        parse_mode = None
+      else:
+        err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=} {e=}", no_send=True)
+    except ValueError as e:
+      if e.args[0] == 'Failed to parse message':
+        err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
+      return False
+    except Exception as e:
+      if client is TB:
+        no_send = True
+      else:
+        no_send = False
+      err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
+      return False
 
   if resend:
-    return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=parse_mode, name=name)
+    return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=parse_mode, name=name, tg_msg_id=tg_msg_id)
   info(f"sent: {chat_id}: {short(text)}")
   return True
 
@@ -6096,16 +6131,17 @@ async def msgt(event):
         if gid - 1 in forwarded_tg_msg_ids:
           info(f"too many tg msg: {gid} for {chat_id}")
           await sleep(0.5)
-        if src == GROUP_ID or src == GROUP2_ID:
-          send(text, GROUP_ID, correct=correct, name="**C bot:** ")
-          send(text, GROUP2_ID, correct=correct, name="**C bot:** ")
-          await sleep(0)
-          send(text, main_group, correct=correct, tg_msg_id=gid)
-        else:
-          send(text, src, correct=correct, tg_msg_id=gid)
-          await sleep(0)
-          send(text, GROUP_ID, correct=correct, name="**C bot:** ")
-          send(text, GROUP2_ID, correct=correct, name="**C bot:** ")
+        send(text, src, correct=correct, tg_msg_id=gid)
+        #  if src == GROUP_ID or src == GROUP2_ID:
+        #    send(text, GROUP_ID, correct=correct)
+        #    send(text, GROUP2_ID, correct=correct)
+        #    await sleep(0)
+        #    send(text, main_group, correct=correct, tg_msg_id=gid)
+        #  else:
+        #    send(text, src, correct=correct, tg_msg_id=gid)
+        #    await sleep(0)
+        #    send(text, GROUP_ID, correct=correct)
+        #    send(text, GROUP2_ID, correct=correct)
       else:
       #  if type(src) is int:
         send(text, src, correct=correct)
