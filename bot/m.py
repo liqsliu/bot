@@ -3752,39 +3752,45 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       #  else:
       #    info(f"res is not coroutine: {res=} {client=} {room=} {msg=}")
       #  return False
-      if tg_msg_id is None:
-        if tmp_msg is False:
-          #  clean_forwarded_tg_msg_ids(jid)
-          d = set()
-          for i in forwarded_tg_msg_ids:
-            s = forwarded_tg_msg_ids[i]
-            if jid in s:
-              s.remove(jid)
-              info(f"delete forward log for {jid}: {i}")
-              if len(s) == 0:
-                info(f"delete empty log: {i}")
-                d.add(i)
-          for i in d:
-            forwarded_tg_msg_ids.pop(i)
-        #  forwarded_tg_msg_ids.clear()
-      elif tg_msg_id in deleted_tg_msg_ids:
-        tmp_msg_chats.add(jid)
-        return
-      else:
-        #  clean_forwarded_tg_msg_ids(jid)
-        for i in forwarded_tg_msg_ids:
-          s = forwarded_tg_msg_ids[i]
-          if jid in s:
-            s.remove(jid)
-            info(f"delete forward log for {jid}: {i}")
-        if tg_msg_id not in forwarded_tg_msg_ids:
-          forwarded_tg_msg_ids[tg_msg_id] = set()
-        forwarded_tg_msg_ids[tg_msg_id].add(jid)
 
       if tmp_msg is True:
         tmp_msg_chats.add(jid)
       elif jid in tmp_msg_chats:
         tmp_msg_chats.remove(jid)
+
+
+
+      if save_msg_id(jid, tmp_msg_chats, tg_msg_id, tmp_msg) is True:
+        return True
+
+      #  if tg_msg_id is None:
+      #    if tmp_msg is False:
+      #      #  clean_forwarded_tg_msg_ids(jid)
+      #      d = set()
+      #      for i in forwarded_tg_msg_ids:
+      #        s = forwarded_tg_msg_ids[i]
+      #        if jid in s:
+      #          s.remove(jid)
+      #          info(f"del forward log for {jid}: {i}")
+      #          if len(s) == 0:
+      #            info(f"delete empty log: {i}")
+      #            d.add(i)
+      #      for i in d:
+      #        forwarded_tg_msg_ids.pop(i)
+      #    #  forwarded_tg_msg_ids.clear()
+      #  elif tg_msg_id in deleted_tg_msg_ids:
+      #    tmp_msg_chats.add(jid)
+      #    return True
+      #  else:
+      #    #  clean_forwarded_tg_msg_ids(jid)
+      #    for i in forwarded_tg_msg_ids:
+      #      s = forwarded_tg_msg_ids[i]
+      #      if jid in s:
+      #        s.remove(jid)
+      #        info(f"delete forward log for {jid}: {i}")
+      #    if tg_msg_id not in forwarded_tg_msg_ids:
+      #      forwarded_tg_msg_ids[tg_msg_id] = set()
+      #    forwarded_tg_msg_ids[tg_msg_id].add(jid)
       # 为了同步tg消息的删除，当tg删除消息时，这边会根据l[2]把xmpp这边的最后消息标记为临时待更正消息，但如果标记之前发送了别的xmpp正常消息，就不能进行该动作了(镜像群也要处理)，所以l[2]记录应该清除，而且对也确实没用了
       #  if jid in mtmsgsg:
       #    mtmsgs = mtmsgsg[jid]
@@ -3798,6 +3804,43 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
       if delay is not None:
         await sleep(delay)
   return True
+
+
+def save_msg_id(jid, chats, tg_msg_id, tmp_msg):
+  # for sync correct between tg and xmpp
+  if tg_msg_id is None:
+    if tmp_msg is False:
+      #  clean_forwarded_tg_msg_ids(jid)
+      d = set()
+      for i in forwarded_tg_msg_ids:
+        s = forwarded_tg_msg_ids[i]
+        if jid in s:
+          s.remove(jid)
+          info(f"del forward log for {jid}: {i}")
+          if len(s) == 0:
+            info(f"delete empty log: {i}")
+            d.add(i)
+      for i in d:
+        forwarded_tg_msg_ids.pop(i)
+    #  forwarded_tg_msg_ids.clear()
+  elif tg_msg_id in deleted_tg_msg_ids:
+    #  tmp_msg_chats.add(jid)
+    #  return
+    chats.add(jid)
+    return True
+  else:
+    #  clean_forwarded_tg_msg_ids(jid)
+    for i in forwarded_tg_msg_ids:
+      s = forwarded_tg_msg_ids[i]
+      if jid in s:
+        s.remove(jid)
+        info(f"delete forward log for {jid}: {i}")
+    if tg_msg_id not in forwarded_tg_msg_ids:
+      forwarded_tg_msg_ids[tg_msg_id] = set()
+    forwarded_tg_msg_ids[tg_msg_id].add(jid)
+
+
+
 
 
 
@@ -3978,41 +4021,15 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         k += 1
         if k == len(ts):
           last[chat_id] = msg
+
           if tmp_msg:
             chats.add(chat_id)
           elif chat_id in chats:
             chats.remove(chat_id)
 
-          jid = chat_id
-          if tg_msg_id is None:
-            if tmp_msg is False:
-              #  clean_forwarded_tg_msg_ids(jid)
-              d = set()
-              for i in forwarded_tg_msg_ids:
-                s = forwarded_tg_msg_ids[i]
-                if jid in s:
-                  s.remove(jid)
-                  info(f"delete forward log for {jid}: {i}")
-                  if len(s) == 0:
-                    info(f"delete empty log: {i}")
-                    d.add(i)
-              for i in d:
-                forwarded_tg_msg_ids.pop(i)
-            #  forwarded_tg_msg_ids.clear()
-          elif tg_msg_id in deleted_tg_msg_ids:
-            #  tmp_msg_chats.add(jid)
-            chats.add(jid)
-            return
-          else:
-            #  clean_forwarded_tg_msg_ids(jid)
-            for i in forwarded_tg_msg_ids:
-              s = forwarded_tg_msg_ids[i]
-              if jid in s:
-                s.remove(jid)
-                info(f"delete forward log for {jid}: {i}")
-            if tg_msg_id not in forwarded_tg_msg_ids:
-              forwarded_tg_msg_ids[tg_msg_id] = set()
-            forwarded_tg_msg_ids[tg_msg_id].add(jid)
+          #  jid = chat_id
+          if save_msg_id(chat_id, chats, tg_msg_id, tmp_msg) is True:
+            return True
 
 
         elif len(ts) > 1:
