@@ -7996,7 +7996,7 @@ async def msgx(msg):
     #    await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
     #  elif muc in bot_groups:
     #    await send_tg(f"{username}{text0}", CHAT_ID, qt=qt)
-    send(text0, main_group, name=name, qt=qt, exclude=set([muc])) )
+    send(text0, main_group, name=name, qt=qt, exclude=set([muc]))
     await sleep(0)
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
