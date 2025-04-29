@@ -3845,10 +3845,11 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
 
   if name is None:
-    if chat_id == GROUP_ID or chat_id == GROUP2_ID:
-      name = "**C bot:** "
-    else:
-      name = ""
+    name = ""
+    #  if chat_id == GROUP_ID or chat_id == GROUP2_ID:
+    #    name = "**C bot:** "
+    #  else:
+    #    name = ""
     #  text = name + text
   if qt is not None:
     qtr = "\n".join(qt)
@@ -6052,15 +6053,15 @@ async def msgt(event):
           info(f"too many tg msg: {gid} for {chat_id}")
           await sleep(0.5)
         if src == GROUP_ID or src == GROUP2_ID:
-          send(text, GROUP_ID, correct=correct)
-          send(text, GROUP2_ID, correct=correct)
+          send(text, GROUP_ID, correct=correct, name="**C bot:** ")
+          send(text, GROUP2_ID, correct=correct, name="**C bot:** ")
           await sleep(0)
           send(text, main_group, correct=correct, tg_msg_id=gid)
         else:
           send(text, src, correct=correct, tg_msg_id=gid)
           await sleep(0)
-          send(text, GROUP_ID, correct=correct)
-          send(text, GROUP2_ID, correct=correct)
+          send(text, GROUP_ID, correct=correct, name="**C bot:** ")
+          send(text, GROUP2_ID, correct=correct, name="**C bot:** ")
       else:
       #  if type(src) is int:
         send(text, src, correct=correct)
