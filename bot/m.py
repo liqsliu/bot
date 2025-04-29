@@ -3376,7 +3376,7 @@ def sendme(*args, to=1, **kwargs):
 #  async def send_x(text, jid=None, *args, **kwargs):
 #  async def send(text, jid=None, *args, **kwargs):
 @exceptions_handler
-def send(text, jid=None, *args, **kwargs):
+def send(text, jid=None, exclude=set(), *args, **kwargs):
   if jid is None:
     if isinstance(text, str):
       return False
@@ -3450,8 +3450,10 @@ def send(text, jid=None, *args, **kwargs):
   #  if muc in my_groups:
     #  info(f"准备发送同步消息到: {ms} {text=}")
     if main_group in ms:
-      asyncio.create_task( send_tg(text0, GROUP_ID, *args, **kwargs) )
-      asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, *args, **kwargs) )
+      if GROUP_ID not in exclude:
+        asyncio.create_task( send_tg(text0, GROUP_ID, *args, **kwargs) )
+      if GROUP2_ID not in exclude:
+        asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, *args, **kwargs) )
       if xmpp_only:
         #  for m in ms:
         #    #  send_typing(m)
@@ -3460,15 +3462,19 @@ def send(text, jid=None, *args, **kwargs):
         asyncio.create_task( send_xmpp(text, jid=log_group_private, *args, **kwargs) )
         return True
       else:
-        asyncio.create_task( mt_send_for_long_text(text0, name=nameo) )
+        if "gateway1" not in exclude:
+          asyncio.create_task( mt_send_for_long_text(text0, name=nameo) )
     for m in ms:
+      if m in exclude:
+        continue
       #  if await send1(text, jid=m, *args, **kwargs):
       #    if isinstance(text, aioxmpp.Message):
       #      text = text.body[None]
       asyncio.create_task( send_xmpp(text, jid=m, *args, **kwargs) )
-      if isinstance(text, aioxmpp.Message):
-        #  text = text.body[None]
-        text = text.body.any()
+      if m == muc:
+        if isinstance(text, aioxmpp.Message):
+          #  text = text.body[None]
+          text = text.body.any()
     return True
   else:
     #  info(f"准备发送到: {muc=} {jid=}")
@@ -4378,34 +4384,40 @@ async def msgmt(msg):
 
     text2 = f"{name2}{text}"
 
-    for m in get_mucs(main_group):
-      #  if await send1(text2, m, nick=nameo) is False:
-      #    warn(f"failed: {m} {text1}")
-      #    return
-      asyncio.create_task( send_xmpp(text2, m, nick=nameo, qt=qt) )
 
 
-    await send_tg(text2, GROUP_ID, qt=qt)
-    await send_tg(text2, GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
 
+    
+    #  for m in get_mucs(main_group):
+    #    #  if await send1(text2, m, nick=nameo) is False:
+    #    #    warn(f"failed: {m} {text1}")
+    #    #    return
+    #    asyncio.create_task( send_xmpp(text2, m, nick=nameo, qt=qt) )
+    #
+    #
+    #  await send_tg(text2, GROUP_ID, qt=qt)
+    #  await send_tg(text2, GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
+
+    send(text2, main_group, qt=qt, name=nameo, exclude=set([gateway]))
 
     #  res = await run_cmd("{}\n\n{}".format(text, "\n".join(qt)), gateway, name, qt=qt)
     res = await run_cmd(text, gateway, nameo, qt=qt)
     if res is True:
       return
     if res:
-      #  await mt_send_for_long_text(res, gateway)
-      asyncio.create_task( mt_send_for_long_text(res, gateway) )
-      #  res = f"**C bot:** {res}"
-      #  nick = "C bot"
-      #  name = "**C bot:** "
-      for m in get_mucs(main_group):
-        #  if await send1(res, m, nick="C bot") is False:
-        #    warn(f"failed: {m} {res}")
-        #    return
-        asyncio.create_task( send_xmpp(res, m) )
-      await send_tg(res, GROUP_ID)
-      await send_tg(res, GROUP2_ID, topic=GROUP2_TOPIC)
+      send(res, main_group)
+      #  #  await mt_send_for_long_text(res, gateway)
+      #  asyncio.create_task( mt_send_for_long_text(res, gateway) )
+      #  #  res = f"**C bot:** {res}"
+      #  #  nick = "C bot"
+      #  #  name = "**C bot:** "
+      #  for m in get_mucs(main_group):
+      #    #  if await send1(res, m, nick="C bot") is False:
+      #    #    warn(f"failed: {m} {res}")
+      #    #    return
+      #    asyncio.create_task( send_xmpp(res, m) )
+      #  await send_tg(res, GROUP_ID)
+      #  await send_tg(res, GROUP2_ID, topic=GROUP2_TOPIC)
     #    if await send1(f"{name}{text}", m, name) is False:
     #      return
     #    if res:
@@ -7972,17 +7984,19 @@ async def msgx(msg):
         info(f"delete qt: {short(text0)}")
       else:
         qt = None
-    ms = get_mucs(muc)
+
+    #  ms = get_mucs(muc)
+    #  #  for m in ms - {muc}:
     #  for m in ms - {muc}:
-    for m in ms - {muc}:
-      #  asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
-      asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name, qt=qt) )
-    if main_group in ms:
-      asyncio.create_task( mt_send_for_long_text(text0, name=name, qt=qt) )
-      await send_tg(f"{username}{text0}", GROUP_ID, qt=qt)
-      await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
-    elif muc in bot_groups:
-      await send_tg(f"{username}{text0}", CHAT_ID, qt=qt)
+    #    #  asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name) )
+    #    asyncio.create_task( send_xmpp(f"{username}{text0}", m, name=name, qt=qt) )
+    #  if main_group in ms:
+    #    asyncio.create_task( mt_send_for_long_text(text0, name=name, qt=qt) )
+    #    await send_tg(f"{username}{text0}", GROUP_ID, qt=qt)
+    #    await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
+    #  elif muc in bot_groups:
+    #    await send_tg(f"{username}{text0}", CHAT_ID, qt=qt)
+    send(text0, main_group, name=name, qt=qt, exclude=set([muc])) )
     await sleep(0)
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
@@ -10389,15 +10403,16 @@ async def msgb(event):
         qto = f"**{namer}:** {qto}"
         qt = qto.splitlines()
 
-    if chat_id == GROUP_ID:
-      asyncio.create_task( send_tg(text, GROUP2_ID, qt=qt, topic=GROUP2_TOPIC, name=name) )
-    elif chat_id == GROUP2_ID:
-      asyncio.create_task( send_tg(text, GROUP_ID, qt=qt, name=name) )
-    await sleep(0)
-    asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
-    ms = get_mucs(main_group)
-    for m in ms:
-      asyncio.create_task( send_xmpp(text, m, name=name, qt=qt) )
+    #  if chat_id == GROUP_ID:
+    #    asyncio.create_task( send_tg(text, GROUP2_ID, qt=qt, topic=GROUP2_TOPIC, name=name) )
+    #  elif chat_id == GROUP2_ID:
+    #    asyncio.create_task( send_tg(text, GROUP_ID, qt=qt, name=name) )
+    #  await sleep(0)
+    #  asyncio.create_task( mt_send_for_long_text(text, name=name, qt=qt) )
+    #  ms = get_mucs(main_group)
+    #  for m in ms:
+    #    asyncio.create_task( send_xmpp(text, m, name=name, qt=qt) )
+    send(text, main_group, qt=qt, name=name, exclude=set([chat_id]))
 
     #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
     if qt is not None:
