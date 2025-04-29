@@ -4362,7 +4362,7 @@ async def msgmt(msg):
 
 
     #  res = await run_cmd("{}\n\n{}".format(text, "\n".join(qt)), gateway, name, qt=qt)
-    res = await run_cmd(text, gateway, name, qt=qt)
+    res = await run_cmd(text, gateway, rname, qt=qt)
     if res is True:
       return
     if res:
@@ -8000,7 +8000,7 @@ async def msgx(msg):
     send(reply)
     return
 
-  res = await run_cmd(text0, get_src(msg), f"X {nick}: ", is_admin, qt)
+  res = await run_cmd(text0, get_src(msg), f"X {nick}", is_admin, qt)
   if res is True:
     return
   if res:
@@ -9487,7 +9487,10 @@ async def run_cmd(*args, **kwargs):
     res = wtf_str(res, "xmpp")
   return res
 
-async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool | str:
+#  async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool | str:
+async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | str:
+  if name:
+    name += ": "
   text0 = text
   if qt is not None:
     text = "{}\n\n{}".format(text, "\n".join(qt))
@@ -10334,6 +10337,7 @@ async def msgb(event):
 
     text, name, _ = await print_tg_msg(msg, True)
     name2 = f"**{name}:** "
+    name3 = f"{name}: "
 
     qt = None
     if msg.is_reply:
@@ -10356,9 +10360,9 @@ async def msgb(event):
       asyncio.create_task( send_xmpp(f"{name2}{text}", m, name=name) )
     #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
     if qt is not None:
-      res = await run_cmd(f"{text}\n\n{qto}", chat_id, f"X {name}: ", False, text)
+      res = await run_cmd(f"{text}\n\n{qto}", chat_id, name, False, text)
     else:
-      res = await run_cmd(text, chat_id, f"X {name}: ", False)
+      res = await run_cmd(text, chat_id, name, False)
     if res is True:
       return
     if res:
@@ -10540,7 +10544,7 @@ async def msgb(event):
       if msg.file:
         return
       #  res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
-      res = await run_cmd(text, chat_id, f"G {MY_NAME}: ", is_admin=True)
+      res = await run_cmd(text, chat_id, f"G {MY_NAME}", is_admin=True)
       #  info("end")
       if res is True:
         pass
