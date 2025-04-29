@@ -3379,13 +3379,9 @@ def sendme(*args, to=1, **kwargs):
 def send(text, jid=None, exclude=[], *args, **kwargs):
   if jid is None:
     if isinstance(text, str):
+      info(f"ignore: {jid}: {short(text)}")
       return False
-  elif isinstance(jid, int):
-    if "tg_msg_id" in kwargs:
-      kwargs.pop("tg_msg_id")
-    #  return await send_tg(text=text, chat_id=jid, *args, **kwargs)
-    asyncio.create_task(send_tg(text=text, chat_id=jid, *args, **kwargs) )
-    return True
+    #  return True
   #  if  type(jid) is int:
     #  if jid == CHAT_ID:
     #    #  await send_t(text, *args, **kwargs)
@@ -3440,47 +3436,57 @@ def send(text, jid=None, exclude=[], *args, **kwargs):
   #    kwargs["name"] = None
   #    nick = name
 
+  if isinstance(muc, int):
+    if "tg_msg_id" in kwargs:
+      kwargs.pop("tg_msg_id")
+    #  return await send_tg(text=text, chat_id=jid, *args, **kwargs)
+
+    if muc == GROUP2_ID:
+      asyncio.create_task(send_tg(text=text0, chat_id=muc, topic=GROUP2_TOPIC, *args, **kwargs) )
+    else:
+      asyncio.create_task(send_tg(text=text0, chat_id=muc, *args, **kwargs) )
+  else:
+    asyncio.create_task( send_xmpp(text, jid=muc, *args, **kwargs) )
+    if isinstance(text, aioxmpp.Message):
+      #  text = text.body[None]
+      text = text.body.any()
+  exclude.append(muc)
+
+  ms = get_mucs(muc) - {muc}
+  if len(ms) == 0:
+    return True
+
   if 'xmpp_only' in kwargs:
     xmpp_only = kwargs["xmpp_only"]
   else:
     xmpp_only = False
 
-  ms = get_mucs(muc)
-  if ms:
-  #  if muc in my_groups:
-    #  info(f"准备发送同步消息到: {ms} {text=}")
-    if main_group in ms:
-      if GROUP_ID not in exclude:
-        asyncio.create_task( send_tg(text0, GROUP_ID, *args, **kwargs) )
-      if GROUP2_ID not in exclude:
-        asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, *args, **kwargs) )
-      if xmpp_only:
-        #  for m in ms:
-        #    #  send_typing(m)
-        #    asyncio.create_task( send_typing(m) )
-        #  await send1(text, jid=log_group_private, *args, **kwargs)
-        asyncio.create_task( send_xmpp(text, jid=log_group_private, *args, **kwargs) )
-        return True
-      else:
-        if "gateway1" not in exclude:
-          asyncio.create_task( mt_send_for_long_text(text0, name=nameo) )
-    for m in ms:
-      if m in exclude:
-        continue
-      #  if await send1(text, jid=m, *args, **kwargs):
-      #    if isinstance(text, aioxmpp.Message):
-      #      text = text.body[None]
-      asyncio.create_task( send_xmpp(text, jid=m, *args, **kwargs) )
-      if m == muc:
-        if isinstance(text, aioxmpp.Message):
-          #  text = text.body[None]
-          text = text.body.any()
-    return True
-  else:
-    #  info(f"准备发送到: {muc=} {jid=}")
-    #  return await send1(text, jid=jid, *args, **kwargs)
-    asyncio.create_task( send_xmpp(text, jid=jid, *args, **kwargs) )
-    return True
+#  if muc in my_groups:
+  #  info(f"准备发送同步消息到: {ms} {text=}")
+  if main_group in ms:
+    if GROUP_ID not in exclude:
+      asyncio.create_task( send_tg(text0, GROUP_ID, *args, **kwargs) )
+    if GROUP2_ID not in exclude:
+      asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, *args, **kwargs) )
+
+    if xmpp_only:
+      #  for m in ms:
+      #    #  send_typing(m)
+      #    asyncio.create_task( send_typing(m) )
+      #  await send1(text, jid=log_group_private, *args, **kwargs)
+      asyncio.create_task( send_xmpp(text, jid=log_group_private, *args, **kwargs) )
+      return True
+    else:
+      if "gateway1" not in exclude:
+        asyncio.create_task( mt_send_for_long_text(text0, name=nameo) )
+  for m in ms:
+    if m in exclude:
+      continue
+    #  if await send1(text, jid=m, *args, **kwargs):
+    #    if isinstance(text, aioxmpp.Message):
+    #      text = text.body[None]
+    asyncio.create_task( send_xmpp(text, jid=m, *args, **kwargs) )
+  return True
 
 @exceptions_handler(no_send=True)
 async def send_xmpp(text, jid=None, *args, **kwargs):
@@ -7286,9 +7292,15 @@ def add_id_to_msg(msg, correct, tmp_msg):
 def get_mucs(muc):
   if muc == "gateway1":
     muc = main_group
+  elif type(muc) is int:
+    if muc == GROUP_ID:
+      muc = main_group
+    elif muc == GROUP2_ID:
+      muc = main_group
+    else:
+      return {muc}
   elif muc not in my_groups:
     return {muc}
-    return
   for s in sync_groups_all:
     if muc in s:
       tmp = set()
@@ -7297,8 +7309,6 @@ def get_mucs(muc):
           tmp.add(m)
       return s - tmp
   return {muc}
-  return [muc]
-  return set([muc])
 
 def wtf_str(s, for_what="nick"):
   if for_what == "nick":
