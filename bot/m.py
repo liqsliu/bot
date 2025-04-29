@@ -3376,12 +3376,14 @@ def sendme(*args, to=1, **kwargs):
 #  async def send_x(text, jid=None, *args, **kwargs):
 #  async def send(text, jid=None, *args, **kwargs):
 @exceptions_handler
-def send(text, jid=None, exclude=[], *args, **kwargs):
+def send(text, jid=None, *args, exclude=None, **kwargs):
   if jid is None:
     if isinstance(text, str):
       info(f"ignore: {jid}: {short(text)}")
       return False
     #  return True
+  if exclude is None:
+    exclude = []
   #  if  type(jid) is int:
     #  if jid == CHAT_ID:
     #    #  await send_t(text, *args, **kwargs)
