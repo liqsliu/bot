@@ -3376,7 +3376,7 @@ def sendme(*args, to=1, **kwargs):
 #  async def send_x(text, jid=None, *args, **kwargs):
 #  async def send(text, jid=None, *args, **kwargs):
 @exceptions_handler
-def send(text, jid=None, exclude=set(), *args, **kwargs):
+def send(text, jid=None, exclude=[], *args, **kwargs):
   if jid is None:
     if isinstance(text, str):
       return False
@@ -4398,7 +4398,7 @@ async def msgmt(msg):
     #  await send_tg(text2, GROUP_ID, qt=qt)
     #  await send_tg(text2, GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
 
-    send(text2, main_group, qt=qt, name=nameo, exclude=set([gateway]))
+    send(text2, main_group, qt=qt, name=nameo, exclude=[gateway])
 
     #  res = await run_cmd("{}\n\n{}".format(text, "\n".join(qt)), gateway, name, qt=qt)
     res = await run_cmd(text, gateway, nameo, qt=qt)
@@ -7996,7 +7996,7 @@ async def msgx(msg):
     #    await send_tg(f"{username}{text0}", GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
     #  elif muc in bot_groups:
     #    await send_tg(f"{username}{text0}", CHAT_ID, qt=qt)
-    send(text0, main_group, name=name, qt=qt, exclude=set([muc]))
+    send(text0, main_group, name=name, qt=qt, exclude=[muc])
     await sleep(0)
     #  text = text2
   #  if msg.type_ == MessageType.GROUPCHAT:
@@ -10412,7 +10412,7 @@ async def msgb(event):
     #  ms = get_mucs(main_group)
     #  for m in ms:
     #    asyncio.create_task( send_xmpp(text, m, name=name, qt=qt) )
-    send(text, main_group, qt=qt, name=name, exclude=set([chat_id]))
+    send(text, main_group, qt=qt, name=name, exclude=[chat_id])
 
     #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
     if qt is not None:
