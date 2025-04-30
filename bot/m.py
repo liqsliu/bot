@@ -1982,26 +1982,25 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
   d = None
 
   if myshell_lock.locked():
-    if src == CHAT_ID:
-      warn(f"shell is busy: {cmds=}")
-    else:
-      send("前一次任务还没结束", src, tmp_msg=True)
-  async with myshell_lock:
+    warn(f"shell is busy: {cmds=}")
+    send("前一次任务还没结束", src, tmp_msg=True)
+  try:
+    async with asyncio.timeout(run_shell_time_max) as cm:
+      async with myshell_lock:
 
-    if not myshell_queue.empty():
-      warn("clean shell")
-      #  await sleep(1)
-      while not myshell_queue.empty():
-        info("drop: %s" % str(await myshell_queue.get()) )
-      info("clean ok")
+        if not myshell_queue.empty():
+          warn("clean shell")
+          #  await sleep(1)
+          while not myshell_queue.empty():
+            info("drop: %s" % str(await myshell_queue.get()) )
+          info("clean ok")
 
 
+        cm.reschedule(loop.time()+max_time)
 
-    p.stdin.write( cmds[-1].encode() )
-    await p.stdin.drain()
-    info(f"send eof: check: shell is ok: {eof}")
-    try:
-      async with asyncio.timeout(run_shell_time_max) as cm:
+        p.stdin.write( cmds[-1].encode() )
+        await p.stdin.drain()
+        info(f"send eof: check: shell is ok: {eof}")
         while True:
           #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=run_shell_time_max )
           n, d = await myshell_queue.get()
@@ -2010,166 +2009,168 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
             break
           warn("drop: %s: %s" % (n, d) )
           cm.reschedule(min(cm.when()+max_time/3, loop.time()+run_shell_time_max))
-    except TimeoutError:
-      warn("shell is busy")
-      return -512, None, None
 
-    start_time = time.time()
-    last_send = start_time
-    for c in cmds:
-      p.stdin.write( c.encode() )
-      info(f"send {k}: {short(c)}")
-      k -= 1
-      while r is None:
-        #  if time.time() - start_time > run_shell_time_max*10:
-        #  if time.time() - start_time > max_time:
-        #    res = "end"
-        #    send(res, src)
-        #    r = 0
-        #    break
-        if k > 1:
-          if myshell_queue.empty():
-            await p.stdin.drain()
-            await sleep(0.001)
-            info("wait for more")
-            if myshell_queue.empty():
-              await sleep(0.01)
-              info("wait for more 2")
-              if myshell_queue.empty():
-                await sleep(0.5)
-                info("wait for more 3")
-                if myshell_queue.empty():
-                  info("wait for more fail")
-                #  if k > 0:
-                  break
-        #  n, d = await myshell_queue.get()
-        try:
-          #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
-          #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time/(k+1))
-          #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max(0.3, min(start_time - time.time() + max_time, max_time)))
-          timeout = time.time()-start_time
-          if timeout + 1 < max_time:
-            timeout = max_time - timeout
-          else:
-            timeout = max_time/timeout/10 
-          info(f"waiting({timeout}s)...")
-          n, d = await asyncio.wait_for( myshell_queue.get(), timeout=timeout )
-          if n == 1:
-            if k == 0:
-              #  if d == b'EOF\n':
-              if d == eof:
-                info(f"found EOF")
-                r = True
-                break
-            #  elif k == 1:
-            #    if d == b'0\n':
-            #      info(f"found returncode")
-            o += d
-          else:
-            e += d
-          tmp += d 
-          info(f"got{n}: {d}")
-        except TimeoutError:
-          if k > 0:
-            info(f"fixme: timeout, skip: {c}")
-            await p.stdin.drain()
-            break
-          #  if k > 0:
-          #    await sleep(0.001)
-          #    await p.stdin.drain()
-          #    info(f"fixme: timeout: {c=} {cmd}")
-          #    break
-          warn(f"timeout: {cmds}")
-          res = "shell: 结束等待"
-          send(res, src)
-          # fixme: 不知道该设为多少
-          r = -512
-          break
-        #  if k > 1:
-        #    if myshell_queue.empty():
-        #      await sleep(0.001)
-        #  info(time.time())
-        # 0.0006s
-        #  while not myshell_queue.empty():
-        #    n, d = await myshell_queue.get()
-            #  await sleep(0.001)
-        try:
-          while True:
-            #  if len(tmp) > MAX_MSG_BYTES_TG:
-            #    warn(f"res is too loog: {len(tmp)} {tmp[:54]}")
+        cm.reschedule(loop.time()+max_time)
+
+        start_time = time.time()
+        last_send = start_time
+        for c in cmds:
+          p.stdin.write( c.encode() )
+          info(f"send {k}: {short(c)}")
+          k -= 1
+          while r is None:
+            #  if time.time() - start_time > run_shell_time_max*10:
+            #  if time.time() - start_time > max_time:
+            #    res = "end"
+            #    send(res, src)
+            #    r = 0
             #    break
-            #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
-            #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.01)
-            n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
-            if n == 1:
-              if k == 0:
-                if d == eof:
-                  print(f"found EOF?")
-                  #  o = o[:-(len(eof))]
-                  #  tmp = tmp[:-(len(eof))]
-                  r = True
-                  break
-              #  elif k == 1:
-              #    if d == b'0\n':
-              #      print(f"found returncode?")
-              #      #  r = int(d[:-1])
-              #      #  break
-              o += d
-            else:
-              e += d
-            tmp += d 
-            print(f"got{n}: {d}")
-            if len(tmp) > MAX_MSG_BYTES_TG * 10:
-              info(f"too long: {short(tmp)}")
-              break
-          if d == eof:
-            break
-          info(f"附带消息: {d}")
-        except TimeoutError:
-          info(f"no more")
-          # 至少还有一条待执行的命令
-        #  if r is not None:
-        #    info(f"break: {r=}")
-        #    break
-        #  if k > 2:
-        if k == 1:
-          if d == b"0\n":
-            info(f"skip sending of returncode 0")
-            break
-        else:
-          if k > 1:
-            #  if len(tmp) < 512:
-            if len(tmp) < MAX_MSG_BYTES_TG:
-              if time.time() - last_send < 1:
-                info(f"等一下，合并后续消息")
-                #  if not e:
+            if k > 1:
+              if myshell_queue.empty():
+                await p.stdin.drain()
+                await sleep(0.001)
+                info("wait for more")
+                if myshell_queue.empty():
+                  await sleep(0.01)
+                  info("wait for more 2")
+                  if myshell_queue.empty():
+                    await sleep(0.5)
+                    info("wait for more 3")
+                    if myshell_queue.empty():
+                      info("wait for more fail")
+                    #  if k > 0:
+                      break
+            #  n, d = await myshell_queue.get()
+            try:
+              #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=interval/(k+1))
+              #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max_time/(k+1))
+              #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=max(0.3, min(start_time - time.time() + max_time, max_time)))
+              timeout = time.time()-start_time
+              if timeout + 1 < max_time:
+                timeout = max_time - timeout
+              else:
+                timeout = max_time/timeout/10 
+              info(f"waiting({timeout}s)...")
+              n, d = await asyncio.wait_for( myshell_queue.get(), timeout=timeout )
+              if n == 1:
+                if k == 0:
+                  #  if d == b'EOF\n':
+                  if d == eof:
+                    info(f"found EOF")
+                    r = True
+                    break
+                #  elif k == 1:
+                #    if d == b'0\n':
+                #      info(f"found returncode")
+                o += d
+              else:
+                e += d
+              tmp += d 
+              info(f"got{n}: {d}")
+            except TimeoutError:
+              if k > 0:
+                info(f"fixme: timeout, skip: {c}")
+                await p.stdin.drain()
                 break
-          if src is not None and len(tmp) > 0:
-            ds = tmp.decode("utf-8", errors="ignore")
-            #  info(f"got{n}: {ds[:16]}")
-            ds = re.sub(shell_color_re,  "", ds)
-            #  info(f"got{n}>: {ds[:16]}")
-            #  res += "\n" + ds
-            ds = ds.strip()
-            if ds:
-              #  info(f"send: {src} {type(ds)} {ds[:16]}")
-              #  send(f"```\n{ds}```", src)
-              send(ds, src)
-              last_send = time.time()
-              tmp = b""
-        if k > 0:
-          #  if k == 1:
-          #    info(f"res {n}: {d}")
-          await p.stdin.drain()
-          if myshell_queue.empty():
-            break
-        #  if k > 0:
-          #  await p.stdin.drain()
-          #  if myshell_queue.empty():
-          #    await sleep(0.01)
-          #    info("wait for more")
-          #    if myshell_queue.empty():
-          #      break
+              #  if k > 0:
+              #    await sleep(0.001)
+              #    await p.stdin.drain()
+              #    info(f"fixme: timeout: {c=} {cmd}")
+              #    break
+              warn(f"timeout: {cmds}")
+              res = "shell: 结束等待"
+              send(res, src)
+              # fixme: 不知道该设为多少
+              r = -512
+              break
+            #  if k > 1:
+            #    if myshell_queue.empty():
+            #      await sleep(0.001)
+            #  info(time.time())
+            # 0.0006s
+            #  while not myshell_queue.empty():
+            #    n, d = await myshell_queue.get()
+                #  await sleep(0.001)
+            try:
+              while True:
+                #  if len(tmp) > MAX_MSG_BYTES_TG:
+                #    warn(f"res is too loog: {len(tmp)} {tmp[:54]}")
+                #    break
+                #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.001)
+                #  n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.01)
+                n, d = await asyncio.wait_for( myshell_queue.get(), timeout=0.1)
+                if n == 1:
+                  if k == 0:
+                    if d == eof:
+                      print(f"found EOF?")
+                      #  o = o[:-(len(eof))]
+                      #  tmp = tmp[:-(len(eof))]
+                      r = True
+                      break
+                  #  elif k == 1:
+                  #    if d == b'0\n':
+                  #      print(f"found returncode?")
+                  #      #  r = int(d[:-1])
+                  #      #  break
+                  o += d
+                else:
+                  e += d
+                tmp += d 
+                print(f"got{n}: {d}")
+                if len(tmp) > MAX_MSG_BYTES_TG * 10:
+                  info(f"too long: {short(tmp)}")
+                  break
+              if d == eof:
+                break
+              info(f"附带消息: {d}")
+            except TimeoutError:
+              info(f"no more")
+              # 至少还有一条待执行的命令
+            #  if r is not None:
+            #    info(f"break: {r=}")
+            #    break
+            #  if k > 2:
+            if k == 1:
+              if d == b"0\n":
+                info(f"skip sending of returncode 0")
+                break
+            else:
+              if k > 1:
+                #  if len(tmp) < 512:
+                if len(tmp) < MAX_MSG_BYTES_TG:
+                  if time.time() - last_send < 1:
+                    info(f"等一下，合并后续消息")
+                    #  if not e:
+                    break
+              if src is not None and len(tmp) > 0:
+                ds = tmp.decode("utf-8", errors="ignore")
+                #  info(f"got{n}: {ds[:16]}")
+                ds = re.sub(shell_color_re,  "", ds)
+                #  info(f"got{n}>: {ds[:16]}")
+                #  res += "\n" + ds
+                ds = ds.strip()
+                if ds:
+                  #  info(f"send: {src} {type(ds)} {ds[:16]}")
+                  #  send(f"```\n{ds}```", src)
+                  send(ds, src)
+                  last_send = time.time()
+                  tmp = b""
+            if k > 0:
+              #  if k == 1:
+              #    info(f"res {n}: {d}")
+              await p.stdin.drain()
+              if myshell_queue.empty():
+                break
+            #  if k > 0:
+              #  await p.stdin.drain()
+              #  if myshell_queue.empty():
+              #    await sleep(0.01)
+              #    info("wait for more")
+              #    if myshell_queue.empty():
+              #      break
+  except TimeoutError:
+    warn("shell is busy")
+    return -512, None, "shell is busy"
   #  if o:
   if len(o) > 0:
     o = o.decode("utf-8", errors="ignore")
