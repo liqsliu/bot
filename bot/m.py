@@ -3920,7 +3920,7 @@ async def slow_mode(client, timeout=300):
 
 #  @exceptions_handler(no_send=True)
 @cross_thread
-async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None, tg_msg_id=None, resend=0):
+async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None, tg_msg_id=None, resend=0, *args, **kwargs):
   # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
 
   if name is None:
