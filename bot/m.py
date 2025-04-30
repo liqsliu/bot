@@ -3990,7 +3990,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   #      parse_mode = client.parse_mode
   #  info(f"parse_mode: {parse_mode}")
   if urlre.fullmatch(text):
-    text2 = name2 + raw_md(text)
+    #  text2 = name2 + raw_md(text)
+    text2 = "{}[{}]({})".fromat(name2, text, text)
   else:
     text2 = name2 + text
   ts = await split_long_text(text2, MAX_MSG_BYTES_TG, tmp_msg)
