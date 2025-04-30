@@ -21,7 +21,7 @@ from . import debug, WORK_DIR, PARENT_DIR, LOG_FILE, get_my_key, HOME, LOGGER
 from telethon import TelegramClient
 from telethon import events, utils
 #  from tg.telegram import DOWNLOAD_PATH
-from telethon.tl.types import InputChannel, InputPeerChannel, InputPeerUser, InputPhoneContact, KeyboardButton, KeyboardButtonUrl, KeyboardButtonCallback, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument, InputPeerChat, InputPeerChannel, InputPeerUser, MessageEntityItalic, messageEntityBold, messageEntityBlockquote, messageEntityUrl, messageEntityTextUrl
+from telethon.tl.types import InputChannel, InputPeerChannel, InputPeerUser, InputPhoneContact, KeyboardButton, KeyboardButtonUrl, KeyboardButtonCallback, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument, InputPeerChat, InputPeerChannel, InputPeerUser, MessageEntityItalic, MessageEntityBold, MessageEntityBlockquote, MessageEntityUrl, MessageEntityTextUrl
 
 import telethon.errors
 from telethon.errors import rpcerrorlist
@@ -3998,8 +3998,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     #  text2 = "{}[{}]({})".fromat(name2, text, text)
       text2 = name + ": " + text
       formatting_entities = []
-      formatting_entities.append(messageEntityBold(offset=0, length=len(name.strip())+1))
-      formatting_entities.append(messageEntityUrl(offset=len(name), length=len(text)))
+      formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
+      formatting_entities.append(MessageEntityUrl(offset=len(name), length=len(text)))
     else:
       #  text2 = name2 + text
       text2 = name + ": " + text
@@ -4095,7 +4095,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     #  res = await _send_tg(client, lock, last, chats, raw_md(text), chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1)
     if formatting_entitiesis is None:
       formatting_entities = []
-      formatting_entities.append(messageEntityBold(offset=0, length=len(name.strip())+1))
+      formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
     else:
       formatting_entities = None
     res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
