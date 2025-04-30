@@ -3012,6 +3012,7 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
         if os.path.exists(s[0]):
           path = s.pop(0)
           info("found file: %s" % path)
+          o = "\n".join(s)
           if len(s) > 0:
             try:
               t = asyncio.create_task(backup(path))
