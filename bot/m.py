@@ -3410,12 +3410,13 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
     #    return await send_t(text, jid, *args, **kwargs)
 
   if 'name' in kwargs:
-    nameo = kwargs["name"]
+    name = kwargs["name"]
     #  kwargs.pop("name")
     #  if nameo is None:
     #    nameo = "C bot"
   else:
-    nameo = "C bot"
+    name = "C bot"
+  info(f"{name=}")
 
   #  if nameo == "":
   #    name = nameo
@@ -3502,7 +3503,7 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
       return True
     else:
       if "gateway1" not in exclude:
-        asyncio.create_task( mt_send_for_long_text(text0, name=nameo) )
+        asyncio.create_task( mt_send_for_long_text(text0, name=name) )
 
   for m in ms:
     #  if m in exclude:
@@ -3647,18 +3648,19 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
             #    info(f"not found room: {msg.to}")
 
     if name is None:
-      name = "**C bot:** "
+      name2 = "**C bot:** "
     elif name == "":
-      pass
+      name2 = ""
     else:
-      name = f"**{name}:** "
+      name2 = f"**{name}:** "
 
     text = None
     #  text = msg.body.any() # ValueError("any() on empty map")
     for i in msg.body:
       text = msg.body[i]
       if text:
-        text = name + text
+        info(f"{name2=}")
+        text = name2 + text
         if qt is not None:
           text = "> %s\n%s" % ("\n> ".join(qt), text)
           msg.body[i] = text
@@ -4121,18 +4123,18 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
       return False
 
-  if resend > 0:
-    info(f"resend: {short(text)}")
-    #  res = await _send_tg(client, lock, last, chats, raw_md(text), chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1)
-    if formatting_entitiesis is None:
-      formatting_entities = []
-      formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
-    else:
-      formatting_entities = None
-    res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
-    if res is False:
-      info(f"resend2: {short(text)}")
-      return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
+    if resend > 0:
+      info(f"resend: {short(text)}")
+      #  res = await _send_tg(client, lock, last, chats, raw_md(text), chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1)
+      if formatting_entitiesis is None:
+        formatting_entities = []
+        formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
+      else:
+        formatting_entities = None
+      res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
+      if res is False:
+        info(f"resend2: {short(text)}")
+        return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
 
   info(f"sent: {chat_id}: {short(text)}")
   return True
