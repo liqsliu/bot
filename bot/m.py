@@ -5728,6 +5728,7 @@ async def print_tg_msg(msg, download_file=False):
     text = ""
   if event.fwd_from:
     # 来自转发消息
+    pass
 
   if msg.file:
     if download_file is True:
