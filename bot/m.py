@@ -2995,6 +2995,12 @@ async def get_twitter(url, src=None, opts=[], max_time=run_shell_time_max):
   cmds = [f"{SH_PATH}/twitter_to_text.sh", url]
   return format_out_of_shell( await myshell(cmds, src=src, max_time=max_time))
 
+def get_domain(url):
+  if "://" in url:
+    return url.split("/")[2]
+  else:
+    return url.split("/", 1)[0]
+
 @exceptions_handler
 async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
   # also download
@@ -10027,29 +10033,31 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
       #  url=url[0]
       url=url[1]
       if url.startswith("https://t.me/"):
-        return False
+        continue
+        #  return False
       if url.startswith("https://conversations.im/j/"):
-        return False
+        continue
+        #  return False
       if url.startswith("https://icq.im"):
-        return False
+        continue
+        #  return False
       elif url.startswith("https://x.com/"):
-        res = await get_twitter(url, max_time=8)
-        return res
+        tmp = await get_twitter(url, max_time=8)
       elif url.startswith("https://twitter.com/"):
-        res = await get_twitter(url, max_time=8)
-        return res
+        tmp = await get_twitter(url, max_time=8)
+      else:
 
-      #  tmp = "%s" % await get_title(url, max_time=15)
-      tmp = await get_title(url, max_time=15)
+        #  tmp = "%s" % await get_title(url, max_time=15)
+        tmp = await get_title(url, max_time=15)
       if len(urls) == 1:
         if tmp is None:
           return True
-        res = f"[URL]({url}): {tmp}"
+        res = f"[{get_domain(url)}]({url}): {tmp}"
       else:
         if res is None:
-          res=" %s urls" % len(urls)
+          res=" 检测到%s个链接" % len(urls)
         #  res+="\n\n> %s\n%s" % (url, tmp)
-        res += "\n\n%s. %s\n%s" % (k, url, tmp)
+        res += "\n\n%s. [%s](%s): %s" % (k, get_domain(url), url, tmp)
       k += 1
 
     #  if res:
