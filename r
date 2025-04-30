@@ -3,9 +3,9 @@
 cd ~/bot || exit 1
 echo "wait ..."
 # sleep 5
-vgp
-tgp
-Tgp
+vgpp
+tgpp
+Tgpp
 bash init.sh || break
 
 pkill -x mt
@@ -20,7 +20,8 @@ python3 -m bot && {
 } || r=$?
 echo "res: $r"
 date
-vgp && tgp
+vgpp
+tgpp
 Tgpp
 bash init.sh || break
 (cd ~/ToxBot && make )|| exit 1
