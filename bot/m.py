@@ -3416,7 +3416,7 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
     #    nameo = "C bot"
   else:
     name = "C bot"
-  info(f"{name=}")
+  #  info(f"{name=}")
 
   #  if nameo == "":
   #    name = nameo
@@ -3659,7 +3659,7 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
     for i in msg.body:
       text = msg.body[i]
       if text:
-        info(f"{name2=}")
+        #  info(f"{name2=}")
         text = name2 + text
         if qt is not None:
           text = "> %s\n%s" % ("\n> ".join(qt), text)
