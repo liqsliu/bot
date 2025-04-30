@@ -10663,10 +10663,10 @@ async def msgb(event):
     send(text, main_group, qt=qt, name=name, exclude=[chat_id])
 
     #  res = await run_cmd(f"{text}\n\n{qt}", get_src(msg), f"X {name}: ", is_admin=False, text)
-    if qt is not None:
-      res = await run_cmd(f"{text}\n\n{qto}", chat_id, name, False, text)
-    else:
-      res = await run_cmd(text, chat_id, name, False)
+    #  if qt is not None:
+    #    res = await run_cmd(f"{text}\n\n{qto}", chat_id, name, False, text)
+    #  else:
+    res = await run_cmd(text, chat_id, name, False, qt)
     if res is True:
       return
     if res:
@@ -10852,8 +10852,13 @@ async def msgb(event):
 
       if msg.file:
         return
+      qt = None
+      if msg.is_reply():
+        msgr = await msg.get_reply_message()
+        qt, _, _ = await print_tg_msg(msg)
+        qt = qt.splitlines()
       #  res = await run_cmd(text, log_group_private, f"G {MY_NAME}: ", is_admin=True)
-      res = await run_cmd(text, chat_id, f"G {MY_NAME}", is_admin=True)
+      res = await run_cmd(text, chat_id, f"G {MY_NAME}", is_admin=True, qt=qt)
       #  info("end")
       if res is True:
         pass
