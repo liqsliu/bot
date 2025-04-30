@@ -5645,7 +5645,6 @@ async def parse_tg_file_msg(msg):
     if file.size > FILE_DOWNLOAD_MAX_BYTES:
       file_info = f"文件过大，终止下载: ({hbyte(file.size)})"
     else:
-      file_info = ""
       #  path = await tg_download_media(msg)
       path = await tg_download_media(msg, src=msg.chat_id, max_wait_time=get_timeout(msg.file.size))
       if path is not None:
@@ -5657,9 +5656,9 @@ async def parse_tg_file_msg(msg):
         #    url = f"- {xmpp_url}\n\n- {url}"
         #  file_info += "\n"
         if file_name:
-          file_info += f"[{file_name}]({url})"
+          file_info = f"[{file_name}]({url})"
         else:
-          file_info += url
+          file_info = url
   else:
     file_info = "文件大小未知，终止下载"
   return file_info, path, backup_task
@@ -5669,7 +5668,8 @@ async def print_tg_msg(msg, download_file=False):
   #  msg = event.message
   chat_id = msg.chat_id
   #  res = ''
-  nick = ""
+  #  nick = ""
+  nick = []
   if msg.is_private:
     delay = None
     #  res += "@"
@@ -5677,11 +5677,13 @@ async def print_tg_msg(msg, download_file=False):
     #  peer = await event.get_chat()
     peer = await msg.get_chat()
     if peer is not None:
-      nick += "%s" % peer.first_name
+      #  nick += "%s" % peer.first_name
+      nick.append(peer.first_name)
       if peer.last_name is not None:
         #  res += " [%s %s]" % (peer.first_name, peer.last_name)
         #  nick = "G [%s %s]" % (peer.first_name, peer.last_name)
-        nick += " %s" % peer.last_name
+        #  nick += " %s" % peer.last_name
+        nick.append(peer.last_name)
   else:
 
     peer = await get_entity(chat_id, False)
@@ -5689,19 +5691,23 @@ async def print_tg_msg(msg, download_file=False):
     if msg.is_group:
       delay = 2
       #  nick += "+"
-      nick += "G "
+      #  nick += "G "
+      nick.append("G ")
       if chat_id == GROUP2_ID:
-        nick += " "
+        #  nick += " "
+        nick.append(" ")
     else:
       delay = 5
       #  if event.is_channel:
-      nick += "#"
+      #  nick += "#"
+      nick.append(" #")
 
       #  peer = await event.get_chat()
       if peer is not None:
         #  res += " %s" % peer.title
         #  nick = "G %s" % peer.title
-        nick += "%s" % peer.title
+        #  nick += "%s" % peer.title
+        nick.append(peer.title)
     #  print(event.chat_id, event.sender_id, event.from_id)
     #  if event.sender_id: # 如果和chat_id相同就没啥意义,这时候from_id是None
 
@@ -5713,43 +5719,57 @@ async def print_tg_msg(msg, download_file=False):
       #  peer = await UB.get_entity(event.from_id)
       if peer is not None:
         if isinstance(peer, User):
-          nick += "%s" % peer.first_name
+          #  nick += "%s" % peer.first_name
+          nick.append(peer.first_name)
           if peer.last_name is not None:
-            nick += " %s" % peer.last_name
+            #  nick += " %s" % peer.last_name
+            nick.append(peer.last_name)
         else:
         #  if isinstance(peer, Channel):
           #  res += " %s" % peer.title
-          nick += "#%s" % peer.title
+          #  nick += "#%s" % peer.title
+          nick.append("#")
+          nick.append(peer.title)
 
 
-  text = ""
+  #  text = ""
+  text = []
   if msg.fwd_from:
     # 来自转发消息
     info(msg.fwd_from.stringify())
     f = msg.forward
-    text += "转发"
+    #  text += "转发"
+    text.append("转发")
     if f.from_name:
-      text += f"自 {f.from_name}"
+      #  text += f"自 {f.from_name}"
+      text.append(f"自 {f.from_name}")
     elif f.saved_from_name:
-      text += f"自 {f.saved_from_name}"
+      #  text += f"自 {f.saved_from_name}"
+      text.append(f"自 {f.saved_from_name}")
     elif f.from_id:
       #  text += f"自{f.from_id}"
       pid = utils.get_peer_id(f.from_id)
     #  text += f"自{utils.resolve_id( pid )}"
-      text += f"自 {pid}"
+      #  text += f"自 {pid}"
+      text.append(f"自 {pid}")
     elif f.saved_from_id:
       pid = utils.get_peer_id(f.saved_from_id)
-      text += f"自 {pid}"
+      #  text += f"自 {pid}"
+      text.append(f"自 {pid}")
     elif f.saved_from_peer:
       pid = utils.get_peer_id(f.saved_from_peer)
-      text += f"自 {pid}"
+      #  text += f"自 {pid}"
+      text.append(f"自 {pid}")
 
     elif f.post_author:
-      text += f"-{f.post_author}"
-    text += ": "
+      #  text += f"-{f.post_author}"
+      text.append(f"-{f.post_author}")
+    #  text += ": "
+    text.append(": ")
 
   if msg.text:
-    text += msg.text
+    #  text += msg.text
+    text.append(msg.text)
 
   if msg.file:
     if download_file is True:
@@ -5758,8 +5778,10 @@ async def print_tg_msg(msg, download_file=False):
         file_info, path, backup_task = await parse_tg_file_msg(msg)
         if file_info:
           if text:
-            text += "\n\n"
-          text += file_info
+            #  text += "\n\n"
+            text.append("\n\n")
+          #  text += file_info
+          text.append(file_info)
 
       finally:
         if backup_task is not None:
@@ -5767,10 +5789,13 @@ async def print_tg_msg(msg, download_file=False):
           asyncio.create_task(backup(path, delete=True))
     else:
       if msg.file.size:
-        text += " %s" % hbyte(msg.file.size)
+        #  text += " %s" % hbyte(msg.file.size)
+        text.append(hbyte(msg.file.size))
       if msg.file.name:
-        text += " %s" % msg.file.name
-  return text, nick, delay
+        #  text += " %s" % msg.file.name
+        text.append(msg.file.name)
+  #  return text, nick, delay
+  return "".join(text), "".join(nick), delay
 
 
 
