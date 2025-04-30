@@ -53,10 +53,8 @@ elif [[ "${fn}" == "index" ]]; then
 fi
 fno=$fn
 fn="$HOME/t/$fn"
-(
-cd "$HOME/t/" || exit 1
+cd "$HOME/t/" || {
 # rm * &>/dev/null || true
-) || {
   echo "目录有问题"
   exit 1
 }
@@ -85,14 +83,16 @@ if [[ "$2" == curl ]]; then
 elif [[ "$2" == raw ]]; then
   # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
   # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
-  wget -T $MAX_TIMEOUT -O "$fn" "$URL"
+  # wget -T $MAX_TIMEOUT -O "$fn" "$URL"
+  wget -T $MAX_TIMEOUT -O "$fno" "$URL"
   sc=$?
   # }
 else
   # wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
   # wget --server-response --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
   # wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL"
-  wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL"
+  # wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL"
+  wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fno" "$URL"
   # wget -O "$fn" "$URL"
   sc=$?
   # }
