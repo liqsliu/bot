@@ -10853,7 +10853,7 @@ async def msgb(event):
       if msg.file:
         return
       qt = None
-      if msg.is_reply():
+      if msg.is_reply:
         msgr = await msg.get_reply_message()
         qt, _, _ = await print_tg_msg(msg)
         qt = qt.splitlines()
