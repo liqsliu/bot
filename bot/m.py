@@ -5728,7 +5728,20 @@ async def print_tg_msg(msg, download_file=False):
     text = ""
   if msg.fwd_from:
     # 来自转发消息
-    pass
+    info(msg.fwd_from.stringify())
+    f = msg.forward
+    text += "转发"
+    if f.from_name:
+      text += f"自{f.from_name}"
+    elif f.saved_from_name:
+      text += f"自{f.saved_from_name}"
+    elif f.from_id:
+      text += f"自{f.from_id}"
+    elif f.saved_from_id:
+      text += f"自{f.saved_from_id}"
+
+    elif f.post_author:
+      text += f"-{f.post_author}"
 
   if msg.file:
     if download_file is True:
