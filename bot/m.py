@@ -6086,9 +6086,8 @@ async def msgt(event):
             if text.startswith("reply: "):
               text = text.split(": ", 1)[1]
           elif text.startswith("G "):
-            warn(f"fixme: {text=}")
             if text.startswith("G  "):
-              pass
+              warn(f"fixme: {text=}")
             else:
               await msg.delete()
               if chat_id in last_outmsg:
