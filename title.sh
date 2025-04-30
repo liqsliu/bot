@@ -231,6 +231,8 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   exit 0
   exit $?
 elif [[ $sc -ne 0 ]]; then
+  echo -n "$ft "
+  du -h -- "$fn" | cut -f1
   exit $sc
 else
 
@@ -246,8 +248,7 @@ else
   # size=$(echo "$html" | wc -c)
   # echo "$fn"
   # echo -n "[file]($URL): "
-  echo "$fs"
-  echo "$ft"
+  echo "$ft $fs"
   echo "$ft3"
   # echo
   # echo "- https://$DOMAIN/${fno}${fe}"
