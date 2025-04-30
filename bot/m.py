@@ -3012,21 +3012,24 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
         if os.path.exists(s[0]):
           path = s.pop(0)
           info("found file: %s" % path)
-          try:
-            t = asyncio.create_task(backup(path))
-            url = await upload(path, src)
-            url2 = await t
-            #  s.append("")
-            if url:
-              #  s[0] = f"\n- {url}"
-              #  s.append(f"- {url}")
-              s.append(s.pop() + f" [[xmpp]]({url})")
-              info("add xmpp file url: %s" % url)
-            #  s.append(f"- {url2}")
-            #  s.append(f"- {url2}")
-            s.append(s.pop() + f" [[vps]]({url2})")
-          finally:
-            asyncio.create_task(backup(path, delete=True))
+          if len(s) > 0:
+            try:
+              t = asyncio.create_task(backup(path))
+              url = await upload(path, src)
+              url2 = await t
+              #  s.append("")
+              if url:
+                #  s[0] = f"\n- {url}"
+                #  s.append(f"- {url}")
+                s.append(s.pop() + f" [[xmpp]]({url})")
+                info("add xmpp file url: %s" % url)
+              #  s.append(f"- {url2}")
+              #  s.append(f"- {url2}")
+              s.append(s.pop() + f" [[vps]]({url2})")
+            except Exception as e:
+              raise e
+            finally:
+              asyncio.create_task(backup(path, delete=True))
         else:
           warn("not found file: %s" % s.pop(0))
       else:
@@ -4823,6 +4826,8 @@ async def pvb(text, server=None):
   except SystemExit as e:
     sys.stdout = orig
     warn("failed", e=e)
+  except Exception as e:
+    raise e
   finally:
     sys.stdout = orig
   #  except BaseException as e:
@@ -5823,6 +5828,8 @@ async def print_tg_msg(msg, download_file=False):
           #  text += file_info
           text.append(file_info)
 
+      except Exception as e:
+        raise e
       finally:
         if backup_task is not None:
           await backup_task
@@ -6301,6 +6308,8 @@ async def msgt(event):
       else:
       #  if type(src) is int:
         send(text, src, correct=correct)
+    except Exception as e:
+      raise e
     finally:
       if backup_task is not None:
         await backup_task
@@ -6532,6 +6541,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             send(url, chat_id)
             err(f"上传失败 {e=}")
 
+      except Exception as e:
+        raise e
       finally:
         await t
         if t.done():
@@ -9526,6 +9537,8 @@ async def init_cmd():
                     return 512,
                   else:
                     info("上传失败")
+                except Exception as e:
+                  raise e
                 finally:
                   asyncio.create_task(backup(path, delete=True))
               else:
@@ -9896,6 +9909,8 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
         res = await send_cmd_to_bash(None, name, text)
         if res:
           return res
+    except Exception as e:
+      raise e
     finally:
       #  info("finally")
       try:
@@ -10563,6 +10578,8 @@ async def join(jid=None, nick=None, client=None):
           return False
         await sleep(0.1)
 
+    except Exception as e:
+      raise e
     finally:
       if auto_input:
         client.stream.unregister_message_callback(
@@ -11096,6 +11113,8 @@ async def stop_sub(p=None):
         await asyncio.wait_for(p.wait(), timeout=5)
       except Exception as e:
         info(f"timeout {e=}")
+  except Exception as e:
+    raise e
   finally:
     if p.returncode is None:
       info(f"停止成功: {p} {p.returncode=}")
@@ -11306,6 +11325,8 @@ async def amain():
       await send_tg("xmpp bot 已断开，准备重启...")
       await sleep(1)
       sys.exit(2)
+    except Exception as e:
+      raise e
     finally:
       info("断开bot连接前需要清理")
       await stop()
@@ -11314,6 +11335,8 @@ async def amain():
 
 
     info("主程序结束")
+  except Exception as e:
+    raise e
   finally:
     info("开始关闭")
     #  for j in asyncio.all_tasks(loop):
