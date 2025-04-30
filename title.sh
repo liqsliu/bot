@@ -96,9 +96,15 @@ else
   # }
 fi
 
-[[ -e "$fn" ]]  || exit $sc
+[[ -e "$fn" ]]  || {
+  echo "not found file"
+  exit $sc
+}
 
-ft=$(file --mime-type -b -- "$fn")  || exit $?
+ft=$(file --mime-type -b -- "$fn")  || {
+  echo "can not open file"
+  exit $?
+}
 
   # echo "$html" > "$fn"
   # fes=$(file --extension -b -- "$fn" | grep -o -P "[^\s/]+")

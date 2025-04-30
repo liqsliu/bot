@@ -2431,13 +2431,13 @@ def format_out_of_shell(res):
   o = res[1]
   e = res[2]
   info("%s\n\nE: %s\n%s" % (o, r, e))
-  res = ""
+  if o == "":
+    o = None
   if e is None:
     if r == 0:
       return f"{o}"
+  res = ""
   #  if o is not None and o.strip() != "":
-  if o == "":
-    o = None
   if o is not None:
     res = f"{o}\n\n"
   res += f"E: {r}"
@@ -3016,8 +3016,8 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
           path = s.pop(0)
           info("found file: %s" % path)
           o = "\n".join(s)
-          if len(s) > 0:
-            try:
+          try:
+            if len(s) > 0:
               t = asyncio.create_task(backup(path))
               url = await upload(path, src)
               url2 = await t
@@ -3030,10 +3030,10 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
               #  s.append(f"- {url2}")
               #  s.append(f"- {url2}")
               s.append(s.pop() + f" [[vps]]({url2})")
-            except Exception as e:
-              raise e
-            finally:
-              asyncio.create_task(backup(path, delete=True))
+          except Exception as e:
+            raise e
+          finally:
+            asyncio.create_task(backup(path, delete=True))
         else:
           warn("not found file: %s" % s.pop(0))
       else:
