@@ -19,9 +19,10 @@ from . import debug, WORK_DIR, PARENT_DIR, LOG_FILE, get_my_key, HOME, LOGGER
 
 
 from telethon import TelegramClient
-#  from tg.telegram import DOWNLOAD_PATH
-from telethon.tl.types import InputChannel, InputPeerChannel, InputPeerUser, InputPhoneContact, KeyboardButton, KeyboardButtonUrl, KeyboardButtonCallback, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument, InputPeerChat, InputPeerChannel, InputPeerUser
 from telethon import events, utils
+#  from tg.telegram import DOWNLOAD_PATH
+from telethon.tl.types import InputChannel, InputPeerChannel, InputPeerUser, InputPhoneContact, KeyboardButton, KeyboardButtonUrl, KeyboardButtonCallback, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument, InputPeerChat, InputPeerChannel, InputPeerUser, MessageEntityItalic, messageEntityBold, messageEntityBlockquote, messageEntityUrl, messageEntityTextUrl
+
 import telethon.errors
 from telethon.errors import rpcerrorlist
 
@@ -2531,7 +2532,8 @@ async def my_exec(cmd, src=None, client=None, **args):
   res = await locals()['_']()
   info(f"exec res: {res}")
   #  if res is not None:
-  return "{!r}".format(res)
+  #  return "{!r}".format(res)
+  return str(res)
 
 
 my_exec2 = cross_thread(need_main=False)(my_exec)
@@ -3920,15 +3922,17 @@ async def slow_mode(client, timeout=300):
 
 #  @exceptions_handler(no_send=True)
 @cross_thread
-async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None, tg_msg_id=None, resend=0, *args, **kwargs):
+async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None, tg_msg_id=None, resend=0, formatting_entities=None, *args, **kwargs):
   # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
 
   if name is None:
     #  name = ""
     if chat_id == GROUP_ID or chat_id == GROUP2_ID:
       name2 = "**C bot:** "
+      name = "C bot"
     else:
       name2 = ""
+      name = ""
   elif name == "":
     name2 = ""
   else:
@@ -3990,10 +3994,22 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   #      parse_mode = client.parse_mode
   #  info(f"parse_mode: {parse_mode}")
   if urlre.fullmatch(text):
-    #  text2 = name2 + raw_md(text)
-    text2 = "{}[{}]({})".fromat(name2, text, text)
+    if formatting_entities is None:
+    #  text2 = "{}[{}]({})".fromat(name2, text, text)
+      text2 = name + ": " + text
+      formatting_entities = []
+      formatting_entities.append(messageEntityBold(offset=0, length=len(name.strip())+1))
+      formatting_entities.append(messageEntityUrl(offset=len(name), length=len(text)))
+    else:
+      #  text2 = name2 + text
+      text2 = name + ": " + text
+      for e in formatting_entities:
+        e.offset += len(name) + 2
   else:
     text2 = name2 + text
+    if formatting_entities is not None:
+      for e in formatting_entities:
+        e.offset += len(name2)
   ts = await split_long_text(text2, MAX_MSG_BYTES_TG, tmp_msg)
   if len(ts) > 1:
     tmp_msg = False
@@ -4013,11 +4029,11 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
             msg = await omsg.edit(t)
             correct = False
           elif chat_id in chats:
-            msg = await omsg.edit(t, parse_mode=parse_mode)
+            msg = await omsg.edit(t, parse_mode=parse_mode, formatting_entities=formatting_entities)
           else:
-            msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode)
+            msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode, formatting_entities=formatting_entities)
         else:
-          msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode)
+          msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode, formatting_entities=formatting_entities)
         k += 1
         if k == len(ts):
           last[chat_id] = msg
@@ -4076,10 +4092,16 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
 
   if resend > 0:
     info(f"resend: {short(text)}")
-    res = await _send_tg(client, lock, last, chats, raw_md(text), chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1)
+    #  res = await _send_tg(client, lock, last, chats, raw_md(text), chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1)
+    if formatting_entitiesis is None:
+      formatting_entities = []
+      formatting_entities.append(messageEntityBold(offset=0, length=len(name.strip())+1))
+    else:
+      formatting_entities = None
+    res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
     if res is False:
       info(f"resend2: {short(text)}")
-      return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1)
+      return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
 
   info(f"sent: {chat_id}: {short(text)}")
   return True
