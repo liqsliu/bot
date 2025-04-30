@@ -78,21 +78,25 @@ fi
 
 if [[ "$2" == curl ]]; then
   # curl -s -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || {
-  curl -v -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || exit $?
+  curl -v -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" 
+  sc=$?
   # }
 
 elif [[ "$2" == raw ]]; then
   # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
   # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
-  wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+  wget -T $MAX_TIMEOUT -O "$fn" "$URL"
+  sc=$?
   # }
 else
   # wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
   # wget --server-response --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
-  wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+  wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL"
+  sc=$?
   # }
 fi
 
+[[ -e "$fn" ]]  || exit $sc
 
 ft=$(file --mime-type -b -- "$fn")  || exit $?
 
@@ -217,8 +221,11 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   fi
   # rm "$fn"
   # exit
+  exit $sc
   exit 0
   exit $?
+elif [[ $sc -ne 0 ]]; then
+  exit $sc
 else
 
 
