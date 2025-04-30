@@ -3028,7 +3028,7 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
               url1 = await upload(path, src)
               url2 = await t
               #  s.append("")
-              s.append(s.pop() + f" [URL]({url})")
+              s.append(s.pop() + f" [原始链接{get_domain(url)}]({url})")
               if url1:
                 #  s[0] = f"\n- {url}"
                 #  s.append(f"- {url}")
