@@ -3956,13 +3956,18 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     else:
       #  text2 = name2 + text
       text2 = name + ": " + text
-      for e in formatting_entities:
-        e.offset += len(name) + 2
+      #  for e in formatting_entities:
+      #    e.offset += len(name) + 2
   else:
-    text2 = name2 + text
-    if formatting_entities is not None:
-      for e in formatting_entities:
-        e.offset += len(name2)
+    if formatting_entities is None:
+      if parse_mode ==  "md":
+        text2 = name2 + text
+      else:
+        text2 = name + ": " + text
+    else:
+      text2 = name + ": " + text
+      #  for e in formatting_entities:
+      #    e.offset += len(name) + 2
 
   if qt is not None:
     qtr = "\n".join(qt)
