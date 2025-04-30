@@ -5720,10 +5720,15 @@ async def print_tg_msg(msg, download_file=False):
         #  if isinstance(peer, Channel):
           #  res += " %s" % peer.title
           nick += "#%s" % peer.title
+
+
   if msg.text:
     text = msg.text
   else:
     text = ""
+  if event.fwd_from:
+    # 来自转发消息
+
   if msg.file:
     if download_file is True:
       backup_task = None
@@ -6526,6 +6531,17 @@ async def msgtout(event):
         else:
           #  await msg.reply(f"not a reply: {msg.stringify()}")
           await send_tg(f"not a reply: {msg.stringify()}", chat_id, topic=msg.id)
+      elif cmds[1] == "f":
+        if event.is_reply:
+          e = await msg.get_reply_message()
+          #  await msg.reply(f"{e.stringify()}")
+          if event.fwd_from:
+            await send_tg(e.fwd_from.stringify(), chat_id, topic=msg.id)
+          else:
+            await send_tg(f"no fwd_from: {msg.stringify()}", chat_id, topic=msg.id)
+        else:
+          #  await msg.reply(f"not a reply: {msg.stringify()}")
+          await send_tg(f"not a reply: {msg.stringify()}", chat_id, topic=msg.id)
       elif cmds[1] == "sender":
         if event.is_reply:
           e = await msg.get_reply_message()
@@ -6555,7 +6571,6 @@ async def msgtout(event):
       await send_tg2(f"document type: {type(tmsg.document)}\nfile type: {type(tmsg.file)}\nmedia type: {type(tmsg.media)}\n$get reply/file", chat_id)
     if event.fwd_from:
       #  await msg.reply(event.fwd_from.stringify())
-      #  await send_tg(event.fwd_from.stringify(), chat_id)
       opts = 0
       #  cmds = get_cmd(text)
       #  if len(cmds) == 3:
@@ -10539,7 +10554,8 @@ async def msgb(event):
 
   if event.is_private or chat_id == CHAT_ID:
     if event.fwd_from:
-      info(f"goto msgtout")
+      #  info(f"goto msgtout")
+      await send_tg(event.fwd_from.stringify(), chat_id)
       return
     # my private group
     #  text = msg.text
