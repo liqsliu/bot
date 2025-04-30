@@ -217,7 +217,7 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   # echo
   s=$(grep --binary-file=text -o '<title>.*</title>'  "$fn")
   if [[ -n "$s" ]]; then
-    echo "${s:7:-8}"
+    echo -n "${s:7:-8} "
   else
     s=$(grep --binary-file=text -P -o '<title ?[^>]+>.*</title>' "$fn"  | grep -o '>.*<' )
     if [[ -n "$s" ]]; then
@@ -226,8 +226,8 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
     else
       echo -n "没找到标题 "
     fi
-    du -h -- "$fn" | cut -f1
   fi
+  du -h -- "$fn" | cut -f1
   # rm "$fn"
   # exit
   exit $sc
