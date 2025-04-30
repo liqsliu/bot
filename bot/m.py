@@ -10033,6 +10033,7 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
     for url in urls:
       #  url=url[0]
       url=url[1]
+      info(f"get url: {url}")
       if url.startswith("https://t.me/"):
         continue
         #  return False
