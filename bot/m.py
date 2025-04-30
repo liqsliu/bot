@@ -3025,17 +3025,18 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
           try:
             if len(s) > 0:
               t = asyncio.create_task(backup(path))
-              url = await upload(path, src)
+              url1 = await upload(path, src)
               url2 = await t
               #  s.append("")
-              if url:
+              s.append(s.pop() + f" [URL]({url})")
+              if url1:
                 #  s[0] = f"\n- {url}"
                 #  s.append(f"- {url}")
-                s.append(s.pop() + f" [[xmpp]]({url})")
-                info("add xmpp file url: %s" % url)
+                s.append(s.pop() + f" [xmpp备份]({url1})")
+                info("add xmpp file url: %s" % url1)
               #  s.append(f"- {url2}")
               #  s.append(f"- {url2}")
-              s.append(s.pop() + f" [[vps]]({url2})")
+              s.append(s.pop() + f" [vps备份]({url2})")
           except Exception as e:
             raise e
           finally:
@@ -10052,12 +10053,14 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
       if len(urls) == 1:
         if tmp is None:
           return True
-        res = f"[{get_domain(url)}]({url}): {tmp}"
+        #  res = f"[{get_domain(url)}]({url}): {tmp}"
+        res = tmp
       else:
         if res is None:
           res=" 检测到%s个链接" % len(urls)
         #  res+="\n\n> %s\n%s" % (url, tmp)
-        res += "\n\n%s. [%s](%s): %s" % (k, get_domain(url), url, tmp)
+        #  res += "\n\n%s. [%s](%s): %s" % (k, get_domain(url), url, tmp)
+        res += "\n\n%s. %s" % (k, tmp)
       k += 1
 
     #  if res:
