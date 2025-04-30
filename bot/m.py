@@ -5722,10 +5722,7 @@ async def print_tg_msg(msg, download_file=False):
           nick += "#%s" % peer.title
 
 
-  if msg.text:
-    text = msg.text
-  else:
-    text = ""
+  text = ""
   if msg.fwd_from:
     # 来自转发消息
     info(msg.fwd_from.stringify())
@@ -5750,6 +5747,9 @@ async def print_tg_msg(msg, download_file=False):
     elif f.post_author:
       text += f"-{f.post_author}"
     text += ": "
+
+  if msg.text:
+    text += msg.text
 
   if msg.file:
     if download_file is True:
