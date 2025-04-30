@@ -2435,6 +2435,9 @@ def format_out_of_shell(res):
   if e is None:
     if r == 0:
       return f"{o}"
+  #  if o is not None and o.strip() != "":
+  if o == "":
+    o = None
   if o is not None:
     res = f"{o}\n\n"
   res += f"E: {r}"
