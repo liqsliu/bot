@@ -5732,16 +5732,24 @@ async def print_tg_msg(msg, download_file=False):
     f = msg.forward
     text += "转发"
     if f.from_name:
-      text += f"自{f.from_name}"
+      text += f"自 {f.from_name}"
     elif f.saved_from_name:
-      text += f"自{f.saved_from_name}"
+      text += f"自 {f.saved_from_name}"
     elif f.from_id:
-      text += f"自{f.from_id}"
+      #  text += f"自{f.from_id}"
+      pid = utils.get_peer_id(f.from_id)
+    #  text += f"自{utils.resolve_id( pid )}"
+      text += f"自 {pid}"
     elif f.saved_from_id:
-      text += f"自{f.saved_from_id}"
+      pid = utils.get_peer_id(f.saved_from_id)
+      text += f"自 {pid}"
+    elif f.saved_from_peer:
+      pid = utils.get_peer_id(f.saved_from_peer)
+      text += f"自 {pid}"
 
     elif f.post_author:
       text += f"-{f.post_author}"
+    text += ": "
 
   if msg.file:
     if download_file is True:
@@ -10570,6 +10578,7 @@ async def msgb(event):
     if event.fwd_from:
       #  info(f"goto msgtout")
       await send_tg(event.fwd_from.stringify(), chat_id)
+      await send_tg(str(await print_tg_msg(msg)), chat_id)
       return
     # my private group
     #  text = msg.text
