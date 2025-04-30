@@ -9789,6 +9789,8 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
     text = "{}\n\n{}".format(text, "\n".join(qt))
   if text == "ping":
     return "pong"
+  elif text == "help":
+    text = ".help"
   if text[0:1] == ".":
     if text[1:2] == " ":
       return True
@@ -10071,9 +10073,9 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
       #  if res2:
       #    res += f"\n{res2}"
       return res
-    else:
-      res = await send_cmd_to_bash(None, name, text)
-      return res
+    #  else:
+    #    res = await send_cmd_to_bash(None, name, text)
+    #    return res
       #  await mt_send(res, gateway=gateway, name="titlebot")
 
   return False
