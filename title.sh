@@ -221,11 +221,12 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   else
     s=$(grep --binary-file=text -P -o '<title ?[^>]+>.*</title>' "$fn"  | grep -o '>.*<' )
     if [[ -n "$s" ]]; then
-      echo "${s:1:-1}"
+      echo -n "${s:1:-1} "
       # echo null
     else
-      echo "没找到标题"
+      echo -n "没找到标题 "
     fi
+    du -h -- "$fn" | cut -f1
   fi
   # rm "$fn"
   # exit
