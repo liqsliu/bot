@@ -6342,7 +6342,7 @@ async def msgt(event):
     if res:
       info(f"sync to xmpp: {chat_id} -> {src}: {short(res)}")
       gid = msg.id
-      send(res, src, name=f"**{nick}:** ", nick=nick, delay=delay, correct=correct, tg_msg_id=gid)
+      send(res, src, name=nick, nick=nick, delay=delay, correct=correct, tg_msg_id=gid)
     else:
       err(f"忽略空白信息: {res=} {nick=} {msg.text=}")
     return
