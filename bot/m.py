@@ -5327,6 +5327,8 @@ def send_tmp_msg(text, chat_id):
   if chat_id not in tmp_msgs or time.time() - tmp_msgs[chat_id] > interval:
     send(text, chat_id, tmp_msg=True)
     tmp_msgs[chat_id] = time.time()
+    return True
+  return False
   #  await sleep(interval)
 #  last_time = {}
 
