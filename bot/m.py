@@ -4573,9 +4573,9 @@ async def msgmt(msg):
       qt = None
 
     nameo = name[:-2]
-    name2 = f"**{nameo}:** "
+    #  name2 = f"**{nameo}:** "
 
-    text2 = f"{name2}{text}"
+    #  text2 = f"{name2}{text}"
 
 
 
@@ -4591,7 +4591,7 @@ async def msgmt(msg):
     #  await send_tg(text2, GROUP_ID, qt=qt)
     #  await send_tg(text2, GROUP2_ID, topic=GROUP2_TOPIC, qt=qt)
 
-    send(text2, main_group, qt=qt, name=nameo, exclude=[gateway])
+    send(text, main_group, qt=qt, name=nameo, exclude=[gateway])
 
     #  res = await run_cmd("{}\n\n{}".format(text, "\n".join(qt)), gateway, name, qt=qt)
     res = await run_cmd(text, gateway, nameo, qt=qt)
@@ -9845,7 +9845,9 @@ async def run_cmd(*args, **kwargs):
 #  async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool | str:
 async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | str:
   if name:
-    name += ": "
+    name2 = name + ": "
+  else:
+    name2 = ""
   text0 = text
   if qt is not None:
     text = "{}\n\n{}".format(text, "\n".join(qt))
@@ -9923,7 +9925,7 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
           if src not in mtmsgsg:
             mtmsgsg[src] = {}
           mtmsgs = mtmsgsg[src]
-          mtmsgs[pid] = [name]
+          mtmsgs[pid] = [name2]
 
           if pid in bridges:
             bridges.pop(pid)
@@ -9981,7 +9983,7 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
         #  return True
       else:
         #  res = await send_cmd_to_bash(src, name, text)
-        res = await send_cmd_to_bash(None, name, text)
+        res = await send_cmd_to_bash(None, name2, text)
         if res:
           return res
     except Exception as e:
@@ -10051,7 +10053,7 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
       if k == s:
         send(f"命中：{text}. [{i.text}]", src, tmp_msg=True)
         info(f"已找到：{text} {i.text}")
-        mtmsgs[pid] = [name]
+        mtmsgs[pid] = [name2]
         k = None
         await sleep(0.5)
         await i.click()
@@ -10120,14 +10122,14 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
 
     #  if res:
     if res is not None:
-      res = f"{name}{res}"
+      res = f"{name2}{res}"
       #  res2 = await send_cmd_to_bash(src, "", text)
       #  if res2:
       #    res += f"\n{res2}"
       return res
-    #  else:
-    #    res = await send_cmd_to_bash(None, name, text)
-    #    return res
+    else:
+      res = await send_cmd_to_bash(None, name2, text)
+      return res
       #  await mt_send(res, gateway=gateway, name="titlebot")
 
   return False
