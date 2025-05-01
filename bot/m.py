@@ -3975,6 +3975,11 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   else:
     name2 = f"**{name}:** "
 
+  if len(name) > 0:
+    name3 = name + ": "
+  else:
+    name3 = ""
+
     #  text = name + text
 
   #  if name is not None:
@@ -3986,14 +3991,22 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   if urlre.fullmatch(text):
     if formatting_entities is None:
     #  text2 = "{}[{}]({})".fromat(name2, text, text)
-      text2 = name + ": " + text
+      #  text2 = name + ": " + text
+      text2 = name3 + text
       formatting_entities = []
-      formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
-      #  formatting_entities.append(MessageEntityUrl(offset=len(name), length=len(text)))
-      formatting_entities.append(MessageEntityTextUrl(offset=len(name), length=len(text), url=text))
+      if len(name) > 0:
+        formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
+        #  formatting_entities.append(MessageEntityUrl(offset=len(name), length=len(text)))
+        formatting_entities.append(MessageEntityTextUrl(offset=len(name), length=len(text), url=text))
+      else:
+        formatting_entities.append(MessageEntityTextUrl(offset=0, length=len(text), url=text))
     else:
       #  text2 = name2 + text
-      text2 = name + ": " + text
+      #  if name:
+      #    text2 = name + ": " + text
+      #  else:
+      #    text2 = text
+      text2 = name3 + text
       #  for e in formatting_entities:
       #    e.offset += len(name) + 2
   else:
@@ -4001,9 +4014,11 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       if parse_mode ==  "md":
         text2 = name2 + text
       else:
-        text2 = name + ": " + text
+        #  text2 = name + ": " + text
+        text2 = name3 + text
     else:
-      text2 = name + ": " + text
+      #  text2 = name + ": " + text
+      text2 = name3 + text
       #  for e in formatting_entities:
       #    e.offset += len(name) + 2
 
