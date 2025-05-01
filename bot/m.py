@@ -3003,6 +3003,26 @@ def get_domain(url):
 
 @exceptions_handler
 async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
+  if url.startswith(f"https://{DOMAIN}/"):
+    if src == CHAT_ID:
+      pass
+    else:
+      return
+  if url.startswith("https://t.me/"):
+    return
+    #  continue
+    #  return False
+  if url.startswith("https://conversations.im/j/"):
+    return
+  if url.startswith("https://icq.im"):
+    return
+  elif url.startswith("https://x.com/"):
+    tmp = await get_twitter(url, max_time=8)
+    return tmp
+  elif url.startswith("https://twitter.com/"):
+    tmp = await get_twitter(url, max_time=8)
+    return tmp
+  info(f"get title of url: {url}")
   # also download
   #  cmds = ["bash", f"{SH_PATH}/title.sh"]
   #  cmds = [f"{SH_PATH}/title.sh", shlex.quote(url)]
@@ -10033,40 +10053,30 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
     #  M=' 🔗 '
     #  M='- '
     #  M=' ⤷ '
-    k = 1
+    d = {}
     for url in urls:
       #  url=url[0]
       url=url[1]
-      info(f"get url: {url}")
-      if url.startswith("https://t.me/"):
-        continue
-        #  return False
-      if url.startswith("https://conversations.im/j/"):
-        continue
-        #  return False
-      if url.startswith("https://icq.im"):
-        continue
-        #  return False
-      elif url.startswith("https://x.com/"):
-        tmp = await get_twitter(url, max_time=8)
-      elif url.startswith("https://twitter.com/"):
-        tmp = await get_twitter(url, max_time=8)
-      else:
-
-        #  tmp = "%s" % await get_title(url, max_time=15)
-        tmp = await get_title(url, max_time=15)
-      if len(urls) == 1:
-        if tmp is None:
-          return True
-        #  res = f"[{get_domain(url)}]({url}): {tmp}"
-        res = tmp
-      else:
-        if res is None:
-          res=" 检测到%s个链接" % len(urls)
+      #  tmp = "%s" % await get_title(url, max_time=15)
+      tmp = await get_title(url, max_time=15)
+      if tmp is not None:
+        #  return True
+        d[url] = tmp
+    
+    if len(d) == 0:
+      return False
+    if len(d) == 1:
+      #  res = f"[{get_domain(url)}]({url}): {tmp}"
+      res = tmp
+    else:
+      res=" 检测到%s个链接" % len(d)
+      k = 1
+      for url in d:
+        tmp = d[url]
         #  res+="\n\n> %s\n%s" % (url, tmp)
         #  res += "\n\n%s. [%s](%s): %s" % (k, get_domain(url), url, tmp)
         res += "\n\n%s. %s" % (k, tmp)
-      k += 1
+        k += 1
 
     #  if res:
     if res is not None:
