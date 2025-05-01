@@ -2534,7 +2534,7 @@ async def my_exec(cmd, src=None, client=None, **args):
 
   # Get `__ex` from local variables, call it and return the result
   res = await locals()['_']()
-  info(f"exec res: {res}")
+  info(f"exec res: {res=}")
   #  if res is not None:
   #  return "{!r}".format(res)
   return str(res)
@@ -4153,7 +4153,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       #    formatting_entities = None
       formatting_entities = []
       formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
-      res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
+      res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
       if res is False:
         info(f"resend2: {short(text)}")
         res = await pastebin(text)
@@ -9885,7 +9885,7 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
         #    warn(f"wtf: {f=}")
         #    return True
         #  res = await (exceptions_handler(no_send=True)(cmd_funs[cmd])(cmds, src))
-        info(f"res: {res}")
+        info(f"res: {res=}")
         #  if type(res) is tuple:
         r = res[0]
         if r == 512:
