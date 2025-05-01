@@ -5513,7 +5513,7 @@ def print_buttons(bs, k=0):
   def format_button_text(k, text):
     #  if text[0].isnumeric():
     if text.isnumeric():
-      return f"[{text}]"
+      return f"{k}. [{text}]"
     else:
       return f"{k}. {text}"
   #  if bs:
@@ -10029,7 +10029,7 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
     for i in get_buttons(l[1]):
       k += 1
       if k == s:
-        send(f"命中：{text} {i.text}", src, tmp_msg=True)
+        send(f"命中：{text}. [{i.text}]", src, tmp_msg=True)
         info(f"已找到：{text} {i.text}")
         mtmsgs[pid] = [name]
         k = None
