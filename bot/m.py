@@ -6145,7 +6145,7 @@ async def msgt(event):
   #  info(f"{chat_id} {sender_id}: {msg.id} {short(text) if text is not None else type(msg.file)}")
   #  info(f"{chat_id} {sender_id}: {msg.id} {short(text) if text else type(msg.media)}")
   #  text = msg.message
-  info(f"{chat_id} {sender_id if sender is None or sender_id > 0 else -1}: {short(text) if text is not None and len(text) > 0 else type(msg.media)}_{msg.id}")
+  info(f"{chat_id if chat_id < 0 else 0} {sender_id if sender_id is None or sender_id > 0 else -1}: {short(text) if text is not None and len(text) > 0 else type(msg.media)}_{msg.id}")
 
   if chat_id is None:
     #  warn(f"chat_id is None")
