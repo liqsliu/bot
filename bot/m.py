@@ -2773,7 +2773,13 @@ async def load_config():
               tmp.append(set(j))
             config[i] = tmp
 
+    global my_groups, log_group, log_group_private, bot_groups
+    my_groups = {}
+    log_group = None
+    log_group_private = None
+
     globals().update(config)
+
     global gd
     try:
       data = await read_file(DATA_PATH, "rb")
@@ -2786,26 +2792,33 @@ async def load_config():
       err(e=e)
       gd = {}
 
+
+    global mtmsgsg
+    mtmsgsg = {
+        "gateway1": {}
+        }
     if "mtmsgsg" in gd:
       info("load msg history: %s" % gd["users"])
     else:
       warn("not found msg history")
+      gd["mtmsgs"] = mtmsgsg
 
+    global users
+    users = {}
     if "users" not in gd:
-      gd["users"] = {}
+      gd["users"] = users
 
+    global bridges
+    bridges = {
+        # chat_id fo tg: jid of xmpp/gateway
+        -1001577701755: acg_group,
+        rss_bot: rss_group,
+        #  gpt_bot: "gateway1",
+        # 临时通道 jid of xmpp/gateway: chat_id fo tg
+        }
     if "bridges" not in gd:
-      gd["bridges"] = {
-          # chat_id fo tg: jid of xmpp/gateway
-          -1001577701755: acg_group,
-          rss_bot: rss_group,
-          #  gpt_bot: "gateway1",
-          # 临时通道 jid of xmpp/gateway: chat_id fo tg
-          }
-    if "mtmsgsg" not in gd:
-      gd["mtmsgs"] = {
-          "gateway1": {}
-          }
+      gd["bridges"] = bridges
+
 
     #  info("loaded gd\n%s" % json.dumps(gd, indent='  '))
     globals().update(gd)
@@ -9887,9 +9900,10 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
           f = cmd_funs[cmd]
           res = await f(cmds, src)
         except Exception as e:
-          return _exceptions_handler(e, no_send=True)
-          #  return True
-          res = 512,
+          res = _exceptions_handler(e, no_send=True)
+          if type(res) is str:
+            return res
+          return False
         #    print("run_cmd error:", e)
         #    res = get_lineno(e)
         #    res = f"run_cmd error: {res} {e=}"
