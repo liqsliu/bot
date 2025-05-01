@@ -6,7 +6,7 @@ export DOMAIN=${DOMAIN:-$(cat "$SH_PATH/DOMAIN")}
 LP=${LP:-$HOME/tera/tmp}
 
 UA="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
-UA="curl/7.88.1"
+# UA="curl/7.88.1"
 LA='Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6'
 
 
