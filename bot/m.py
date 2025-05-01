@@ -10106,8 +10106,8 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
         d[url] = tmp
     
     if len(d) == 0:
-      return False
-    if len(d) == 1:
+      pass
+    elif len(d) == 1:
       #  res = f"[{get_domain(url)}]({url}): {tmp}"
       res = tmp
     else:
@@ -10121,14 +10121,14 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
         k += 1
 
     #  if res:
-    if res is not None:
-      res = f"{name2}{res}"
+    if res is None:
+      res = await send_cmd_to_bash(None, name2, text)
       #  res2 = await send_cmd_to_bash(src, "", text)
       #  if res2:
       #    res += f"\n{res2}"
       return res
     else:
-      res = await send_cmd_to_bash(None, name2, text)
+      res = f"{name2}{res}"
       return res
       #  await mt_send(res, gateway=gateway, name="titlebot")
 
