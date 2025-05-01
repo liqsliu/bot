@@ -4143,24 +4143,24 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
       return False
 
-    if resend > 0:
-      info(f"resend: {short(text)}")
-      #  res = await _send_tg(client, lock, last, chats, raw_md(text), chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1)
-      #  if formatting_entities is None:
-      #    formatting_entities = []
-      #    formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
-      #  else:
-      #    formatting_entities = None
-      formatting_entities = []
-      formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
-      res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
-      if res is False:
-        info(f"resend2: {short(text)}")
-        res = await pastebin(text)
-        if res:
-          warn(f"saved text to: {res}")
-          text = res
-        return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
+  if resend > 0:
+    info(f"resend: {short(text)}")
+    #  res = await _send_tg(client, lock, last, chats, raw_md(text), chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1)
+    #  if formatting_entities is None:
+    #    formatting_entities = []
+    #    formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
+    #  else:
+    #    formatting_entities = None
+    formatting_entities = []
+    formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
+    res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
+    if res is False:
+      info(f"resend2: {short(text)}")
+      res = await pastebin(text)
+      if res:
+        warn(f"saved text to: {res}")
+        text = res
+      return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
 
   info(f"sent: {chat_id}: {short(text)}")
   return True
