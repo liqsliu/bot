@@ -3989,7 +3989,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       text2 = name + ": " + text
       formatting_entities = []
       formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
-      formatting_entities.append(MessageEntityUrl(offset=len(name), length=len(text)))
+      #  formatting_entities.append(MessageEntityUrl(offset=len(name), length=len(text)))
+      formatting_entities.append(MessageEntityTextUrl(offset=len(name), length=len(text), url=text))
     else:
       #  text2 = name2 + text
       text2 = name + ": " + text
