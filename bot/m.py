@@ -4106,10 +4106,11 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         if delay is not None:
           await sleep(delay)
 
+      info(f"sent: {chat_id}: {short(text)}")
+      return True
     except rpcerrorlist.MessageTooLongError as e:
       warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
       await sleep(3)
-      return False
     except rpcerrorlist.MessageIdInvalidError as e:
       err(f"找不到对应id的消息，大概已经被删除了: {e=} {chat_id} {short(t)}", no_send=True)
       if chat_id in last:
@@ -4121,27 +4122,24 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       if parse_mode ==  "md":
         err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
         #  resend = True
-        if resend >= 0:
-          resend += 1
       else:
         err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=} {e=}", no_send=True)
+      if resend >= 0:
+        resend += 1
     except rpcerrorlist.FloodWaitError as e:
       warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
       await slow_mode(client)
-      return False
     except ValueError as e:
       if e.args[0] == 'Failed to parse message':
         err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
       else:
         err(f"发送tg消息失败, wtf: {chat_id} {type(t)} {e=} {t=}")
-      return False
     except Exception as e:
       if client is TB:
         no_send = True
       else:
         no_send = False
       err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
-      return False
 
   if resend > 0:
     info(f"resend: {short(text)}")
@@ -4154,16 +4152,15 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     formatting_entities = []
     formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
     res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
-    if res is False:
-      info(f"resend2: {short(text)}")
-      res = await pastebin(text)
-      if res:
-        warn(f"saved text to: {res}")
-        text = res
-      return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
-
-  info(f"sent: {chat_id}: {short(text)}")
-  return True
+    if res is True:
+      return True
+    info(f"resend2: {short(text)}")
+    res = await pastebin(text)
+    if res:
+      warn(f"saved text to: {res}")
+      text = res
+    return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
+  return False
 
 
 def raw_md(text):
