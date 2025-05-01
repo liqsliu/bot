@@ -5245,7 +5245,7 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
           now = time.time()
           if now - last_time[0] > interval:
             last_time[0] = now
-            send("{}".format(hbyte(length-sent)), src, tmp_msg=True)
+            send_tmp_msg("{}".format(hbyte(length-sent)), src)
             info("剩余 {}".format(hbyte(length-sent)))
       #  async def update_tmp_msg():
       #    while True:
@@ -5314,6 +5314,20 @@ def short(text, length=64):
   else:
     return text
 
+
+tmp_msgs = {}
+def send_tmp_msg(text, chat_id):
+  #  if chat_id in tmp_msgs:
+  #    pass
+  #    last tmp_msgs[chat_id]
+  #  else:
+  #    #  tmp_msgs[chat_id] = time.time()
+  #    last = 0
+  #  if time.time() - last > interval:
+  if chat_id not in tmp_msgs or time.time() - tmp_msgs[chat_id] > interval:
+    send(text, chat_id, tmp_msg=True)
+    tmp_msgs[chat_id] = time.time()
+  #  await sleep(interval)
 #  last_time = {}
 
 tg_download_tasks = set()
@@ -5324,11 +5338,12 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   if msg.file:
     size = msg.file.size
     res = ''
-    if size:
-      res += f"{hbyte(size)}"
     if msg.file.name:
       res += f" {msg.file.name}"
-    send("准备下载: {}".format(res), src, tmp_msg=True)
+    if size:
+      res += f" {hbyte(size)}"
+    if res:
+      send("准备下载:{}".format(res), src, tmp_msg=True)
     timeout = get_timeout(size)
     if max_wait_time > timeout:
       timeout = max_wait_time
@@ -5372,9 +5387,11 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
         break
       #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
       #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
-      send(hbyte(total-current), src, tmp_msg=True)
+      send_tmp_msg(hbyte(total-current), src)
       last_time[0] = time.time()
         #  last_current = current
+
+
 
 
   async def _download_media(msg, path):
@@ -5388,7 +5405,8 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   try:
     if src:
       while src in tg_download_tasks:
-        send("下载任务排队中 {}".format(res), src, tmp_msg=True)
+        send_tmp_msg("下载任务排队中 {}".format(res), src)
+        #  send("下载任务排队中 {}".format(res), src, tmp_msg=True)
         await sleep(interval)
       tg_download_tasks.add(src)
       t = asyncio.create_task(update_tmp_msg())
@@ -7256,7 +7274,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
         ress[0] = now
         info("剩余: {}".format(hbyte(length-ress[1])))
         #  sendme("{:.1f}M".format((length-ress[0])/1024/1024))
-        send(hbyte(length-ress[1]), src, tmp_msg=True)
+        send_tmp_msg(hbyte(length-ress[1]), src)
       #  print(f"{len(data)}")
       return data
     return wrapper
