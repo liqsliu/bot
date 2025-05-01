@@ -4146,7 +4146,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     if resend > 0:
       info(f"resend: {short(text)}")
       #  res = await _send_tg(client, lock, last, chats, raw_md(text), chat_id, correct, tmp_msg, delay, topic, parse_mode="md", name=name, tg_msg_id=tg_msg_id, resend=-1)
-      if formatting_entitiesis is None:
+      if formatting_entities is None:
         formatting_entities = []
         formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
       else:
