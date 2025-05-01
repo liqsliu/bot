@@ -9844,6 +9844,9 @@ async def run_cmd(*args, **kwargs):
 
 #  async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool | str:
 async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | str:
+  st = send_typing(src)
+  if st is not None:
+    await st.__aenter__()
   if name:
     name2 = name + ": "
   else:
@@ -9856,7 +9859,6 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
   elif text == "help":
     text = ".help"
 
-  st = None
   try:
     if text[0:1] == ".":
       if text[1:2] == " ":
@@ -9870,9 +9872,6 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
         return True
       #  print(f"> I: {cmds}")
       info("got cmds: {}".format(cmds))
-      st = send_typing(src)
-      if st is not None:
-        await st.__aenter__()
 
       cmd = cmds[0]
       res = False
