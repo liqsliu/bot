@@ -9855,23 +9855,25 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
     return "pong"
   elif text == "help":
     text = ".help"
-  if text[0:1] == ".":
-    if text[1:2] == " ":
-      return True
-    if text[1:2] == ".":
-      return True
-    cmds = get_cmd(text[1:])
-    if cmds:
-      pass
-    else:
-      return True
-    #  print(f"> I: {cmds}")
-    info("got cmds: {}".format(cmds))
-    st = send_typing(src)
-    if st is not None:
-      await st.__aenter__()
 
-    try:
+  st = None
+  try:
+    if text[0:1] == ".":
+      if text[1:2] == " ":
+        return True
+      if text[1:2] == ".":
+        return True
+      cmds = get_cmd(text[1:])
+      if cmds:
+        pass
+      else:
+        return True
+      #  print(f"> I: {cmds}")
+      info("got cmds: {}".format(cmds))
+      st = send_typing(src)
+      if st is not None:
+        await st.__aenter__()
+
       cmd = cmds[0]
       res = False
       if cmd in cmd_for_admin:
@@ -9981,48 +9983,13 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
         #  reply.body[None] = "%s" % res
         #  send(reply)
         #  return True
-      else:
-        #  res = await send_cmd_to_bash(src, name, text)
-        res = await send_cmd_to_bash(None, name2, text)
-        if res:
-          return res
-    except Exception as e:
-      raise e
-    finally:
-      #  info("finally")
-      try:
-        if st is not None:
-          await st.__aexit__()
-      except asyncio.CancelledError as e:
-        info("该任务被要求中止，无法清除输入状态: {!r}".format(e))
-        raise
-      except GeneratorExit as e:
-        warn("fixme: 无法清除输入状态: {!r})".format(e))
+    #  elif text.isnumeric() and bridges[music_bot] != src:
+    elif text.isnumeric():
 
-    return True
-  #  elif text.isnumeric() and bridges[music_bot] != src:
-  elif text.isnumeric():
-
-    #  src_o = src
-    pid = None
-    if src in mtmsgsg:
-      mtmsgs = mtmsgsg[src]
-      for pid,l in mtmsgs.items():
-        if len(l) > 1:
-          if l[1]:
-            if pid in bridges_tmp:
-              if bridges_tmp[pid] == src:
-                break
-        pid = None
-
-    if pid is None:
-      for src in get_mucs(src):
-        if src in mtmsgsg:
-          mtmsgs = mtmsgsg[src]
-        else:
-          info(f"not founc {src} in mtmsgsg")
-          #  return
-          continue
+      #  src_o = src
+      pid = None
+      if src in mtmsgsg:
+        mtmsgs = mtmsgsg[src]
         for pid,l in mtmsgs.items():
           if len(l) > 1:
             if l[1]:
@@ -10031,106 +9998,139 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
                   break
           pid = None
 
-        if pid is not None:
+      if pid is None:
+        for src in get_mucs(src):
+          if src in mtmsgsg:
+            mtmsgs = mtmsgsg[src]
+          else:
+            info(f"not founc {src} in mtmsgsg")
+            #  return
+            continue
+          for pid,l in mtmsgs.items():
+            if len(l) > 1:
+              if l[1]:
+                if pid in bridges_tmp:
+                  if bridges_tmp[pid] == src:
+                    break
+            pid = None
+
+          if pid is not None:
+            break
+
+      #  src = src_o
+      if pid is None:
+        return False
+
+      s = int(text)
+      k = 0
+      #  for _, v in mtmsgs.items():
+        #  v = mtmsgs[gid]
+        #  if len(v) > 1:
+        #    info(f"mtmsgs buttons: {v[1]}")
+        #    #  k += len(get_buttons(v))
+      #  if k is None:
+      #    break
+
+      for i in get_buttons(l[1]):
+        k += 1
+        if k == s:
+          send(f"命中：{text}. [{i.text}]", src, tmp_msg=True)
+          info(f"已找到：{text} {i.text}")
+          mtmsgs[pid] = [name2]
+          k = None
+          await sleep(0.5)
+          await i.click()
           break
 
-    #  src = src_o
-    if pid is None:
-      return False
+      if k is not None:
+        info(f"没找到：{text}")
+      #  mtmsgs.clear()
+        #  ids = list(mtmsgs.keys())
+        #  m = None
+        #  if len(ids) > 5:
+        #    while True:
+        #      m = min(ids)
+        #      mtmsgs.pop(m)
+        #      ids.remove(m)
+        #      if len(ids) < 5:
+        #        break
+        #  if m is None:
+        text = ""
+        k = 0
+        for pid in mtmsgs:
+          l = mtmsgs[pid]
+          if len(l) > 1:
+            bs = l[1]
+            text += print_buttons(bs)
+        send(f"没找到，请重新发送指令{text}", src)
 
-    s = int(text)
-    k = 0
-    #  for _, v in mtmsgs.items():
-      #  v = mtmsgs[gid]
-      #  if len(v) > 1:
-      #    info(f"mtmsgs buttons: {v[1]}")
-      #    #  k += len(get_buttons(v))
-    #  if k is None:
-    #    break
-
-    for i in get_buttons(l[1]):
-      k += 1
-      if k == s:
-        send(f"命中：{text}. [{i.text}]", src, tmp_msg=True)
-        info(f"已找到：{text} {i.text}")
-        mtmsgs[pid] = [name2]
-        k = None
-        await sleep(0.5)
-        await i.click()
-        break
-
-    if k is not None:
-      info(f"没找到：{text}")
-    #  mtmsgs.clear()
-      #  ids = list(mtmsgs.keys())
-      #  m = None
-      #  if len(ids) > 5:
-      #    while True:
-      #      m = min(ids)
-      #      mtmsgs.pop(m)
-      #      ids.remove(m)
-      #      if len(ids) < 5:
-      #        break
-      #  if m is None:
-      text = ""
-      k = 0
-      for pid in mtmsgs:
-        l = mtmsgs[pid]
-        if len(l) > 1:
-          bs = l[1]
-          text += print_buttons(bs)
-      send(f"没找到，请重新发送指令{text}", src)
-
-    return True
-  else:
-    # tilebot
-    tmp=""
-    info(f"check url in: {text0}")
-    for i in text0.splitlines():
-      if not i.startswith("> ") and  i != ">":
-        tmp += i+"\n"
-
-    urls=urlre.findall(qre.sub("", tmp))
-    res = None
-    #  M=' 🔗 '
-    #  M='- '
-    #  M=' ⤷ '
-    d = {}
-    for url in urls:
-      #  url=url[0]
-      url=url[1]
-      #  tmp = "%s" % await get_title(url, max_time=15)
-      tmp = await get_title(url, max_time=15)
-      if tmp is not None:
-        #  return True
-        d[url] = tmp
-    
-    if len(d) == 0:
-      res = await send_cmd_to_bash(None, name2, text)
-      return res
-    elif len(d) == 1:
-      #  res = f"[{get_domain(url)}]({url}): {tmp}"
-      res = tmp
+      return True
     else:
-      res=" 检测到%s个链接" % len(d)
-      k = 1
-      for url in d:
-        tmp = d[url]
-        #  res+="\n\n> %s\n%s" % (url, tmp)
-        #  res += "\n\n%s. [%s](%s): %s" % (k, get_domain(url), url, tmp)
-        res += "\n\n%s. %s" % (k, tmp)
-        k += 1
+      # tilebot
+      tmp=""
+      info(f"check url in: {text0}")
+      for i in text0.splitlines():
+        if not i.startswith("> ") and  i != ">":
+          tmp += i+"\n"
 
-    #  if res:
-    if res is None:
-      #  res2 = await send_cmd_to_bash(src, "", text)
-      #  if res2:
-      #    res += f"\n{res2}"
+      urls=urlre.findall(qre.sub("", tmp))
+      res = None
+      #  M=' 🔗 '
+      #  M='- '
+      #  M=' ⤷ '
+      d = {}
+      for url in urls:
+        #  url=url[0]
+        url=url[1]
+        #  tmp = "%s" % await get_title(url, max_time=15)
+        tmp = await get_title(url, max_time=15)
+        if tmp is not None:
+          #  return True
+          d[url] = tmp
+      
+      if len(d) == 0:
+        pass
+      else:
+        if len(d) == 1:
+          #  res = f"[{get_domain(url)}]({url}): {tmp}"
+          res = tmp
+        else:
+          res=" 检测到%s个链接" % len(d)
+          k = 1
+          for url in d:
+            tmp = d[url]
+            #  res+="\n\n> %s\n%s" % (url, tmp)
+            #  res += "\n\n%s. [%s](%s): %s" % (k, get_domain(url), url, tmp)
+            res += "\n\n%s. %s" % (k, tmp)
+            k += 1
+
+        #  if res:
+        if res is None:
+          #  res2 = await send_cmd_to_bash(src, "", text)
+          #  if res2:
+          #    res += f"\n{res2}"
+          return res
+        else:
+          res = f"{name2}{res}"
+          return res
+        #  await mt_send(res, gateway=gateway, name="titlebot")
+    res = await send_cmd_to_bash(None, name2, text)
+    if res:
       return res
-    else:
-      res = f"{name2}{res}"
-      return res
-      #  await mt_send(res, gateway=gateway, name="titlebot")
+  except Exception as e:
+    raise e
+  finally:
+    #  info("finally")
+    try:
+      if st is not None:
+        await st.__aexit__()
+    except asyncio.CancelledError as e:
+      info("该任务被要求中止，无法清除输入状态: {!r}".format(e))
+      raise
+    except GeneratorExit as e:
+      warn("fixme: 无法清除输入状态: {!r})".format(e))
+
+    #  return True
 
   return False
 
