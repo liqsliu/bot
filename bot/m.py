@@ -2394,7 +2394,7 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None, cmd=None):
     #    break
     try:
       ts = asyncio.shield(t)
-      o, e = await asyncio.wait_for(ts, interval+1)
+      o, e = await asyncio.wait_for(ts, interval+3)
       info(f"执行结束: {p} {o=} {e=}")
       break
     #  start_timme = loop.time()
