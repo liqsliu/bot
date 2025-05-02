@@ -10803,35 +10803,36 @@ async def msgb(event):
         e, gid = await get_entity(url, False, return_gid=True, client=client)
         if e is None:
           if text.startswith("id a "):
-          res += "using TB\n"
-          client = TB
-          e, gid = await get_entity(url, False, return_gid=True, client=client)
+            res += "using TB\n"
+            client = TB
+            e, gid = await get_entity(url, False, return_gid=True, client=client)
 
         if e:
           if gid is not None:
             info(f"get msg: {e} {gid}")
-            msg = await client.get_messages(e, ids=gid)
-            if msg is None:
+            tmsg = await client.get_messages(e, ids=gid)
+            if tmsg is None:
               info(f"get msg(TB): {e} {gid}")
               res += "using get_msg\n"
               if client is UB:
-                msg = await get_msg(url, TB)
+                tmsg = await get_msg(url, TB)
               else:
-                msg = await get_msg(url, UB)
+                tmsg = await get_msg(url, UB)
 
-            if msg is not None:
-              ee = await msg.get_sender()
+            if tmsg is not None:
+              ee = await tmsg.get_sender()
               if ee is not None:
                 if full:
                   await send_tg(ee.stringify(), chat_id, topic=msg.id)
                   return
 
-              if msg.is_group:
+              if tmsg.is_group:
                 res += "chat:\n"
                 res += print_entity(e)
+              if ee is None:
                 res += "\n\nsender:\n"
-              if ee is not None:
-                res += "E: sender: None\n"
+              else:
+                res += "\n\nE: sender: None\n"
                 e = ee
             else:
               res += "E: not found msg\n"
@@ -10851,18 +10852,21 @@ async def msgb(event):
         full = False
         if text.startswith("msg f "):
           full = True
+        client = UB
+        if text.startswith("msg b "):
+          client = TB
         #  url = cmds[1]
         url = text.split(' ')[-1]
         if url:
           opts = 0
-          peer, gid = await get_entity(url, return_gid=True)
+          peer, gid = await get_entity(url, return_gid=True, client=client)
           if peer:
             #  send(peer.stringify(), chat_id)
             #  ss = url.split('/')
             #  if len(ss) > 4:
             #    gid = int(ss[-1])
             if gid:
-              tmsg = await UB.get_messages(peer, ids=gid)
+              tmsg = await client.get_messages(peer, ids=gid)
               if tmsg:
                 if full:
                   #  await msg.reply(f"{e.stringify()}")
