@@ -670,7 +670,7 @@ def _exceptions_handler(e, func=None, no_send=False, *args, **kwargs):
     info("W: 手动终止")
     raise
   except SystemExit:
-    err(res, exc_info=True, stack_info=True)
+    err(res, exc_info=True, stack_info=True, e=e)
     raise
 
   except asyncio.CancelledError:
@@ -727,12 +727,12 @@ def _exceptions_handler(e, func=None, no_send=False, *args, **kwargs):
     return True
   except OSError:
     no_send = True
-    err("出错啦 OSError %s" % res, True)
+    err("出错啦 OSError %s" % res, True, e=e)
     #  raise
   except Exception:
     pass
   except BaseException:
-    err("出错啦 %s" % res)
+    err("出错啦 %s" % res, e=e)
     raise
     #  err(f"W: {repr(e)} line: {e.__traceback__.tb_lineno}", exc_info=True, stack_info=True)
     #  print(f"W: {repr(e)} line: {e.__traceback__.tb_next.tb_next.tb_lineno}")
@@ -757,11 +757,11 @@ def _exceptions_handler(e, func=None, no_send=False, *args, **kwargs):
 
   if no_send:
     if more:
-      err(res, True)
+      err(res, True, e=e)
     else:
-      warn(res)
+      warn(res, e=e)
   else:
-    err(res)
+    err(res, e=e)
     # wait is ok
     #  await sleep(5)
     #  send_log(res, 9)
@@ -1331,7 +1331,7 @@ def load_str(msg, no_ast=False):
     try:
       return json.loads(msg)
     except Exception as e:
-      err(f"failed2: {msg=}")
+      err(f"failed2: {msg=}", e=e)
       #  raise e
       return {}
 
@@ -3775,13 +3775,13 @@ async def _send_xmpp(msg, client=None, room=None, name=None, correct=False, from
           res = await c.send_message(msg)
       except ValueError as e:
         if e.args[0] == 'control characters are not allowed in well-formed XML':
-          #  err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", exc_info=True, stack_info=True)
+          #  err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", exc_info=True, stack_info=True, e=e)
           info(f"发送xmpp消息失败，不支持特殊字符: {e=} {jid=} [msg=] {text=}")
         else:
-          err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
+          err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True, e=e)
         return False
       except Exception as e:
-        err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True)
+        err(f"发送xmpp消息失败: {e=} {jid=} [msg=] {text=}", no_send=True, e=e)
         return False
         #  return False
       #  if isawaitable(res):
@@ -4142,10 +4142,10 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       info(f"sent: {chat_id}: {short(text)}")
       return True
     except rpcerrorlist.MessageTooLongError as e:
-      warn(f"消息过长，被服务器拒绝: {e=} {chat_id} {short(t)}")
+      warn(f"消息过长，被服务器拒绝: {chat_id} {short(t)}", e=e)
       await sleep(3)
     except rpcerrorlist.MessageIdInvalidError as e:
-      err(f"找不到对应id的消息，大概已经被删除了: {e=} {chat_id} {short(t)}", no_send=True)
+      err(f"找不到对应id的消息，大概已经被删除了: {chat_id} {short(t)}", no_send=True, e=e)
       if chat_id in last:
         last.pop(chat_id)
         info("deleted msg log")
@@ -4153,26 +4153,31 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         resend += 1
     except rpcerrorlist.EntityBoundsInvalidError as e:
       if parse_mode ==  "md":
-        err(f"failed to send tg msg: {chat_id=} {text=} {e=}", no_send=True)
+        err(f"failed to send tg msg: {chat_id=} {text=}", no_send=True, e=e)
         #  resend = True
       else:
-        err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=} {e=}", no_send=True)
+        err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=}", no_send=True,, e=e)
       if resend >= 0:
         resend += 1
     except rpcerrorlist.FloodWaitError as e:
-      warn(f"消息发送过快，被服务器拒绝，等待300s: {e=} {chat_id} {t}")
+      warn(f"消息发送过快，被服务器拒绝，等待300s: {chat_id=} {t}", e=e)
       await slow_mode(client)
     except ValueError as e:
       if e.args[0] == 'Failed to parse message':
-        err(f"发送tg消息失败: {chat_id=} {type(t)} {e=} {t=}")
+        err(f"发送tg消息失败，检查要发送的内容: {chat_id=} {t=}", e=e)
+      elif e.args[0].startswith('Could not find the input entity for PeerUser(user_id='):
+        if client is TB:
+          err(f"发送tg消息失败，bot不能和bot通讯: {chat_id=} {type(t)} {t=}", e=e)
+        else:
+          err(f"发送tg消息失败, wtf: {chat_id=} {t=}\n{await client.get_me()}", e=e)
       else:
-        err(f"发送tg消息失败, wtf: {chat_id=} {type(t)} {e=} {t=}")
+        err(f"发送tg消息失败, wtf: {chat_id=} {t=}", e=e)
     except Exception as e:
       if client is TB:
         no_send = True
       else:
         no_send = False
-      err(f"发送tg消息失败: {chat_id=} {e=} {t=}", no_send)
+      err(f"发送tg消息失败: {chat_id=} {t=}", no_send, e=e)
 
   if resend > 0:
     info(f"resend: {short(text)}")
@@ -4438,18 +4443,18 @@ async def mt_read():
               line = b""
 
     except ClientPayloadError:
-      err("mt closed, data lost")
+      err("mt closed, data lost", e=e)
     except ClientConnectorError:
-      warn("mt api is not ok, retry...")
+      warn("mt api is not ok, retry...", e=e)
     except asyncio.CancelledError as e:
       info(f"该任务被要求中止")
       raise
     except ValueError as e:
       #  print("W: maybe a msg is lost")
-      err(f"{e=} line: {line}")
+      err(f"{e=} line: {line}", e=e)
       raise
     except Exception as e:
-      err(f"{e=} line: {line}")
+      err(f"{e=} line: {line}", e=e)
       raise
     await sleep(5)
 
@@ -4474,14 +4479,14 @@ async def msgmt(msg):
         return
 
       msgd = json.loads(msg)
-  except json.decoder.JSONDecodeError:
-      err("fail to decode msg from mt")
+  except json.decoder.JSONDecodeError as e:
+      err("fail to decode msg from mt", e=e)
       print("################")
       print(msg)
       print("################")
       #  info = "E: {}\n==\n{}\n==\n{}".format(sys.exc_info()[1], traceback.format_exc(), sys.exc_info())
       #  err(info)
-      err("E: failed to decode msg from mt...", exc_info=True, stack_info=True)
+      err("E: failed to decode msg from mt...", exc_info=True, stack_info=True, e=e)
       return
 
   account = msgd["account"]
@@ -5054,9 +5059,9 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
       res = await session.request(url=url, method=method, *args, **kwargs)
     except asyncio.TimeoutError as e:
       #  raise
-      err(f"请求超时 {e=} {url=}")
+      err(f"请求超时 {url=}", e=e)
     except Exception as e:
-      err(f"请求失败 {e=} {url=}")
+      err(f"请求失败 {url=}", e=e)
     else:
       try:
         async with res:
@@ -5068,7 +5073,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
           elif res.status != 200 and res.status != 201:
             text = await res.text()
             html = f"E: error http status: {res.status} {res.reason} headers: {res.headers} url: {res.url} res: {text}"
-            err(html)
+            err(html, e=e)
             #  return
           else:
             # print(type(res))
@@ -5084,7 +5089,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               length = int(res.headers['Content-Length'])
             #  if 'Content-Length' in res.headers and int(res.headers['Content-Length']) > HTTP_RES_MAX_BYTES:
             if length > HTTP_RES_MAX_BYTES:
-              err(f"文件过大，终止下载: ({length}) {url}")
+              err(f"文件过大，终止下载: ({length}) {url}", e=e)
             elif 'Transfer-Encoding' in res.headers and res.headers['Transfer-Encoding'] == "chunked":
               #  async for data in res.content.iter_chunked(HTTP_RES_MAX_BYTES):
               #    break
@@ -5100,7 +5105,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               #  data = await res.read()
               data = await res.content.read(HTTP_FILE_MAX_BYTES)
       except ClientPayloadError as e:
-        err(f"读取失败: {e=} {url=}")
+        err(f"读取失败: {url=}", e=e)
         #  return
       #  except Exception as e:
       #    err(f"http connect error: {e=} {url=}")
@@ -5131,7 +5136,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
             html = data.decode(errors='ignore')
           info(f"http res: {short(html)} url: {url}")
         except UnicodeDecodeError as e:
-          err(f"docode failed: {e=} res data: {short(data)}")
+          err(f"docode failed: res data: {short(data)}", e=e)
           html = data
   if return_headers:
     if res:
@@ -5436,7 +5441,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     try:
       return await asyncio.wait_for(msg.download_media(path, progress_callback=cb), timeout=timeout)
     except TimeoutError as e:
-      err(f"下载失败(超时{timeout}s): {e=}")
+      err(f"下载失败(超时{timeout}s)", e=e)
 
 
   file_path = None
@@ -5479,11 +5484,11 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
         path = None
         return f"下载取消: {res}"
   except Exception as e:
-    err(f"下载失败 {e=}")
+    err(f"下载失败", e=e)
   finally:
     if file_path is None:
       text, nick, d = await print_tg_msg(msg)
-      err(f"下载失败 file_path is None: file_msg: {nick}: {text}")
+      err(f"下载失败 file_path is None: file_msg: {nick}: {text}", e=e)
     else:
       if not file_path.startswith("/"):
         file_path = path + file_path
@@ -5713,14 +5718,14 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
             return peer, gid
           return  peer
         except TypeError as e:
-          err(f"E: {e=}, not found entity: {peer} {e=}")
+          err(f"not found entity: {peer}", e=e)
         except ValueError as e:
-          info(f"not found entity: {peer=} {e=}")
+          info(f"not found entity: {peer=}", e=e)
 
       except rpcerrorlist.UsernameInvalidError as e:
-        err(f"E: {e=}, not found input entity: {peer}")
+        err(f"not found input entity: {peer}", e=e)
       except TypeError as e:
-        err(f"E: {e=}, not found input entity: {peer}")
+        err(f"not found input entity: {peer}", e=e)
       except ValueError as e:
         info(f"search inputpeer(use get_peer_id): {peer} {e=}")
         try:
@@ -5731,12 +5736,11 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
               return peer, gid
             return  peer
         except TypeError as e:
-          err(f"E: {e=}, not found input entity(use get_peer_id): {peer}")
+          err(f"not found input entity(use get_peer_id): {peer}", e=e)
           return
         except ValueError as e:
           info(f"not found input entity: {peer} {e=}")
   except Exception as e:
-    #  err(f"{e=}")
     err(e)
   #  raise ValueError(f"无法获取entity: {chat_id=} {peer=}")
   if return_gid:
@@ -6499,9 +6503,9 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       else:
         warn(f"fixme: {e=} {file=}")
     except AttributeError as e:
-      err(f"fixme: {e=} {file=}")
+      err(f"fixme: {file=}", e=e)
     except Exception as e:
-      err(f"fixme: {e=} {file=}")
+      err(f"fixme: {file=}", e=e)
       try:
         if tmsg.video:
           res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
@@ -6512,7 +6516,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if opts == 1:
           return True
       except Exception as e:
-        err(f"fixme: {e=} {file=}")
+        err(f"fixme: {file=}", e=e)
 
     if res is None:
       file = None
@@ -6522,9 +6526,9 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         else:
           file = utils.pack_bot_file_id(tmsg.document)
       except AttributeError as e:
-        err(f"fixme: {e=} {type(file)}")
+        err(f"fixme: {type(file)}", e=e)
       except Exception as e:
-        err(f"fixme: {e=}")
+        err(f"fixme: ", e=e)
       if file is None:
         try:
           # AttributeError("'PhotoSize' object has no attribute 'location'")
@@ -6536,12 +6540,12 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
           if file is None and tmsg.media:
             file = utils.pack_bot_file_id(tmsg.media)
           if file is None:
-            err(f"wtf: {tmsg.stringify()}")
+            err(f"wtf: {tmsg.stringify()}", e=e)
             #  return
         except AttributeError as e:
-          err(f"fixme: {e=}")
+          err("fixme: ", e=e)
         except Exception as e:
-          err(f"fixme: {e=}")
+          err("fixme: ", e=e)
       if file is not None:
         res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
         if opts == 1:
@@ -6578,7 +6582,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             if opts == 2:
               return
           except Exception as e:
-            err(f"上传失败 {e=}")
+            err("上传失败", e=e)
         else:
           if url:
             send(url, chat_id)
@@ -6592,7 +6596,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             xmpp_url = await upload(path)
             info(xmpp_url)
           except Exception as e:
-            err(f"上传失败 {e=}")
+            err("上传失败", e=e)
 
         if xmpp_url:
           try:
@@ -6602,13 +6606,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               return True
           except rpcerrorlist.WebpageCurlFailedError as e:
             send(xmpp_url, chat_id)
-            err(f"文件url有问题: {e=} {url}")
+            err(f"文件url有问题: {url}", e=e)
           except rpcerrorlist.WebpageMediaEmptyError as e:
             send(xmpp_url, chat_id)
-            err(f"文件url有问题: {e=} {url}")
+            err(f"文件url有问题: {url}", e=e)
           except Exception as e:
             send(xmpp_url, chat_id)
-            err(f"{e=} {url}")
+            err(url, e=e)
 
         try:
           await t
@@ -6619,13 +6623,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
              await sleep(1)
              res = await UB.send_file(chat_id, file=url, caption=url)
           else:
-            err("wtf")
+            err("wtf", e=e)
         except rpcerrorlist.WebpageCurlFailedError as e:
-          err(f"文件url有问题: {e=} {url}")
+          err(f"文件url有问题: {url}", e=e)
         except rpcerrorlist.WebpageMediaEmptyError as e:
-          err(f"文件url有问题: {e=} {url}")
+          err(f"文件url有问题: {url}", e=e)
         except Exception as e:
-          err(f"{e=} {url}")
+          err(f"{url=}", e=e)
 
         if res is None or opts == 2:
           try:
@@ -6633,7 +6637,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             return True
           except Exception as e:
             send(url, chat_id)
-            err(f"上传失败 {e=}")
+            err("上传失败", e=e)
 
       except Exception as e:
         raise e
@@ -7346,10 +7350,10 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       #  await send("测试进程间通信 res: {}".format(res))
       #  return res
   except FileNotFoundError as e:
-    err(f"上传失败：{e=} {slot.put.url=}")
+    err(f"上传失败：{slot.put.url=}", e=e)
     return
   except Exception as e:
-    err(f"上传失败：{e=} {slot.put.url=}")
+    err(f"上传失败：{slot.put.url=}", e=e)
     return
     #  finally:
     #    if not t.done():
@@ -10663,7 +10667,7 @@ async def join(jid=None, nick=None, client=None):
             info(f"进群失败(无权限): {myid} {jid} {e=}")
             return False
         except Exception as e:
-          err(f"进群失败: {myid} {jid} {e=}")
+          err(f"进群失败: {myid} {jid}", e=e)
           return False
         sum_try += 1
         if sum_try > 3:
@@ -11447,7 +11451,7 @@ def main():
       warn(f"捕获到systemexit: {e=} {e.args=}", exc_info=True, stack_info=True)
       sys.exit(2)
   except Exception as e:
-    err(f"出现未知异常: 正在停止运行...{e=}", exc_info=True, stack_info=True)
+    err(f"出现未知异常: 正在停止运行...", exc_info=True, stack_info=True, e=e)
     sys.exit(5)
     raise e
 
