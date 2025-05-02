@@ -255,11 +255,9 @@ def get_lineno(e=None, fs=None):
     maybe = tb
     n= tb.tb_next
     while n is not None:
-      if n.tb_frame.f_code.co_filename != FILE:
+      tb = n
+      if n.tb_frame.f_code.co_filename == FILE:
         #  print(last.tb_frame.f_code.co_filename, " != ", os.path.abspath(__file__))
-        tb = n
-      else:
-        tb = n
         maybe = tb
         if fs is not None:
           fs.add(tb.tb_frame.f_code.co_name)
@@ -286,6 +284,7 @@ info = logger.info
 def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
   if issubclass(type(text), BaseException):
     e = text
+    text = None
   if e is not None:
     text = "{} {}: {!r}".format(get_lineno(e=e), text, e)
   logger.error(text, exc_info=exc_info, stack_info=stack_info)
@@ -306,6 +305,7 @@ def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
 def warn(text=None, more=False, no_send=True, e=None, exc_info=True, stack_info=True):
   if issubclass(type(text), BaseException):
     e = text
+    text = None
   if e is not None:
     text = "{} {}: {!r}".format(get_lineno(e=e), text, e)
   if more:
@@ -5692,7 +5692,6 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
           peer = url
     elif chat_id is None:
       warn("chat_id is None")
-      return
     else:
       peer = url
       #  return False
@@ -5705,9 +5704,23 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
           if return_gid:
             return peer, gid
           return  peer
+
+        info(f"search peer: {peer}")
+        try:
+          peer = await client.get_entity(peer)
+          #  if gid is not None:
+          if return_gid:
+            return peer, gid
+          return  peer
+        except TypeError as e:
+          err(f"E: {e=}, not found entity: {peer} {e=}")
+        except ValueError as e:
+          info(f"not found entity: {peer=} {e=}")
+
+      except rpcerrorlist.UsernameInvalidError as e:
+        err(f"E: {e=}, not found input entity: {peer}")
       except TypeError as e:
         err(f"E: {e=}, not found input entity: {peer}")
-        return
       except ValueError as e:
         info(f"search inputpeer(use get_peer_id): {peer} {e=}")
         try:
@@ -5722,18 +5735,6 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
           return
         except ValueError as e:
           info(f"not found input entity: {peer} {e=}")
-
-      info(f"search peer: {peer}")
-      try:
-        peer = await client.get_entity(peer)
-        #  if gid is not None:
-        if return_gid:
-          return peer, gid
-        return  peer
-      except TypeError as e:
-        err(f"E: {e=}, not found entity: {peer} {e=}")
-      except ValueError as e:
-        info(f"not found entity: {peer=} {e=}")
   except Exception as e:
     #  err(f"{e=}")
     err(e)
