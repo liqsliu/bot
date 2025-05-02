@@ -10823,7 +10823,6 @@ async def msgb(event):
               return
             else:
               res += "E: not found msg\n"
-              res += print_entity(e)
           else:
             if full:
               #  await msg.reply(f"{e.stringify()}")
@@ -10831,7 +10830,7 @@ async def msgb(event):
               return
 
           #  pid = await UB.get_peer_id(e)
-            res += print_entity(e)
+          res += print_entity(e)
 
           #  await msg.reply(res)
           await send_tg(res, chat_id, topic=msg.id)
