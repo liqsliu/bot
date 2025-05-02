@@ -10790,62 +10790,52 @@ async def msgb(event):
         if text.startswith("id f "):
           full = True
         url = text.split(' ')[-1]
-        #  url = text.split(' ')[1]
-        #  if url.startswith("https://t.me/"):
-        #    username = url.split('/')[3]
-        #  elif url.startswith("@"):
-        #    username = url[1:]
-        #  else:
-        #    await UB.send_message(chat_id, "error url")
-        #    return
-        #
-        #  e = await UB.get_entity(username)
 
         e, gid = await get_entity(url, False, return_gid=True)
-        #  if type(e) is tuple:
-        #    peer = e[0]
-        #    gid = e[1]
-        #    e = await UB.get_messages(peer, ids=gid)
-        #    #  await UB.send_message(chat_id, f"{e.stringify()}")
-        #    if full:
-        #      #  await msg.reply(f"{e.stringify()}")
-        #      await send_tg(e.stringify(), chat_id, topic=msg.id)
-        #    await msg.reply("peer id: %s %s" % (await UB.get_peer_id(peer), type(e)))
         if e:
           res = ""
           if gid is not None:
-            if msg.is_group:
-              res += "chat:\n"
+
+            info(f"get msg: {e} {gid}")
+            msg = await UB.get_messages(e, ids=gid)
+            if msg is None:
+              info(f"get msg(TB): {e} {gid}")
+              msg = await get_msg(url, TB)
+                res += "using TB\n"
+
+            if msg is not None:
+              if full:
+                await send_tg(msg.stringify(), chat_id, topic=msg.id)
+                return
+
+              if e.is_group:
+                res += "chat:\n"
+                res += print_entity(e)
+                res += "\n\nsender:\n"
+              ee = await msg.get_sender()
+              if ee is None:
+                res += "E: sender: None\n"
+              else:
+                e = ee
+            elif full:
+              #  await msg.reply(f"{e.stringify()}")
+              await send_tg(e.stringify(), chat_id, topic=msg.id)
+              return
+            else:
+              res += "E: not found msg\n"
               res += print_entity(e)
-              res += "\n\nsender:\n"
+          else:
+            if full:
+              #  await msg.reply(f"{e.stringify()}")
+              await send_tg(e.stringify(), chat_id, topic=msg.id)
+              return
 
-              info(f"get msg: {e} {gid}")
-              msg = await UB.get_messages(e, ids=gid)
-              if msg is None:
-                info(f"get msg(TB): {e} {gid}")
-                msg = await get_msg(url, TB)
-              if msg is not None:
-                if full:
-                  await send_tg(msg.stringify(), chat_id, topic=msg.id)
-                ee = await msg.get_sender()
-                if ee is None:
-                  res += "E: sender: None"
-                else:
-                  e = ee
-
-          if full:
-            #  await msg.reply(f"{e.stringify()}")
-            await send_tg(e.stringify(), chat_id, topic=msg.id)
           #  pid = await UB.get_peer_id(e)
-          res += print_entity(e)
+            res += print_entity(e)
 
           #  await msg.reply(res)
           await send_tg(res, chat_id, topic=msg.id)
 
-          #  if pid > 0:
-          #    await msg.reply("peer id: [%s](tg://openmessage?user_id=%s)" % (pid, pid))
-          #  else:
-          #    await msg.reply("peer id: %s" % pid)
         else:
           e = await get_entity(url, False, client=TB)
           if type(e) is tuple:
@@ -10853,19 +10843,21 @@ async def msgb(event):
             gid = e[1]
             e = await TB.get_messages(peer, ids=gid)
             if e:
+              if full:
+                await msg.reply(f"{e.stringify()}")
+                return
               #  if len(e) > 1:
               if hasattr(e, "__len__"):
                 await msg.reply(f"found {len(e)} msgs")
                 e = e[0]
               #  await UB.send_message(chat_id, f"{e.stringify()}")
-              if full:
-                await msg.reply(f"{e.stringify()}")
               await msg.reply("using TB, peer id: %s" % await UB.get_peer_id(peer))
             else:
               await msg.reply("not fount entity")
           elif e:
             if full:
               await msg.reply(f"{e.stringify()}")
+              return
             pid = await TB.get_peer_id(e)
             #  res = "peer id: %s" % pid
             res = "using TB, peer id: %s %s %s" % (pid, e.first_name, e.last_name)
@@ -10903,10 +10895,11 @@ async def msgb(event):
                 if full:
                   #  await msg.reply(f"{e.stringify()}")
                   await send_tg(tmsg.stringify(), chat_id)
-                opts = 0
-                if len(cmds) == 3:
-                  opts = cmds[2]
-                await save_tg_msg(tmsg, chat_id, opts, url)
+                else:
+                  if len(cmds) == 3:
+                    opts = 0
+                    opts = cmds[2]
+                  await save_tg_msg(tmsg, chat_id, opts, url)
               else:
                 await msg.reply(f"error id: {gid}\nres: {msg}")
             return
