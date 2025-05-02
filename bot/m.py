@@ -284,6 +284,8 @@ def info2(s):
 info = logger.info
 
 def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
+  if issubclass(type(text), BaseException):
+    e = text
   if e is not None:
     text = "{} {}: {!r}".format(get_lineno(e=e), text, e)
   logger.error(text, exc_info=exc_info, stack_info=stack_info)
@@ -302,6 +304,8 @@ def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
 
 
 def warn(text=None, more=False, no_send=True, e=None, exc_info=True, stack_info=True):
+  if issubclass(type(text), BaseException):
+    e = text
   if e is not None:
     text = "{} {}: {!r}".format(get_lineno(e=e), text, e)
   if more:
@@ -5602,6 +5606,8 @@ async def parse_tg_url(url, wtf=1):
         gid = url.rsplit('=', 1)[-1]
       elif '/' in url:
         gid = url.rsplit('/', 1)[-1]
+      if len(gid) == 0:
+        gid = None
   #  if peer:
   #    #  if peer[0] != "-":
   #    if peer.isnumeric():
@@ -5612,10 +5618,8 @@ async def parse_tg_url(url, wtf=1):
   #      elif wtf == 2:
   #        peer = f"-{peer}"
   #        peer = int(peer)
-  if len(gid) > 0:
+  if gid is not None:
     gid = int(gid)
-  else:
-    gid = None
   return peer, gid
 
 
