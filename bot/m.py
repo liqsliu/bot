@@ -10839,10 +10839,10 @@ async def msgb(event):
                 res += "chat:\n"
                 res += print_entity(e)
               if ee is None:
-                res += "\n\nsender:\n"
-              else:
                 res += "\n\nE: sender: None\n"
+              else:
                 e = ee
+                res += "\n\nsender:\n"
             else:
               res += "E: not found msg\n"
 
@@ -10850,7 +10850,8 @@ async def msgb(event):
             await send_tg(e.stringify(), chat_id, topic=msg.id)
             return
           #  pid = await UB.get_peer_id(e)
-          res += print_entity(e)
+          if e:
+            res += print_entity(e)
           await send_tg(res, chat_id, topic=msg.id)
 
         else:
