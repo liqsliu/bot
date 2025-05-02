@@ -4095,7 +4095,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
           text2 = "%s\n%s%s" % ("\n".join(qt), name3, text)
           formatting_entities = []
           formatting_entities.append(MessageEntityBlockquote(offset=0, length=len("\n".join(qt))))
-          formatting_entities.append(MessageEntityBold(offset=len("\n".join(qt))+1, length=len(name3.strip())))
+          if name3:
+            formatting_entities.append(MessageEntityBold(offset=len("\n".join(qt))+1, length=len(name3.strip())))
         else:
           text2 = "%s\n%s" % ("\n> ".join(qt), text2)
       else:
