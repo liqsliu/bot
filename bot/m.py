@@ -10804,11 +10804,8 @@ async def msgb(event):
               msg = await get_msg(url, TB)
 
             if msg is not None:
-              if full:
-                await send_tg(msg.stringify(), chat_id, topic=msg.id)
-                return
 
-              if e.is_group:
+              if msg.is_group:
                 res += "chat:\n"
                 res += print_entity(e)
                 res += "\n\nsender:\n"
@@ -10817,6 +10814,9 @@ async def msgb(event):
                 res += "E: sender: None\n"
               else:
                 e = ee
+                if full:
+                  await send_tg(e.stringify(), chat_id, topic=msg.id)
+                  return
             elif full:
               #  await msg.reply(f"{e.stringify()}")
               await send_tg(e.stringify(), chat_id, topic=msg.id)
