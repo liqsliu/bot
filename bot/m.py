@@ -4164,15 +4164,15 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       await slow_mode(client)
     except ValueError as e:
       if e.args[0] == 'Failed to parse message':
-        err(f"发送tg消息失败: {chat_id} {type(t)} {e=} {t=}")
+        err(f"发送tg消息失败: {chat_id=} {type(t)} {e=} {t=}")
       else:
-        err(f"发送tg消息失败, wtf: {chat_id} {type(t)} {e=} {t=}")
+        err(f"发送tg消息失败, wtf: {chat_id=} {type(t)} {e=} {t=}")
     except Exception as e:
       if client is TB:
         no_send = True
       else:
         no_send = False
-      err(f"发送tg消息失败: {chat_id} {e=} {t=}", no_send)
+      err(f"发送tg消息失败: {chat_id=} {e=} {t=}", no_send)
 
   if resend > 0:
     info(f"resend: {short(text)}")
@@ -5773,7 +5773,7 @@ def print_entity(e):
   res += "\nhttps://t.me/c/%s/" % utils.resolve_id(pid)[0]
   return res
 
-async def parse_tg_file_msg(msg):
+async def parse_tg_file_msg(msg, chat_id=None):
   path = None
   backup_task = None
 
@@ -5784,7 +5784,7 @@ async def parse_tg_file_msg(msg):
       file_info = f"文件过大，终止下载: ({hbyte(file.size)})"
     else:
       #  path = await tg_download_media(msg)
-      path = await tg_download_media(msg, src=msg.chat_id, max_wait_time=get_timeout(msg.file.size))
+      path = await tg_download_media(msg, src=chat_id, max_wait_time=get_timeout(msg.file.size))
       if path is not None:
         #  t = asyncio.create_task(backup(path))
         #  url = await t
@@ -6347,7 +6347,7 @@ async def msgt(event):
     backup_task = None
     try:
       if msg.file:
-        file_info, path, backup_task = await parse_tg_file_msg(msg)
+        file_info, path, backup_task = await parse_tg_file_msg(msg, src)
         #  file = msg.file
         #  file_name = file.name
         #  if file_name:
