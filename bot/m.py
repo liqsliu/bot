@@ -10800,8 +10800,8 @@ async def msgb(event):
             msg = await UB.get_messages(e, ids=gid)
             if msg is None:
               info(f"get msg(TB): {e} {gid}")
+              res += "using TB\n"
               msg = await get_msg(url, TB)
-                res += "using TB\n"
 
             if msg is not None:
               if full:
