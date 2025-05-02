@@ -2343,13 +2343,13 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
 
 async def my_sexec(cmds, max_time=run_shell_time_max, src=None):
   #  p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  info(f"run shell cmds: {cmds}")
+  info(f"run shell cmds list: {cmds}")
   p = await asyncio.create_subprocess_exec(*cmds, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   return await my_subprocess(p, max_time=max_time, src=src)
 
 
 async def my_sshell(cmd, max_time=run_shell_time_max, src=None):
-  info(f"run shell cmd: {cmd}")
+  info(f"run shell cmd str: {cmd}")
   p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   #  p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   return await my_subprocess(p, max_time=max_time, src=src)
@@ -2362,11 +2362,12 @@ def wrap_read(func, src, ress):
     now = time.time()
     ress[1] += data
     if data:
-      if now - ress[0] > interval/2:
+      if now - ress[0] > interval:
         ress[0] = now
         #  if src and ress[1].strip():
         if ress[1].strip():
-          send( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, tmp_msg=True)
+          #  send( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, tmp_msg=True)
+          send_tmp_msg( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src)
         ress[1] = b""
       #  print(f"{len(data)}")
     return data
@@ -2412,7 +2413,7 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None):
       info(f"执行中: {p} {o=} {e=}")
     now = time.time()
     if now - ress[0] > interval:
-      send( "执行中 %ss" % int(now-start_time), src, tmp_msg=True)
+      send_tmp_msg( "执行中 %ss" % int(now-start_time), src)
     if now - ress[0] < max_time and now - start_time < max_time*10:
       pass
     elif p.returncode is None:
@@ -8780,39 +8781,49 @@ async def init_cmd():
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"bash\n.{cmds[0]} $code"
+      return 0, f"bash 独立线程\n.{cmds[0]} $code"
     cmds.pop(0)
     #  res = await my_popen(cmds)
     #  res = await my_popen(' '.join(cmds), src=src, shell=True)
     #  res = await my_sexec(' '.join(cmds), src=src)
     res = await my_sshell(' '.join(cmds), src=src)
     return 0, format_out_of_shell(res)
-  cmd_funs["sh3"] = _
-  cmd_for_admin.add('sh3')
+  cmd_funs["sh"] = _
+  cmd_for_admin.add('sh')
 
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
-      return 0, f"bash -l\n.{cmds[0]} $code"
+      return 0, f"bash -l 独立线程\n.{cmds[0]} $code"
     #  cmds[0] = "bash"
     cmds.pop(0)
     text = ' '.join(cmds)
     cmds = ["bash", "-c", text]
     res = await my_sexec(cmds, src=src)
     return 0, format_out_of_shell(res)
-  cmd_funs["sh2"] = _
-  cmd_for_admin.add('sh2')
+  cmd_funs["shl"] = _
+  cmd_for_admin.add('shl')
 
   async def _(cmds: list, src: str | int) -> tuple:
     global myshell_p
     if len(cmds) == 1:
-      return 0, f"bash -i\n.{cmds[0]} $code/stop/restart/err/kill\n'\\ '会翻译成空格再执行"
+      return 0, f"bash -i 共用一个线程\n.{cmds[0]} $code/stop/restart/err/kill\n'\\ '会翻译成空格再执行"
     elif len(cmds) == 2:
       if cmds[1] == "restart":
         if await stop_sub(myshell_p):
           #  myshell_p = await asyncio.create_subprocess_shell("bash -i", stdin=asyncio.subprocess.PIPE, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
           if await init_myshell():
             return 0, "ok"
+        else:
+          if await init_myshell():
+            return 0, "failed to stop\ninit ok"
+          else:
+            return 0, "failed to stop and init"
         return 0, "failed"
+      elif cmds[1] == "init":
+        if await init_myshell():
+          return 0, "ok"
+        else:
+          return 0, "failed"
       elif cmds[1] == "stop":
         if await stop_sub(myshell_p):
           return 0, "ok"
@@ -8836,19 +8847,19 @@ async def init_cmd():
     #  if res:
     #    res = f"```\n{res}```"
     #  return format_out_of_shell(res)
-  cmd_funs["sh"] = _
-  cmd_for_admin.add('sh')
+  cmd_funs["shi"] = _
+  cmd_for_admin.add('shi')
 
   async def _(cmds: list, src: str | int) -> tuple:
     global myshell_p
     if len(cmds) == 1:
-      return 0, f"bash -i\n不显示临时结果，只显示最终结果\n.{cmds[0]} $code"
+      return 0, f"bash -i\n共用一个线程，不显示临时结果，只显示最终结果\n.{cmds[0]} $code"
     cmds.pop(0)
     cmds = ' '.join(cmds)
     res = await myshell(cmds)
     return 0, format_out_of_shell(res)
-  cmd_funs["sh5"] = _
-  cmd_for_admin.add('sh5')
+  cmd_funs["shii"] = _
+  cmd_for_admin.add('shii')
 
   async def _(cmds: list, src: str | int) -> tuple:
     cmds = f'''
