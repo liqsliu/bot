@@ -2345,14 +2345,14 @@ async def my_sexec(cmds, max_time=run_shell_time_max, src=None):
   #  p = await asyncio.create_subprocess_exec(*args, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   info(f"run shell cmds list: {cmds}")
   p = await asyncio.create_subprocess_exec(*cmds, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  return await my_subprocess(p, max_time=max_time, src=src)
+  return await my_subprocess(p, max_time=max_time, src=src, cmd=" ".join(cmds))
 
 
 async def my_sshell(cmd, max_time=run_shell_time_max, src=None):
   info(f"run shell cmd str: {cmd}")
   p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
   #  p = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-  return await my_subprocess(p, max_time=max_time, src=src)
+  return await my_subprocess(p, max_time=max_time, src=src, cmd=cmd)
 
 
 def wrap_read(func, src, ress):
@@ -2373,7 +2373,11 @@ def wrap_read(func, src, ress):
     return data
   return wrapper
 
-async def my_subprocess(p, max_time=run_shell_time_max, src=None):
+async def my_subprocess(p, max_time=run_shell_time_max, src=None, cmd=None):
+  if cmd:
+    qt = cmd.splitlines()
+  else:
+    qt = None
   start_time = time.time()
   ress = [start_time, b""]
   p.stdout.read = wrap_read( p.stdout.read, src, ress)
@@ -2413,7 +2417,7 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None):
       info(f"执行中: {p} {o=} {e=}")
     now = time.time()
     if now - ress[0] > interval:
-      send_tmp_msg( "执行中 %ss" % int(now-start_time), src)
+      send_tmp_msg( "执行中 %ss" % int(now-start_time), src, qt=qt)
     if now - ress[0] < max_time and now - start_time < max_time*10:
       pass
     elif p.returncode is None:
@@ -4013,9 +4017,9 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       text2 = name3 + text
       formatting_entities = []
       if len(name) > 0:
-        formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
+        formatting_entities.append(MessageEntityBold(offset=0, length=len(name3.strip())))
         #  formatting_entities.append(MessageEntityUrl(offset=len(name), length=len(text)))
-        formatting_entities.append(MessageEntityTextUrl(offset=len(name), length=len(text), url=text))
+        formatting_entities.append(MessageEntityTextUrl(offset=len(name3), length=len(text), url=text))
       else:
         formatting_entities.append(MessageEntityTextUrl(offset=0, length=len(text), url=text))
     else:
@@ -4049,7 +4053,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     info(f"{qtr=}")
     topic_orig = topic
     k = 0
-    if qtr is not None:
+    if qtr is not None and len(qtr.strip()) > 0 and client is UB:
       if topic is None:
         async for msg in client.iter_messages(chat_id):
           textr = msg.text
@@ -4086,12 +4090,12 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         #    parse_mode = "html"
         if parse_mode ==  "html":
           #  text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text2)
-          text2 = "<blockquote>%s</blockquote>\n<b>%s:</b> %s" % ("\n".join(qt), name, text)
+          text2 = "<blockquote>%s</blockquote>\n<b>%s</b> %s" % ("\n".join(qt), name3, text)
         elif parse_mode ==  "md":
-          text2 = "%s\n%s: %s" % ("\n".join(qt), name, text)
+          text2 = "%s\n%s%s" % ("\n".join(qt), name3, text)
           formatting_entities = []
           formatting_entities.append(MessageEntityBlockquote(offset=0, length=len("\n".join(qt))))
-          formatting_entities.append(MessageEntityBold(offset=len("\n".join(qt))+1, length=len(name.strip())+1))
+          formatting_entities.append(MessageEntityBold(offset=len("\n".join(qt))+1, length=len(name3.strip())))
         else:
           text2 = "%s\n%s" % ("\n> ".join(qt), text2)
       else:
@@ -5358,7 +5362,7 @@ def short(text, length=64):
 
 
 tmp_msgs = {}
-def send_tmp_msg(text, chat_id):
+def send_tmp_msg(text, chat_id, **kwargs):
   #  if chat_id in tmp_msgs:
   #    pass
   #    last tmp_msgs[chat_id]
@@ -5367,7 +5371,7 @@ def send_tmp_msg(text, chat_id):
   #    last = 0
   #  if time.time() - last > interval:
   if chat_id not in tmp_msgs or time.time() - tmp_msgs[chat_id] > interval:
-    send(text, chat_id, tmp_msg=True)
+    send(text, chat_id, tmp_msg=True, **kwargs)
     tmp_msgs[chat_id] = time.time()
     return True
   return False
