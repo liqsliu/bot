@@ -6076,6 +6076,7 @@ async def msgtp(event):
   #    src = bridges[chat_id]
   #  else:
   #    return
+  #  await event.client.action(chat_id, 'cancel')
   send_typing(src)
   return
   res = await get_name(chat_id)
@@ -9869,22 +9870,24 @@ async def run_cmd(*args, **kwargs):
 
 #  async def _run_cmd(text, src, name="X test: ", is_admin=False, qt=None) -> bool | str:
 async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | str:
-  st = send_typing(src)
-  if st is not None:
-    await st.__aenter__()
-  if name:
-    name2 = name + ": "
-  else:
-    name2 = ""
-  text0 = text
-  if qt is not None:
-    text = "{}\n\n{}".format(text, "\n".join(qt))
-  if text == "ping":
-    return "pong"
-  elif text == "help":
-    text = ".help"
-
   try:
+    #  if type(muc) is int:
+    #    await event.client.action(chat_id, 'cancel')
+    st = send_typing(src)
+    if st is not None:
+      await st.__aenter__()
+    if name:
+      name2 = name + ": "
+    else:
+      name2 = ""
+    text0 = text
+    if qt is not None:
+      text = "{}\n\n{}".format(text, "\n".join(qt))
+
+    if text == "ping":
+      return "pong"
+    elif text == "help":
+      text = ".help"
     if text[0:1] == ".":
       if text[1:2] == " ":
         return True
