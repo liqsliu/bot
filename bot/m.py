@@ -2367,7 +2367,7 @@ def wrap_read(func, src, ress):
         #  if src and ress[1].strip():
         if ress[1].strip():
           #  send( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src, tmp_msg=True)
-          send_tmp_msg( "执行中，临时输出: \n%s" % ress[1].decode("utf-8", errors="ignore"), src)
+          send_tmp_msg( "执行中，临时输出: \n%s" % short(ress[1].decode("utf-8", errors="ignore")), src)
         ress[1] = b""
       #  print(f"{len(data)}")
     return data
@@ -2387,6 +2387,7 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None, cmd=None):
   t = asyncio.create_task( p.communicate() )
   o = None
   e = None
+  last = None
   while True:
     #  await sleep(interval)
     #  if t.done():
@@ -2394,7 +2395,7 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None, cmd=None):
     #    break
     try:
       ts = asyncio.shield(t)
-      o, e = await asyncio.wait_for(ts, interval+3)
+      o, e = await asyncio.wait_for(ts, interval+2)
       info(f"执行结束: {p} {o=} {e=}")
       break
     #  start_timme = loop.time()
@@ -2416,13 +2417,16 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None, cmd=None):
       #  warn(f"timeout: {args}")
       info(f"执行中: {p} {o=} {e=}")
     now = time.time()
-    if now - ress[0] > interval:
-      send_tmp_msg( "执行中 %ss" % int(now-start_time), src, qt=qt)
     if now - ress[0] < max_time and now - start_time < max_time*10:
       pass
     elif p.returncode is None:
       warn(f"执行超时，尝试停止: {p} {o=} {e=}")
       await stop_sub(p)
+    elif now - ress[0] > interval:
+      if last == ress[1]:
+        send_tmp_msg( "执行中 %ss" % int(now-start_time), src, qt=qt)
+      else:
+        last = ress[1]
   if o:
     o = o.decode("utf-8", errors="ignore")
   else:
@@ -3070,15 +3074,17 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
               url1 = await upload(path, src)
               url2 = await t
               #  s.append("")
-              s.append(s.pop() + f" [原始链接{get_domain(url)}]({url})")
+              #  s.append(s.pop() + f" [原始链接{get_domain(url)}]({url})")
+              s[-1] += f" [原始链接{get_domain(url)}]({url})"
               if url1:
                 #  s[0] = f"\n- {url}"
                 #  s.append(f"- {url}")
-                s.append(s.pop() + f" [xmpp备份]({url1})")
+                #  s.append(s.pop() + f" [xmpp备份]({url1})")
+                s[-1] += f" [xmpp备份]({url1})"
                 info("add xmpp file url: %s" % url1)
               #  s.append(f"- {url2}")
               #  s.append(f"- {url2}")
-              s.append(s.pop() + f" [vps备份]({url2})")
+              s[-1] += f" [vps备份]({url2})"
           except Exception as e:
             raise e
           finally:
