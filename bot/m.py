@@ -4156,7 +4156,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         err(f"failed to send tg msg: {chat_id=} {text=}", no_send=True, e=e)
         #  resend = True
       else:
-        err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=}", no_send=True,, e=e)
+        err(f"failed to send tg msg({parse_mode=}): {chat_id=} {text=}", no_send=True, e=e)
       if resend >= 0:
         resend += 1
     except rpcerrorlist.FloodWaitError as e:
