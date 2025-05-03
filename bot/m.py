@@ -5416,7 +5416,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   def cb(current, total):
     #  last_time[0] = time.time()
     last_time[1] = current
-    info("剩余 {}".format(hbyte(total-current)))
+    #  info("剩余 {}".format(hbyte(total-current)))
     #  if len(last_time) == 2:
     #    last_time.append(total)
     #    asyncio.create_task(send("开始下载 {} {}".format(hbyte(size), res), src))
@@ -5430,18 +5430,19 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
     #    #  last_time[src] = time.time()
 
   async def update_tmp_msg():
-    start_time = last_time[0]
-    last_current = 0
+    #  start_time = last_time[0]
+    #  last_current = 0
     while True:
       await sleep(interval)
       #  now = time.time()-start_time
       current = last_time[1]
       total = last_time[2]
-      if current == total:
-        send("下载完成：{} 用时: {}s".format(res), src, int(time.time()-start_time), tmp_msg=True)
-        break
+      #  if current == total:
+      #    send("下载完成：{} 用时: {}s".format(res), src, int(time.time()-start_time), tmp_msg=True)
+      #    break
       #  await send("执行中({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, xmpp_only=True, correct=True)
       #  await send("({:.0f}s)：{} {:.2%} {:.2f}/{:.2f}MB {:.1f}MB/s".format(now, res, current / total, current/1024/1024, total/1024/1024, (current-last_current)/(time.time()-last_time[0])/1024/1024), src, correct=True)
+      #  info("剩余 {}".format(hbyte(total-current)))
       send_tmp_msg(hbyte(total-current), src)
       last_time[0] = time.time()
         #  last_current = current
@@ -6565,7 +6566,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
           if opts == 1:
             return True
       except Exception as e:
-        err("fixme: {file=}", e=e)
+        err(f"fixme: {file=}", e=e)
         
     #  src = log_group_private
     src = chat_id
