@@ -20,15 +20,16 @@ from . import debug, WORK_DIR, PARENT_DIR, LOG_FILE, get_my_key, HOME, LOGGER
 
 import telethon.errors
 from telethon.errors import rpcerrorlist
-import telethon.extensions
 #  import telethon.extensions.markdownn
+import telethon.extensions
 
 from telethon import TelegramClient
 from telethon import events, utils
 
 #  from tg.telegram import DOWNLOAD_PATH
-from telethon.tl.types import InputChannel, InputPeerChannel, InputPeerUser, InputPhoneContact, KeyboardButton, KeyboardButtonUrl, KeyboardButtonCallback, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument, InputPeerChat, InputPeerChannel, InputPeerUser, MessageEntityItalic, MessageEntityBold, MessageEntityBlockquote, MessageEntityUrl, MessageEntityTextUrl
+#  from telethon.tl.types import InputChannel, InputPeerChannel, InputPeerUser, InputPhoneContact, KeyboardButton, KeyboardButtonUrl, KeyboardButtonCallback, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument, InputPeerChat, InputPeerChannel, InputPeerUser, MessageEntityItalic, MessageEntityBold, MessageEntityBlockquote, MessageEntityUrl, MessageEntityTextUrl
 
+from telethon.tl import types
 
 import aioxmpp
 from aioxmpp import stream, ibr, protocol, node, dispatcher, connector, JID, im, errors, MessageType, PresenceType, chatstates
@@ -4027,11 +4028,11 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       text2 = name3 + text
       formatting_entities = []
       if len(name) > 0:
-        formatting_entities.append(MessageEntityBold(offset=0, length=len(name3.strip())))
-        #  formatting_entities.append(MessageEntityUrl(offset=len(name), length=len(text)))
-        formatting_entities.append(MessageEntityTextUrl(offset=len(name3), length=len(text), url=text))
+        formatting_entities.append(types.MessageEntityBold(offset=0, length=len(name3.strip())))
+        #  formatting_entities.append(types.MessageEntityUrl(offset=len(name), length=len(text)))
+        formatting_entities.append(types.MessageEntityTextUrl(offset=len(name3), length=len(text), url=text))
       else:
-        formatting_entities.append(MessageEntityTextUrl(offset=0, length=len(text), url=text))
+        formatting_entities.append(types.MessageEntityTextUrl(offset=0, length=len(text), url=text))
     else:
       #  text2 = name2 + text
       #  if name:
@@ -4104,9 +4105,9 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         elif parse_mode ==  "md":
           text2 = "%s\n%s%s" % ("\n".join(qt), name3, text)
           formatting_entities = []
-          formatting_entities.append(MessageEntityBlockquote(offset=0, length=len("\n".join(qt))))
+          formatting_entities.append(types.MessageEntityBlockquote(offset=0, length=len("\n".join(qt))))
           if name3:
-            formatting_entities.append(MessageEntityBold(offset=len("\n".join(qt))+1, length=len(name3.strip())))
+            formatting_entities.append(types.MessageEntityBold(offset=len("\n".join(qt))+1, length=len(name3.strip())))
         else:
           text2 = "%s\n%s" % ("\n> ".join(qt), text2)
       else:
@@ -4204,7 +4205,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     #  else:
     #    formatting_entities = None
     formatting_entities = []
-    formatting_entities.append(MessageEntityBold(offset=0, length=len(name.strip())+1))
+    formatting_entities.append(types.MessageEntityBold(offset=0, length=len(name.strip())+1))
     res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
     if res is True:
       return True
@@ -5561,7 +5562,7 @@ def get_buttons(bs):
 
 def support(i):
   i = i.button
-  if isinstance(i, KeyboardButton) or isinstance(i, KeyboardButtonCallback):
+  if isinstance(i, types.KeyboardButton) or isinstance(i, types.KeyboardButtonCallback):
     return True
   else:
     info(f"ignore button: {i=}")
@@ -5593,7 +5594,7 @@ def print_buttons(bs, k=0):
       if tmp2:
         tmp.append("\t".join(tmp2))
     #  else:
-    #  elif isinstance(i, KeyboardButton):
+    #  elif isinstance(i, types.KeyboardButton):
     elif support(i):
       k += 1
       #  text += f"\n{k}. {i.text}"
@@ -5660,10 +5661,10 @@ async def get_commands(chat_id):
 
 async def get_full_entity(chat_id):
   peer = await UB.get_input_entity(chat_id)
-  if isinstance(peer, InputPeerChannel):
+  if isinstance(peer, types.InputPeerChannel):
     # https://tl.telethon.dev/methods/channels/get_full_channel.html
     res = await UB( telethon.functions.channels.GetFullChannelRequest(channel=peer) )
-  elif isinstance(peer, InputPeerChat):
+  elif isinstance(peer, types.InputPeerChat):
     res = await UB( telethon.functions.messages.GetFullChatRequest(chat_id=peer) )
   else:
     res = await UB( telethon.functions.users.GetFullUserRequest(id=peer) )
@@ -5886,7 +5887,7 @@ async def print_tg_msg(msg, download_file=False):
       #  peer = await UB.get_input_entity(event.sender_id)
       #  peer = await UB.get_entity(event.from_id)
       if peer is not None:
-        if isinstance(peer, User):
+        if isinstance(peer, types.User):
           #  nick += "%s" % peer.first_name
           nick.append(peer.first_name)
           if peer.last_name is not None:
