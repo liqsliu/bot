@@ -18,8 +18,10 @@ from typing import Type
 from . import debug, WORK_DIR, PARENT_DIR, LOG_FILE, get_my_key, HOME, LOGGER
 
 
+import telethon
 import telethon.errors
 from telethon.errors import rpcerrorlist
+import telethon.extensions
 import telethon.extensions.markdownn
 
 from telethon import TelegramClient
