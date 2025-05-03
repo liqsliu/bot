@@ -18,13 +18,16 @@ from typing import Type
 from . import debug, WORK_DIR, PARENT_DIR, LOG_FILE, get_my_key, HOME, LOGGER
 
 
+import telethon.errors
+from telethon.errors import rpcerrorlist
+import telethon.extensions.markdownn
+
 from telethon import TelegramClient
 from telethon import events, utils
+
 #  from tg.telegram import DOWNLOAD_PATH
 from telethon.tl.types import InputChannel, InputPeerChannel, InputPeerUser, InputPhoneContact, KeyboardButton, KeyboardButtonUrl, KeyboardButtonCallback, KeyboardButtonUrl, PeerUser, PeerChannel, PeerChat, User, Channel, Chat, MessageMediaDocument, InputPeerChat, InputPeerChannel, InputPeerUser, MessageEntityItalic, MessageEntityBold, MessageEntityBlockquote, MessageEntityUrl, MessageEntityTextUrl
 
-import telethon.errors
-from telethon.errors import rpcerrorlist
 
 import aioxmpp
 from aioxmpp import stream, ibr, protocol, node, dispatcher, connector, JID, im, errors, MessageType, PresenceType, chatstates
@@ -5819,6 +5822,15 @@ async def parse_tg_file_msg(msg, chat_id=None):
   return file_info, path, backup_task
 
 
+def get_tg_msg_text(msg, parse_mode=telethon.extensions.markdown):
+  # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.messageparse.MessageParseMethods.parse_mode
+  #  if msg.client.parse_mode is telethon.extensions.markdown:
+  if msg.client.parse_mode is parse_mode:
+    return msg.text
+  else:
+    #  return telethon.extensions.markdown.unparse(msg.raw_text, msg.entities)
+    return parse_mode.unparse(msg.raw_text, msg.entities)
+
 async def print_tg_msg(msg, download_file=False):
   #  msg = event.message
   chat_id = msg.chat_id
@@ -5924,7 +5936,7 @@ async def print_tg_msg(msg, download_file=False):
 
   if msg.text:
     #  text += msg.text
-    text.append(msg.text)
+    text.append(get_tg_msg_text(msg))
 
   if msg.file:
     if download_file is True:
@@ -10780,6 +10792,8 @@ async def msgb(event):
     if res:
       send(res, chat_id)
     return
+
+
 
   if event.is_private or chat_id == CHAT_ID:
     if event.fwd_from:
