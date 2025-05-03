@@ -5920,18 +5920,18 @@ async def print_tg_msg(msg, download_file=False):
     #  text += f"自{utils.resolve_id( pid )}"
       #  text += f"自 {pid}"
       text.append(f"自 {pid}")
-    elif f.saved_from_id:
-      pid = utils.get_peer_id(f.saved_from_id)
-      #  text += f"自 {pid}"
-      text.append(f"自 {pid}")
     elif f.saved_from_peer:
       pid = utils.get_peer_id(f.saved_from_peer)
       #  text += f"自 {pid}"
       text.append(f"自 {pid}")
+    elif f.saved_from_id:
+      pid = utils.get_peer_id(f.saved_from_id)
+      #  text += f"自 {pid}"
+      text.append(f"自 {pid}")
 
-    elif f.post_author:
+    if f.post_author:
       #  text += f"-{f.post_author}"
-      text.append(f"-{f.post_author}")
+      text.append(f" by {f.post_author}")
     #  text += ": "
     text.append(": ")
 
