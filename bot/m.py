@@ -6559,10 +6559,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
           err("fixme: ", e=e)
         except Exception as e:
           err("fixme: ", e=e)
-      if file is not None:
-        res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
-        if opts == 1:
-          return True
+      try:
+        if file is not None:
+          res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+          if opts == 1:
+            return True
+      except Exception as e:
+        err("fixme: {file=}", e=e)
         
     #  src = log_group_private
     src = chat_id
