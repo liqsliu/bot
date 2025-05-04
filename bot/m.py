@@ -3989,11 +3989,34 @@ async def slow_mode(client, timeout=300):
   return True
 
 
+async def clear_tmp_chat_flag(chat_id):
+  # bot account
+  if chat_id in tmp_msg_chats:
+    tmp_msg_chats.remove(chat_id)
+    msg = last_outmsg[chat_id]
+    last_outmsg.pop(chat_id)
+    await msg.delete()
+    return True
+
+async def clear_tmp_chat_flag2(chat_id):
+  # user account
+  if chat_id in tmp_msg_chats2:
+    tmp_msg_chats2.remove(chat_id)
+    msg = last_outmsg2[chat_id]
+    last_outmsg2.pop(chat_id)
+    await msg.delete()
+    return True
+
 
 #  @exceptions_handler(no_send=True)
 @cross_thread
 async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None, tg_msg_id=None, resend=0, formatting_entities=None, *args, **kwargs):
   # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
+
+  if client is TB:
+    await clear_tmp_chat_flag2(chat_id)
+  else:
+    await clear_tmp_chat_flag(chat_id)
 
   if name is None:
     #  name = ""
@@ -6782,21 +6805,11 @@ async def msgtout(event):
       #      warn(f"unlink {src} - (chat_id)")
       bridges_tmp.pop(chat_id)
 
-  if chat_id in tmp_msg_chats:
-    # bot account
-    tmp_msg_chats.remove(chat_id)
-    msg = last_outmsg[chat_id]
-    last_outmsg.pop(chat_id)
-    await msg.delete()
-  elif chat_id in tmp_msg_chats2:
-    # user account
-    tmp_msg_chats2.remove(chat_id)
-    msg = last_outmsg2[chat_id]
-    last_outmsg2.pop(chat_id)
-    await msg.delete()
 
   text = msg.text
   info(f"tg out msg: {chat_id}: {text}")
+  await clear_tmp_chat_flag(chat_id)
+
   if text == "/help":
     if event.is_reply:
       r = await msg.get_reply_message()
