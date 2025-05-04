@@ -10949,7 +10949,11 @@ async def msgb(event):
     #  if qt is not None:
     #    res = await run_cmd(f"{text}\n\n{qto}", chat_id, name, False, text)
     #  else:
-    res = await run_cmd(text, chat_id, name, False, qt)
+    if sender_id == MY_ID:
+      is_admin = True
+    else:
+      is_admin = False
+    res = await run_cmd(text, chat_id, name, is_admin, qt)
     if res is True:
       return
     if res:
