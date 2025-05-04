@@ -6545,13 +6545,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     send(tmsg.stringify(), chat_id)
   elif tmsg.document or tmsg.file or tmsg.media or tmsg.photo:
     #  file = tmsg.document
-    o = f"direct send {opts}...\nphoto: {type(tmsg.photo)}\ndocument: {type(tmsg.document)}\nmedia: {type(tmsg.media)}\nfile: {type(tmsg.file)}\n$get reply/file"
+    o = f"direct send {opts}...\nphoto: {type(tmsg.photo)}\ndocument: {type(tmsg.document)}\nmedia: {type(tmsg.media)}\nfile: {type(tmsg.file)}"
     if tmsg.file:
       file = tmsg.file
       file_size = file.size
-      send(f"direct send {opts}...\n{o}\nname: {file.name}\nsize: {file.size}", chat_id)
+      send(f"{o}\nname: {file.name}\nsize: {file.size}", chat_id)
     else:
-      send(f"direct send {opts}...\n{o}", chat_id)
+      send(o, chat_id)
 
     file = None
 
@@ -6878,7 +6878,7 @@ async def msgtout(event):
       elif cmds[1] == "file":
         e = await msg.get_reply_message()
         tmsg = e
-        opts = 0
+        opts = 1
         if len(cmds) == 3:
           opts = cmds[2]
         await save_tg_msg(tmsg, chat_id, opts)
