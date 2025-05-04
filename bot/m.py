@@ -6552,14 +6552,16 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         warn("内容被保护，无法直接转发")
         if tmsg.client is UB:
           try:
-            chat = await tmsg.get_chat()
-            pid = utils.get_peer_id
-            if chat.is_channel and not chat.is_group:
-              tmsg2 = await TB.get_messages(pid, ids=tmsg.id)
+            if tmsg.is_channel and not tmsg.is_group:
+              #  chat = await tmsg.get_chat()
+              #  pid = utils.get_peer_id(chat)
+              tmsg2 = await TB.get_messages(tmsg.chat_id, ids=tmsg.id)
               if tmsg2:
                 info("using TB: found msg")
                 file = None
-                if tmsg2.document:
+                if tmsg2.photo:
+                  file = tmsg2.photo
+                elif tmsg2.document:
                   file = tmsg2.document
                 else:
                   file = tmsg2.media
@@ -6568,7 +6570,10 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
                   try:
                     res = await TB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
                   except Exception as e:
-                    res = await TB.send_file(chat_id, file=utils.get_input_media(file), caption=tmsg.text, force_document=True)
+                    file=utils.pack_bot_file_id(file)
+                    if file is None:
+                      file=utils.get_input_media(file)
+                    res = await TB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
 
           except Exception as e:
             err("failed(TB)", e=e)
