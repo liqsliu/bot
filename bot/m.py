@@ -6677,9 +6677,9 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               return
           except Exception as e:
             err("上传失败", e=e)
-        else:
-          if url:
-            send(url, chat_id)
+        #  else:
+        #    if url:
+        #      send(url, chat_id)
 
 
         #  res = None
@@ -6781,6 +6781,20 @@ async def msgtout(event):
       #      #  await send(f"unlink {src}", CHAT_ID)
       #      warn(f"unlink {src} - (chat_id)")
       bridges_tmp.pop(chat_id)
+
+  if chat_id in tmp_msg_chats:
+    # bot account
+    tmp_msg_chats.remove(chat_id)
+    msg = last_outmsg[chat_id]
+    last_outmsg.pop(chat_id)
+    await msg.delete()
+  elif chat_id in tmp_msg_chats2:
+    # user account
+    tmp_msg_chats2.remove(chat_id)
+    msg = last_outmsg2[chat_id]
+    last_outmsg2.pop(chat_id)
+    await msg.delete()
+
   text = msg.text
   info(f"tg out msg: {chat_id}: {text}")
   if text == "/help":
