@@ -10987,7 +10987,7 @@ async def msgb(event):
         #  url = cmds[1]
         url = text.split(' ')[-1]
         if url:
-          opts = 0
+          opts = 1
           peer, gid = await get_entity(url, return_gid=True, client=client)
           if peer:
             #  send(peer.stringify(), chat_id)
@@ -11002,7 +11002,6 @@ async def msgb(event):
                   await send_tg(tmsg.stringify(), chat_id)
                 else:
                   if len(cmds) == 3:
-                    opts = 0
                     opts = cmds[2]
                   await save_tg_msg(tmsg, chat_id, opts, url)
               else:
