@@ -6298,7 +6298,13 @@ async def msgt(event):
           #  text = "M " + text
           text = text.split(": ", 1)[1]
           info(f"bot original text(3): {text=}")
+
         #  text = text.splitlines()[0]
+        tmp = []
+        for l in text.splitlines():
+          tmp.append(l.strip(" "))
+        text = "\n".join(tmp)
+
         while "  " in text:
           text = text.replace("  ", " ")
         text = text.strip()
@@ -6336,6 +6342,10 @@ async def msgt(event):
         #    #  if ord("\u3000") <= ord(i) <= ord("\u303f"):
         #    if 0x3000 <= ord(i) <= 0x303f:
         #      text = text.replace(i, " ")
+        tmp = []
+        for l in text.splitlines():
+          tmp.append(l.strip(" "))
+        text = "\n".join(tmp)
 
         while "  " in text:
           text = text.replace("  ", " ")
