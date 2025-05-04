@@ -6697,37 +6697,39 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if xmpp_url:
           try:
             #  res = await client.send_file(chat_id, file=url, caption=url)
-            res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=url)
+            res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=f"{url}\n{xmpp_url}")
             if opts == 3:
               return True
           except rpcerrorlist.WebpageCurlFailedError as e:
             #  send(xmpp_url, chat_id)
-            err(f"文件url有问题: {url} ", e=e)
+            err(f"文件url有问题: {xmpp_url} ", e=e)
           except rpcerrorlist.WebpageMediaEmptyError as e:
-            err(f"文件url有问题: {url} ", e=e)
+            err(f"文件url有问题: {xmpp_url} ", e=e)
+          except Exception as e:
+            err(xmpp_url, e=e)
+
+        my_url = None
+        await t
+        if t.done():
+          my_url = t.result()
+        else:
+          err(f"wtf: not done: {t}")
+
+        if my_url:
+          try:
+            info(my_url)
+            await sleep(1)
+            res = await client.send_file(chat_id, file=url, caption=f"{url}\n{my_url}")
+          except rpcerrorlist.WebpageCurlFailedError as e:
+            err(f"文件url有问题: {my_url} ", e=e)
+          except rpcerrorlist.WebpageMediaEmptyError as e:
+            err(f"文件url有问题: {my_url} ", e=e)
           except Exception as e:
             err(url, e=e)
 
-        try:
-          await t
-          if t.done():
-            url = t.result()
-            if url:
-             info(url)
-             await sleep(1)
-             res = await client.send_file(chat_id, file=url, caption=url)
-          else:
-            err("wtf", e=e)
-        except rpcerrorlist.WebpageCurlFailedError as e:
-          err(f"文件url有问题: {url} ", e=e)
-        except rpcerrorlist.WebpageMediaEmptyError as e:
-          err(f"文件url有问题: {url} ", e=e)
-        except Exception as e:
-          err(url, e=e)
-
         if res is None or opts == 2:
           try:
-            res = await tg_upload_media(path, src, chat_id=chat_id, caption=url, max_time=get_timeout(file_size))
+            res = await tg_upload_media(path, src, chat_id=chat_id, caption=f"{url}\n{my_url}", max_time=get_timeout(file_size))
             return True
           except Exception as e:
             send(url, chat_id)
