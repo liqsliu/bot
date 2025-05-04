@@ -4117,7 +4117,10 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       else:
         text2 = "%s\n%s" % (text2, "\n> ".join(qt))
 
-  ts = await split_long_text(text2, MAX_MSG_BYTES_TG, tmp_msg)
+  #  ts = await split_long_text(text2, MAX_MSG_BYTES_TG, tmp_msg)
+  ts = []
+  for t in utils.split_text(text2, formatting_entities):
+    ts.append(t)
   if len(ts) > 1:
     tmp_msg = False
   k = 0
@@ -4125,7 +4128,10 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   async with lock:
     #  info0(f"send: {chat_id}: {text}")
     try:
-      for t in ts:
+      #  for t in ts:
+        #  et = t[1]
+        #  t = t[0]
+      for t, et in ts:
         await sleep(msg_delay_default)
         if tg_msg_id in deleted_tg_msg_ids:
           return True
@@ -4136,11 +4142,14 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
             msg = await omsg.edit(t)
             correct = False
           elif chat_id in chats:
-            msg = await omsg.edit(t, parse_mode=parse_mode, formatting_entities=formatting_entities)
+            #  msg = await omsg.edit(t, parse_mode=parse_mode, formatting_entities=formatting_entities)
+            msg = await omsg.edit(t, parse_mode=parse_mode, formatting_entities=et)
           else:
-            msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode, formatting_entities=formatting_entities)
+            #  msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode, formatting_entities=formatting_entities)
+            msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode, formatting_entities=et)
         else:
-          msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode, formatting_entities=formatting_entities)
+          #  msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode, formatting_entities=formatting_entities)
+          msg = await client.send_message(chat_id, t, reply_to=topic, parse_mode=parse_mode, formatting_entities=et)
         k += 1
         if k == len(ts):
           last[chat_id] = msg
@@ -6529,7 +6538,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       else:
         info("use file")
         file = tmsg.file
-      info(f"try send file type: {type(file)}")
+      info(f"try send type: {type(file)}")
       res = await client.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
 
       if opts == 1:
@@ -6537,6 +6546,25 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     except rpcerrorlist.ChatForwardsRestrictedError as e:
       if e.args[0] == "You can't forward messages from a protected chat (caused by SendMediaRequest)":
         warn("内容被保护，无法直接转发")
+        if tmsg.client is UB:
+          try:
+            chat = await tmsg.get_chat()
+            pid = utils.get_peer_id
+            if chat.is_channel and not chat.is_group:
+              tmsg2 = await TB.get_messages(pid, ids=tmsg.id)
+              if tmsg2:
+                info("using TB: found msg")
+                file = None
+                if tmsg2.document:
+                  file = tmsg2.document
+                else:
+                  file = tmsg2.media
+                if file:
+                  info("using TB.send_file")
+                  res = await TB.send_file(chat_id, file=utils.get_input_media(file), caption=tmsg.text, force_document=True)
+          except Exception as e:
+            err("failed(TB)", e=e)
+
       else:
         warn(f"fixme: {e=} {file=}")
     except AttributeError as e:
@@ -6823,26 +6851,25 @@ async def msgtout(event):
   #  if chat_id == MY_ID or chat_id == CHAT_ID:
   #  if chat_id == MY_ID or chat_id == CHAT_ID:
   if chat_id == CHAT_ID:
-    tmsg = event
-    if tmsg.document or tmsg.file or tmsg.media:
-      #  file = tmsg.document
-      await send_tg(f"document type: {type(tmsg.document)}\nfile type: {type(tmsg.file)}\nmedia type: {type(tmsg.media)}\n$get reply/file", chat_id)
-    if event.fwd_from:
-      #  await msg.reply(event.fwd_from.stringify())
-      #  opts = 0
-      #  cmds = get_cmd(text)
-      #  if len(cmds) == 3:
-      #    opts = cmds[2]
-      await save_tg_msg(tmsg, chat_id, opts=1)
-        #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
-      return
+    if msg.grouped_id is None:
+      tmsg = event
+      if tmsg.document or tmsg.file or tmsg.media:
+        #  file = tmsg.document
+        await send_tg(f"document type: {type(tmsg.document)}\nfile type: {type(tmsg.file)}\nmedia type: {type(tmsg.media)}\n$get reply/file", chat_id)
+      if event.fwd_from:
+        #  await msg.reply(event.fwd_from.stringify())
+        #  opts = 0
+        #  cmds = get_cmd(text)
+        #  if len(cmds) == 3:
+        #    opts = cmds[2]
+        await save_tg_msg(tmsg, chat_id, opts=1)
+          #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+        return
     #  elif event.is_reply:
     #    sendme(event.reply_to.stringify())
     #    return
     #  if not text:
     #    return
-
-
 
 
 
@@ -10831,9 +10858,10 @@ async def msgb(event):
 
   if event.is_private or chat_id == CHAT_ID:
     if event.fwd_from:
-      #  info(f"goto msgtout")
-      await send_tg(event.fwd_from.stringify(), chat_id)
-      await send_tg(str(await print_tg_msg(msg)), chat_id)
+      if msg.grouped_id is None:
+        #  info(f"goto msgtout")
+        await send_tg(event.fwd_from.stringify(), chat_id)
+        #  await send_tg(str(await print_tg_msg(msg)), chat_id)
       return
     # my private group
     #  text = msg.text
