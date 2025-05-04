@@ -6532,15 +6532,16 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       if tmsg.document:
         info("use document")
         file = tmsg.document
-      elif tmsg.video:
-        info("use video")
-        file = tmsg.video
-      elif tmsg.photo:
-        info("use photo")
-        file = tmsg.photo
+      #  elif tmsg.video:
+      #    info("use video")
+      #    file = tmsg.video
+      #  elif tmsg.photo:
+      #    info("use photo")
+      #    file = tmsg.photo
       else:
         info("use file")
-        file = tmsg.file
+        #  file = tmsg.file
+        file = tmsg.media
       info(f"try send type: {type(file)}")
       res = await client.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
 
@@ -6564,7 +6565,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
                   file = tmsg2.media
                 if file:
                   info("using TB.send_file")
-                  res = await TB.send_file(chat_id, file=utils.get_input_media(file), caption=tmsg.text, force_document=True)
+                  try:
+                    res = await TB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+                  except Exception as e:
+                    res = await TB.send_file(chat_id, file=utils.get_input_media(file), caption=tmsg.text, force_document=True)
+
           except Exception as e:
             err("failed(TB)", e=e)
 
@@ -6574,31 +6579,35 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       err(f"fixme: {file=}", e=e)
     except Exception as e:
       err(f"fixme: {file=}", e=e)
-      try:
-        if tmsg.video:
-          res = await client.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
-        elif tmsg.photo:
-          res = await client.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
-        elif tmsg.media:
-          res = await client.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
-        if opts == 1:
-          return True
-      except Exception as e:
-        err(f"fixme: {file=}", e=e)
+      #  try:
+      #    if tmsg.video:
+      #      res = await client.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
+      #    elif tmsg.photo:
+      #      res = await client.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
+      #    elif tmsg.media:
+      #      res = await client.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
+      #    if opts == 1:
+      #      return True
+      #  except Exception as e:
+      #    err(f"fixme: {file=}", e=e)
 
     if res is None:
       file = None
       try:
-        if tmsg.file:
-          file = utils.pack_bot_file_id(tmsg.file)
+        info("utils.get_input_media")
+        if tmsg.photo:
+          file = utils.get_input_photo(tmsg.photo)
+        elif tmsg.cocument:
+          file = utils.get_input_media(tmsg.document)
         else:
-          file = utils.pack_bot_file_id(tmsg.document)
+          file = utils.get_input_media(tmsg.media)
       except AttributeError as e:
         err(f"fixme: {type(file)}", e=e)
       except Exception as e:
         err(f"fixme: ", e=e)
       if file is None:
         try:
+          info("utils.pack_bot_file_id")
           # AttributeError("'PhotoSize' object has no attribute 'location'")
           #  file = utils.pack_bot_file_id(tmsg.file)
           if file is None and tmsg.photo:
@@ -6607,8 +6616,10 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             file = utils.pack_bot_file_id(tmsg.document)
           if file is None and tmsg.media:
             file = utils.pack_bot_file_id(tmsg.media)
+          if file is None and tmsg.file:
+            file = utils.pack_bot_file_id(tmsg.media)
           if file is None:
-            err(f"wtf: {tmsg.stringify()}", e=e)
+            err(f"wtf: {tmsg.stringify()}")
             #  return
         except AttributeError as e:
           err("fixme: ", e=e)
