@@ -6765,14 +6765,15 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             err(url, e=e)
 
         if res is None or opts == 2:
+          if url:
+            caption = url
+          else:
+            caption = "no tg url"
+          if xmpp_url:
+            caption += "\n" + xmpp_url
+          if my_url:
+            caption += "\n" + my_url
           try:
-            if url:
-              caption = url
-            if xmpp_url:
-              caption += "\n" + xmpp_url
-            if my_url:
-              caption += "\n" + my_url
-
             res = await tg_upload_media(path, src, chat_id=chat_id, caption=caption, max_time=get_timeout(file_size))
             return True
           except Exception as e:
