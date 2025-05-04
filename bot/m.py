@@ -6551,7 +6551,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       file_size = file.size
       send(f"{o}\nname: {file.name}\nsize: {file.size}", chat_id)
     else:
-      send(o, chat_id)
+      send(o + "\nnot found file", chat_id)
+      return
 
     file = None
 
@@ -6725,7 +6726,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if xmpp_url:
           try:
             #  res = await client.send_file(chat_id, file=url, caption=url)
-            res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=f"{url}\n{xmpp_url}")
+            if url:
+              caption = f"{url}\n{xmpp_url}"
+            else:
+              caption = xmpp_url
+            res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=caption)
             if opts == 3:
               return True
           except rpcerrorlist.WebpageCurlFailedError as e:
@@ -6745,9 +6750,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
         if my_url:
           try:
-            info(my_url)
             await sleep(1)
-            res = await client.send_file(chat_id, file=my_url, caption=f"{url}\n{my_url}")
+            info(my_url)
+            if url:
+              caption = f"{url}\n{my_url}"
+            else:
+              caption = my_url
+            res = await client.send_file(chat_id, file=my_url, caption=caption)
           except rpcerrorlist.WebpageCurlFailedError as e:
             err(f"文件url有问题: {my_url} ", e=e)
           except rpcerrorlist.WebpageMediaEmptyError as e:
@@ -6757,7 +6766,14 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
         if res is None or opts == 2:
           try:
-            res = await tg_upload_media(path, src, chat_id=chat_id, caption=f"{url}\n{my_url}", max_time=get_timeout(file_size))
+            if url:
+              caption = url
+            if xmpp_url:
+              caption += "\n" + xmpp_url
+            if my_url:
+              caption += "\n" + my_url
+
+            res = await tg_upload_media(path, src, chat_id=chat_id, caption=caption, max_time=get_timeout(file_size))
             return True
           except Exception as e:
             send(url, chat_id)
