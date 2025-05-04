@@ -10917,9 +10917,10 @@ async def msgb(event):
     # my private group
     #  text = msg.text
     text = msg.raw_text
-    sender_id = event.sender_id
-    if text:
-      info(f"bot got msg: {chat_id} {sender_id}: {text}")
+    if text is None or text == "":
+      return
+    #  if text:
+    #    info(f"bot got msg: {chat_id} {sender_id}: {text}")
     if text == "ping":
       #  await TB.send_message(chat_id, "pong")
       await msg.reply("pong")
