@@ -6570,6 +6570,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
                   try:
                     res = await TB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
                   except Exception as e:
+                    warn("failed1(TB)", e=e)
                     file=utils.pack_bot_file_id(file)
                     if file is None:
                       file=utils.get_input_media(file)
@@ -6638,7 +6639,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       except Exception as e:
         err(f"fixme: {file=}", e=e)
 
-    if res is None:
+    if res is not None:
       if opts == 1:
         return False
         
