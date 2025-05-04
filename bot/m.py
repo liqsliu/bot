@@ -4118,11 +4118,14 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         text2 = "%s\n%s" % (text2, "\n> ".join(qt))
 
   #  ts = await split_long_text(text2, MAX_MSG_BYTES_TG, tmp_msg)
+  #  if len(ts) > 1:
+  #    tmp_msg = False
   ts = []
   for t in utils.split_text(text2, formatting_entities if formatting_entities is not None else []):
     ts.append(t)
-  if len(ts) > 1:
-    tmp_msg = False
+  if tmp_msg == True:
+    #  text2 = short(text2, 500)
+    ts = [ts[0]]
   k = 0
   #  resend = False
   async with lock:
