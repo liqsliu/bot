@@ -4064,35 +4064,39 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     info(f"{qtr=}")
     topic_orig = topic
     k = 0
-    if qtr is not None and len(qtr.strip()) > 0 and client is UB:
-      if topic is None:
-        async for msg in client.iter_messages(chat_id):
-          textr = msg.text
-          if textr:
-            if textr.startswith("**G "):
-              textr = textr.split(":** ", 1)[1]
-            if similarity(textr, qtr) > 0.9:
-              info(f"found: {textr=} {qtr=}")
-              topic = msg.id
+    #  if qtr is not None and len(qtr.strip()) > 0 and client is UB:
+    if qtr is not None and len(qtr.strip()) > 0:
+      try:
+        if topic is None:
+          async for msg in client.iter_messages(chat_id):
+            textr = msg.text
+            if textr:
+              if textr.startswith("**G "):
+                textr = textr.split(":** ", 1)[1]
+              if similarity(textr, qtr) > 0.9:
+                info(f"found: {textr=} {qtr=}")
+                topic = msg.id
+                break
+              info(f"skip: {text=}")
+            k += 1
+            if k > 9:
               break
-            info(f"skip: {text=}")
-          k += 1
-          if k > 9:
-            break
-      else:
-        async for msg in client.iter_messages(chat_id, reply_to=topic):
-          textr = msg.text
-          if textr:
-            if textr.startswith("**G "):
-              textr = textr.split(":** ", 1)[1]
-            if similarity(textr, qtr) > 0.9:
-              info(f"found: {textr=} {qtr=}")
-              topic = msg.id
+        else:
+          async for msg in client.iter_messages(chat_id, reply_to=topic):
+            textr = msg.text
+            if textr:
+              if textr.startswith("**G "):
+                textr = textr.split(":** ", 1)[1]
+              if similarity(textr, qtr) > 0.9:
+                info(f"found: {textr=} {qtr=}")
+                topic = msg.id
+                break
+              info(f"skip: {text=}")
+            k += 1
+            if k > 9:
               break
-            info(f"skip: {text=}")
-          k += 1
-          if k > 9:
-            break
+      except Exception as e:
+        err(e=e)
 
     if topic_orig == topic:
       info("not found")
@@ -6482,6 +6486,9 @@ async def msgt(event):
 
 
 async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
+
+  client = tmsg.client
+
   if opts == "fast":
     opts = 1
   elif opts == "tg":
@@ -6494,6 +6501,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
     opts = 4
   elif opts == "raw":
     opts = 9
+  elif type(opts) is int:
+    pass
   else:
     opts = 0
 
@@ -6521,7 +6530,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         info("use file")
         file = tmsg.file
       info(f"try send file type: {type(file)}")
-      res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+      res = await client.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
 
       if opts == 1:
         return True
@@ -6536,11 +6545,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       err(f"fixme: {file=}", e=e)
       try:
         if tmsg.video:
-          res = await UB.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
+          res = await client.send_file(chat_id, file=tmsg.video, caption=tmsg.text, supports_streaming=True)
         elif tmsg.photo:
-          res = await UB.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
+          res = await client.send_file(chat_id, file=tmsg.photo, caption=tmsg.text)
         elif tmsg.media:
-          res = await UB.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
+          res = await client.send_file(chat_id, file=tmsg.media, caption=tmsg.text, force_document=True)
         if opts == 1:
           return True
       except Exception as e:
@@ -6576,11 +6585,15 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
           err("fixme: ", e=e)
       try:
         if file is not None:
-          res = await UB.send_file(chat_id, file=file, caption=tmsg.text)
+          res = await client.send_file(chat_id, file=file, caption=tmsg.text)
           if opts == 1:
             return True
       except Exception as e:
         err(f"fixme: {file=}", e=e)
+
+    if res is None:
+      if opts == 1:
+        return False
         
     #  src = log_group_private
     src = chat_id
@@ -6631,7 +6644,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
         if xmpp_url:
           try:
-            #  res = await UB.send_file(chat_id, file=url, caption=url)
+            #  res = await client.send_file(chat_id, file=url, caption=url)
             res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=url)
             if opts == 3:
               return True
@@ -6652,7 +6665,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             if url:
              info(url)
              await sleep(1)
-             res = await UB.send_file(chat_id, file=url, caption=url)
+             res = await client.send_file(chat_id, file=url, caption=url)
           else:
             err("wtf", e=e)
         except rpcerrorlist.WebpageCurlFailedError as e:
@@ -6683,7 +6696,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
 
   elif tmsg.text:
-    #  res = await UB.send_message(chat_id, tmsg.text)
+    #  res = await client.send_message(chat_id, tmsg.text)
     await send_tg(tmsg.text, chat_id)
   else:
     await send_tg(tmsg.stringify(), chat_id)
@@ -6726,7 +6739,8 @@ async def msgtout(event):
       await send_tg(r.stringify())
     else:
       #  sendme(f"{event.chat_id}")
-      await msg.reply(f"{event.chat_id}")
+      #  await msg.reply(f"{event.chat_id}")
+      await send_tg(f"event.chat_id")
   elif text.startswith("$"):
     cmds = get_cmd(text)
     if cmds[0] == "$get":
@@ -6757,7 +6771,7 @@ async def msgtout(event):
         else:
           #  await msg.reply(f"not a reply: {msg.stringify()}")
           await send_tg(f"not a reply: {msg.stringify()}", chat_id, topic=msg.id)
-      elif cmds[1] == "f":
+      elif cmds[1] == "fwd":
         if event.is_reply:
           e = await msg.get_reply_message()
           #  await msg.reply(f"{e.stringify()}")
@@ -6784,6 +6798,24 @@ async def msgtout(event):
         if len(cmds) == 3:
           opts = cmds[2]
         await save_tg_msg(tmsg, chat_id, opts)
+      elif cmds[1] == "f":
+        e = await msg.get_reply_message()
+        tmsg = e
+        opts = 0
+        f = e.file
+        await send_tg(f.stringify(), chat_id)
+      elif cmds[1] == "doc":
+        e = await msg.get_reply_message()
+        tmsg = e
+        opts = 0
+        f = e.document
+        await send_tg(f.stringify(), chat_id)
+      elif cmds[1] == "media":
+        e = await msg.get_reply_message()
+        tmsg = e
+        opts = 0
+        f = e.media
+        await send_tg(f.stringify(), chat_id)
     res = await msg.delete()
     info(f"delete userbot cmd: {res}")
     return
@@ -6794,14 +6826,14 @@ async def msgtout(event):
     tmsg = event
     if tmsg.document or tmsg.file or tmsg.media:
       #  file = tmsg.document
-      await send_tg2(f"document type: {type(tmsg.document)}\nfile type: {type(tmsg.file)}\nmedia type: {type(tmsg.media)}\n$get reply/file", chat_id)
+      await send_tg(f"document type: {type(tmsg.document)}\nfile type: {type(tmsg.file)}\nmedia type: {type(tmsg.media)}\n$get reply/file", chat_id)
     if event.fwd_from:
       #  await msg.reply(event.fwd_from.stringify())
-      opts = 0
+      #  opts = 0
       #  cmds = get_cmd(text)
       #  if len(cmds) == 3:
       #    opts = cmds[2]
-      await save_tg_msg(tmsg, chat_id, opts)
+      await save_tg_msg(tmsg, chat_id, opts=1)
         #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
       return
     #  elif event.is_reply:
