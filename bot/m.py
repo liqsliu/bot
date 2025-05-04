@@ -4123,7 +4123,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   ts = []
   for t in utils.split_text(text2, formatting_entities if formatting_entities is not None else []):
     ts.append(t)
-  if tmp_msg == True:
+  if tmp_msg is True:
     #  text2 = short(text2, 500)
     ts = [ts[0]]
   k = 0
