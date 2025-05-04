@@ -8662,6 +8662,8 @@ def get_jid_room(cmds, src):
   return jid, room
 
 def get_nick_room(cmds, src):
+  if src == GROUP_ID:
+    src = main_group
   if src in my_groups or '/' in cmds[1]:
     muc = cmds[1].split('/', 1)[0]
     if muc in my_groups:
