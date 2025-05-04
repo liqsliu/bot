@@ -942,7 +942,7 @@ def decode_base64(data, altchars=b'+/'):
     try:
         return base64.b64decode(data, altchars)
     except binascii.Error as e:
-        err(e=e)
+        err("解码失败", e=e, no_send=False)
 
 
 def encode_base64(data, altchars=b'+/'):
@@ -9699,6 +9699,30 @@ async def init_cmd():
     return 0, await pvb(text, server="https://0.0g.gg/")
   cmd_funs["pvb2"] = _
 
+  #  async def _(cmds: list, src: str | int) -> tuple:
+  #    if len(cmds) == 1:
+  #      return 0, f"fast reply\n.{cmds[0]} $text| $text2| ...|$reply[|$chat_id|$sender_id]"
+  #    res = "ok"
+  #    return 0, res
+  #  cmd_funs["fr"] = _
+
+  async def _(cmds: list, src: str | int) -> tuple:
+    if len(cmds) == 1:
+      return 0, f"base64 encode\n.{cmds[0]} $text"
+    text = ' '.join(cmds[1:])
+    res = encode_base64(text)
+    return 0, res
+  cmd_funs["b64"] = _
+
+  async def _(cmds: list, src: str | int) -> tuple:
+    if len(cmds) == 1:
+      return 0, f"base64 decode\n.{cmds[0]} $text"
+    text = ' '.join(cmds[1:])
+    res = decode_base64(text)
+    if res is not None:
+      res = res.decode()
+    return 0, res
+  cmd_funs["b64d"] = _
 
 
   #  async def _(cmds: list, src: str | int) -> tuple:
