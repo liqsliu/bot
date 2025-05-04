@@ -154,7 +154,7 @@ logger = logging.getLogger(__name__)
 #      return True
 
 
-interval = 6
+interval = 3
 download_media_time_max = 60
 upload_media_time_max = 900
 run_shell_time_max = 60
@@ -6669,7 +6669,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       try:
 
         #  if opts == 2 or res is None or opts == 0:
-        if opts != 4 and opts != 2 and res is None:
+        if res is None and opts != 3:
           try:
             res = await tg_upload_media(path, src, chat_id=chat_id, caption=url, max_time=get_timeout(file_size))
             direct = True
@@ -6684,13 +6684,15 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
         #  res = None
         xmpp_url = None
-        if res is None and opts == 4:
-          send("上传到xmpp...", src, tmp_msg=True)
+        #  if res is None and opts == 4:
+        if res is None or opts == 3:
+          send_tmp_msg("上传到xmpp...", src)
           try:
             xmpp_url = await upload(path)
             info(xmpp_url)
           except Exception as e:
             err("上传失败", e=e)
+
 
         if xmpp_url:
           try:
@@ -6699,13 +6701,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             if opts == 3:
               return True
           except rpcerrorlist.WebpageCurlFailedError as e:
-            send(xmpp_url, chat_id)
-            err(f"文件url有问题: {url}", e=e)
+            #  send(xmpp_url, chat_id)
+            err(f"文件url有问题: {url} ", e=e)
           except rpcerrorlist.WebpageMediaEmptyError as e:
-            send(xmpp_url, chat_id)
-            err(f"文件url有问题: {url}", e=e)
+            err(f"文件url有问题: {url} ", e=e)
           except Exception as e:
-            send(xmpp_url, chat_id)
             err(url, e=e)
 
         try:
@@ -6719,11 +6719,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
           else:
             err("wtf", e=e)
         except rpcerrorlist.WebpageCurlFailedError as e:
-          err(f"文件url有问题: {url}", e=e)
+          err(f"文件url有问题: {url} ", e=e)
         except rpcerrorlist.WebpageMediaEmptyError as e:
-          err(f"文件url有问题: {url}", e=e)
+          err(f"文件url有问题: {url} ", e=e)
         except Exception as e:
-          err(f"{url=}", e=e)
+          err(url, e=e)
 
         if res is None or opts == 2:
           try:
