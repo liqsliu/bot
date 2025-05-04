@@ -4143,6 +4143,14 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   #  ts = await split_long_text(text2, MAX_MSG_BYTES_TG, tmp_msg)
   #  if len(ts) > 1:
   #    tmp_msg = False
+  if parse_mode is not None:
+    pm = utils.sanitize_parse_mode(parse_mode)
+    text2, et = pm.parse(text2)
+    if et:
+      if formatting_entities is None:
+        formatting_entities = et
+      else:
+        formatting_entities.extend(et)
   ts = []
   for t in utils.split_text(text2, formatting_entities if formatting_entities is not None else []):
     ts.append(t)
