@@ -6543,10 +6543,15 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
   if opts == 9:
     send(tmsg.stringify(), chat_id)
-  elif tmsg.file:
-    file = tmsg.file
-    file_size = file.size
-    send(f"direct send {opts}...\nfile: {type(file)}\nname: {file.name}\nsize: {file.size}", chat_id)
+  elif tmsg.document or tmsg.file or tmsg.media or tmsg.photo:
+    #  file = tmsg.document
+    o = f"direct send {opts}...\nphoto: {type(tmsg.photo)}\ndocument: {type(tmsg.document)}\nmedia: {type(tmsg.media)}\nfile: {type(tmsg.file)}\n$get reply/file"
+    if tmsg.file:
+      file = tmsg.file
+      file_size = file.size
+      send(f"direct send {opts}...\n{o}\nname: {file.name}\nsize: {file.size}", chat_id)
+    else:
+      send(f"direct send {opts}...\n{o}", chat_id)
 
     file = None
 
@@ -6901,26 +6906,23 @@ async def msgtout(event):
 
   #  if chat_id == MY_ID or chat_id == CHAT_ID:
   #  if chat_id == MY_ID or chat_id == CHAT_ID:
-  if chat_id == CHAT_ID:
-    if msg.grouped_id is None:
-      tmsg = event
-      if tmsg.document or tmsg.file or tmsg.media:
-        #  file = tmsg.document
-        await send_tg(f"photo: {type(tmsg.photo)}\ndocument: {type(tmsg.document)}\nfile: {type(tmsg.file)}\nmedia: {type(tmsg.media)}\n$get reply/file", chat_id)
-      if event.fwd_from:
-        #  await msg.reply(event.fwd_from.stringify())
-        #  opts = 0
-        #  cmds = get_cmd(text)
-        #  if len(cmds) == 3:
-        #    opts = cmds[2]
-        await save_tg_msg(tmsg, chat_id, opts=1)
-          #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
-        return
-    #  elif event.is_reply:
-    #    sendme(event.reply_to.stringify())
-    #    return
-    #  if not text:
-    #    return
+  #  if chat_id == CHAT_ID:
+  #    if msg.grouped_id is None:
+  #      tmsg = event
+  #      if event.fwd_from:
+  #        #  await msg.reply(event.fwd_from.stringify())
+  #        #  opts = 0
+  #        #  cmds = get_cmd(text)
+  #        #  if len(cmds) == 3:
+  #        #    opts = cmds[2]
+  #        await save_tg_msg(tmsg, chat_id, opts=1)
+  #          #  res = await UB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+  #        return
+  #    #  elif event.is_reply:
+  #    #    sendme(event.reply_to.stringify())
+  #    #    return
+  #    #  if not text:
+  #    #    return
 
 
 
@@ -10909,10 +10911,10 @@ async def msgb(event):
 
   if event.is_private or chat_id == CHAT_ID:
     if event.fwd_from:
-      if msg.grouped_id is None:
-        #  info(f"goto msgtout")
-        await send_tg(event.fwd_from.stringify(), chat_id)
-        #  await send_tg(str(await print_tg_msg(msg)), chat_id)
+      #  if msg.grouped_id is None:
+      #    #  info(f"goto msgtout")
+      #    await send_tg(event.fwd_from.stringify(), chat_id)
+      #    #  await send_tg(str(await print_tg_msg(msg)), chat_id)
       return
     # my private group
     #  text = msg.text
