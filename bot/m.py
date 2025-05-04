@@ -6747,7 +6747,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
           try:
             info(my_url)
             await sleep(1)
-            res = await client.send_file(chat_id, file=url, caption=f"{url}\n{my_url}")
+            res = await client.send_file(chat_id, file=my_url, caption=f"{url}\n{my_url}")
           except rpcerrorlist.WebpageCurlFailedError as e:
             err(f"文件url有问题: {my_url} ", e=e)
           except rpcerrorlist.WebpageMediaEmptyError as e:
