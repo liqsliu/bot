@@ -6906,7 +6906,7 @@ async def msgtout(event):
       tmsg = event
       if tmsg.document or tmsg.file or tmsg.media:
         #  file = tmsg.document
-        await send_tg(f"document type: {type(tmsg.document)}\nfile type: {type(tmsg.file)}\nmedia type: {type(tmsg.media)}\n$get reply/file", chat_id)
+        await send_tg(f"photo: {type(tmsg.photo)}\ndocument: {type(tmsg.document)}\nfile: {type(tmsg.file)}\nmedia: {type(tmsg.media)}\n$get reply/file", chat_id)
       if event.fwd_from:
         #  await msg.reply(event.fwd_from.stringify())
         #  opts = 0
