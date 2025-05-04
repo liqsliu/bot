@@ -6523,7 +6523,10 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
   elif tmsg.file:
     file = tmsg.file
     file_size = file.size
-    send(f"direct send...\nfile: {type(file)}\nname: {file.name}\nsize: {file.size}", chat_id)
+    send(f"direct send {opts}...\nfile: {type(file)}\nname: {file.name}\nsize: {file.size}", chat_id)
+
+    file = None
+
     res = None
     #  if tmsg.text:
     # https://docs.telethon.dev/en/stable/modules/client.html#telethon.client.uploads.UploadMethods.send_file
@@ -6558,7 +6561,6 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               tmsg2 = await TB.get_messages(tmsg.chat_id, ids=tmsg.id)
               if tmsg2:
                 info("using TB: found msg")
-                file = None
                 if tmsg2.photo:
                   file = tmsg2.photo
                 elif tmsg2.document:
@@ -10919,19 +10921,38 @@ async def msgb(event):
       if text == "id":
         await msg.reply(f"id [f/b/a] @name https://t.me/name\nchat_id: {chat_id}")
         return
-      if text == "msg":
-        await msg.reply("msg url raw/fast/xmpp/direct/vps")
-        return
-      if text.startswith("id "):
-        full = False
-        if text.startswith("id f "):
-          full = True
+      cmds = get_cmd(text)
+      #  if text.startswith("id "):
+      if cmds[0] == "id":
 
+        full = False
         client = UB
-        if text.startswith("id b "):
+        #  if text.startswith("msg b "):
+        if cmds[1] == "b":
+          cmds.pop(1)
           client = TB
 
-        url = text.split(' ')[-1]
+        #  if text.startswith("msg f "):
+        if cmds[1] == "f":
+          full = True
+          cmds.pop(1)
+
+        cmds.pop(0)
+
+        #  full = False
+        #  if text.startswith("id f "):
+        #    full = True
+        #
+        #  client = UB
+        #  if text.startswith("id b "):
+        #    client = TB
+
+        #  url = text.split(' ')[-1]
+        url = cmds[-1]
+
+        if not url:
+          await msg.reply(f"error url: {url}")
+          return
 
         res = ""
         e, gid = await get_entity(url, False, return_gid=True, client=client)
@@ -10982,16 +11003,30 @@ async def msgb(event):
         else:
           await msg.reply("not fount entity")
         return
-      elif text.startswith("msg "):
-        cmds = get_cmd(text)
+      #  elif text.startswith("msg "):
+      elif cmds[0] == "msg":
+        if text == "msg":
+          await msg.reply("msg [b] [f] [raw/fast/xmpp/direct/vps] url")
+          return
+
         full = False
-        if text.startswith("msg f "):
-          full = True
         client = UB
-        if text.startswith("msg b "):
+        #  if text.startswith("msg b "):
+        if cmds[1] == "b":
+          cmds.pop(1)
           client = TB
+
+        #  if text.startswith("msg f "):
+        if cmds[1] == "f":
+          full = True
+          cmds.pop(1)
+
+        cmds.pop(0)
+
         #  url = cmds[1]
-        url = text.split(' ')[-1]
+        #  url = text.split(' ')[-1]
+        url = cmds[-1]
+        cmds.pop(-1)
         if url:
           opts = 1
           peer, gid = await get_entity(url, return_gid=True, client=client)
@@ -11007,8 +11042,8 @@ async def msgb(event):
                   #  await msg.reply(f"{e.stringify()}")
                   await send_tg(tmsg.stringify(), chat_id)
                 else:
-                  if len(cmds) == 3:
-                    opts = cmds[2]
+                  if len(cmds) > 0:
+                    opts = cmds[0]
                   await save_tg_msg(tmsg, chat_id, opts, url)
               else:
                 await msg.reply(f"error id: {gid}\nres: {msg}")
