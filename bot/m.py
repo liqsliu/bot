@@ -4029,9 +4029,9 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     if chat_id == GROUP_ID or chat_id == GROUP2_ID:
       #  name2 = "**C bot:** "
       name = "C bot"
-    else:
-      #  name2 = ""
-      name = ""
+    #  else:
+    #    #  name2 = ""
+    #    name = ""
   #  elif name == "":
   #    name2 = ""
   #  else:
@@ -4105,7 +4105,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         #  if parse_mode ==  "md":
         #    parse_mode = "html"
         if parse_mode ==  "html":
-          pass
+          qtr = "<blockquote>%s</blockquote>" % qtr
         #  elif parse_mode ==  "md":
         else:
           #  text2 = "%s\n%s%s" % ("\n".join(qt), name3, text)
@@ -4133,47 +4133,67 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       formatting_entities = []
       formatting_entities.append(types.MessageEntityBlockquote(offset=0, length=qt_len))
 
-    if parse_mode is None:
-      if len(name) > 0:
+
+    if parse_mode ==  "html":
+      if name is not None:
+        name2 = "<b>%s:</b> " % name
+      #  text2 = "%s%s" % (name2, text)
+      #  if qt is not None:
+      #    text2 = "<blockquote>%s</blockquote>\n%s" % (qtr, text2)
+    elif parse_mode is None:
+      if name is not None:
         name2 = "%s: " % name
+    else:
+    #  if parse_mode ==  "md":
+      if urlre.fullmatch(text):
+        text = f"[{text}]({text})"
+      if name is not None:
+        name2 = "**%s:** " % name
+
+    #  if parse_mode is None:
+    #    if name is not None:
+    #      name2 = "%s: " % name
+    #    text2 = "%s%s" % (name2, text)
+    #    #  text2 = name + ": " + text
+    #    if qt is not None:
+    #      #  text2 = "%s%s\n%s" % (name2, text, qtr)
+    #      text2 = "%s\n%s" % (qtr, text2)
+    #  else:
+    #    if parse_mode ==  "html":
+    #      if name is not None:
+    #        name2 = "<b>%s:</b> " % name
+    #      #  text2 = "%s%s" % (name2, text)
+    #      #  if qt is not None:
+    #      #    text2 = "<blockquote>%s</blockquote>\n%s" % (qtr, text2)
+    #    else:
+    #    #  if parse_mode ==  "md":
+    #      if urlre.fullmatch(text):
+    #        text = f"[{text}]({text})"
+    #      if name is not None:
+    #        name2 = "**%s:** " % name
+
       text2 = "%s%s" % (name2, text)
-      #  text2 = name + ": " + text
       if qt is not None:
         #  text2 = "%s%s\n%s" % (name2, text, qtr)
-        text2 = "%s\n%s%s" % (qtr, text2)
-    else:
-      if parse_mode ==  "md":
-        if urlre.fullmatch(text):
-          text = f"[{text}]({text})"
-        if len(name) > 0:
-          name2 = "**%s:** " % name
-        text2 = "%s%s" % (name2, text)
-        if qt is not None:
-          #  text2 = "%s%s\n%s" % (name2, text, qtr)
-          text2 = "%s\n%s%s" % (qtr, text2)
-      elif parse_mode ==  "html":
-        if len(name) > 0:
-          name2 = "<b>%s:</b> " % name
-        text2 = "%s%s" % (name2, text)
-        if qt is not None:
-          text2 = "<blockquote>%s</blockquote>\n%s" % (qtr, text2)
+        text2 = "%s\n%s" % (qtr, text2)
 
-      pm = utils.sanitize_parse_mode(parse_mode)
-      text2, et = pm.parse(text2)
-      if et:
-        if formatting_entities is None:
-          formatting_entities = et
-        else:
-          formatting_entities.extend(et)
+      if parse_mode is not None:
+        pm = utils.sanitize_parse_mode(parse_mode)
+        text2, et = pm.parse(text2)
+        if et:
+          if formatting_entities is None:
+            formatting_entities = et
+          else:
+            formatting_entities.extend(et)
 
   else:
-    if len(name) > 0:
+    if name is not None:
       name2 = "%s: " % name
     text2 = "%s%s" % (name2, text)
     #  text2 = name + ": " + text
     if qt is not None:
       #  text2 = "%s%s\n%s" % (name2, text, qtr)
-      text2 = "%s%s\n%s" % (text2, qtr)
+      text2 = "%s\n%s" % (text2, qtr)
     #  text2 = name + ": " + text
     #  text2 = name3 + text
     #  for e in formatting_entities:
