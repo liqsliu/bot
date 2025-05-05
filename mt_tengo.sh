@@ -718,7 +718,11 @@ if [[ -n "$4" ]] ; then
         # else
         #   NAME=$(echo "$NAME"; echo "$QT")
         # fi
-        NAME=$(echo "⁦$NAME"; echo "$QT")
+        if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
+          NAME=$(echo "⁦${NAME}"; echo "$QT")
+        else
+          NAME=$(echo "$NAME"; echo "$QT")
+        fi
       else
         block_msg
       fi
@@ -758,7 +762,11 @@ ${NAME}"
             TEXT="[$TEXT]($TEXT)"
           fi
         fi
-        TEXT="⁦$NAME$TEXT"
+        if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
+          TEXT="⁦${NAME}$TEXT"
+        else
+          TEXT="$NAME$TEXT"
+        fi
       fi
       unset NAME
     fi

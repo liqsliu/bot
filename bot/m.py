@@ -4033,127 +4033,150 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
 
   if len(name) > 0:
     name3 = name + ": "
+    name4 = name + ":"
   else:
     name3 = ""
+    name4 = ""
 
-    #  text = name + text
-
-  #  if name is not None:
-  #    text = f"{name}{text}"
-  #  else:
-  #    if parse_mode ==  "md":
-  #      parse_mode = client.parse_mode
-  #  info(f"parse_mode: {parse_mode}")
-  if urlre.fullmatch(text):
-    if formatting_entities is None:
-    #  text2 = "{}[{}]({})".fromat(name2, text, text)
-      #  text2 = name + ": " + text
-      text2 = name3 + text
-      formatting_entities = []
-      if len(name) > 0:
-        formatting_entities.append(types.MessageEntityBold(offset=0, length=len(name3.strip())))
-        #  formatting_entities.append(types.MessageEntityUrl(offset=len(name), length=len(text)))
-        formatting_entities.append(types.MessageEntityTextUrl(offset=len(name3), length=len(text), url=text))
-      else:
-        formatting_entities.append(types.MessageEntityTextUrl(offset=0, length=len(text), url=text))
-    else:
-      #  text2 = name2 + text
-      #  if name:
-      #    text2 = name + ": " + text
-      #  else:
-      #    text2 = text
-      text2 = name3 + text
-      #  for e in formatting_entities:
-      #    e.offset += len(name) + 2
+  force_quoted = False
+  #  text2 = text
+  if qt is None:
+    qt_len = 0
   else:
-    if formatting_entities is None:
-      if parse_mode ==  "md":
-        text2 = name2 + text
-      else:
-        #  text2 = name + ": " + text
-        text2 = name3 + text
-    else:
-      #  text2 = name + ": " + text
-      text2 = name3 + text
-      #  for e in formatting_entities:
-      #    e.offset += len(name) + 2
-
-  if qt is not None:
     qtr = "\n".join(qt)
     if qtr.startswith("**G "):
       qtr = qtr.split(":** ", 1)[1]
-      if qtr.startswith(f"https://{DOMAIN}") and urlre.fullmatch(qtr):
-        qtr = None
     info(f"{qtr=}")
     topic_orig = topic
     k = 0
     #  if qtr is not None and len(qtr.strip()) > 0 and client is UB:
-    if qtr is not None and len(qtr.strip()) > 0:
-      try:
-        if topic is None:
-          #  async for msg in client.iter_messages(chat_id):
-          async for msg in UB.iter_messages(chat_id):
-            textr = msg.text
-            if textr:
-              if textr.startswith("**G "):
-                textr = textr.split(":** ", 1)[1]
-              if similarity(textr, qtr) > 0.9:
-                info(f"found: {textr=} {qtr=}")
-                topic = msg.id
+    #  if qtr is not None and len(qtr.strip()) > 0:
+    if len(qtr.strip()) > 0:
+      if qtr.startswith(f"https://{DOMAIN}") and urlre.fullmatch(qtr):
+        pass
+      else:
+        try:
+          if topic is None:
+            #  async for msg in client.iter_messages(chat_id):
+            async for msg in UB.iter_messages(chat_id):
+              textr = msg.text
+              if textr:
+                if textr.startswith("**G "):
+                  textr = textr.split(":** ", 1)[1]
+                if similarity(textr, qtr) > 0.9:
+                  info(f"found: {textr=} {qtr=}")
+                  topic = msg.id
+                  break
+                info(f"skip: {text=}")
+              k += 1
+              if k > 9:
                 break
-              info(f"skip: {text=}")
-            k += 1
-            if k > 9:
-              break
-        else:
-          #  async for msg in client.iter_messages(chat_id, reply_to=topic):
-          async for msg in UB.iter_messages(chat_id, reply_to=topic):
-            textr = msg.text
-            if textr:
-              if textr.startswith("**G "):
-                textr = textr.split(":** ", 1)[1]
-              if similarity(textr, qtr) > 0.9:
-                info(f"found: {textr=} {qtr=}")
-                topic = msg.id
+          else:
+            #  async for msg in client.iter_messages(chat_id, reply_to=topic):
+            async for msg in UB.iter_messages(chat_id, reply_to=topic):
+              textr = msg.text
+              if textr:
+                if textr.startswith("**G "):
+                  textr = textr.split(":** ", 1)[1]
+                if similarity(textr, qtr) > 0.9:
+                  info(f"found: {textr=} {qtr=}")
+                  topic = msg.id
+                  break
+                info(f"skip: {text=}")
+              k += 1
+              if k > 9:
                 break
-              info(f"skip: {text=}")
-            k += 1
-            if k > 9:
-              break
-      except Exception as e:
-        err(e=e)
+        except Exception as e:
+          err(e=e)
 
     if topic_orig == topic:
+      #  if parse_mode is not None:
       info("not found")
       if formatting_entities is None:
+        pm = utils.sanitize_parse_mode(parse_mode)
+        qtr, et = pm.parse("\n".join(qt))
+        qt_len = len(qtr)
+        if et:
+          #  if formatting_entities is None:
+          formatting_entities = et
+          #  else:
+          #    formatting_entities.extend(et)
+          qt = qtr.splitlines()
+      #  if formatting_entities is None:
         #  if parse_mode ==  "md":
         #    parse_mode = "html"
         if parse_mode ==  "html":
-          #  text = "<blockquote>%s</blockquote>\n%s" % ("\n".join(qt), text2)
-          text2 = "<blockquote>%s</blockquote>\n<b>%s</b> %s" % ("\n".join(qt), name3, text)
-        elif parse_mode ==  "md":
-          text2 = "%s\n%s%s" % ("\n".join(qt), name3, text)
-          formatting_entities = []
-          formatting_entities.append(types.MessageEntityBlockquote(offset=0, length=len("\n".join(qt))))
-          if name3:
-            formatting_entities.append(types.MessageEntityBold(offset=len("\n".join(qt))+1, length=len(name3.strip())))
+          pass
+        #  elif parse_mode ==  "md":
         else:
-          text2 = "%s\n%s" % ("\n> ".join(qt), text2)
+          #  text2 = "%s\n%s%s" % ("\n".join(qt), name3, text)
+          #  text2 = "%s\n%s%s" % (qtr, name3, text)
+          force_quoted = True
+        #  else:
+        #    #  text2 = "%s\n%s" % ("\n> ".join(qt), text2)
+        #    qtr = "\n> ".join(qt)
+        #    qt_len = len(qtr)
+        #    #  text2 = "%s\n%s" % (qtr, text2)
+        #    text2 = "%s\n%s%s" % (qtr, name2, text)
       else:
-        text2 = "%s\n%s" % (text2, "\n> ".join(qt))
+        #  text2 = "%s\n%s" % (text2, "\n> ".join(qt))
+        qtr = "\n> ".join(qt)
+        qt_len = len(qtr)
+        #  text2 = "%s\n%s" % (text2, qtr)
+    else:
+      info("found")
+      qt_len = 0
+      qt = None
+
+  if formatting_entities is None:
+    if force_quoted is True:
+      formatting_entities = []
+      formatting_entities.append(types.MessageEntityBlockquote(offset=0, length=qt_len))
+
+    if parse_mode is None:
+      #  text2 = name + ": " + text
+      if qt is None:
+        text2 = name3 + text
+      else:
+        #  text2 = "%s%s\n%s" % (name2, text, qtr)
+        text2 = "%s\n%s%s" % (qtr, name3, text)
+    else:
+      if parse_mode ==  "md":
+        if urlre.fullmatch(text):
+          text = f"[text](text)"
+        #  text2 = name2 + text
+        if qt is None:
+          text2 = "%s%s" % (name3, text)
+        else:
+          text2 = "%s\n%s%s" % (qtr, name3, text)
+      elif parse_mode ==  "html":
+        if qt is None:
+          text2 = "<b>%s</b> %s" % (name4, text)
+        else:
+          text2 = "<blockquote>%s</blockquote>\n<b>%s</b> %s" % (qtr, name4, text)
+
+      pm = utils.sanitize_parse_mode(parse_mode)
+      text2, et = pm.parse(text2)
+      if et:
+        if formatting_entities is None:
+          formatting_entities = et
+        else:
+          formatting_entities.extend(et)
+
+  else:
+    #  text2 = name + ": " + text
+    #  text2 = name3 + text
+    #  for e in formatting_entities:
+    #    e.offset += len(name) + 2
+    if qt is None:
+      text2 = name3 + text
+    else:
+      text2 = "%s%s\n%s" % (name3, text, qtr)
 
   #  ts = await split_long_text(text2, MAX_MSG_BYTES_TG, tmp_msg)
   #  if len(ts) > 1:
   #    tmp_msg = False
-  if parse_mode is not None:
-    pm = utils.sanitize_parse_mode(parse_mode)
-    text2, et = pm.parse(text2)
-    if et:
-      if formatting_entities is None:
-        formatting_entities = et
-      else:
-        formatting_entities.extend(et)
-  info(f"{text2=} {formatting_entities=}")
+
   ts = []
   for t in utils.split_text(text2, formatting_entities if formatting_entities is not None else []):
     ts.append(t)
@@ -6274,8 +6297,9 @@ async def msgt(event):
           info(f"bot original text: {text=}")
           text = text[3:]
           #  if text.startswith("\u2066"):
-          while text.startswith("\u2066"):
-            text = text[1:]
+          #  while text.startswith("\u2066"):
+          #    text = text[1:]
+          text = text.replace("\u2066", "", 1)
           if text[:2] == " \n":
             text = text[2:]
           elif text[0] == "\n":
@@ -6331,8 +6355,8 @@ async def msgt(event):
       elif sender_id == 5864905002:
         # msg from my tg bot received by tg user bot
         #  text2 = "bot: " + (msg.raw_text)
-        while text.startswith("\u2066"):
-          text = text[1:]
+        #  while text.startswith("\u2066"):
+        #    text = text[1:]
         #  text = text.splitlines()[0]
         #  text = text.strip()
         if text.startswith("M "):
