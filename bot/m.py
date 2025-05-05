@@ -5393,7 +5393,9 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
 #      print("me: %s" % text)
 
 
-async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_memory=False, max_time=download_media_time_max):
+async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in_memory=False, max_time=download_media_time_max, client=None):
+  if client is None:
+    client = UB
   if path is None:
     err(f"need file path: {path}")
     return
@@ -5450,15 +5452,15 @@ async def tg_upload_media(path=None, src=None, chat_id=CHAT_ID, caption=None, in
           #    break
       #  if src:
       #    t = asyncio.create_task(update_tmp_msg())
-    h = await UB.upload_file(path, progress_callback=cb)
+    h = await client.upload_file(path, progress_callback=cb)
   else:
     h = path
-    if h.endswith(".webp"):
-      await UB.send_message(chat_id, h)
+    #  if h.endswith(".webp"):
+    #    await client.send_message(chat_id, h)
   try:
-    res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document, supports_streaming=supports_streaming)
+    res = await client.send_file(chat_id, file=h, caption=caption, force_document=force_document, supports_streaming=supports_streaming)
   except Exception as e:
-    res = await UB.send_file(chat_id, file=h, caption=caption, force_document=force_document)
+    res = await client.send_file(chat_id, file=h, caption=caption, force_document=force_document)
   return res
 
 
@@ -6828,13 +6830,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
 
 
         if xmpp_url:
+          if url:
+            caption = f"{url}\n{xmpp_url}"
+          else:
+            caption = xmpp_url
           try:
             #  res = await client.send_file(chat_id, file=url, caption=url)
-            if url:
-              caption = f"{url}\n{xmpp_url}"
-            else:
-              caption = xmpp_url
-            res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=caption)
+            res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=caption, client=UB)
             if path.endswith(".webp"):
               if client is UB:
                 await send_tg2(caption, chat_id, topic=res.id)
@@ -6849,6 +6851,28 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             err(f"文件url有问题: {xmpp_url} ", e=e)
           except Exception as e:
             err(xmpp_url, e=e)
+
+          if res is None:
+            try:
+              #  res = await client.send_file(chat_id, file=url, caption=url)
+              res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=caption, client=TB)
+              if path.endswith(".webp"):
+                if client is UB:
+                  await send_tg2(caption, chat_id, topic=res.id)
+                else:
+                  await send_tg(caption, chat_id, topic=res.id)
+              if opts == 3:
+                return True
+            except rpcerrorlist.WebpageCurlFailedError as e:
+              #  send(xmpp_url, chat_id)
+              err(f"文件url有问题: {xmpp_url} ", e=e)
+            except rpcerrorlist.WebpageMediaEmptyError as e:
+              err(f"文件url有问题: {xmpp_url} ", e=e)
+            except Exception as e:
+              err(xmpp_url, e=e)
+
+
+
 
         my_url = None
         await t
@@ -6878,6 +6902,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             err(f"文件url有问题: {my_url} ", e=e)
           except Exception as e:
             err(url, e=e)
+
 
         if res is None or opts == 2:
           if url:
