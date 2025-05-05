@@ -4121,6 +4121,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       qt_len = 0
       qt = None
 
+  name2 = ""
   if formatting_entities is None:
     if force_quoted is True:
       formatting_entities = []
