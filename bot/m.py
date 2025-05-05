@@ -6446,6 +6446,12 @@ async def msgt(event):
             #  if ratio(text, tg_msg_cache_for_bot2) > 0.9:
             r = similarity(text, tg_msg_cache_for_bot2)
             if r > 0.8:
+              if ": " in tg_msg_cache_for_bot2:
+                tmptg_msg_cache_for_bot2.split(": ", 1)[1]
+                if urlre.fullmatch(tmp):
+                  r = similarity(text, "%s: [%s](%s)" % (tmptg_msg_cache_for_bot2.split(": ", 1)[0], tmp, tmp))
+                  info(f"format url: {tmp}")
+            if r > 0.8:
               tg_msg_cache_for_bot2_event.clear()
               await msg.delete()
               if chat_id in last_outmsg:
@@ -6458,7 +6464,7 @@ async def msgt(event):
               #  if time.time() - start_time > 5:
               #  await sleep(0.2)
               #  info(f"bot1 miss: {short(text)} != {short(tg_msg_cache_for_bot2)}")
-              info(f"匹配失败: {r=} {text=} != {tg_msg_cache_for_bot2=}")
+              info(f"匹配失败: {r=}\n{text=}\n!=\n{tg_msg_cache_for_bot2=}")
               await asyncio.sleep(0)
         except TimeoutError as e:
           info(f"等待超时，未找到重复消息: {short(text)}")
