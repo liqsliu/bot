@@ -6804,9 +6804,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             if url:
               caption = url
               if path.endswith(".webp"):
-                if client is UB:
-                  await send_tg2(caption, chat_id, topic=res.id)
-                else:
+                #  if client is UB:
+                #    await send_tg2(caption, chat_id, topic=res.id)
+                #  else:
+                if chat_id == CHAT_ID:
+                  await sleep(0.5)
                   await send_tg(caption, chat_id, topic=res.id)
             if opts == 2:
               return
@@ -6838,9 +6840,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             #  res = await client.send_file(chat_id, file=url, caption=url)
             res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=caption, client=UB)
             if path.endswith(".webp"):
-              if client is UB:
-                await send_tg2(caption, chat_id, topic=res.id)
-              else:
+              if chat_id == CHAT_ID:
+                await sleep(0.5)
                 await send_tg(caption, chat_id, topic=res.id)
             if opts == 3:
               return True
@@ -6857,9 +6858,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               #  res = await client.send_file(chat_id, file=url, caption=url)
               res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=caption, client=TB)
               if path.endswith(".webp"):
-                if client is UB:
-                  await send_tg2(caption, chat_id, topic=res.id)
-                else:
+                if chat_id == CHAT_ID:
+                  await sleep(0.5)
                   await send_tg(caption, chat_id, topic=res.id)
               if opts == 3:
                 return True
@@ -6870,8 +6870,6 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               err(f"文件url有问题: {xmpp_url} ", e=e)
             except Exception as e:
               err(xmpp_url, e=e)
-
-
 
 
         my_url = None
@@ -6891,10 +6889,8 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               caption = my_url
             res = await client.send_file(chat_id, file=my_url, caption=caption)
             if path.endswith(".webp"):
-              await sleep(0.2)
-              if client is UB:
-                await send_tg2(caption, chat_id, topic=res.id)
-              else:
+              if chat_id == CHAT_ID:
+                await sleep(0.5)
                 await send_tg(caption, chat_id, topic=res.id)
           except rpcerrorlist.WebpageCurlFailedError as e:
             err(f"文件url有问题: {my_url} ", e=e)
