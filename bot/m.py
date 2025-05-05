@@ -2977,6 +2977,17 @@ async def shasum(path):
   else:
     return str(int(time.time()))
 
+async def ipfssum(path):
+  shell_cmd=["ipfs", "add", "-n", "-Q", path]
+  res = await myshell(shell_cmd)
+  if res:
+    info(f"res: {res} {shell_cmd}")
+    res = res[1]
+    res = res.split(" ")[0]
+    return res
+  else:
+    return str(int(time.time()))
+
 async def backup(path, src=None, delete=False, no_wait=False, rename=False):
   if rename:
     name = path.split("/")[-1]
@@ -2984,8 +2995,9 @@ async def backup(path, src=None, delete=False, no_wait=False, rename=False):
       ext = "." + name.split(".")[-1]
     else:
       ext = ""
-    name = await shasum(path) + ext
-    npath = path.rsplit("/", 1)[0] + "/" + name
+    #  name = await shasum(path) + ext
+    name = "{}{}".format(await ipfssum(path), ext)
+    npath = "{}/{}".format(path.rsplit("/", 1)[0], name)
   else:
     npath = path
   #  if name is not None:

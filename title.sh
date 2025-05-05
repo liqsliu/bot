@@ -178,33 +178,42 @@ case "$mime_type" in
 esac
 
 unset fe
+# if [[ -n "$ext" ]]; then
+#   fe=".$ext"
+#   if [[ "${fno%.${ext}}" == "$fno" ]]; then
+#     mv "$fn" "$HOME/t/$fno$fe"
+#     fn="$HOME/t/$fno$fe"
+#   else
+#     fno=${fno%.${ext}}
+#   fi
+#   # tmp=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
+#   # if [[ -z "$tmp" || ${#tmp} -ne 6 || "$tmp" != "$fno" ]]; then
+#   #   fno=$tmp
+#   #   # if [[ ${#fno} -gt 6 ]]; then
+#   #   #   # fno=${fno::6}
+#   #   #   fno=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
+#   #   # fi
+#   #   if [[ ${#fno} -gt 6 ]]; then
+#   #     fno=${fno: -6}
+#   #   elif [[ ${#fno} -lt 6 ]]; then
+#   #     fno+=$(date "+%H%M%S")
+#   #   fi
+#   #
+#   if true; then
+#     fno=$(shasum "$fn" | awk '{print $1}')
+#     # fno=$(ipfs add -n -Q "$fn")
+#
+#     mv "$fn" "$HOME/t/$fno$fe"
+#     fn="$HOME/t/$fno$fe"
+#   fi
+# fi
+fno=$(ipfs add -n -Q "$fn")
 if [[ -n "$ext" ]]; then
   fe=".$ext"
-  if [[ "${fno%.${ext}}" == "$fno" ]]; then
-    mv "$fn" "$HOME/t/$fno$fe"
-    fn="$HOME/t/$fno$fe"
-  else
-    fno=${fno%.${ext}}
-  fi
-  # tmp=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
-  # if [[ -z "$tmp" || ${#tmp} -ne 6 || "$tmp" != "$fno" ]]; then
-  #   fno=$tmp
-  #   # if [[ ${#fno} -gt 6 ]]; then
-  #   #   # fno=${fno::6}
-  #   #   fno=$(echo "$fno"| tr -d '_-' | tr -d '#?' | tr -d '=.')
-  #   # fi
-  #   if [[ ${#fno} -gt 6 ]]; then
-  #     fno=${fno: -6}
-  #   elif [[ ${#fno} -lt 6 ]]; then
-  #     fno+=$(date "+%H%M%S")
-  #   fi
-  #
-  if true; then
-    fno=$(shasum "$fn" | awk '{print $1}')
-
-    mv "$fn" "$HOME/t/$fno$fe"
-    fn="$HOME/t/$fno$fe"
-  fi
+fi
+if [[ "$fn" != "$HOME/t/$fno$fe" ]]; then
+  mv "$fn" "$HOME/t/$fno$fe"
+  fn="$HOME/t/$fno$fe"
 fi
 
 echo "$fn"
