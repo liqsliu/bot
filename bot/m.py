@@ -2996,8 +2996,12 @@ async def backup(path, src=None, delete=False, no_wait=False, rename=False):
   info(f"url: {url}")
   #  shell_cmd=["/usr/bin/mv", path, DOWNLOAD_PATH0+"/"]
   if delete:
-    info(f"delete: {path}")
-    shell_cmd=["rm", path]
+    if os.path.exists(path):
+      info(f"delete: {path}")
+      shell_cmd=["rm", path]
+    else:
+      warn("not found: %s" % path)
+      shell_cmd=["echo", "not found: %s" % path]
   else:
     #  if name is not None:
     if rename:

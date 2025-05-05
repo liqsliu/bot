@@ -33,26 +33,27 @@ fi
 # while read -r URL; do
     # echo -n "$URL --> "
 URL=$1
-fn=${URL##*/}
-fn=${fn##*:}
-fn=${fn##*\?}
-fn=${fn##*=}
-fn=${fn%%#*}
-# fn=${fn#-}
-# fn=${fn#-}
-# fn=${fn#-}
-fn=$(echo "$fn" | sed "s/^-*//g")
-if [[ -z "$fn" ]]; then
-  # fn=$(date "+%Y%m%d_%H%M%S")
-  # fn=$(date "+%H%M%S")
-  fn=tmp
-elif [[ "${fn}" == "index.html" ]]; then
-  fn=tmp
-elif [[ "${fn}" == "index" ]]; then
-  fn=tmp
-fi
-fno=$fn
-fn="$HOME/t/$fn"
+# fn=${URL##*/}
+# fn=${fn##*:}
+# fn=${fn##*\?}
+# fn=${fn##*=}
+# fn=${fn%%#*}
+# # fn=${fn#-}
+# # fn=${fn#-}
+# # fn=${fn#-}
+# fn=$(echo "$fn" | sed "s/^-*//g")
+# if [[ -z "$fn" ]]; then
+#   # fn=$(date "+%Y%m%d_%H%M%S")
+#   # fn=$(date "+%H%M%S")
+#   fn=tmp
+# elif [[ "${fn}" == "index.html" ]]; then
+#   fn=tmp
+# elif [[ "${fn}" == "index" ]]; then
+#   fn=tmp
+# fi
+# fno=$fn
+fno=tmp
+fn="$HOME/t/$fno"
 cd "$HOME/t/" || {
 # rm * &>/dev/null || true
   echo "目录有问题"
@@ -60,6 +61,7 @@ cd "$HOME/t/" || {
 }
 # echo "$fn"
 
+[[ -e "$fn" ]] && rm -f "$fn"
 
 
 if [[ "$3" == direct ]]; then
