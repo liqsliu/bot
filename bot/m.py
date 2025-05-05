@@ -5935,7 +5935,8 @@ async def parse_tg_file_msg(msg, chat_id=None):
       if path is not None:
         #  t = asyncio.create_task(backup(path))
         #  url = await t
-        url, backup_task = await backup(path, no_wait=True)
+        #  url, backup_task = await backup(path, no_wait=True)
+        url, backup_task = await backup(path, no_wait=True, rename=True)
         #  xmpp_url = await upload(path, src)
         #  if xmpp_url:
         #    url = f"- {xmpp_url}\n\n- {url}"
@@ -6798,7 +6799,13 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if res is None and opts != 3:
           try:
             res = await tg_upload_media(path, src, chat_id=chat_id, caption=url, max_time=get_timeout(file_size))
-            direct = True
+            if url:
+              caption = url
+              if path.endswith(".webp"):
+                if client is UB:
+                  await send_tg2(caption, chat_id, topic=res.id)
+                else:
+                  await send_tg(caption, chat_id, topic=res.id)
             if opts == 2:
               return
           except Exception as e:
@@ -6828,6 +6835,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
             else:
               caption = xmpp_url
             res = await tg_upload_media(xmpp_url, src, chat_id=chat_id, caption=caption)
+            if path.endswith(".webp"):
+              if client is UB:
+                await send_tg2(caption, chat_id, topic=res.id)
+              else:
+                await send_tg(caption, chat_id, topic=res.id)
             if opts == 3:
               return True
           except rpcerrorlist.WebpageCurlFailedError as e:
