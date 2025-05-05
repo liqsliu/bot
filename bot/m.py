@@ -5501,7 +5501,9 @@ def short(text, length=64):
 
 
 tmp_msgs = {}
-def send_tmp_msg(text, chat_id, **kwargs):
+def send_tmp_msg(text, chat_id=None, **kwargs):
+  if chat_id is None:
+    chat_id = CHAT_ID
   #  if chat_id in tmp_msgs:
   #    pass
   #    last tmp_msgs[chat_id]
@@ -6973,11 +6975,12 @@ async def msgtout(event):
       r = await msg.get_reply_message()
       #  sendme(f"{r.stringify()}")
       #  await msg.reply(f"{r.stringify()}")
-      await send_tg(r.stringify())
+      #  await send_tg(r.stringify())
+      send_tmp_msg(r.stringify())
     else:
       #  sendme(f"{event.chat_id}")
       #  await msg.reply(f"{event.chat_id}")
-      await send_tg(f"event.chat_id")
+      send_tmp_msg(f"{chat_id}")
   elif text.startswith("$"):
     cmds = get_cmd(text)
     if cmds[0] == "$get":
