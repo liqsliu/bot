@@ -4043,11 +4043,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     qt_len = 0
   else:
     qtr = "\n".join(qt)
-    if qtr.startswith("**G "):
-      qtr = qtr.split(":** ", 1)[1]
     info(f"{qtr=}")
     topic_orig = topic
-    k = 0
     #  if qtr is not None and len(qtr.strip()) > 0 and client is UB:
     #  if qtr is not None and len(qtr.strip()) > 0:
     if len(qtr.strip()) > 0:
@@ -4055,29 +4052,41 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         pass
       else:
         try:
+          k = 0
           if topic is None:
-            #  async for msg in client.iter_messages(chat_id):
-            async for msg in UB.iter_messages(chat_id):
-              textr = msg.text
-              if textr:
-                if textr.startswith("**G "):
-                  textr = textr.split(":** ", 1)[1]
-                if similarity(textr, qtr) > 0.9:
-                  info(f"found: {textr=} {qtr=}")
-                  topic = msg.id
+            if chat_id == GROUP_ID:
+              qtr2 = qtr
+              if qtr.startswith("**G  "):
+                pass
+              elif qtr.startswith("**G "):
+                qtr2 = qtr.split(":** ", 1)[1]
+              #  async for msg in client.iter_messages(chat_id):
+              async for msg in UB.iter_messages(chat_id):
+                textr = msg.text
+                if textr:
+                  if msg.send_id != 420415423 and msg.send_id != 5864905002:
+                    if textr.startswith("**G "):
+                      textr = textr.split(":** ", 1)[1]
+                  if similarity(textr, qtr2) > 0.9:
+                    info(f"found: {textr=} {qtr=}")
+                    topic = msg.id
+                    break
+                  info(f"skip: {text=}")
+                k += 1
+                if k > 9:
                   break
-                info(f"skip: {text=}")
-              k += 1
-              if k > 9:
-                break
-          else:
+          elif chat_id == GROUP2_ID:
+            qtr2 = qtr
+            if qtr.startswith("**G  "):
+              qtr2 = qtr.split(":** ", 1)[1]
             #  async for msg in client.iter_messages(chat_id, reply_to=topic):
             async for msg in UB.iter_messages(chat_id, reply_to=topic):
               textr = msg.text
               if textr:
-                if textr.startswith("**G "):
-                  textr = textr.split(":** ", 1)[1]
-                if similarity(textr, qtr) > 0.9:
+                if msg.send_id != 420415423 and msg.send_id != 5864905002:
+                  if textr.startswith("**G  "):
+                    textr = textr.split(":** ", 1)[1]
+                if similarity(textr, qtr2) > 0.9:
                   info(f"found: {textr=} {qtr=}")
                   topic = msg.id
                   break
