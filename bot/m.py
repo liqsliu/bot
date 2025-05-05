@@ -3993,18 +3993,24 @@ async def clear_tmp_chat_flag(chat_id):
   # bot account
   if chat_id in tmp_msg_chats:
     tmp_msg_chats.remove(chat_id)
-    msg = last_outmsg[chat_id]
-    last_outmsg.pop(chat_id)
-    await msg.delete()
+    try:
+      msg = last_outmsg[chat_id]
+      last_outmsg.pop(chat_id)
+      await msg.delete()
+    except KeyError:
+      pass
     return True
 
 async def clear_tmp_chat_flag2(chat_id):
   # user account
   if chat_id in tmp_msg_chats2:
     tmp_msg_chats2.remove(chat_id)
-    msg = last_outmsg2[chat_id]
-    last_outmsg2.pop(chat_id)
-    await msg.delete()
+    try:
+      msg = last_outmsg2[chat_id]
+      last_outmsg2.pop(chat_id)
+      await msg.delete()
+    except KeyError:
+      pass
     return True
 
 
