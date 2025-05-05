@@ -2441,7 +2441,7 @@ async def my_subprocess(p, max_time=run_shell_time_max, src=None, cmd=None):
   else:
     e = None
   #  print(o, e)
-  info("my sub exec res: %s" % format_out_of_shell((p.returncode, o, e)))
+  #  info("my sub exec res: %s" % format_out_of_shell((p.returncode, o, e)))
   return p.returncode, o, e
     
 def format_out_of_shell(res):
