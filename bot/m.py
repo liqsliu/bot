@@ -4144,7 +4144,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     else:
       if parse_mode ==  "md":
         if urlre.fullmatch(text):
-          text = f"[text](text)"
+          text = f"[{text}]({text})"
         if len(name) > 0:
           name2 = "**%s:** " % name
         text2 = "%s%s" % (name2, text)
