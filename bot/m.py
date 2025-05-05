@@ -4091,7 +4091,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     if qtr is not None and len(qtr.strip()) > 0:
       try:
         if topic is None:
-          async for msg in client.iter_messages(chat_id):
+          #  async for msg in client.iter_messages(chat_id):
+          async for msg in UB.iter_messages(chat_id):
             textr = msg.text
             if textr:
               if textr.startswith("**G "):
@@ -4105,7 +4106,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
             if k > 9:
               break
         else:
-          async for msg in client.iter_messages(chat_id, reply_to=topic):
+          #  async for msg in client.iter_messages(chat_id, reply_to=topic):
+          async for msg in UB.iter_messages(chat_id, reply_to=topic):
             textr = msg.text
             if textr:
               if textr.startswith("**G "):
@@ -4151,9 +4153,11 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         formatting_entities = et
       else:
         formatting_entities.extend(et)
+  info(f"{text2=} {formatting_entities=}")
   ts = []
   for t in utils.split_text(text2, formatting_entities if formatting_entities is not None else []):
     ts.append(t)
+  info(f"{ts=}")
   if tmp_msg is True:
     #  text2 = short(text2, 500)
     ts = [ts[0]]
