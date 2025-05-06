@@ -232,11 +232,14 @@ cmds() {
           )
           echo
           local ip6=""
-          local ip6=$(nali-dig +short aaaa "$host") && {
+          local ip6=$(nali-dig +short aaaa "$host" | grep -E '^[0-9a-fA-F:]') && {
             if [[ -n "$ip6" ]]; then
               echo -n "ipv6 from us: "
               echo $ip6
+              echo 
               curl -m 5 -s "https://api.iplocation.net/?ip=$(echo "$ip6"|tail -n1|sed 's/.* //')"
+              echo 
+              curl -m 5 -s "https://api.live.bilibili.com/ip_service/v1/ip_service/get_ip_addr?ip=$(echo "$ip6"|tail -n1|sed 's/.* //')"
             else
               echo -n "no ipv6"
             fi
