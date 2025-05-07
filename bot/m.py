@@ -4197,19 +4197,19 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     #      if name is not None:
     #        name2 = "**%s:** " % name
 
-      text2 = "%s%s" % (name2, text)
-      if qt is not None:
-        #  text2 = "%s%s\n%s" % (name2, text, qtr)
-        text2 = "%s\n%s" % (qtr, text2)
+    text2 = "%s%s" % (name2, text)
+    if qt is not None:
+      #  text2 = "%s%s\n%s" % (name2, text, qtr)
+      text2 = "%s\n%s" % (qtr, text2)
 
-      if parse_mode is not None:
-        pm = utils.sanitize_parse_mode(parse_mode)
-        text2, et = pm.parse(text2)
-        if et:
-          if formatting_entities is None:
-            formatting_entities = et
-          else:
-            formatting_entities.extend(et)
+    if parse_mode is not None:
+      pm = utils.sanitize_parse_mode(parse_mode)
+      text2, et = pm.parse(text2)
+      if et:
+        if formatting_entities is None:
+          formatting_entities = et
+        else:
+          formatting_entities.extend(et)
 
   else:
     if name is not None:
@@ -6447,7 +6447,7 @@ async def msgt(event):
             r = similarity(text, tg_msg_cache_for_bot2)
             if r > 0.8:
               if ": " in tg_msg_cache_for_bot2:
-                tmptg_msg_cache_for_bot2.split(": ", 1)[1]
+                tmp = tg_msg_cache_for_bot2.split(": ", 1)[1]
                 if urlre.fullmatch(tmp):
                   r = similarity(text, "%s: [%s](%s)" % (tmptg_msg_cache_for_bot2.split(": ", 1)[0], tmp, tmp))
                   info(f"format url: {tmp}")
