@@ -4080,7 +4080,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
               async for msg in UB.iter_messages(chat_id):
                 textr = msg.text
                 if textr:
-                  if msg.send_id != 420415423 and msg.send_id != 5864905002:
+                  if msg.sender_id != 420415423 and msg.sender_id != 5864905002:
                     if textr.startswith("**G "):
                       textr = textr.split(":** ", 1)[1]
                   if similarity(textr, qtr2) > 0.9:
@@ -4099,7 +4099,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
             async for msg in UB.iter_messages(chat_id, reply_to=topic):
               textr = msg.text
               if textr:
-                if msg.send_id != 420415423 and msg.send_id != 5864905002:
+                if msg.sender_id != 420415423 and msg.sender_id != 5864905002:
                   if textr.startswith("**G  "):
                     textr = textr.split(":** ", 1)[1]
                 if similarity(textr, qtr2) > 0.9:
