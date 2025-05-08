@@ -2207,8 +2207,10 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           pass
         else:
           ds = ds.rsplit("\n", 1)[0] + f"\n\nE: {r}"
-      if len(ds) > 0:
-        send(ds, src)
+    if len(ds) > 0:
+      send(ds, src)
+    else:
+      send("无返回值: %s" % ds, src)
   #  if e:
   if len(e) > 0:
     e = e.decode("utf-8", errors="ignore")
