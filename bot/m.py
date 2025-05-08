@@ -2090,7 +2090,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
               res = "shell: 结束等待"
               send(res, src)
               # fixme: 不知道该设为多少
-              r = -512
+              r = 512
               break
             #  if k > 1:
             #    if myshell_queue.empty():
@@ -2159,7 +2159,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
                 #  res += "\n" + ds
                 ds = ds.strip()
                 if ds:
-                  #  info(f"send: {src} {type(ds)} {ds[:16]}")
+                  info(f"send: {src} {short(ds)}")
                   #  send(f"```\n{ds}```", src)
                   send(ds, src)
                   last_send = time.time()
@@ -2179,7 +2179,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
               #      break
   except TimeoutError:
     warn("shell is busy")
-    return -512, None, "shell is busy"
+    return 512, None, "shell is busy"
   #  if o:
   if len(o) > 0:
     o = o.decode("utf-8", errors="ignore")
@@ -2197,16 +2197,18 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
     ds = ds.strip()
     #  if ds:
     if len(ds) > 0:
-      info(f"{r=}")
+      #  info(f"{r=}")
+      info(f"send: {r=} {src} {short(ds)}")
       if type(r) is int:
         if r == 0:
           #  if ds.endswith("\n0"):
           ds = ds[:-2]
-        elif r == -512:
+        elif r == 512:
           pass
         else:
           ds = ds.rsplit("\n", 1)[0] + f"\n\nE: {r}"
-      send(ds, src)
+      if len(ds) > 0:
+        send(ds, src)
   #  if e:
   if len(e) > 0:
     e = e.decode("utf-8", errors="ignore")
@@ -3129,7 +3131,7 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
     else:
       warn("empty out: %s\n\nE: %s\n%s" % (o, r, e))
       return
-  elif r == -512:
+  elif r == 512:
     if o:
       if len(s) > 0:
         return html.unescape("\n".join(s))
@@ -3463,10 +3465,17 @@ def sendme(*args, to=1, **kwargs):
 #  async def send(text, jid=None, *args, **kwargs):
 @exceptions_handler
 def send(text, jid=None, *args, exclude=None, **kwargs):
-  if jid is None:
-    if isinstance(text, str):
+  #  if jid is None:
+  #    if isinstance(text, str):
+  if text is None:
+    return False
+  if isinstance(text, str):
+    if jid is None:
       info(f"ignore: {jid}: {short(text)}")
       return False
+    if text == "":
+      return False
+
     #  return True
   if exclude is None:
     exclude = []
