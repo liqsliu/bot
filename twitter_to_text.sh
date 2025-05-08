@@ -84,7 +84,7 @@ $text"
       res+="$media_type: "
       local videos=$(echo "$tw_res" | jq -r ".mediaDetails[$i].video_info.variants")
       local length_v=$(echo "$videos" | jq -r ".|length")
-      m3u8 = ""
+      m3u8=""
       for((j=0; j<$length_v; j++ )); do
         local url_v=$(echo "$videos" | jq -r ".[$j].url")
         local type_v=$(echo "$videos" | jq -r ".[$j].content_type")
