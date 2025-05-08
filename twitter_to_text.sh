@@ -108,6 +108,7 @@ $text"
       fi
       res+="| [photo]($(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https"))"
     else
+      res+="image: "
       res+=$(echo "$tw_res" | jq -r ".mediaDetails[$i].media_url_https")
     fi
 
