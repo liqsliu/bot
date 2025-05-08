@@ -89,7 +89,8 @@ $text"
         local url_v=$(echo "$videos" | jq -r ".[$j].url")
         local type_v=$(echo "$videos" | jq -r ".[$j].content_type")
         if [[ "$type_v" == "video/mp4" ]]; then
-          # res+="[$type_v"
+          res+="["
+          # res+="$type_v"
           # res+=" "
           res+=$(echo "$videos" | jq -r ".[$j].bitrate")
         else
