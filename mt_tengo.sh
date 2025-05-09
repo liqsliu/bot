@@ -692,15 +692,6 @@ if [[ -n "$4" ]] ; then
         block_msg
       fi
     fi
-#     tmp=$NAME
-#     NAME=$(echo "$NAME" | tail -n1)
-#     # NAME=$(echo "$NAME" | cut -d ":" -f 1)
-#     NAME=${NAME%: }
-#     NAME="**${NAME}:** "
-#     qt=$(echo "$tmp" | sed '$d')
-#     [[ -n "$qt" ]] && NAME="$qt
-#
-# $NAME"
     if [[ -z "$TEXT" ]]; then
 #      [[ $(echo "$NAME" | wc -l) -ge 3 ]] && [[ $(echo "$NAME" | grep -c -G '^$') -ge 1 ]] && echo "$NAME" | tail -n1 && echo "$NAME" | sed '/^$/,$d' && NAME=""
       # if [[ $(echo "$NAME" | wc -l) -ge 3 ]]; then
@@ -764,7 +755,6 @@ ${NAME}"
 
 ${NAME}"
             fi
-        
           fi
         fi
 
@@ -778,7 +768,7 @@ ${NAME}"
         if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
           TEXT="⁦${NAME}$TEXT"
         else
-          TEXT="$NAME$TEXT"
+          TEXT="$NAME$TEXT ."
         fi
       fi
       unset NAME
