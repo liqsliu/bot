@@ -3466,7 +3466,7 @@ def sendme(*args, to=1, **kwargs):
 #  async def send_x(text, jid=None, *args, **kwargs):
 #  async def send(text, jid=None, *args, **kwargs):
 @exceptions_handler
-def send(text, jid=None, *args, exclude=None, **kwargs):
+def send(text, jid=None, exclude=None, **kwargs):
   #  if jid is None:
   #    if isinstance(text, str):
   if text is None:
