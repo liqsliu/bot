@@ -3620,7 +3620,7 @@ async def send_xmpp(text, jid=None, **kwargs):
           type_=MessageType.CHAT,
       )
     msg.body[None] = text
-    if await _send_xmpp(msg, *args, **kwargs) is not True:
+    if await _send_xmpp(msg, **kwargs) is not True:
       return False
     return True
   elif isinstance(text, aioxmpp.Message):
@@ -3640,7 +3640,7 @@ async def send_xmpp(text, jid=None, **kwargs):
         orig = msg.to
         msg.to = msg.to.bare()
         info(f"已修正地址错误: {orig} -> {msg=}")
-    return await _send_xmpp(msg, *args, **kwargs)
+    return await _send_xmpp(msg, **kwargs)
   else:
     err(f"text类型不对: {type(text)}")
     return False
