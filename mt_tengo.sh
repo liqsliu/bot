@@ -723,7 +723,6 @@ if [[ -n "$4" ]] ; then
       fi
     else
       newline
-      # if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
       if false; then
         if [[ -n "$QT" ]]; then
           if [[ -n "$NAME" ]]; then
@@ -755,10 +754,6 @@ ${NAME}"
 
 ${NAME}"
             fi
-          else
-              NAME="> .$QT
-
-${NAME}"
           fi
         fi
 
