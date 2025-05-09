@@ -290,29 +290,31 @@ def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
   if issubclass(type(text), BaseException):
     e = text
     text = None
-  if e is not None:
+  if e is None:
+    fm = sys._getframe()
+    fm = fm.f_back
+  else:
     text = "{} {}: {!r}".format(get_lineno(e=e), text, e)
+    fm = False
   logger.error(text, exc_info=exc_info, stack_info=stack_info)
   #  raise ValueError
   if no_send:
     pass
   else:
     text = f"E: {text}"
-    if e is None:
-      fm = sys._getframe()
-      fm = fm.f_back
-      send_log(text, fm=fm, delay=2)
-    else:
-      #  text = "%s %s %s" % (get_lineno(e=e), text, e)
-      send_log(text, fm=False)
+    send_log(text, fm=fm)
 
 
 def warn(text=None, more=False, no_send=True, e=None, exc_info=True, stack_info=True):
   if issubclass(type(text), BaseException):
     e = text
     text = None
-  if e is not None:
+  if e is None:
+    fm = sys._getframe()
+    fm = fm.f_back
+  else:
     text = "{} {}: {!r}".format(get_lineno(e=e), text, e)
+    fm = False
   if more:
     logger.warning(text, exc_info=exc_info, stack_info=stack_info)
   else:
@@ -322,13 +324,7 @@ def warn(text=None, more=False, no_send=True, e=None, exc_info=True, stack_info=
     pass
   else:
     text = f"W: {text}"
-    if e is None:
-      fm = sys._getframe()
-      fm = fm.f_back
-      send_log(text, fm=fm)
-    else:
-      #  text = "%s %s %s" % (get_lineno(e=e), text, e)
-      send_log(text, fm=False)
+    send_log(text, fm=fm)
 
 #  def dbg(text):
 #    logger.debug(text)
