@@ -3543,11 +3543,11 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
       #  return await send_tg(text=text, chat_id=jid, *args, **kwargs)
 
       if muc == GROUP2_ID:
-        asyncio.create_task(send_tg(text=text0, chat_id=muc, topic=GROUP2_TOPIC, *args, **kwargs) )
+        asyncio.create_task(send_tg(text=text0, chat_id=muc, topic=GROUP2_TOPIC, **kwargs) )
       else:
-        asyncio.create_task(send_tg(text=text0, chat_id=muc, *args, **kwargs) )
+        asyncio.create_task(send_tg(text=text0, chat_id=muc, **kwargs) )
     else:
-      asyncio.create_task( send_xmpp(text, muc, *args, **kwargs) )
+      asyncio.create_task( send_xmpp(text, muc, **kwargs) )
       if isinstance(text, aioxmpp.Message):
         #  text = text.body[None]
         text = text.body.any()
@@ -3570,16 +3570,16 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
   #  info(f"准备发送同步消息到: {ms} {text=}")
   if muc == main_group or main_group in ms:
     if GROUP_ID not in exclude:
-      asyncio.create_task( send_tg(text0, GROUP_ID, *args, **kwargs) )
+      asyncio.create_task( send_tg(text0, GROUP_ID, **kwargs) )
     if GROUP2_ID not in exclude:
-      asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, *args, **kwargs) )
+      asyncio.create_task( send_tg(text0, GROUP2_ID, topic=GROUP2_TOPIC, **kwargs) )
 
     if xmpp_only:
       #  for m in ms:
       #    #  send_typing(m)
       #    asyncio.create_task( send_typing(m) )
       #  await send1(text, jid=log_group_private, *args, **kwargs)
-      asyncio.create_task( send_xmpp(text, log_group_private, *args, **kwargs) )
+      asyncio.create_task( send_xmpp(text, log_group_private, **kwargs) )
       return True
     else:
       if "gateway1" not in exclude:
@@ -3591,11 +3591,11 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
     #  if await send1(text, jid=m, *args, **kwargs):
     #    if isinstance(text, aioxmpp.Message):
     #      text = text.body[None]
-    asyncio.create_task( send_xmpp(text, m, *args, **kwargs) )
+    asyncio.create_task( send_xmpp(text, m, **kwargs) )
   return True
 
 @exceptions_handler(no_send=True)
-async def send_xmpp(text, jid=None, *args, **kwargs):
+async def send_xmpp(text, jid=None, **kwargs):
   # for short msg
   if type(text) is str:
     #  if name:
@@ -4043,7 +4043,7 @@ async def clear_tmp_chat_flag2(chat_id):
 
 #  @exceptions_handler(no_send=True)
 @cross_thread
-async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None, tg_msg_id=None, resend=0, formatting_entities=None, *args, **kwargs):
+async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=False, tmp_msg=False, delay=None, topic=None, qt=None, parse_mode="md", name=None, tg_msg_id=None, resend=0, formatting_entities=None, **kwargs):
   # tmp_msg: 标记该条消息为临时消息，会被下一条消息覆盖
 
   if client is TB:
@@ -5293,7 +5293,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
 
 #  async def mt_send(text="null", name="bot", gateway="test", qt=None):
 @exceptions_handler
-async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None, *args, **kwargs):
+async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None, **kwargs):
   #  # api.xmpp
   #  MT_API = "127.0.0.1:4247"
   #  #  if gateway == 'me':
@@ -5334,7 +5334,7 @@ async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None, *args,
 
 @exceptions_handler
 @cross_thread(need_main=False)
-async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, **kwargs):
+async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", **kwargs):
   if not isinstance(text, str):
     text = "%s" % text
   info(f"send to mt: {gateway} {text}")
@@ -5357,7 +5357,7 @@ async def mt_send_for_long_text(text, gateway="gateway1", name="C bot", *args, *
 
     for i in await split_long_text(text):
       #  if await send(i, *args, **kwargs) is not True:
-      if await mt_send(i, gateway=gateway, name=name, *args, **kwargs) is not True:
+      if await mt_send(i, gateway=gateway, name=name, **kwargs) is not True:
         break
       #  await mt_send(res, gateway=gateway, name="")
       name = ""
