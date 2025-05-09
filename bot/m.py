@@ -10240,7 +10240,10 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
       name2 = ""
     text0 = text
     if qt is not None:
-      text = "{}\n\n该问题引用的内容:\n{}".format(text, "\n".join(qt))
+      if text == ".tr":
+        text = "{}\n\n{}".format(text, "\n".join(qt))
+      else:
+        text = "{}\n\n该问题引用的内容:\n{}".format(text, "\n".join(qt))
 
     if text == "ping":
       return "pong"

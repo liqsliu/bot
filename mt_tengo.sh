@@ -755,14 +755,16 @@ ${NAME}"
           NAME="**${NAME% }** "
           if [[ -n "$QT" ]]; then
             if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
-            NAME="
+              NAME="
 $QT
 
 ${NAME}"
             else
-            NAME="$QT
+              NAME="$QT
 
 ${NAME}"
+            fi
+        
           fi
         fi
         if [[ $(echo "$TEXT" | wc -l) -eq 1 ]]; then
