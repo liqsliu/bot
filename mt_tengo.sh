@@ -755,6 +755,10 @@ ${NAME}"
 
 ${NAME}"
             fi
+          else
+              NAME="> .
+
+${NAME}"
           fi
         fi
 
@@ -768,7 +772,7 @@ ${NAME}"
         if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
           TEXT="⁦${NAME}$TEXT"
         else
-          TEXT="$NAME$TEXT ."
+          TEXT="$NAME$TEXT"
         fi
       fi
       unset NAME
