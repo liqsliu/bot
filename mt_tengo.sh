@@ -573,10 +573,11 @@ api.*)
   ;;
 esac
 
-if [[ "$(echo "$QT" | head -n1 | grep -c -G "^> >" )" -eq 1 ]]; then
+# if [[ "$(echo "$QT" | head -n1 | grep -c -G "^> >" )" -eq 1 ]]; then
+if echo "$QT" | head -n1 | grep -q -G "^> >"; then
   QT=$( echo "$QT" | sed '/^> [^>]/,$!d' )
 fi
-if [[ "$(echo "$QT" | head -n1 | grep -c -G "^>>" )" -eq 1 ]]; then
+if echo "$QT" | head -n1 | grep -q -G "^>>"; then
   QT=$( echo "$QT" | sed '/^>[^>]/,$!d' )
 fi
 
@@ -753,8 +754,13 @@ ${NAME}"
         if [[ -n "$NAME" ]]; then
           NAME="**${NAME% }** "
           if [[ -n "$QT" ]]; then
+            if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
             NAME="
 $QT
+
+${NAME}"
+            else
+            NAME="$QT
 
 ${NAME}"
           fi

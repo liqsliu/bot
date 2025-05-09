@@ -4069,6 +4069,13 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   if qt is None:
     qt_len = 0
   else:
+    tmp = []
+    for l in qt:
+      if l.startswith(">"):
+        info(f"del: {l=}")
+        continue
+      tmp.append(l)
+    qt = tmp
     qtr = "\n".join(qt)
     info(f"{qtr=}")
     topic_orig = topic
@@ -11081,7 +11088,14 @@ async def msgb(event):
         #  peer = await msgr.get_sender()
         #  qto = "**G %s%s:** %s" % (peer.first_name, " " + peer.last_name if peer.last_name is not None else "", msgr.text)
         qto, namer, _ = await print_tg_msg(msgr, True)
-        qto = f"**{namer}:** {qto}"
+        if msgr.sender_id == 5864905002:
+          # my bot
+          pass
+        elif msgr.sender_id == 5864905002:
+          # t2bot bot
+          qto = qto[8:]
+        else:
+          qto = f"**{namer}:** {qto}"
         qt = qto.splitlines()
 
     #  if chat_id == GROUP_ID:
