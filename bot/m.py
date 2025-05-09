@@ -3489,13 +3489,13 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
     #  else:
     #    return await send_t(text, jid, *args, **kwargs)
 
-  if 'name' in kwargs:
-    name = kwargs["name"]
-    #  kwargs.pop("name")
-    #  if nameo is None:
-    #    nameo = "C bot"
-  else:
-    name = "C bot"
+  #  if 'name' in kwargs:
+  #    name = kwargs["name"]
+  #    #  kwargs.pop("name")
+  #    #  if nameo is None:
+  #    #    nameo = "C bot"
+  #  else:
+  #    name = "C bot"
   #  info(f"{name=}")
 
   #  if nameo == "":
@@ -3583,7 +3583,7 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
       return True
     else:
       if "gateway1" not in exclude:
-        asyncio.create_task( mt_send_for_long_text(text0, name=name, **kwargs) )
+        asyncio.create_task( mt_send_for_long_text(text0, **kwargs) )
 
   for m in ms:
     #  if m in exclude:
