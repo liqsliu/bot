@@ -3547,7 +3547,7 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
       else:
         asyncio.create_task(send_tg(text=text0, chat_id=muc, *args, **kwargs) )
     else:
-      asyncio.create_task( send_xmpp(text, jid=muc, *args, **kwargs) )
+      asyncio.create_task( send_xmpp(text, muc, *args, **kwargs) )
       if isinstance(text, aioxmpp.Message):
         #  text = text.body[None]
         text = text.body.any()
@@ -3579,11 +3579,11 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
       #    #  send_typing(m)
       #    asyncio.create_task( send_typing(m) )
       #  await send1(text, jid=log_group_private, *args, **kwargs)
-      asyncio.create_task( send_xmpp(text, jid=log_group_private, *args, **kwargs) )
+      asyncio.create_task( send_xmpp(text, log_group_private, *args, **kwargs) )
       return True
     else:
       if "gateway1" not in exclude:
-        asyncio.create_task( mt_send_for_long_text(text0, "gateway1", name=name, *args, **kwargs) )
+        asyncio.create_task( mt_send_for_long_text(text0, name=name, **kwargs) )
 
   for m in ms:
     #  if m in exclude:
@@ -3591,7 +3591,7 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
     #  if await send1(text, jid=m, *args, **kwargs):
     #    if isinstance(text, aioxmpp.Message):
     #      text = text.body[None]
-    asyncio.create_task( send_xmpp(text, jid=m, *args, **kwargs) )
+    asyncio.create_task( send_xmpp(text, m, *args, **kwargs) )
   return True
 
 @exceptions_handler(no_send=True)
