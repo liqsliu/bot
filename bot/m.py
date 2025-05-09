@@ -4135,18 +4135,15 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       #  if parse_mode is not None:
       info("not found")
       if formatting_entities is None:
-        pm = utils.sanitize_parse_mode(parse_mode)
-        qtr, et = pm.parse("\n".join(qt))
-        qt_len = len(qtr)
-        if et:
-          #  if formatting_entities is None:
-          formatting_entities = et
-          #  else:
-          #    formatting_entities.extend(et)
-          qt = qtr.splitlines()
-      #  if formatting_entities is None:
-        #  if parse_mode ==  "md":
-        #    parse_mode = "html"
+        #  pm = utils.sanitize_parse_mode(parse_mode)
+        #  qtr, et = pm.parse("\n".join(qt))
+        #  qt_len = len(qtr)
+        #  if et:
+        #    #  if formatting_entities is None:
+        #    formatting_entities = et
+        #    #  else:
+        #    #    formatting_entities.extend(et)
+        #    qt = qtr.splitlines()
         if parse_mode ==  "html":
           qtr = "<blockquote>%s</blockquote>" % qtr
         #  elif parse_mode ==  "md":
@@ -4172,11 +4169,6 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
 
   name2 = ""
   if formatting_entities is None:
-    if force_quoted is True:
-      formatting_entities = []
-      formatting_entities.append(types.MessageEntityBlockquote(offset=0, length=qt_len))
-
-
     if parse_mode ==  "html":
       if name is not None:
         name2 = "<b>%s:</b> " % name
@@ -4193,30 +4185,15 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       if name is not None:
         name2 = "**%s:** " % name
 
-    #  if parse_mode is None:
-    #    if name is not None:
-    #      name2 = "%s: " % name
-    #    text2 = "%s%s" % (name2, text)
-    #    #  text2 = name + ": " + text
-    #    if qt is not None:
-    #      #  text2 = "%s%s\n%s" % (name2, text, qtr)
-    #      text2 = "%s\n%s" % (qtr, text2)
-    #  else:
-    #    if parse_mode ==  "html":
-    #      if name is not None:
-    #        name2 = "<b>%s:</b> " % name
-    #      #  text2 = "%s%s" % (name2, text)
-    #      #  if qt is not None:
-    #      #    text2 = "<blockquote>%s</blockquote>\n%s" % (qtr, text2)
-    #    else:
-    #    #  if parse_mode ==  "md":
-    #      if urlre.fullmatch(text):
-    #        text = f"[{text}]({text})"
-    #      if name is not None:
-    #        name2 = "**%s:** " % name
-
     text2 = "%s%s" % (name2, text)
     if qt is not None:
+      if parse_mode is not None:
+        pm = utils.sanitize_parse_mode(parse_mode)
+        qtr, et = pm.parse("\n".join(qt))
+        qt_len = len(qtr)
+        if force_quoted is True:
+          formatting_entities = []
+          formatting_entities.append(types.MessageEntityBlockquote(offset=0, length=qt_len))
       #  text2 = "%s%s\n%s" % (name2, text, qtr)
       text2 = "%s\n%s" % (qtr, text2)
 
@@ -4236,7 +4213,11 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     #  text2 = name + ": " + text
     if qt is not None:
       #  text2 = "%s%s\n%s" % (name2, text, qtr)
-      text2 = "%s\n%s" % (text2, qtr)
+      #  text2 = "%s\n%s" % (text2, qtr)
+      pm = utils.sanitize_parse_mode("md")
+      qtr, et = pm.parse("\n".join(qt))
+      qtr = "> %s" % "> ".join(qtr.splitlines())
+      text2 = "%s\n%s" % (qtr, text2)
     #  text2 = name + ": " + text
     #  text2 = name3 + text
     #  for e in formatting_entities:
