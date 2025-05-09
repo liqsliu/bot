@@ -733,7 +733,7 @@ if [[ -n "$4" ]] ; then
     else
       newline
       # if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
-      if false ; then
+      if false; then
         if [[ -n "$QT" ]]; then
           if [[ -n "$NAME" ]]; then
             NAME="**${NAME% }** "
@@ -767,12 +767,14 @@ ${NAME}"
         
           fi
         fi
+
         if [[ $(echo "$TEXT" | wc -l) -eq 1 ]]; then
           if echo "$TEXT" | grep -q -P '^http(s)?://[0-9a-zA-Z.-]+\.[a-zA-Z]+(:[0-9]+)?/?[\S]*$'; then
             # TEXT="\`$TEXT\`"
             TEXT="[$TEXT]($TEXT)"
           fi
         fi
+
         if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
           TEXT="⁦${NAME}$TEXT"
         else
