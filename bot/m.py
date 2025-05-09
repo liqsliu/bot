@@ -3583,7 +3583,7 @@ def send(text, jid=None, *args, exclude=None, **kwargs):
       return True
     else:
       if "gateway1" not in exclude:
-        asyncio.create_task( mt_send_for_long_text(text0, name=name) )
+        asyncio.create_task( mt_send_for_long_text(text0, "gateway1", name=name, *args, **kwargs) )
 
   for m in ms:
     #  if m in exclude:
@@ -5293,7 +5293,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
 
 #  async def mt_send(text="null", name="bot", gateway="test", qt=None):
 @exceptions_handler
-async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None):
+async def mt_send(text="null", gateway="gateway1", name="C bot", qt=None, *args, **kwargs):
   #  # api.xmpp
   #  MT_API = "127.0.0.1:4247"
   #  #  if gateway == 'me':
