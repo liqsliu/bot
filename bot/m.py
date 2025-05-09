@@ -304,7 +304,7 @@ def err(text=None, no_send=False, e=None, exc_info=True, stack_info=True):
       send_log(text, fm=fm, delay=2)
     else:
       #  text = "%s %s %s" % (get_lineno(e=e), text, e)
-      send_log(text)
+      send_log(text, fm=False)
 
 
 def warn(text=None, more=False, no_send=True, e=None, exc_info=True, stack_info=True):
@@ -328,7 +328,7 @@ def warn(text=None, more=False, no_send=True, e=None, exc_info=True, stack_info=
       send_log(text, fm=fm)
     else:
       #  text = "%s %s %s" % (get_lineno(e=e), text, e)
-      send_log(text)
+      send_log(text, fm=False)
 
 #  def dbg(text):
 #    logger.debug(text)
@@ -762,11 +762,11 @@ def _exceptions_handler(e, func=None, no_send=False, *args, **kwargs):
 
   if no_send:
     if more:
-      err(res, True, e=e)
+      err(res, True)
     else:
-      warn(res, e=e)
+      warn(res)
   else:
-    err(res, e=e)
+    err(res)
     # wait is ok
     #  await sleep(5)
     #  send_log(res, 9)
@@ -3385,9 +3385,12 @@ def send_log(text, jid=None, delay=1, fm=None):
   if fm is None:
     fm = sys._getframe()
     fm = fm.f_back
-  if fm is None:
-    return False
-  if fm.f_code.co_name != "_exceptions_handler":
+  elif fm is False:
+    fm = None
+  #  if fm is None:
+  #    return False
+  #  if fm.f_code.co_name != "_exceptions_handler":
+  if fm is not None:
     text = f"{fm.f_code.co_name} {fm.f_lineno} {text}"
   #  if jid is None:
   #    if send_log(text, CHAT_ID, delay, fm) is True:
