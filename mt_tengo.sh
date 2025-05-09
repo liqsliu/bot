@@ -582,7 +582,7 @@ if echo "$QT" | head -n1 | grep -q -G "^>>"; then
 fi
 
 # if [[ "$(echo "$QT" | tail -n1 | grep -c -G "^$" )" -eq 1 ]]; then
-if echo "$QT" | tail -n 1 | grep -q -G "^$"; then
+if echo "$QT" | tail -n1 | grep -q -G "^$"; then
   QT=$( echo "$QT" | sed '$d')
 fi
 
@@ -756,7 +756,7 @@ ${NAME}"
 ${NAME}"
             fi
           else
-              NAME="> .
+              NAME="> .$QT
 
 ${NAME}"
           fi
