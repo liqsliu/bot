@@ -576,6 +576,9 @@ esac
 if [[ "$(echo "$QT" | head -n1 | grep -c -G "^> >" )" -eq 1 ]]; then
   QT=$( echo "$QT" | sed '/^> [^>]/,$!d' )
 fi
+if [[ "$(echo "$QT" | head -n1 | grep -c -G "^>>" )" -eq 1 ]]; then
+  QT=$( echo "$QT" | sed '/^>[^>]/,$!d' )
+fi
 
 # if [[ "$(echo "$QT" | tail -n1 | grep -c -G "^$" )" -eq 1 ]]; then
 if echo "$QT" | tail -n 1 | grep -q -G "^$"; then
