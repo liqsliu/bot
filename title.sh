@@ -227,11 +227,11 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   # echo "$html" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
   # cat "$fn" | tr "\n" " " | sed 's|.*<title>\([^<]*\).*</head>.*|\1|;s|^\s*||;s|\s*$||' || exit $?
   # echo
-  s=$(grep --binary-file=text -o '<title>.*</title>'  "$fn")
+  s=$(grep --binary-file=text -P -o '<title>.*?</title>'  "$fn" | head -n1)
   if [[ -n "$s" ]]; then
     echo -n "${s:7:-8} "
   else
-    s=$(grep --binary-file=text -P -o '<title ?[^>]+>.*</title>' "$fn"  | grep -o '>.*<' )
+    s=$(grep --binary-file=text -P -o '<title ?[^>]+>.*?</title>' "$fn" | head -n1 | grep -o '>.*<' )
     if [[ -n "$s" ]]; then
       echo -n "${s:1:-1} "
       # echo null
