@@ -6695,9 +6695,12 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               #  info(f"{type(tmsg.chat_id)}")
               #  chat = await tmsg.get_chat()
               #  pid = utils.get_peer_id(chat)
+              tmsg2 = None
               if url:
                 info(f"{url=}")
                 tmsg2 = await get_msg(url, TB)
+              if tmsg2:
+                pass
               else:
                 e = None
                 #  if tmsg.input_chat:
@@ -6717,8 +6720,6 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
                 e = await get_entity(pid, client=TB)
                 if e:
                   tmsg2 = await TB.get_messages(e, ids=tmsg.id)
-                else:
-                  tmsg2 = None
               if tmsg2:
                 info("using TB: found msg")
                 if tmsg2.photo:
