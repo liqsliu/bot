@@ -6695,21 +6695,28 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               #  info(f"{type(tmsg.chat_id)}")
               #  chat = await tmsg.get_chat()
               #  pid = utils.get_peer_id(chat)
-              if tmsg.chat_id < 0:
-                info(f"{tmsg.chat_id=}")
-                tmsg2 = await TB.get_messages(tmsg.chat_id, ids=tmsg.id)
+              e = None
+              if tmsg.input_chat:
+                info(f"{tmsg.input_chat=}")
+                e = tmsg.input_chat
+              else:
+                if tmsg.chat_id:
+                  info(f"{tmsg.chat_id=}")
+                  #  e = tmsg.chat_id
+                  peer = await get_entity(tmsg.chat_id, client=TB)
+                  if peer:
+                    info(f"{peer=}")
+                    e = peer
+                if e is None:
+                  #  chat = await tmsg.get_chat()
+                  chat = await tmsg.get_input_chat()
+                  info(f"{chat=}")
+                  e = chat
+              if e:
+                tmsg2 = await TB.get_messages(e, ids=tmsg.id)
               elif url:
                 info(f"{url=}")
                 tmsg2 = await get_msg(url, TB)
-              else:
-                peer = await get_entity(tmsg.chat_id, client=TB)
-                if peer:
-                  info(f"{peer=}")
-                  tmsg2 = await TB.get_messages(peer, ids=tmsg.id)
-                else:
-                  chat = await tmsg.get_chat()
-                  info(f"{chat=}")
-                  tmsg2 = await TB.get_messages(chat, ids=tmsg.id)
               if tmsg2:
                 info("using TB: found msg")
                 if tmsg2.photo:
