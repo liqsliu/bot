@@ -6695,7 +6695,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               #  chat = await tmsg.get_chat()
               #  pid = utils.get_peer_id(chat)
               #  tmsg2 = await TB.get_messages(tmsg.chat_id, ids=tmsg.id)
-              pid = get_entity(tmsg.chat_id, client=TB)
+              pid = await get_entity(tmsg.chat_id, client=TB)
               tmsg2 = await TB.get_messages(pid, ids=tmsg.id)
               if tmsg2:
                 info("using TB: found msg")
