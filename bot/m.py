@@ -6689,14 +6689,27 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
       if e.args[0] == "You can't forward messages from a protected chat (caused by SendMediaRequest)":
         warn("内容被保护，无法直接转发")
         if tmsg.client is UB:
+          info("using TB")
           try:
             if tmsg.is_channel and not tmsg.is_group:
               #  info(f"{type(tmsg.chat_id)}")
               #  chat = await tmsg.get_chat()
               #  pid = utils.get_peer_id(chat)
-              #  tmsg2 = await TB.get_messages(tmsg.chat_id, ids=tmsg.id)
-              pid = await get_entity(tmsg.chat_id, client=TB)
-              tmsg2 = await TB.get_messages(pid, ids=tmsg.id)
+              if tmsg.chat_id < 0:
+                info(f"{tmsg.chat_id=}")
+                tmsg2 = await TB.get_messages(tmsg.chat_id, ids=tmsg.id)
+              elif url:
+                info(f"{url=}")
+                tmsg2 = await get_msg(url, TB)
+              else:
+                peer = await get_entity(tmsg.chat_id, client=TB)
+                if peer:
+                  info(f"{peer=}")
+                  tmsg2 = await TB.get_messages(peer, ids=tmsg.id)
+                else:
+                  chat = await tmsg.get_chat()
+                  info(f"{chat=}")
+                  tmsg2 = await TB.get_messages(chat, ids=tmsg.id)
               if tmsg2:
                 info("using TB: found msg")
                 if tmsg2.photo:
