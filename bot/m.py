@@ -5757,11 +5757,10 @@ async def parse_tg_url(url: str):
         gid = url.rsplit('=', 1)[-1]
       elif '/' in url:
         gid = url.rsplit('/', 1)[-1]
-  else:
-    if url.startswith("@"):
-      peer = url[1:]
-    elif '/' not in url:
-      peer = url
+  elif url.startswith("@"):
+    peer = url[1:]
+  elif '/' not in url:
+    peer = url
       #  if len(gid) == 0:
       #    gid = None
   #  if peer:
