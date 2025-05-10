@@ -5910,7 +5910,7 @@ def print_entity(e):
 
   res += "\n"
   if e.username:
-    res += "@%s" % e.username
+    res += "usernme: @%s" % e.username
     res += "\nhttps://t.me/%s/" % e.username
   else:
     #  if pid > 0:
@@ -5920,7 +5920,7 @@ def print_entity(e):
       res += "[%s](tg://openmessage?chat_id=%s)" % (pid, pid)
 
   #  res = "peer id: %s" % pid
-  res += "\npeer id: `%s`" % pid
+  res += "\nid: `%s`" % pid
 
   # https://docs.telethon.dev/en/stable/concepts/chats-vs-channels.html#converting-ids
   # https://docs.telethon.dev/en/stable/modules/utils.html#telethon.utils.resolve_id
@@ -11217,7 +11217,6 @@ async def msgb(event):
       cmds = get_cmd(text)
       #  if text.startswith("id "):
       if cmds[0] == "id":
-
         full = False
         client = UB
         #  if text.startswith("msg b "):
