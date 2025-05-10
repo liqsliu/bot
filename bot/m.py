@@ -6731,7 +6731,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
                 if file:
                   info("using TB.send_file")
                   try:
-                    res = await TB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True)
+                    res = await TB.send_file(chat_id, file=file, caption=tmsg.text, force_document=True, parse_mode=tmsg.client.parse_mode)
                   except Exception as e:
                     warn("failed1(TB)", e=e)
                     file=utils.pack_bot_file_id(file)
@@ -7030,7 +7030,19 @@ async def msgtout(event):
       elif cmds[1] == "r":
         if event.is_reply:
           #  await msg.reply(event.reply_to.stringify())
-          await send_tg("in event: %s" % event.reply_to.stringify(), chat_id, topic=msg.id)
+          #  await send_tg("in event: %s" % event.reply_to.stringify(), chat_id, topic=msg.id)
+          e = await msg.get_reply_message()
+          if e.text:
+            await send_tg(e.text)
+          elif e.file:
+            tmsg = e
+            opts = 1
+            if len(cmds) == 3:
+              opts = cmds[2]
+            #  await save_tg_msg(tmsg, chat_id, opts=opts)
+            await save_tg_msg(tmsg, opts=opts)
+          else:
+            await send_tg(f"wtf: {e.stringify()}")
         else:
           await send_tg(f"not a reply: {msg.stringify()}", chat_id, topic=msg.id)
       elif cmds[1] == "reply":
@@ -7067,7 +7079,8 @@ async def msgtout(event):
         opts = 1
         if len(cmds) == 3:
           opts = cmds[2]
-        await save_tg_msg(tmsg, chat_id, opts)
+        #  await save_tg_msg(tmsg, chat_id, opts=opts)
+        await save_tg_msg(tmsg, opts=opts)
       elif cmds[1] == "f":
         e = await msg.get_reply_message()
         tmsg = e
