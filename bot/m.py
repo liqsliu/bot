@@ -6696,30 +6696,45 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               #  chat = await tmsg.get_chat()
               #  pid = utils.get_peer_id(chat)
               tmsg2 = None
-              if url:
-                info(f"{url=}")
-                tmsg2 = await get_msg(url, TB)
-              if tmsg2:
+              #  if tmsg2:
+              #    pass
+              #  else:
+              e = None
+              #  if tmsg.input_chat:
+              #    info(f"{tmsg.input_chat=}")
+              if tmsg.chat_id:
+                info(f"{tmsg.chat_id=}")
+                #  e = tmsg.input_chat
+                #  pid = await TB.get_peer_id(tmsg.input_chat)
+                #  pid, _ = utils.resolve_id(tmsg.chat_id)
+                pid = tmsg.chat_id
+                #  e = await TB.get_input_entity(pid)
+              else:
+                #  chat = await tmsg.get_chat()
+                chat = await tmsg.get_input_chat()
+                info(f"{chat=}")
+                #  pid, _ = utils.resolve_id(chat)
+                pid = utils.get_peer_id(chat)
+                #  e = await TB.get_input_entity(pid)
+              e = await get_entity(pid, client=TB)
+              if e:
                 pass
               else:
-                e = None
-                #  if tmsg.input_chat:
-                #    info(f"{tmsg.input_chat=}")
-                if tmsg.chat_id:
-                  info(f"{tmsg.chat_id=}")
-                  #  e = tmsg.input_chat
-                  #  pid = await TB.get_peer_id(tmsg.input_chat)
-                  pid, _ = utils.resolve_id(tmsg.chat_id)
-                  #  e = await TB.get_input_entity(pid)
-                else:
-                  #  chat = await tmsg.get_chat()
-                  chat = await tmsg.get_input_chat()
-                  info(f"{chat=}")
-                  pid, _ = utils.resolve_id(chat)
-                  #  e = await TB.get_input_entity(pid)
-                e = await get_entity(pid, client=TB)
+                warn("not found: {pid=}")
+                e = await TB.get_input_entity(pid)
                 if e:
+                  warn("found: {pid=} {e=}")
+              if e:
+                try:
                   tmsg2 = await TB.get_messages(e, ids=tmsg.id)
+                except Exception as e:
+                  warn("failed0(TB)", e=e)
+              if tmsg2 is None:
+                if url:
+                  info(f"{url=}")
+                  tmsg2 = await get_msg(url, TB)
+                else:
+                  info(f"no {url=}")
               if tmsg2:
                 info("using TB: found msg")
                 if tmsg2.photo:
