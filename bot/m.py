@@ -5474,7 +5474,7 @@ def get_timeout(size):
   #  elif timeout < 10:
   #    timeout = 10
   timeout = 247080/233-10768058155008000/54289/(size+43751833600/233)
-  return timeout
+  return int(timeout)
 
 
 def hbyte(size):
@@ -6740,7 +6740,7 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         info("utils.get_input_media")
         if tmsg.photo:
           file = utils.get_input_photo(tmsg.photo)
-        elif tmsg.cocument:
+        elif tmsg.document:
           file = utils.get_input_media(tmsg.document)
         else:
           file = utils.get_input_media(tmsg.media)
