@@ -6723,7 +6723,9 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
                 warn("not found: {pid=}")
                 e = await TB.get_input_entity(pid)
                 if e:
-                  warn("found: {pid=} {e=}")
+                  info("found: {pid=} {e=}")
+                else:
+                  e = await get_entity(pid, id_only=False, client=TB)
               if e:
                 try:
                   tmsg2 = await TB.get_messages(e, ids=tmsg.id)
