@@ -5732,10 +5732,11 @@ def print_buttons(bs, k=0):
   return text
 
 
-async def parse_tg_url(url, wtf=1):
+async def parse_tg_url(url: str):
   peer = None
   gid = None
   url = url.rstrip("?single")
+  url = url.rstrip("/")
   #  if "?comment=" in url:
   #    #需要先获取频道绑定的群，然后再在群里根据消息id找，麻烦，先不搞
   #    url = url.split("?comment")[0]
@@ -5756,8 +5757,13 @@ async def parse_tg_url(url, wtf=1):
         gid = url.rsplit('=', 1)[-1]
       elif '/' in url:
         gid = url.rsplit('/', 1)[-1]
-      if len(gid) == 0:
-        gid = None
+  else:
+    if url.startswith("@"):
+      peer = url[1:]
+    if '/' not in url:
+      peer = url
+      #  if len(gid) == 0:
+      #    gid = None
   #  if peer:
   #    #  if peer[0] != "-":
   #    if peer.isnumeric():
