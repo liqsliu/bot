@@ -6691,9 +6691,11 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
         if tmsg.client is UB:
           try:
             if tmsg.is_channel and not tmsg.is_group:
-              #  chat = await tmsg.get_chat()
-              #  pid = utils.get_peer_id(chat)
-              tmsg2 = await TB.get_messages(tmsg.chat_id, ids=tmsg.id)
+              info(f"{type(tmsg.chat_id)}")
+              chat = await tmsg.get_chat()
+              pid = utils.get_peer_id(chat)
+              #  tmsg2 = await TB.get_messages(tmsg.chat_id, ids=tmsg.id)
+              tmsg2 = await TB.get_messages(pid, ids=tmsg.id)
               if tmsg2:
                 info("using TB: found msg")
                 if tmsg2.photo:
