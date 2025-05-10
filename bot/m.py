@@ -6448,13 +6448,13 @@ async def msgt(event):
             #  if jaccard_similarity(text, tg_msg_cache_for_bot2) > 0.9:
             #  if ratio(text, tg_msg_cache_for_bot2) > 0.9:
             r = similarity(text, tg_msg_cache_for_bot2)
-            if r > 0.8:
+            if r < 0.8:
               if ": " in tg_msg_cache_for_bot2:
                 tmp = tg_msg_cache_for_bot2.split(": ", 1)[1]
                 if urlre.fullmatch(tmp):
-                  r = similarity(text, "%s: [%s](%s)" % (tmptg_msg_cache_for_bot2.split(": ", 1)[0], tmp, tmp))
                   info(f"format url: {tmp}")
-            if r > 0.8:
+                  r = similarity(text, "%s: [%s](%s)" % (tmptg_msg_cache_for_bot2.split(": ", 1)[0], tmp, tmp))
+            if r >= 0.8:
               tg_msg_cache_for_bot2_event.clear()
               await msg.delete()
               if chat_id in last_outmsg:
