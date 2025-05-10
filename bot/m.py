@@ -5910,7 +5910,7 @@ def print_entity(e):
 
   res += "\n"
   if e.username:
-    res += "usernme: @%s" % e.username
+    res += "username: @%s" % e.username
     res += "\nhttps://t.me/%s/" % e.username
   else:
     #  if pid > 0:
