@@ -6696,22 +6696,21 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               #  chat = await tmsg.get_chat()
               #  pid = utils.get_peer_id(chat)
               e = None
-              if tmsg.input_chat:
-                info(f"{tmsg.input_chat=}")
-                e = tmsg.input_chat
+              #  if tmsg.input_chat:
+              #    info(f"{tmsg.input_chat=}")
+              if tmsg.chat_id:
+                info(f"{tmsg.chat_id=}")
+                #  e = tmsg.input_chat
+                #  pid = await TB.get_peer_id(tmsg.input_chat)
+                pid, _ = utils.resolve_id(tmsg.chat_id)
+                #  e = await TB.get_input_entity(pid)
               else:
-                if tmsg.chat_id:
-                  info(f"{tmsg.chat_id=}")
-                  #  e = tmsg.chat_id
-                  peer = await get_entity(tmsg.chat_id, client=TB)
-                  if peer:
-                    info(f"{peer=}")
-                    e = peer
-                if e is None:
-                  #  chat = await tmsg.get_chat()
-                  chat = await tmsg.get_input_chat()
-                  info(f"{chat=}")
-                  e = chat
+                #  chat = await tmsg.get_chat()
+                chat = await tmsg.get_input_chat()
+                info(f"{chat=}")
+                pid, _ = utils.resolve_id(chat)
+                #  e = await TB.get_input_entity(pid)
+              e = await get_entity(pid, client=TB)
               if e:
                 tmsg2 = await TB.get_messages(e, ids=tmsg.id)
               elif url:
