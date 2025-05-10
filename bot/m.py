@@ -5846,7 +5846,7 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
       peer = url
       #  return False
     if peer:
-      info(f"search inputpeer: {peer}")
+      info(f"search inputpeer: {peer=}")
       try:
         peer = await client.get_input_entity(peer)
         if id_only:
@@ -5855,7 +5855,7 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
             return peer, gid
           return  peer
 
-        info(f"search peer: {peer}")
+        info(f"search peer: {peer=}")
         try:
           peer = await client.get_entity(peer)
           #  if gid is not None:
@@ -5863,16 +5863,16 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
             return peer, gid
           return  peer
         except TypeError as e:
-          err(f"not found entity: {peer}", e=e)
+          err(f"not found entity: {peer=}", e=e)
         except ValueError as e:
-          info(f"not found entity: {peer=}", e=e)
+          info(f"not found entity: {peer=}")
 
       except rpcerrorlist.UsernameInvalidError as e:
-        err(f"not found input entity: {peer}", e=e)
+        err(f"not found input entity: {peer=}", e=e)
       except TypeError as e:
-        err(f"not found input entity: {peer}", e=e)
+        err(f"not found input entity: {peer=}", e=e)
       except ValueError as e:
-        info(f"search inputpeer(use get_peer_id): {peer} {e=}")
+        info(f"failed. use get_peer_id: {peer=} {e=}")
         try:
           pid = await client.get_peer_id(peer)
           peer = await client.get_input_entity(pid)
@@ -5881,10 +5881,10 @@ async def get_entity(chat_id, id_only=True, client=None, return_gid=False):
               return peer, gid
             return  peer
         except TypeError as e:
-          err(f"not found input entity(use get_peer_id): {peer}", e=e)
+          err(f"not found input entity(use get_peer_id): {peer=}", e=e)
           return
         except ValueError as e:
-          info(f"not found input entity: {peer} {e=}")
+          info(f"not found input entity: {peer=} {e=}")
   except Exception as e:
     err(e)
   #  raise ValueError(f"无法获取entity: {chat_id=} {peer=}")
@@ -6695,27 +6695,30 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
               #  info(f"{type(tmsg.chat_id)}")
               #  chat = await tmsg.get_chat()
               #  pid = utils.get_peer_id(chat)
-              e = None
-              #  if tmsg.input_chat:
-              #    info(f"{tmsg.input_chat=}")
-              if tmsg.chat_id:
-                info(f"{tmsg.chat_id=}")
-                #  e = tmsg.input_chat
-                #  pid = await TB.get_peer_id(tmsg.input_chat)
-                pid, _ = utils.resolve_id(tmsg.chat_id)
-                #  e = await TB.get_input_entity(pid)
-              else:
-                #  chat = await tmsg.get_chat()
-                chat = await tmsg.get_input_chat()
-                info(f"{chat=}")
-                pid, _ = utils.resolve_id(chat)
-                #  e = await TB.get_input_entity(pid)
-              e = await get_entity(pid, client=TB)
-              if e:
-                tmsg2 = await TB.get_messages(e, ids=tmsg.id)
-              elif url:
+              if url:
                 info(f"{url=}")
                 tmsg2 = await get_msg(url, TB)
+              else:
+                e = None
+                #  if tmsg.input_chat:
+                #    info(f"{tmsg.input_chat=}")
+                if tmsg.chat_id:
+                  info(f"{tmsg.chat_id=}")
+                  #  e = tmsg.input_chat
+                  #  pid = await TB.get_peer_id(tmsg.input_chat)
+                  pid, _ = utils.resolve_id(tmsg.chat_id)
+                  #  e = await TB.get_input_entity(pid)
+                else:
+                  #  chat = await tmsg.get_chat()
+                  chat = await tmsg.get_input_chat()
+                  info(f"{chat=}")
+                  pid, _ = utils.resolve_id(chat)
+                  #  e = await TB.get_input_entity(pid)
+                e = await get_entity(pid, client=TB)
+                if e:
+                  tmsg2 = await TB.get_messages(e, ids=tmsg.id)
+                else:
+                  tmsg2 = None
               if tmsg2:
                 info("using TB: found msg")
                 if tmsg2.photo:
