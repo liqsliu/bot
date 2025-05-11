@@ -6453,7 +6453,7 @@ async def msgt(event):
                 tmp = tg_msg_cache_for_bot2.split(": ", 1)[1]
                 if urlre.fullmatch(tmp):
                   info(f"format url: {tmp}")
-                  r = similarity(text, "%s: [%s](%s)" % (tmptg_msg_cache_for_bot2.split(": ", 1)[0], tmp, tmp))
+                  r = similarity(text, "%s: [%s](%s)" % (tg_msg_cache_for_bot2.split(": ", 1)[0], tmp, tmp))
             if r >= 0.8:
               tg_msg_cache_for_bot2_event.clear()
               await msg.delete()
