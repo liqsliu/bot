@@ -4347,27 +4347,29 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
 
   info(f"sent: {chat_id}: {short(text)}")
 
-  if tmp_msg and msg.edit_date is None:
+  #  if tmp_msg and msg.edit_date is None:
+  if tmp_msg:
     info(f"delete tmp msg...")
     await sleep(60*(time.time()-start_time))
     await sleep(30)
     if lock.locked():
       await sleep(30)
     try:
-      if client is UB:
-        ms = await client.get_messages(chat_id, ids=msg.id)
-        if ms:
-          if ms.edit_date is None:
-            await ms.delete()
+      if chat_id in last:
+        nmsg = last[chat_id]
+        if nmsg.id == msg.id:
+          if client is UB:
+            ms = await client.get_messages(chat_id, ids=msg.id)
+            if ms:
+              if ms.edit_date is None or ms.edit_date == msg.edit_date:
+                if chat_id in chats:
+                  chats.remove(chat_id)
+                  await ms.delete()
+            else:
+              warn("not found tmp msg history")
           else:
             if chat_id in chats:
-              await ms.delete()
-        else:
-          warn("not found tmp msg history")
-      else:
-        if chat_id in last:
-          nmsg = last[chat_id]
-          if nmsg.id == msg.id:
+              chats.remove(chat_id)
             await msg.delete()
     except Exception as e:
       err(f"failed to delete: {chat_id=}", e=e)
