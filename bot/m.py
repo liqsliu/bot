@@ -10353,6 +10353,8 @@ async def _run_cmd(text, src, name="X test", is_admin=False, qt=None) -> bool | 
           #  gid = await send_tg(text, pid, return_id=True)
           #  mtmsgs, pid = await change_bridge(res[1], src, res[2])
           peer = await get_entity(bot_name)
+          if not peer:
+            return "not found peer: None: "+bot_name
           pid = await UB.get_peer_id(peer)
           if src not in mtmsgsg:
             mtmsgsg[src] = {}
