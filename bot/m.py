@@ -4349,10 +4349,10 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
 
   if tmp_msg and msg.edit_date is None:
     info(f"delete tmp msg...")
+    await sleep(60*(time.time()-start_time))
     await sleep(30)
     if lock.locked():
       await sleep(30)
-    await sleep(60*(time.time()-start_time))
     try:
       if client is UB:
         ms = await client.get_messages(chat_id, ids=msg.id)
