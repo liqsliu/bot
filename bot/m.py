@@ -11212,7 +11212,7 @@ async def msgb(event):
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
       if text == "id":
-        await msg.reply(f"id [f/b/a] @name https://t.me/name\nchat_id: {chat_id}")
+        await msg.reply(f"id [f/b/a] @name|https://t.me/name\nchat_id: {chat_id}\nsender_id: {sender_id}")
         return
       cmds = get_cmd(text)
       #  if text.startswith("id "):
