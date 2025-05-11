@@ -4233,7 +4233,9 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   if tmp_msg is True:
     #  text2 = short(text2, 500)
     ts = [ts[0]]
+  msg = None
   k = 0
+  start_time = time.time()
   #  resend = False
   async with lock:
     #  info0(f"send: {chat_id}: {text}")
@@ -4279,8 +4281,6 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         if delay is not None:
           await sleep(delay)
 
-      info(f"sent: {chat_id}: {short(text)}")
-      return True
     except rpcerrorlist.MessageTooLongError as e:
       warn(f"消息过长，被服务器拒绝: {chat_id} {short(t)}", e=e)
       await sleep(3)
@@ -4337,8 +4337,42 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     if res:
       warn(f"saved text to: {res}")
       text = res
-    return await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
-  return False
+    res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
+    if res is True:
+      return True
+    return False
+
+  if msg is None:
+    return False
+
+  info(f"sent: {chat_id}: {short(text)}")
+
+  if tmp_msg and msg.edit_date is None:
+    info(f"delete tmp msg...")
+    await sleep(30)
+    if lock.locked():
+      await sleep(30)
+    await sleep(60*(time.time()-start_time))
+    try:
+      if client is UB:
+        ms = await client.get_messages(chat_id, ids=msg.id)
+        if ms:
+          if ms.edit_date is None:
+            await ms.delete()
+          else:
+            if chat_id in chats:
+              await ms.delete()
+        else:
+          warn("not found tmp msg history")
+      else:
+        if chat_id in last:
+          nmsg = last[chat_id]
+          if nmsg.id == msg.id:
+            await msg.delete()
+    except Exception as e:
+      err(f"failed to delete: {chat_id=}", e=e)
+
+  return True
 
 
 def raw_md(text):
