@@ -6713,35 +6713,38 @@ async def save_tg_msg(tmsg, chat_id=CHAT_ID, opts=0, url=None):
                 #  pid = await TB.get_peer_id(tmsg.input_chat)
                 #  pid, _ = utils.resolve_id(tmsg.chat_id)
                 pid = tmsg.chat_id
+                e = await get_entity(pid, client=TB)
                 #  e = await TB.get_input_entity(pid)
-              else:
+              if e is None:
                 #  chat = await tmsg.get_chat()
                 chat = await tmsg.get_input_chat()
                 info(f"{chat=}")
                 #  pid, _ = utils.resolve_id(chat)
                 pid = utils.get_peer_id(chat)
                 #  e = await TB.get_input_entity(pid)
-              e = await get_entity(pid, client=TB)
-              if e:
-                pass
-              else:
-                warn("not found: {pid=}")
-                e = await TB.get_input_entity(pid)
-                if e:
-                  info("found: {pid=} {e=}")
-                else:
-                  e = await get_entity(pid, id_only=False, client=TB)
+                e = await get_entity(pid, client=TB)
+
+              #  if e:
+              #    pass
+              #  else:
+              #    warn("not found: {pid=}")
+              #    e = await TB.get_input_entity(pid)
+              #    if e:
+              #      info("found: {pid=} {e=}")
+              #    else:
+              #      e = await get_entity(pid, id_only=False, client=TB)
               if e:
                 try:
                   tmsg2 = await TB.get_messages(e, ids=tmsg.id)
                 except Exception as e:
                   warn("failed0(TB)", e=e)
               if tmsg2 is None:
-                if url:
-                  info(f"{url=}")
+                if not url.startswith("https://t.me/c/"):
+                  info(f"using {url=}")
                   tmsg2 = await get_msg(url, TB)
                 else:
-                  info(f"no {url=}")
+                  info(f"ignore {url=}")
+
               if tmsg2:
                 info("using TB: found msg")
                 if tmsg2.photo:
