@@ -33,7 +33,8 @@ fi
 GP=${GP:-$HOME/$DIR/$fe}
 [[ -e "$GP" ]] || mkdir "$GP" || exit $?
 
-if [[ $(echo "$1" | grep -c -P "^http(s)?://[0-9a-zA-Z.-]+\.[a-zA-Z]+(:[0-9]+)?/?[\S]*(txt|md)$") -eq 1 ]]; then
+# if [[ $(echo "$1" | grep -c -P "^http(s)?://[0-9a-zA-Z.-]+\.[a-zA-Z]+(:[0-9]+)?/?[\S]*(txt|md)$") -eq 1 ]]; then
+if echo "$1" | grep -q -P "^http(s)?://[0-9a-zA-Z.-]+\.[a-zA-Z]+(:[0-9]+)?/?[\S]*(txt|md)$"; then
   URL=$1
   file_path=$(bash "$SH_PATH/link_to_file.sh" "$URL" "only") || {
     echo "E: error url, result: $file_path"
@@ -76,7 +77,7 @@ if [[ -n "fn" ]]; then
 # " &>/dev/null
 cd ~
 cd "$DIR"
-{ git pull && git add . && git commit -a -m "$(date "+%Y%m%d_%H%M%S"): commit by $USER/${host_name}/${operating_system_name}/${kernel_name}/${machine_hardware_name}" --no-edit && git push; } >/dev/null 2>&1
+{ git pull && git add . && git commit -a -m "$(date "+%Y%m%d_%H%M%S"): commit by $USER/${host_name}/${operating_system_name}/${kernel_name}/${machine_hardware_name}" --no-edit && git push; } >/dev/null 2>&1 || echo "上传失败"
 
 echo https://github.com/$USERNAME/$DIR/blob/main/$fe/"$fn"
 fi
