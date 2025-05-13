@@ -10310,7 +10310,7 @@ async def init_cmd():
       s = s[2:]
     s = int(s, 2)
     s = hex(s)
-    return s[2:]
+    return 0, s[2:]
   cmd_funs["bind"] = _
 
 
