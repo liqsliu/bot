@@ -20,7 +20,8 @@ export https_proxy="http://127.0.0.1:6080"
 # GP=${GP:-$HOME/bot/note}
 # GP=${GP:-$HOME/wtfipfs/txt}
 
-USERNAME=wtfipfs
+# USERNAME=wtfipfs
+USERNAME=liqsliu
 DIR=d
 
 
@@ -70,15 +71,17 @@ fi
 # mp m && mygit pull && bash init.sh && mygitcommit
 
 if [[ -n "fn" ]]; then
-# bash -i -c "
-# cd $GP
-# cd ..
-# mp m && mygit pull && mygitcommit
-# " &>/dev/null
-# cd ~
-# cd "$DIR"
-# { git pull && git add . && git commit -a -m "$(date "+%Y%m%d_%H%M%S"): commit by $USER/${host_name}/${operating_system_name}/${kernel_name}/${machine_hardware_name}" --no-edit && git push; } >/dev/null 2>&1 || echo "上传失败"
-#
-# echo https://github.com/$USERNAME/$DIR/blob/main/$fe/"$fn"
-echo "https://$DOMAIN/public/d/$fe/$fn"
+  # bash -i -c "
+  # cd $GP
+  # cd ..
+  # mp m && mygit pull && mygitcommit
+  # " &>/dev/null
+  if [[ "$2" == fast ]]; then
+    echo "https://$DOMAIN/public/d/$fe/$fn"
+  else
+    cd ~
+    cd "$DIR"
+    { git pulm && git add . && git commit -a -m "$(date "+%Y%m%d_%H%M%S"): commit by $USER/${host_name}/${operating_system_name}/${kernel_name}/${machine_hardware_name}" --no-edit && git push; } >/dev/null 2>&1 && echo https://github.com/$USERNAME/$DIR/blob/main/$fe/"$fn" || echo "上传失败 https://$DOMAIN/public/d/$fe/$fn"
+
+  fi
 fi

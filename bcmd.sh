@@ -399,6 +399,15 @@ cmds() {
       bash "$SH_PATH/save_to_gh.sh" "${text:5}" md || echo "E: $?"
     fi
     ;;
+  ghf)
+    if [[ -z "$2" ]]; then
+      echo "保存文本或txt文件到vps"
+      echo ".ghf \$text"
+      echo ".ghf \$URL"
+    else
+      bash "$SH_PATH/save_to_gh.sh" "${text:5}" fast || echo "E: $?"
+    fi
+    ;;
   hhsh | wtf)
     shift
     bash "$SH_PATH/nbnhhsh.sh" "$@" || echo "E: $?"
