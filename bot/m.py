@@ -10294,6 +10294,24 @@ async def init_cmd():
     return 0, "\n\n".join(tmp)
   cmd_funs["bin"] = _
 
+  async def _(cmds: list, src: str | int) -> tuple:
+    if len(cmds) == 1:
+      return 0, f"bin to hex\n.{cmds[0]} $text"
+    s = ' '.join(cmds[1:])
+    #  s = s.replace(" ", "")
+    #  s = s.replace("\n", "")
+    tmp = []
+    for c in s:
+      if c != "0" and c != "1":
+        continue
+      tmp.append(c)
+    s = "".join(tmp)
+    if s.startswith("0b"):
+      s = s[2:]
+    s = int(s, 2)
+    s = hex(s)
+    return s[2:]
+  cmd_funs["bind"] = _
 
 
 
