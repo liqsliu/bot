@@ -83,7 +83,8 @@ if [[ -n "fn" ]]; then
     cd "$DIR"
     { git pull
       git add .
-      git commit -a -m "$(date "+%Y%m%d_%H%M%S"): commit by $USER/${host_name}/${operating_system_name}/${kernel_name}/${machine_hardware_name}" --no-edit
+      # git commit -a -m "$(date "+%Y%m%d_%H%M%S"): commit by $USER/${host_name}/${operating_system_name}/${kernel_name}/${machine_hardware_name}" --no-edit
+      git commit -a -m "$(date "+%Y%m%d_%H%M%S"): commit by $USER/${host_name}" --no-edit
       git push
     } >/dev/null 2>&1 && echo https://github.com/$USERNAME/$DIR/blob/main/$fe/"$fn" || echo "上传失败 https://$DOMAIN/public/d/$fe/$fn"
 
