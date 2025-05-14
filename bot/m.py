@@ -4104,15 +4104,26 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
             if chat_id == GROUP_ID:
             #  if False:
               qtr2 = qtr
-              if qtr.startswith("**G  "):
+              if qtr.startswith("**g "):
                 pass
               elif qtr.startswith("**G "):
                 qtr2 = qtr.split(":** ", 1)[1]
+              qtr3 = qtr2.splitlines()[0]
               #  async for msg in client.iter_messages(chat_id):
               async for msg in UB.iter_messages(chat_id):
                 textr = msg.text
                 if textr:
-                  if msg.sender_id == 420415423:
+                  if msg.sender_id == 5864905002:
+                    # my bot
+                    tmp = textr.splitlines()
+                    j = 0
+                    for l in tmp:
+                      if l.startswith(qtr3):
+                        textr = "\n".join(tmp[j:])
+                        break
+                      j += 1
+                  elif msg.sender_id == 420415423:
+                    # t2bot
                     if textr.startswith("**\u2067**: \u2066"):
                       textr = textr.split("\u2066", 1)[1]
                     else:
@@ -4148,15 +4159,15 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
                   break
           elif chat_id == GROUP2_ID:
             qtr2 = qtr
-            if qtr.startswith("**G  "):
+            if qtr.startswith("**g "):
               qtr2 = qtr.split(":** ", 1)[1]
             #  async for msg in client.iter_messages(chat_id, reply_to=topic):
             async for msg in UB.iter_messages(chat_id, reply_to=topic):
               textr = msg.text
               if textr:
-                if msg.sender_id != 420415423 and msg.sender_id != 5864905002:
-                  if textr.startswith("**G  "):
-                    textr = textr.split(":** ", 1)[1]
+                #  if msg.sender_id != 420415423 and msg.sender_id != 5864905002:
+                #    if textr.startswith("**g "):
+                #      textr = textr.split(":** ", 1)[1]
                 if similarity(textr, qtr2) > 0.9:
                   info(f"found: {textr=} {qtr=}")
                   topic = msg.id
@@ -4233,6 +4244,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         if force_quoted is True:
           formatting_entities = []
           formatting_entities.append(types.MessageEntityBlockquote(offset=0, length=qt_len))
+          if et:
+            formatting_entities.extend(et)
       #  text2 = "%s%s\n%s" % (name2, text, qtr)
       text2 = "%s\n%s" % (qtr, text2)
 
@@ -6072,10 +6085,12 @@ async def print_tg_msg(msg, download_file=False):
       delay = 2
       #  nick += "+"
       #  nick += "G "
-      nick.append("G ")
+      #  nick.append("G ")
       if chat_id == GROUP2_ID:
         #  nick += " "
-        nick.append(" ")
+        nick.append("g ")
+      else:
+        nick.append("G ")
     else:
       delay = 5
       #  if event.is_channel:
@@ -6447,13 +6462,15 @@ async def msgt(event):
             text = text.split(": ", 1)[1]
             if text.startswith("reply: "):
               text = text.split(": ", 1)[1]
+          elif text.startswith("g "):
+            warn(f"fixme: {text=}")
           elif text.startswith("G "):
-            if text.startswith("G  "):
-              warn(f"fixme: {text=}")
-            else:
-              await msg.delete()
-              if chat_id in last_outmsg:
-                last_outmsg.pop(chat_id)
+            #  if text.startswith("G  "):
+            #    warn(f"fixme: {text=}")
+            #  else:
+            await msg.delete()
+            if chat_id in last_outmsg:
+              last_outmsg.pop(chat_id)
             #  return
           info(f"bot original text(2): {text=}")
 
