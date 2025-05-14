@@ -4087,9 +4087,22 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
       else:
         try:
           k = 0
+          while True:
+            if tg_msg_cache_for_bot2_event.is_set():
+              if k>10:
+                warn("wait for clean: timeout")
+                break
+              info("wait for clean")
+              await sleep(1)
+              k += 1
+            else:
+              if k > 0:
+                await sleep(1)
+              break
+          k = 0
           if topic is None:
-            #  if chat_id == GROUP_ID:
-            if False:
+            if chat_id == GROUP_ID:
+            #  if False:
               qtr2 = qtr
               if qtr.startswith("**G  "):
                 pass
@@ -6468,7 +6481,7 @@ async def msgt(event):
           await asyncio.sleep(0)
           while tg_msg_cache_for_bot2_event.is_set():
             if i>10:
-              info(f"bot2 wait for clear timeout: {short(text)}")
+              warn(f"bot2 wait for clear timeout: {short(text)}")
               break
             info(f"bot2 wait for clear: {short(text)}")
             await sleep(0.8)
@@ -6513,13 +6526,13 @@ async def msgt(event):
             #  if jaccard_similarity(text, tg_msg_cache_for_bot2) > 0.9:
             #  if ratio(text, tg_msg_cache_for_bot2) > 0.9:
             r = similarity(text, tg_msg_cache_for_bot2)
-            if r < 0.8:
+            if r < 0.9:
               if ": " in tg_msg_cache_for_bot2:
                 tmp = tg_msg_cache_for_bot2.split(": ", 1)[1]
                 if urlre.fullmatch(tmp):
                   info(f"format url: {tmp}")
                   r = similarity(text, "%s: [%s](%s)" % (tg_msg_cache_for_bot2.split(": ", 1)[0], tmp, tmp))
-            if r >= 0.8:
+            if r >= 0.9:
               tg_msg_cache_for_bot2_event.clear()
               await msg.delete()
               if chat_id in last_outmsg:
