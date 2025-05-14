@@ -687,8 +687,10 @@ if [[ -n "$4" ]] ; then
     ;;
   matrix.*)
   # elif [[ "$9" == "matrix" ]] ; then
-    if [[ "${5}" == "-1001193563578" ]] ; then
-      if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
+    if [[ "${10}" == "#wtfipfs:mozilla.org" ]] ; then
+      if [[ "${5}" == "-1001193563578" ]] ; then
+        block_msg
+      elif [[ "${NAME% *}" == "G" ]] ; then
         block_msg
       fi
     fi

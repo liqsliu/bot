@@ -6471,7 +6471,7 @@ async def msgt(event):
             await msg.delete()
             if chat_id in last_outmsg:
               last_outmsg.pop(chat_id)
-            #  return
+            return
           info(f"bot original text(2): {text=}")
 
         #  elif " " not in  text.splei(": ", 1)[0]:
