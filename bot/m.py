@@ -4078,6 +4078,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     qtr = "\n".join(qt)
     info(f"{qtr=}")
     topic_orig = topic
+    found_reply = False
     #  if qtr is not None and len(qtr.strip()) > 0 and client is UB:
     #  if qtr is not None and len(qtr.strip()) > 0:
     if len(qtr.strip()) > 0:
@@ -4087,7 +4088,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         try:
           k = 0
           if topic is None:
-            if chat_id == GROUP_ID:
+            #  if chat_id == GROUP_ID:
+            if False:
               qtr2 = qtr
               if qtr.startswith("**G  "):
                 pass
@@ -4097,12 +4099,35 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
               async for msg in UB.iter_messages(chat_id):
                 textr = msg.text
                 if textr:
-                  if msg.sender_id != 420415423 and msg.sender_id != 5864905002:
-                    if textr.startswith("**G "):
-                      textr = textr.split(":** ", 1)[1]
+                  if msg.sender_id == 420415423:
+                    if textr.startswith("**\u2067**: \u2066"):
+                      textr = textr.split("\u2066", 1)[1]
+                    else:
+                      textr = "**M %s" % textr[2:]
+                  #  elif msg.sender_id != 5864905002:
+                  #    if textr.startswith("**G "):
+                  #      textr = textr.split(":** ", 1)[1]
                   if similarity(textr, qtr2) > 0.9:
                     info(f"found: {textr=} {qtr=}")
                     topic = msg.id
+                    found_reply = True
+                    if msg.sender_id == 5864905002:
+                      k = 0
+                      async for msg in UB.iter_messages(chat_id, from_user=420415423):
+                        textr = msg.text
+                        if textr:
+                          if textr.startswith("**\u2067**: \u2066"):
+                            textr = textr.split("\u2066", 1)[1]
+                          else:
+                            textr = "**M %s" % textr[2:]
+                          if similarity(textr, qtr2) > 0.9:
+                            info(f"found: {textr=} {qtr=}")
+                            topic = msg.id
+                            break
+                          info(f"skip: {text=}")
+                        k += 1
+                        if k > 5:
+                          break
                     break
                   info(f"skip: {text=}")
                 k += 1
@@ -4122,6 +4147,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
                 if similarity(textr, qtr2) > 0.9:
                   info(f"found: {textr=} {qtr=}")
                   topic = msg.id
+                  found_reply = True
                   break
                 info(f"skip: {text=}")
               k += 1
@@ -4130,7 +4156,8 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
         except Exception as e:
           err(e=e)
 
-    if topic_orig == topic:
+    #  if topic_orig == topic:
+    if found_reply is False:
       #  if parse_mode is not None:
       info("not found")
       if formatting_entities is None:
@@ -4229,7 +4256,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
   ts = []
   for t in utils.split_text(text2, formatting_entities if formatting_entities is not None else []):
     ts.append(t)
-  info(f"{ts=}")
+  info(f"{topic=} {ts=}")
   if tmp_msg is True:
     #  text2 = short(text2, 500)
     ts = [ts[0]]
@@ -4331,21 +4358,23 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
     formatting_entities.append(types.MessageEntityBold(offset=0, length=len(name.strip())+1))
     res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=formatting_entities)
     if res is True:
-      return True
-    info(f"resend2: {short(text)}")
-    res = await pastebin(text)
-    if res:
-      warn(f"saved text to: {res}")
-      text = res
-    res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
-    if res is True:
-      return True
-    return False
+      pass
+    else:
+      info(f"resend2: {short(text)}")
+      res = await pastebin(text)
+      if res:
+        warn(f"saved text to: {res}")
+        text = res
+      res = await _send_tg(client, lock, last, chats, text, chat_id, correct, tmp_msg, delay, topic, parse_mode=None, name=name, tg_msg_id=tg_msg_id, resend=-1, formatting_entities=None)
+      if res is True:
+        pass
+      else:
+        return False
 
   if msg is None:
     return False
 
-  info(f"sent: {chat_id}: {short(text)}")
+  info(f"sent: {chat_id}: {short(text)} {topic=}")
 
   #  if tmp_msg and msg.edit_date is None:
   if tmp_msg:
