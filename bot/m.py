@@ -5304,7 +5304,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
           elif res.status != 200 and res.status != 201:
             text = await res.text()
             html = f"E: error http status: {res.status} {res.reason} headers: {res.headers} url: {res.url} res: {text}"
-            err(html, e=e)
+            err(html)
             #  return
           else:
             # print(type(res))
@@ -5320,7 +5320,7 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
               length = int(res.headers['Content-Length'])
             #  if 'Content-Length' in res.headers and int(res.headers['Content-Length']) > HTTP_RES_MAX_BYTES:
             if length > HTTP_RES_MAX_BYTES:
-              err(f"文件过大，终止下载: ({length}) {url}", e=e)
+              err(f"文件过大，终止下载: ({length}) {url}")
             elif 'Transfer-Encoding' in res.headers and res.headers['Transfer-Encoding'] == "chunked":
               #  async for data in res.content.iter_chunked(HTTP_RES_MAX_BYTES):
               #    break
