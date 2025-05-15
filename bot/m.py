@@ -5335,6 +5335,9 @@ async def http(url, method="GET", return_headers=False, *args, **kwargs):
             # if res.headers['content-type'] == "text/plain; charset=utf-8":
               #  data = await res.read()
               data = await res.content.read(HTTP_FILE_MAX_BYTES)
+              if not data:
+                html = f"http status: {res.status} {res.reason} url: {res.url}"
+                warn(html)
       except ClientPayloadError as e:
         err(f"读取失败: {url=}", e=e)
         #  return
@@ -7810,6 +7813,7 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       async with aiofiles.open(fp, "rb") as file:
         file.readline = wrap_read(file.readline)
         res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
+        info(f"res: {res}\nslot: {slot}")
     if res is None:
       err(f"上传失败：{slot.put.url=}")
       return
