@@ -7805,7 +7805,15 @@ async def upload(file_path=f"{HOME}/t/1.jpg", src=None):
       #  await sleep(5)
       res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
       info(f"res: {res}\nslot: {slot}")
-      send("上传完成", src, tmp_msg=True)
+    if res is None:
+      warn("retry upload: " + file_path)
+      async with aiofiles.open(fp, "rb") as file:
+        file.readline = wrap_read(file.readline)
+        res = await http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout)
+    if res is None:
+      err(f"上传失败：{slot.put.url=}")
+      return
+    send("上传完成", src, tmp_msg=True)
       #  res = await run_run(http(slot.put.url, method="PUT", headers=headers, data=file, timeout=timeout))
       #  coro = send("测试进程间通信 res: {}".format(res))
       #  fu2 = asyncio.run_coroutine_threadsafe(coro, loop)
