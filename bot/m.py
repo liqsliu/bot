@@ -6095,7 +6095,7 @@ async def print_tg_msg(msg, download_file=False):
       delay = 5
       #  if event.is_channel:
       #  nick += "#"
-      nick.append(" #")
+      nick.append("#")
 
       #  peer = await event.get_chat()
       if peer is not None:
