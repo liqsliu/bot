@@ -2187,7 +2187,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
   else:
     o = None
 
-  if len(tmp) > 0:
+  if src is not None and len(tmp) > 0:
     ds = tmp.decode("utf-8", errors="ignore")
     ds = re.sub(shell_color_re,  "", ds)
     ds = ds.strip()
@@ -3102,7 +3102,7 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
                 #  s.append(f"- {url}")
                 #  s.append(s.pop() + f" [xmpp备份]({url1})")
                 s[-1] += f" [xmpp备份]({url1})"
-                info("add xmpp file url: %s" % url1)
+                info("added xmpp file url: %s" % url1)
               #  s.append(f"- {url2}")
               #  s.append(f"- {url2}")
               s[-1] += f" [vps备份]({url2})"
@@ -3114,6 +3114,8 @@ async def get_title(url, src=None, opts=[], max_time=run_shell_time_max):
           warn("not found file: %s" % s.pop(0))
       else:
         warn("wtf: %s" % s.pop(0))
+    info(f"{s=}")
+  info(f"{o=}")
   #  if res:
   #    o = res
   if r == 0:
