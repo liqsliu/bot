@@ -628,7 +628,8 @@ def __exceptions_handler(func, no_send=False):
   if asyncio.iscoroutinefunction(func):
     async def _(*args, **kwargs):
       try:
-        return await func(*args, **kwargs)
+        #  return await func(*args, **kwargs)
+        return await asyncio.wait_for( func(*args, **kwargs), timeout=1800 )
       #  except Exception as e:
       except BaseException as e:
         return  _exceptions_handler(e, func, no_send, *args,  **kwargs)
@@ -674,13 +675,19 @@ def _exceptions_handler(e, func=None, no_send=False, *args, **kwargs):
     err(res, exc_info=True, stack_info=True, e=e)
     raise
 
+  except TimeoutError as e:
+    #  info("该任务超时: {!r}, fs: {}".format(e, fs))
+    err("该任务超时: {!r}, fs: {}".format(e, fs), True, exc_info=True, stack_info=True, e=e)
+
   except asyncio.CancelledError:
-    info("该任务被要求中止: {!r}, fs: {}".format(e, fs))
+    #  info("该任务被要求中止: {!r}, fs: {}".format(e, fs))
+    err("该任务被要求中止: {!r}, fs: {}".format(e, fs), True, exc_info=True, stack_info=True, e=e)
     raise
 
   except GeneratorExit:
     # https://docs.python.org/zh-cn/3.13/library/exceptions.html#GeneratorExit
-    warn("fixme: {!r}, fs: {}, func: {}(*{}, **{})".format(e, fs, func, args, kwargs))
+    #  warn("fixme: {!r}, fs: {}, func: {}(*{}, **{})".format(e, fs, func, args, kwargs))
+    err("fixme: {!r}, fs: {}".format(e, fs), True, exc_info=True, stack_info=True, e=e)
 
   except RuntimeError:
     warn("fixme: {!r}, fs: {}, func: {}(*{}, **{})".format(e, fs, func, args, kwargs))
