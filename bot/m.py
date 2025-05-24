@@ -4646,7 +4646,7 @@ async def sendg(text, jid=None, room=None, client=None, name="**C bot:** ", **kw
   #    return False
 
 
-@exceptions_handler
+#  @exceptions_handler
 async def mt_read():
   # api.xmpp
   MT_API = "127.0.0.1:4247"
@@ -11572,7 +11572,7 @@ async def msgbo(event):
     sender_id = event.sender_id
     info(f"bot out msg: {chat_id} {sender_id}: {short(text)}")
 
-@exceptions_handler
+#  @exceptions_handler
 async def tg_start():
   global UB, MY_NAME, MY_ID
   info("telegram user bot login...")
@@ -11621,7 +11621,7 @@ async def tg_start():
 
     #  await UB.run_until_disconnected()
 
-@exceptions_handler
+#  @exceptions_handler
 async def bot_start():
   global TB
   info("telegram bot login...")
@@ -11653,7 +11653,7 @@ async def bot_start():
     #  await TB.run_until_disconnected()
 
 
-@exceptions_handler
+#  @exceptions_handler
 async def xmpp_start():
   global XB, myjid, UPLOAD, UPLOAD_MAX
   info("开始登录xmpp")
