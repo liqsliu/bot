@@ -677,7 +677,7 @@ def _exceptions_handler(e, func=None, no_send=False, *args, **kwargs):
 
   except TimeoutError as e:
     #  info("该任务超时: {!r}, fs: {}".format(e, fs))
-    err("该任务超时: {!r}, fs: {}".format(e, fs), True, exc_info=True, stack_info=True, e=e)
+    err("该任务超时: {!r}, fs: {}".format(e, fs), exc_info=True, stack_info=True, e=e)
 
   except asyncio.CancelledError:
     #  info("该任务被要求中止: {!r}, fs: {}".format(e, fs))
