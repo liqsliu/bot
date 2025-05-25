@@ -8563,8 +8563,9 @@ async def msgx(msg):
           break
 
       if not existed:
+        warn("检测到幽灵发言: %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
         if rejoin is False:
-          warn("leave muc: {muc}")
+          warn(f"leave muc: {muc}")
           #  await room.leave()
           try:
             await asyncio.wait_for(room.leave(), timeout=15)
@@ -8572,12 +8573,14 @@ async def msgx(msg):
             warn(f"room.leave(超时)：{muc}, {e=}")
           rejoin = True
           rooms.pop(muc)
-          warn("检测到幽灵发言: %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
           await sleep(5)
           if await join(muc):
             room = rooms[muc]
-            warn("joined muc: {muc}")
+            warn(f"joined muc: {muc}")
             continue
+          else:
+            err(f"failed to join muc: {muc}")
+            return
         else:
           send_log("重新进群无效，忽略幽灵发言%s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
           return
