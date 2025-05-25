@@ -8565,7 +8565,11 @@ async def msgx(msg):
       if not existed:
         if rejoin is False:
           warn("leave muc: {muc}")
-          await room.leave()
+          #  await room.leave()
+          try:
+            await asyncio.wait_for(room.leave(), timeout=15)
+          except TimeoutError as e:
+            warn(f"room.leave(超时)：{muc}, {e=}")
           rejoin = True
           rooms.pop(muc)
           warn("检测到幽灵发言: %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
@@ -8737,6 +8741,7 @@ async def msgx(msg):
 
   info(f"original text: {short(text)}")
   text0 = text
+  qt = None
   if msg.type_ == MessageType.GROUPCHAT:
     if muc == acg_group:
       if is_admin:
@@ -8747,7 +8752,6 @@ async def msgx(msg):
 
     username=f"**X {nick}:** "
     name=f"X {nick}"
-    qt = None
     #  if text.startswith('> ') or text.startswith('>> '):
     if text.startswith('>'):
       qt=[]
