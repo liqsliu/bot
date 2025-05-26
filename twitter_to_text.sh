@@ -44,6 +44,13 @@ get_tw_text(){
   local name=$(echo "$tw_res" | jq -r ".user.name")
   local name_id=$(echo "$tw_res" | jq -r ".user.screen_name")
   if [[ "$name_id" == "null" ]]; then
+    # echo error 1>&2
+    local err_info=$(echo "$tw_res" | jq -r ".tombstone.text")
+    if [[ "$err_info" != "null" ]]; then
+      echo "$err_info" | jq -r ".text"
+      echo
+      echo "$err_info" | jq -r ".entities"
+    fi
     return 1
   fi
   local text=$(echo "$tw_res" | jq -r ".text")
@@ -284,12 +291,13 @@ twitter_to_text(){
 
     if [[ -n "$id" ]]; then
       # local tmp=$(get_tw "$id" "$@") || echo $?
-      local tmp
+      # local tmp
       # tmp=$(get_tw "$id" "$@") || echo $?
-      tmp=$(get_tw "$id" "$@") || return 1
+      # tmp=$(get_tw "$id" "$@") || return 1
+      # echo "$tmp"
+      get_tw "$id" "$@" || return 1
       # echo $?
       # echo "$URL"
-      echo "$tmp"
     else
       echo "E: error twitter id"
     fi
