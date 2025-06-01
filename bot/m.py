@@ -433,6 +433,8 @@ rss_bot = 284403259
 music_bot = 1404457467
 music_bot_name = 'Music163bot'
 
+t2bot = 420415423
+tgbot = 5864905002
 
 
 MAX_MSG_BYTES = 8000
@@ -4122,7 +4124,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
               async for msg in UB.iter_messages(chat_id):
                 textr = msg.text
                 if textr:
-                  if msg.sender_id == 5864905002:
+                  if msg.sender_id == tgbot:
                     # my bot
                     tmp = textr.splitlines()
                     j = 0
@@ -4131,7 +4133,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
                         textr = "\n".join(tmp[j:])
                         break
                       j += 1
-                  elif msg.sender_id == 420415423:
+                  elif msg.sender_id == t2bot:
                     # t2bot
                     if textr.startswith("**\u2067**: \u2066"):
                       textr = textr.split("\u2066", 1)[1]
@@ -4144,7 +4146,7 @@ async def _send_tg(client, lock, last, chats, text, chat_id=CHAT_ID, correct=Fal
                     info(f"found: {textr=} {qtr=}")
                     topic = msg.id
                     found_reply = True
-                    if msg.sender_id == 5864905002:
+                    if msg.sender_id == tgbot:
                       k = 0
                       async for msg in UB.iter_messages(chat_id, from_user=420415423):
                         textr = msg.text
@@ -6452,7 +6454,7 @@ async def msgt(event):
     if text:
       es = msg.entities
       if es:
-        if sender_id == 420415423 or sender_id == 5864905002:
+        if sender_id == t2bot or sender_id == tgbot:
           esc = es.copy()
           k = 0
           i = None
@@ -6474,7 +6476,7 @@ async def msgt(event):
       text = text.replace("*", "")
       text = text.replace("`", "")
       global tg_msg_cache_for_bot2
-      if sender_id == 420415423:
+      if sender_id == t2bot:
         # bot2: t2bot
         #  if text.startswith("bot: "):
         #    text = text[5:]
@@ -6541,7 +6543,7 @@ async def msgt(event):
           await asyncio.sleep(0)
           tg_msg_cache_for_bot2 = text
           tg_msg_cache_for_bot2_event.set()
-      elif sender_id == 5864905002:
+      elif sender_id == tgbot:
         # msg from my tg bot received by tg user bot
         #  text2 = "bot: " + (msg.raw_text)
         #  while text.startswith("\u2066"):
@@ -11301,12 +11303,11 @@ async def msgb(event):
         #  peer = await msgr.get_sender()
         #  qto = "**G %s%s:** %s" % (peer.first_name, " " + peer.last_name if peer.last_name is not None else "", msgr.text)
         qto, namer, _ = await print_tg_msg(msgr, True)
-        if msgr.sender_id == 5864905002:
-          # my bot
+        if msgr.sender_id == t2bot:
+          #  qto = qto[8:]
+          qto = qto.split("\u2066", 1)[1]
+        elif msgr.sender_id == tgbot:
           pass
-        elif msgr.sender_id == 5864905002:
-          # t2bot bot
-          qto = qto[8:]
         else:
           qto = f"**{namer}:** {qto}"
         qt = qto.splitlines()
