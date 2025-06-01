@@ -6451,24 +6451,26 @@ async def msgt(event):
     #    text = msg.raw_text
     if text:
       es = msg.entities
-      if es and sender_id == 420415423:
-        esc = es.copy()
-        k = 0
-        i = None
-        for i in es:
-          if type(i) is types.MessageEntityBlockquote:
-            esc = esc[k+1:]
-            k = -1
-            break
-          k += 1
-        if k == -1:
-          pm = utils.sanitize_parse_mode("md")
-          text = pm.unparse(msg.raw_text, esc)
-          text = text[i.offset + i.length:]
-          text = text.strip()
-          info(f"finally t2bot msg(deleted blockquote): {text}")
-        else:
-          info(f"not found blockquote: {text}")
+      if es:
+        if sender_id == 420415423 or sender_id == 5864905002:
+          esc = es.copy()
+          k = 0
+          i = None
+          for i in es:
+            if type(i) is types.MessageEntityBlockquote:
+              esc = esc[k+1:]
+              k = -1
+              break
+            k += 1
+          if k == -1:
+            pm = utils.sanitize_parse_mode("md")
+            text = pm.unparse(msg.raw_text, esc)
+            text = text[i.offset + i.length:]
+            text = text.strip()
+            info(f"finally t2bot msg(deleted blockquote): {text}")
+          else:
+            info(f"not found blockquote: {text}")
+
       text = text.replace("*", "")
       text = text.replace("`", "")
       global tg_msg_cache_for_bot2
@@ -6483,34 +6485,35 @@ async def msgt(event):
           #  while text.startswith("\u2066"):
           #    text = text[1:]
           text = text.replace("\u2066", "", 1)
-          if text[:2] == " \n":
-            text = text[2:]
-          elif text[0] == "\n":
-            text = text[1:]
-            info(f"bot original text(delete enter): {text=}")
+        if text[:2] == " \n":
+          text = text[2:]
+          info(f"bot original text(delete enter): {text=}")
+        elif text[0] == "\n":
+          text = text[1:]
+          info(f"bot original text(delete enter): {text=}")
 
-          if text.startswith("M "):
+        if text.startswith("M "):
+          text = text.split(": ", 1)[1]
+          if text.startswith("reply: "):
             text = text.split(": ", 1)[1]
-            if text.startswith("reply: "):
-              text = text.split(": ", 1)[1]
-          elif text.startswith("g "):
-            warn(f"fixme: {text=}")
-          elif text.startswith("G "):
-            #  if text.startswith("G  "):
-            #    warn(f"fixme: {text=}")
-            #  else:
-            await msg.delete()
-            #  if chat_id in last_outmsg:
-            #    last_outmsg.pop(chat_id)
-            return
-          info(f"bot original text(2): {text=}")
+        elif text.startswith("g "):
+          warn(f"fixme: {text=}")
+        elif text.startswith("G "):
+          #  if text.startswith("G  "):
+          #    warn(f"fixme: {text=}")
+          #  else:
+          await msg.delete()
+          #  if chat_id in last_outmsg:
+          #    last_outmsg.pop(chat_id)
+          return
+        #  info(f"bot original text(2): {text=}")
 
         #  elif " " not in  text.splei(": ", 1)[0]:
         #  elif text[1] != " ":
         else:
           #  text = "M " + text
           text = text.split(": ", 1)[1]
-          info(f"bot original text(3): {text=}")
+          info(f"delete sender of msg from matrix2: {text=}")
 
         #  text = text.splitlines()[0]
         tmp = []
