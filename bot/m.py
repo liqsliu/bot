@@ -6500,8 +6500,8 @@ async def msgt(event):
             #    warn(f"fixme: {text=}")
             #  else:
             await msg.delete()
-            if chat_id in last_outmsg:
-              last_outmsg.pop(chat_id)
+            #  if chat_id in last_outmsg:
+            #    last_outmsg.pop(chat_id)
             return
           info(f"bot original text(2): {text=}")
 
