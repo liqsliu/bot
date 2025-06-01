@@ -6456,8 +6456,8 @@ async def msgt(event):
         k = 0
         i = None
         for i in es:
-          esc.pop(k)
           if type(i) is types.MessageEntityBlockquote:
+            esc = esc[k+1:]
             k = -1
             break
           k += 1
