@@ -6454,18 +6454,21 @@ async def msgt(event):
       if es and sender_id == 420415423:
         esc = es.copy()
         k = 0
-        e = None
+        i = None
         for i in es:
           if type(i) is types.MessageEntityBlockquote:
-            e = esc.pop(k)
+            esc.pop(k)
             k = -1
+            break
           k += 1
         if k == -1:
           pm = utils.sanitize_parse_mode("md")
           text = pm.unparse(msg.raw_text, esc)
-          text = text[e.offset + e.length:]
+          text = text[i.offset + i.length:]
           text = text.strip()
-          info(f"finally t2bot msg: {text}")
+          info(f"finally t2bot msg(deleted blockquote): {text}")
+        else:
+          info(f"not found blockquote: {text}")
       text = text.replace("*", "")
       text = text.replace("`", "")
       global tg_msg_cache_for_bot2
