@@ -6539,6 +6539,7 @@ async def msgt(event):
         while "  " in text:
           text = text.replace("  ", " ")
         text = text.strip()
+        text = text.replace("__", "_")
         #  if text[-1] == " ":
         #    text = text[:-1]
         async with tg_msg_cache_for_bot2_lock:
@@ -6581,6 +6582,7 @@ async def msgt(event):
         while "  " in text:
           text = text.replace("  ", " ")
         text = text.strip()
+        text = text.replace("__", "_")
         #  start_time = time.time()
         try:
           while True:
