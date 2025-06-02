@@ -11317,7 +11317,11 @@ async def msgb(event):
         qto, namer, _ = await print_tg_msg(msgr, True)
         if msgr.sender_id == t2bot:
           #  qto = qto[8:]
-          qto = qto.split("\u2066", 1)[1]
+          if '\u2066' in qto:
+            qto = qto.split("\u2066", 1)[1]
+          elif ': ' in qto:
+            s = qto.split(": ", 1)
+            qto = "**M {}:** {}".format(s[0].strip("*"), s[1])
         elif msgr.sender_id == tgbot:
           pass
         else:
