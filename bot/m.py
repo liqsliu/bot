@@ -6458,15 +6458,27 @@ async def msgt(event):
           esc = es.copy()
           k = 0
           i = None
+          ii = None
           for i in es:
-            if type(i) is types.MessageEntityBlockquote:
-              esc = esc[k+1:]
-              k = -1
-              break
+            if ii is not None:
+              if ii.offset+ii.length <= i.offset:
+                i = ii
+                esc = esc[k+1:]
+                k = -1
+                break
+            elif type(i) is types.MessageEntityBlockquote:
+              ii = i
+              #  esc = esc[k+1:]
+              #  k = -1
+              #  break
             k += 1
           if k == -1:
             pm = utils.sanitize_parse_mode("md")
             text = pm.unparse(msg.raw_text, esc)
+          if ii is not None:
+            if k != -1:
+              text = msg.raw_text
+              info(f"finally t2bot msg(deleted all entities): {text}")
             text = text[i.offset + i.length:]
             text = text.strip()
             info(f"finally t2bot msg(deleted blockquote): {text}")
