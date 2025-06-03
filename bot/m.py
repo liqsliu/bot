@@ -201,7 +201,7 @@ async def safe_send(jid):
 
 
 wtf_time = 5
-wtf_time_max = 1800
+wtf_time_max = 300
 
 wtf_line = 20
 wtf_line_max = 300
@@ -6539,7 +6539,8 @@ async def msgt(event):
         while "  " in text:
           text = text.replace("  ", " ")
         text = text.strip()
-        text = text.replace("__", "_")
+        while "__" in text:
+          text = text.replace("__", "_")
         #  if text[-1] == " ":
         #    text = text[:-1]
         async with tg_msg_cache_for_bot2_lock:
@@ -6582,7 +6583,8 @@ async def msgt(event):
         while "  " in text:
           text = text.replace("  ", " ")
         text = text.strip()
-        text = text.replace("__", "_")
+        while "__" in text:
+          text = text.replace("__", "_")
         #  start_time = time.time()
         try:
           while True:
@@ -8641,21 +8643,22 @@ async def msgx(msg):
       score = w[0]
       #  global wtf_limit
       #  if score > wtf_limit:
-      if score > wtf_limit/(9/(w[1]+8) +0.1):
+      #  if score > wtf_limit/(9/(w[1]+8) +0.1):
+      now_limit = wtf_limit/(9/(w[1]+8) +0.1)
+      if score > now_limit:
         if type(j[2]) is str:
           warn(f"fixme: 跳过已禁言用户的消息{int(j[2]-real_time)}: {muc} {nick} {short(text)}")
         else:
           info(f"跳过已禁言用户的消息{int(j[2]-real_time)}: {muc} {nick} {short(text)}")
           j[2] = int(j[2] + wtf_ban_time)
       else:
-        if score < wtf_limit/2:
-          need_warn = True
+        if score < now_limit/2:
+          not_warn = True
         else:
-          need_warn = False
+          not_warn = False
 
         #  last = time.time() - j[3]
         last = real_time - j[3]
-        j[3] = time.time()
 
         if last > wtf_time_max:
           score -= 2*last/wtf_time
@@ -8664,25 +8667,27 @@ async def msgx(msg):
         #  tmp = min(last/wtf_time, w[1], wtf_limit)
 
         long = text.count('\n') + len(text)//wtf_line + 1
-        w[0] = score + long*wtf_time/last
+        w[0] = int(score + long*wtf_time/last)
         w[1] += 1
+        j[3] = time.time()
         #  if is_admin:
         #    send(f"now: {w[0]} / {wtf_limit}", jid=muc)
-        if w[1] > 1 and w[0] > wtf_limit/(9/(w[1]+8) +0.1):
-          j[2] = int(time.time() + wtf_ban_time)
+        #  if w[1] > 1 and w[0] > wtf_limit/(9/(w[1]+8) +0.1):
+        if w[1] > 1 and w[0] > now_limit:
+          #  j[2] = int(time.time() + wtf_ban_time)
+          j[2] = int(j[3] + wtf_ban_time)
           role = "visitor"
           reason = "不要刷屏"
           res = await room.muc_set_role(nick, role, reason=reason)
-          warn(f"有人刷屏: {nick}\njid: {jid}\nmuc: {muc}\nnow: {w[0]}/{wtf_limit}/{w[1]}\n{res}")
-          send(f"检测到刷屏，禁言{wtf_ban_time}s: {nick} {w[0]}/{wtf_limit}", jid=muc)
-        elif need_warn:
-          if w[0] > wtf_limit/2:
+          send(f"检测到刷屏，禁言{wtf_ban_time}s: {nick} {w[0]}/{now_limit} {res}", jid=muc)
+          warn(f"有人刷屏: {nick}\njid: {jid}\nmuc: {muc}\nnow: {w[1]}-{w[0]}/{now_limit} {res}")
+        elif not_warn:
+          if w[0] > now_limit/2:
             if w[1] == 1:
-              send(f"{nick} 不要刷屏 {int(w[0])}/{wtf_limit}", jid=muc)
-              w[0] = wtf_limit/2
+              send(f"{nick} , 不要刷屏 {w[0]}/{now_limit}", jid=muc)
+              w[0] = int(now_limit/2)
             else:
-              send(f"{nick} 不要刷屏（第一次警告） {int(w[0])}/{wtf_limit}", jid=muc)
-        
+              send(f"{nick} , 不要刷屏（第一次警告） {w[0]}/{now_limit}", jid=muc)
 
   elif muc == myjid:
     info0("跳过自己发送的消息: %s %s %s %s %s" % (msg.type_, msg.id_,  str(msg.from_), msg.to, msg.body))
