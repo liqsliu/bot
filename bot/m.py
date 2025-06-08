@@ -6500,10 +6500,12 @@ async def msgt(event):
             #  while text.startswith("\u2066"):
             #    text = text[1:]
             text = text.replace("\u2066", "", 1)
-          if text[:2] == " \n":
+          #  if text[:2] == " \n":
+          if text.startswith(" \n"):
             text = text[2:]
             info(f"bot original text(delete enter): {text=}")
-          elif text[0] == "\n":
+          #  elif text[0] == "\n":
+          elif text.startswith("\n"):
             text = text[1:]
             info(f"bot original text(delete enter): {text=}")
 
