@@ -11612,7 +11612,7 @@ async def msgb(event):
             else:
               res = f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})"
             #  await msg2.reply(res)
-            await send_tg(res, ME, topic=msg2.id)
+            await send_tg(res, MY_ID, topic=msg2.id)
             send(res, ME)
             await msg.reply("ok")
             await sleep(1)
