@@ -11567,8 +11567,11 @@ async def msgb(event):
         if msg2.raw_text:
           text2 = msg2.raw_text
           if text2.startswith("id: "):
-            tid = int(text2.split(" ", 2)[1])
-            msg3 = await msg.forward_to(tid)
+            if "[" in text2:
+              tid = int(text2.split("[", 1)[1].split("]", 1)[0])
+            else:
+              tid = int(text2.split(" ", 2)[1])
+            await msg.forward_to(tid)
             await msg.reply("ok")
             return
           if text2.startswith("xmpp: "):
@@ -11608,7 +11611,8 @@ async def msgb(event):
               res = f"id: [{sender_id}](tg://openmessage?user_id={sender_id})"
             else:
               res = f"chat_id: [{chat_id}](tg://openmessage?user_id={chat_id})"
-            await msg2.reply(res)
+            #  await msg2.reply(res)
+            await send_tg(res, ME, topic=msg2.id)
             send(res, ME)
             await msg.reply("ok")
             await sleep(1)
