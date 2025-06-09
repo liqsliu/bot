@@ -11366,44 +11366,49 @@ async def msgb(event):
 
 
   if event.is_private or chat_id == CHAT_ID:
-    if event.fwd_from:
-      #  if msg.grouped_id is None:
-      #    #  info(f"goto msgtout")
-      #    await send_tg(event.fwd_from.stringify(), chat_id)
-      #    #  await send_tg(str(await print_tg_msg(msg)), chat_id)
-      return
+    #  if event.fwd_from:
+    #    #  if msg.grouped_id is None:
+    #    #    #  info(f"goto msgtout")
+    #    #    await send_tg(event.fwd_from.stringify(), chat_id)
+    #    #    #  await send_tg(str(await print_tg_msg(msg)), chat_id)
+    #    return
     # my private group
     #  text = msg.text
     text = msg.raw_text
-    if text is None or text == "":
-      return
-    #  if text:
-    #    info(f"bot got msg: {chat_id} {sender_id}: {text}")
-    if text == "ping":
-      #  await TB.send_message(chat_id, "pong")
-      await msg.reply("pong")
-      return
-    if text == "raw sender":
-      sender = await event.get_sender()
-      await msg.reply(sender.stringify())
-      return
-    if text == "raw chat":
-      peer = await event.get_chat()
-      #  await msg.reply(peer.stringify())
-      await send_tg(peer.stringify(), chat_id, topic=msg.id)
-      return
-    if text == "dc":
-      try:
-        sender = await event.get_sender()
-        if sender.photo:
-          await msg.reply("dc_id: %d" % sender.photo.dc_id)
-        else:
-          await msg.reply("没设置头像")
-          #  info(sender.stringify())
-      except Exception as e:
-        await msg.reply("error")
-        raise
-      return
+    if event.fwd_from:
+      pass
+    else:
+      if text is None or text == "":
+        #  return
+        pass
+      else:
+        #  if text:
+        #    info(f"bot got msg: {chat_id} {sender_id}: {text}")
+        if text == "ping":
+          #  await TB.send_message(chat_id, "pong")
+          await msg.reply("pong")
+          return
+        if text == "raw sender":
+          sender = await event.get_sender()
+          await msg.reply(sender.stringify())
+          return
+        if text == "raw chat":
+          peer = await event.get_chat()
+          #  await msg.reply(peer.stringify())
+          await send_tg(peer.stringify(), chat_id, topic=msg.id)
+          return
+        if text == "dc":
+          try:
+            sender = await event.get_sender()
+            if sender.photo:
+              await msg.reply("dc_id: %d" % sender.photo.dc_id)
+            else:
+              await msg.reply("没设置头像")
+              #  info(sender.stringify())
+          except Exception as e:
+            await msg.reply("error")
+            raise
+          return
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
       if text == "id":
