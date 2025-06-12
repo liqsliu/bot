@@ -8341,14 +8341,15 @@ async def msgxp(msg):
 
               #  if j[0] != msg.from_.resource:
               if j[0] != rnick:
+                res = f"改名通知: {j[0]} -> {rnick}"
+                send_log(f"{res}\njid: {jid}\nmuc: {muc}")
                 #  j[0] = msg.from_.resource
                 if item.role == "participant":
                   #  res = f"改名通知: {hide_nick(j[0])} -> {hide_nick(msg)}"
                   res = f"改名通知: {hide_nick(j[0])} -> {hide_nick(rnick)}"
                   send(res, muc, nick=nick)
-                res = f"改名通知: {j[0]} -> {rnick}"
                 j[0] = rnick
-                send(f"{res}\njid: {jid}\nmuc: {muc}", nick=nick)
+                #  send(f"{res}\njid: {jid}\nmuc: {muc}", jid=log_group_private, nick=nick)
               j[1] = item.affiliation
               #  j[3] = time.time()
           else:
