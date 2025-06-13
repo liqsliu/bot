@@ -556,40 +556,40 @@ def _cross_thread(func, *, need_main=True):
       async def _(*args, **kwargs):
         coro = func(*args, **kwargs)
         if in_main_thread():
-            info(f"在主线程执行: {func}")
+            #  info(f"在主线程执行: {func}")
             return await coro
         else:
           #  return loop.run_until_complete(func(*args, **kwargs))
-          info(f"跨线程在主线程执行: {func}")
+          #  info(f"跨线程在主线程执行: {func}")
           return await run_coro(coro, loop2, loop)
     else:
       async def _(*args, **kwargs):
         coro = func(*args, **kwargs)
         if in_main_thread():
-            info(f"跨线程在副线程执行: {func}")
+            #  info(f"跨线程在副线程执行: {func}")
             return await run_coro(coro, loop, loop2)
         else:
-          info(f"在副线程执行: {func}")
+          #  info(f"在副线程执行: {func}")
           return await coro
   else:
     if need_main is True:
       def _(*args, **kwargs):
         if in_main_thread():
-            info(f"在主线程执行: {func}")
+            #  info(f"在主线程执行: {func}")
             return func(*args, **kwargs)
         else:
           #  return loop.run_until_complete(func(*args, **kwargs))
           #  def _(*args, **kwargs):
-          info(f"跨线程在主线程执行: {func}")
+          #  info(f"跨线程在主线程执行: {func}")
           return run_cb3(loop, func, *args, **kwargs)
     else:
       def _(*args, **kwargs):
         if in_main_thread():
-            info(f"跨线程在副线程执行: {func}")
+            #  info(f"跨线程在副线程执行: {func}")
             return run_cb3(loop2, func, *args, **kwargs)
         else:
           #  def _(*args, **kwargs):
-          info(f"在副线程执行: {func}")
+          #  info(f"在副线程执行: {func}")
           return func(*args, **kwargs)
     #  def _(*args, **kwargs):
       #  return func(*args, **kwargs)
@@ -6441,8 +6441,8 @@ async def msgt(event):
   #  info(f"{chat_id if chat_id < 0 else 0} {sender_id if sender_id is None or sender_id > 0 else -1}: {short(text) if text is not None and len(text) > 0 else type(msg.media)}_{msg.id}")
   if chat_id == GROUP_ID:
     warn(f"{chat_id} {sender_id if sender_id != chat_id else 0}: {short(text) if text is not None and len(text) > 0 else type(msg.media)}_{msg.id}" + ("" if msg.edit_date is None else "_edited"))
-  else:
-    info(f"{chat_id} {sender_id if sender_id != chat_id else 0}: {short(text) if text is not None and len(text) > 0 else type(msg.media)}_{msg.id}" + ("" if msg.edit_date is None else "_edited"))
+  #  else:
+  #    info(f"{chat_id} {sender_id if sender_id != chat_id else 0}: {short(text) if text is not None and len(text) > 0 else type(msg.media)}_{msg.id}" + ("" if msg.edit_date is None else "_edited"))
 
 
   if chat_id is None:
@@ -7603,7 +7603,7 @@ async def run_coro(coro, lp, lp2):
   async def f():
     #  return 0
     #  fu.set()
-    info("run...")
+    #  info("run...")
     try:
       res = await coro
       info(f"fu.result: {res}")
@@ -7613,7 +7613,7 @@ async def run_coro(coro, lp, lp2):
       #  res = None
     ress.append(res)
     lp.call_soon_threadsafe(fu.set)
-    info("done")
+    #  info("done")
     #  return res
   #  info(f"lp2 is_running: {lp2.is_running()}")
   #  t = lp2.create_task(f())
