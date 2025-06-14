@@ -11421,135 +11421,136 @@ async def msgb(event):
         return
       cmds = get_cmd(text)
       #  if text.startswith("id "):
-      if cmds[0] == "id":
-        full = False
-        client = UB
-        #  if text.startswith("msg b "):
-        if cmds[1] == "b":
-          cmds.pop(1)
-          client = TB
-
-        #  if text.startswith("msg f "):
-        if cmds[1] == "f":
-          full = True
-          cmds.pop(1)
-
-        cmds.pop(0)
-
-        #  full = False
-        #  if text.startswith("id f "):
-        #    full = True
-        #
-        #  client = UB
-        #  if text.startswith("id b "):
-        #    client = TB
-
-        #  url = text.split(' ')[-1]
-        url = cmds[-1]
-
-        if not url:
-          await msg.reply(f"error url: {url}")
-          return
-
-        res = ""
-        e, gid = await get_entity(url, False, return_gid=True, client=client)
-        if e is None:
-          if text.startswith("id a "):
-            res += "using TB\n"
+      if len(cmds) > 0:
+        if cmds[0] == "id":
+          full = False
+          client = UB
+          #  if text.startswith("msg b "):
+          if cmds[1] == "b":
+            cmds.pop(1)
             client = TB
-            e, gid = await get_entity(url, False, return_gid=True, client=client)
 
-        if e:
-          if gid is not None:
-            info(f"get msg: {e} {gid}")
-            tmsg = await client.get_messages(e, ids=gid)
-            if tmsg is None:
-              info(f"get msg(TB): {e} {gid}")
-              res += "using get_msg\n"
-              if client is UB:
-                tmsg = await get_msg(url, TB)
-              else:
-                tmsg = await get_msg(url, UB)
+          #  if text.startswith("msg f "):
+          if cmds[1] == "f":
+            full = True
+            cmds.pop(1)
 
-            if tmsg is not None:
-              ee = await tmsg.get_sender()
-              if ee is not None:
-                if full:
-                  await send_tg(ee.stringify(), chat_id, topic=msg.id)
-                  return
+          cmds.pop(0)
 
-              if tmsg.is_group:
-                res += "chat:\n"
-                res += print_entity(e)
-              if ee is None:
-                res += "\n\nE: sender: None\n"
-              else:
-                e = ee
-                res += "\n\nsender:\n"
-            else:
-              res += "E: not found msg\n"
+          #  full = False
+          #  if text.startswith("id f "):
+          #    full = True
+          #
+          #  client = UB
+          #  if text.startswith("id b "):
+          #    client = TB
 
-          if full:
-            await send_tg(e.stringify(), chat_id, topic=msg.id)
+          #  url = text.split(' ')[-1]
+          url = cmds[-1]
+
+          if not url:
+            await msg.reply(f"error url: {url}")
             return
-          #  pid = await UB.get_peer_id(e)
+
+          res = ""
+          e, gid = await get_entity(url, False, return_gid=True, client=client)
+          if e is None:
+            if text.startswith("id a "):
+              res += "using TB\n"
+              client = TB
+              e, gid = await get_entity(url, False, return_gid=True, client=client)
+
           if e:
-            res += print_entity(e)
-          await send_tg(res, chat_id, topic=msg.id)
-
-        else:
-          await msg.reply("not fount entity")
-        return
-      #  elif text.startswith("msg "):
-      elif cmds[0] == "msg":
-        if text == "msg":
-          await msg.reply("msg [b] [f] [raw/fast/xmpp/direct/vps] url")
-          return
-
-        full = False
-        client = UB
-        #  if text.startswith("msg b "):
-        if cmds[1] == "b":
-          cmds.pop(1)
-          client = TB
-
-        #  if text.startswith("msg f "):
-        if cmds[1] == "f":
-          full = True
-          cmds.pop(1)
-
-        cmds.pop(0)
-
-        #  url = cmds[1]
-        #  url = text.split(' ')[-1]
-        url = cmds[-1]
-        cmds.pop(-1)
-        if url:
-          opts = 1
-          peer, gid = await get_entity(url, return_gid=True, client=client)
-          if peer:
-            #  send(peer.stringify(), chat_id)
-            #  ss = url.split('/')
-            #  if len(ss) > 4:
-            #    gid = int(ss[-1])
-            if gid:
-              tmsg = await client.get_messages(peer, ids=gid)
-              if tmsg:
-                if full:
-                  #  await msg.reply(f"{e.stringify()}")
-                  await send_tg(tmsg.stringify(), chat_id)
+            if gid is not None:
+              info(f"get msg: {e} {gid}")
+              tmsg = await client.get_messages(e, ids=gid)
+              if tmsg is None:
+                info(f"get msg(TB): {e} {gid}")
+                res += "using get_msg\n"
+                if client is UB:
+                  tmsg = await get_msg(url, TB)
                 else:
-                  if len(cmds) > 0:
-                    opts = cmds[0]
-                  await save_tg_msg(tmsg, chat_id, opts, url)
+                  tmsg = await get_msg(url, UB)
+
+              if tmsg is not None:
+                ee = await tmsg.get_sender()
+                if ee is not None:
+                  if full:
+                    await send_tg(ee.stringify(), chat_id, topic=msg.id)
+                    return
+
+                if tmsg.is_group:
+                  res += "chat:\n"
+                  res += print_entity(e)
+                if ee is None:
+                  res += "\n\nE: sender: None\n"
+                else:
+                  e = ee
+                  res += "\n\nsender:\n"
               else:
-                await msg.reply(f"error id: {gid}\nres: {msg}")
-            return
+                res += "E: not found msg\n"
+
+            if full:
+              await send_tg(e.stringify(), chat_id, topic=msg.id)
+              return
+            #  pid = await UB.get_peer_id(e)
+            if e:
+              res += print_entity(e)
+            await send_tg(res, chat_id, topic=msg.id)
+
           else:
-            await msg.reply(f"error url: {url}\nres: {peer}")
+            await msg.reply("not fount entity")
+          return
+        #  elif text.startswith("msg "):
+        elif cmds[0] == "msg":
+          if text == "msg":
+            await msg.reply("msg [b] [f] [raw/fast/xmpp/direct/vps] url")
             return
-        await msg.reply("error")
-        return
+
+          full = False
+          client = UB
+          #  if text.startswith("msg b "):
+          if cmds[1] == "b":
+            cmds.pop(1)
+            client = TB
+
+          #  if text.startswith("msg f "):
+          if cmds[1] == "f":
+            full = True
+            cmds.pop(1)
+
+          cmds.pop(0)
+
+          #  url = cmds[1]
+          #  url = text.split(' ')[-1]
+          url = cmds[-1]
+          cmds.pop(-1)
+          if url:
+            opts = 1
+            peer, gid = await get_entity(url, return_gid=True, client=client)
+            if peer:
+              #  send(peer.stringify(), chat_id)
+              #  ss = url.split('/')
+              #  if len(ss) > 4:
+              #    gid = int(ss[-1])
+              if gid:
+                tmsg = await client.get_messages(peer, ids=gid)
+                if tmsg:
+                  if full:
+                    #  await msg.reply(f"{e.stringify()}")
+                    await send_tg(tmsg.stringify(), chat_id)
+                  else:
+                    if len(cmds) > 0:
+                      opts = cmds[0]
+                    await save_tg_msg(tmsg, chat_id, opts, url)
+                else:
+                  await msg.reply(f"error id: {gid}\nres: {msg}")
+              return
+            else:
+              await msg.reply(f"error url: {url}\nres: {peer}")
+              return
+          await msg.reply("error")
+          return
 
 
       if msg.file:
