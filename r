@@ -1,4 +1,10 @@
 #!/bin/bash
+
+add_to_path /usr/sbin
+add_to_path "/usr/local/bin"
+add_to_path "$HOME/.local/bin"
+
+
 (
 cd ~/bot || exit 1
 echo "wait ..."
