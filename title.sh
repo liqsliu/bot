@@ -208,6 +208,10 @@ unset fe
 #   fi
 # fi
 fno=$(ipfs add -n -Q "$fn")
+if [[ -z "$fno" ]]; then
+  # fno=$(date "+%H%M%S")
+  fno=$(shasum "$fn" | awk '{print $1}')
+fi
 if [[ -n "$ext" ]]; then
   fe=".$ext"
 fi
