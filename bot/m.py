@@ -3476,7 +3476,8 @@ def sendme(*args, to=1, **kwargs):
 #  async def send_x(text, jid=None, *args, **kwargs):
 #  async def send(text, jid=None, *args, **kwargs):
 @exceptions_handler
-def send(text, jid=None, exclude=None, **kwargs):
+#  def send(text, jid=None, exclude=None, **kwargs):
+def send(text, jid=main_group, exclude=None, **kwargs):
   #  if jid is None:
   #    if isinstance(text, str):
   if text is None:
@@ -8386,7 +8387,7 @@ async def msgxp(msg):
               elif muc == "wtfipfs@salas.suchat.org":
                 welcome = f"欢迎 {hide_nick(msg)} ,该群新人默认不能发言。\n如果没有发言权，建议使用gajim或cheogram客户端申请。conversations不支持xmpp原生的申请方式。也可以群内私信bot：“申请发言权”，然后等管理批准。也可以改群内名字，添加“申请发言权”。\n建议经常在该群保持在线，管理看到就会给成员身份和发言权。\n该消息来自机器人(bot)，可不予理会。"
               else:
-                welcome = f"欢迎 {hide_nick(msg)} ,如需查看群介绍，请发送 “.help”。该消息来自机器人(bot)，可不予理会。"
+                welcome = f"欢迎 {hide_nick(msg)} ,如需查看群介绍，请发送 “.help”。该消息来自机器人(bot)，可不予理会。muc: {muc}"
               send(welcome, muc, nick=nick)
 
             #  await send(f"有新人入群: {j[0]}\n身份: {j[1]}\n角色: {j[2]}\njid: {jid}\nmuc: {muc}", nick=nick)
