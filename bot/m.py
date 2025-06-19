@@ -3479,7 +3479,8 @@ def sendme(*args, to=1, **kwargs):
 #  def send(text, jid=None, exclude=None, **kwargs):
 def send(text, jid=True, exclude=None, **kwargs):
   if jid is True:
-    jid = main_group
+    #  jid = main_group
+    jid = CHAT_ID
   #  if jid is None:
   #    if isinstance(text, str):
   if text is None:
@@ -8143,6 +8144,8 @@ def get_mucs(muc):
       muc = main_group
     elif muc == GROUP2_ID:
       muc = main_group
+    elif muc == CHAT_ID:
+      muc = log_group_private
     else:
       return {muc}
   elif muc not in my_groups:
