@@ -8352,7 +8352,8 @@ async def msgxp(msg):
               #  if j[0] != msg.from_.resource:
               if j[0] != rnick:
                 res = f"改名通知: {j[0]} -> {rnick}\njid: {jid}\nmuc: {muc}"
-                send_log(res)
+                #  send_log(res)
+                send(res)
                 #  j[0] = msg.from_.resource
                 if item.role == "participant":
                   #  res = f"改名通知: {hide_nick(j[0])} -> {hide_nick(msg)}"
