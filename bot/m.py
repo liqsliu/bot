@@ -6536,9 +6536,10 @@ async def msgt(event):
         #  elif " " not in  text.splei(": ", 1)[0]:
         #  elif text[1] != " ":
         else:
-          #  text = "M " + text
-          text = text.split(": ", 1)[1]
-          info(f"delete sender of msg from matrix2: {text=}")
+          #  text = text.split(": ", 1)[1]
+          #  info(f"delete sender of msg from matrix2: {text=}")
+          text = "M " + text
+          await sleep(5)
 
         #  text = text.splitlines()[0]
         tmp = []
@@ -6575,9 +6576,12 @@ async def msgt(event):
         #  text = text.splitlines()[0]
         #  text = text.strip()
         if text.startswith("M "):
-          text = text.split(": ", 1)[1]
-          if text.startswith("reply: "):
-            text = text.split(": ", 1)[1]
+          #  text = text.split(": ", 1)[1]
+          #  if text.startswith("reply: "):
+          #    text = text.split(": ", 1)[1]
+          textr = text.split(": ", 1)[1]
+          if textr.startswith("reply: "):
+            text = text.split(": ", 1)[0] + ": " + textr[7:]
 
         #  https://symbl.cc/cn/unicode/blocks/cjk-symbols-and-punctuation/
         #  text = text.replace("\u3000", " ")
