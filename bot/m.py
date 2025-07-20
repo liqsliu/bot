@@ -9171,7 +9171,6 @@ async def init_cmd():
     cmds.pop(0)
     #  res = await my_py(' '.join(cmds), src)
     if cmds[0].isnumeric():
-      cmds.pop(0)
       await sleep( int(cmds[0]) )
       return 0, f"@{src}"
     else:
