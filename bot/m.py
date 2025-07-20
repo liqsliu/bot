@@ -9168,7 +9168,7 @@ async def init_cmd():
   async def _(cmds: list, src: str | int) -> tuple:
     if len(cmds) == 1:
       return 0, f"@me in s\n.{cmds[0]} $sec"
-    #  cmds.pop(0)
+    cmds.pop(0)
     #  res = await my_py(' '.join(cmds), src)
     if cmds[0].isnumeric():
       cmds.pop(0)
