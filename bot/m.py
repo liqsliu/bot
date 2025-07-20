@@ -9172,7 +9172,7 @@ async def init_cmd():
     #  res = await my_py(' '.join(cmds), src)
     if cmds[0].isnumeric():
       await sleep( int(cmds[0]) )
-      return 0, f"@{src}"
+      return 0, f"@ id: {src}"
     else:
       return 0, f"wtf: {cmds}"
   cmd_funs["atme"] = _
