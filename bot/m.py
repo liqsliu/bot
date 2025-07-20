@@ -9166,6 +9166,19 @@ async def init_cmd():
   cmd_funs["ping"] = _
 
   async def _(cmds: list, src: str | int) -> tuple:
+    if len(cmds) == 1:
+      return 0, f"@me in s\n.{cmds[0]} $sec"
+    #  cmds.pop(0)
+    #  res = await my_py(' '.join(cmds), src)
+    if cmds[0].isnumeric():
+      cmds.pop(0)
+      await sleep( int(cmds[0]) )
+      return 0, f"@{src}"
+    else:
+      return 0, f"wtf: {cmds}"
+  cmd_funs["atme"] = _
+
+  async def _(cmds: list, src: str | int) -> tuple:
     tmp = set()
     cmds_admin = set()
     cmds_all = set()
