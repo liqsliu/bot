@@ -5742,7 +5742,7 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
   finally:
     if file_path is None:
       text, nick, d = await print_tg_msg(msg)
-      err(f"下载失败 file_path is None: file_msg: {nick}: {text}", e=e)
+      err(f"下载失败 file_path is None: file_msg: {nick}: {text}")
     else:
       if not file_path.startswith("/"):
         file_path = path + file_path
