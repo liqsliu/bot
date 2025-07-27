@@ -5582,7 +5582,8 @@ def get_timeout(size):
   #    timeout = upload_media_time_max
   #  elif timeout < 10:
   #    timeout = 10
-  timeout = 247080/233-10768058155008000/54289/(size+43751833600/233)
+  #  timeout = 247080/233-10768058155008000/54289/(size+43751833600/233)
+  timeout = 247080/233-10768058155008000/54289/(size+43751833600/233) + 5
   return int(timeout)
 
 
