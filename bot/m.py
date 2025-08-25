@@ -6456,9 +6456,9 @@ async def msgt(event):
     chat_id = sender_id
   if text:
     if text == "id":
-      await send_tg2(chat_id, str(chat_id))
+      await send_tg2(str(chat_id), chat_id)
     elif text == "ping":
-      await send_tg2(chat_id, "pong")
+      await send_tg2("pong", chat_id)
     elif text == "dc":
       try:
         sender = await event.get_sender()
