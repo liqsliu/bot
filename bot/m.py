@@ -6454,6 +6454,22 @@ async def msgt(event):
     #  warn(f"chat_id is None")
     warn(f"chat_id is None: {chat_id} {sender_id}: {text}")
     chat_id = sender_id
+  if text:
+    if text == "id":
+      await send_tg2(chat_id, str(chat_id))
+    elif text == "ping":
+      await send_tg2(chat_id, "pong")
+    elif text == "dc":
+      try:
+        sender = await event.get_sender()
+        if sender.photo:
+          await msg.reply("dc_id: %d" % sender.photo.dc_id)
+        else:
+          await msg.reply("没设置头像")
+      except Exception as e:
+        await msg.reply("error")
+        raise
+
 
   #  print(f"{chat_id} {sender_id}: {short(msg.text)}")
   if chat_id == GROUP_ID:
