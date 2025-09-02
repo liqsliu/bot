@@ -8560,7 +8560,7 @@ async def msgx(msg):
         info(f"dir(err): {dir(msg.error)}")
         info(f"dir(condition_obj): {dir(msg.error.condition_obj)}")
         # https://docs.zombofant.net/aioxmpp/devel/api/public/stanza.html?highlight=message#payload-classes
-        if error.condition is errors.ErrorCondition.NOT_ACCEPTABLE
+        if error.condition is errors.ErrorCondition.NOT_ACCEPTABLE:
           #  if error.text == "":
           if muc == main_group:
             send_log(f"群聊已断开，15秒后重启。muc: {muc}")
