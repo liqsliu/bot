@@ -12105,7 +12105,7 @@ async def amain():
 
     info(f"初始化完成")
     sendme(f"启动成功，用时: {int(time.time()-start_time)}s", to=0)
-    #  send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
+    send(f"启动成功，用时: {int(time.time()-start_time)}s", jid=main_group)
     try:
       #  await loop_task()
       while XB.running:
