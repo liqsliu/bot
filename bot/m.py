@@ -6460,6 +6460,8 @@ async def msgt(event):
       await send_tg2(str(chat_id), chat_id)
     elif text == "ping":
       await send_tg2("pong", chat_id)
+    elif text == "中文":
+      await send_tg2("https://t.me/setlanguage/zh-hans-beta", chat_id)
     elif text == "dc":
       try:
         sender = await event.get_sender()
