@@ -32,7 +32,7 @@ from telethon import events, utils
 from telethon.tl import types
 
 import aioxmpp
-from aioxmpp import stream, ibr, protocol, node, dispatcher, connector, JID, im, errors, MessageType, PresenceType, chatstates
+from aioxmpp import stream, ibr, protocol, node, dispatcher, connector, JID, im, errors, MessageType, PresenceType, chatstates, ErrorType
 
 import aiofiles
 #  from aiofile import async_open
@@ -3429,7 +3429,8 @@ def send_log(text, jid=None, delay=1, fm=None):
     t = asyncio.create_task(send_tg(text, tjid, delay=(delay+1)**m, parse_mode=None, resend=-1), name="send_log_tg")
   #  if isinstance(jid, int) is False:
   #  else:
-  if not isinstance(jid, int):
+  #  if not isinstance(jid, int):
+  if isinstance(jid, str):
     if n > 0:
       warn(f"send_log xmpp is busy: {n} text: {short(text)}")
     else:
@@ -8547,7 +8548,29 @@ async def msgx(msg):
   nick = msg.from_.resource
   if nick is None:
     if msg.type_ == MessageType.ERROR:
-      warn(f"收到错误消息：{msg} {msg.error}")
+      warn(f"收到错误消息：{msg}//{msg.error}")
+      if msg.error.type_ == ErrorType.MODIFY:
+        '''
+        收到错误消息：<message from='wtfipfs@conference.conversations.im' to='wtfipfs@pimux.de/PBuT5MVgWfM5' id=':q2mwPHxCihYPdvO7lh1Z' type=<MessageType.ERROR: 'error'>> <not-acceptable type=<ErrorType.MODIFY: 'modify'> text='Only occupants are allowed to send messages to the conference'>
+        '''
+        error = msg.error
+        info("群已断开，需要重连")
+        info(f"{msg.error.text=}")
+        info(f"{msg.error.condition=}")
+        info(f"dir(err): {dir(msg.error)}")
+        info(f"dir(condition_obj): {dir(msg.error.condition_obj)}")
+        # https://docs.zombofant.net/aioxmpp/devel/api/public/stanza.html?highlight=message#payload-classes
+        if error.condition is errors.ErrorCondition.NOT_ACCEPTABLE
+          #  if error.text == "":
+          if muc == main_group:
+            send_log(f"群聊已断开，15秒后重启。muc: {muc}")
+            await sleep(15)
+            raise SystemExit("stop by me, restart...")
+          elif muc == log_group_private:
+            sendme(f"群聊已断开muc: {muc}", to=2)
+          else:
+            send_log(f"群聊已断开muc: {muc}")
+
       return
     pprint(msg)
     warn(f"收到系统消息: {muc} {msg.from_} {msg.body} {msg}")
