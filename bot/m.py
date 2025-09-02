@@ -6472,6 +6472,15 @@ async def msgt(event):
       except Exception as e:
         await msg.reply("error")
         raise
+    #  if text == "raw sender":
+    #    sender = await event.get_sender()
+    #    await msg.reply(sender.stringify())
+    #    return
+    #  if text == "raw chat":
+    #    peer = await event.get_chat()
+    #    #  await msg.reply(peer.stringify())
+    #    await send_tg(peer.stringify(), chat_id, topic=msg.id)
+    #    return
 
 
   #  print(f"{chat_id} {sender_id}: {short(msg.text)}")
@@ -11457,16 +11466,6 @@ async def msgb(event):
         if text == "ping":
           #  await TB.send_message(chat_id, "pong")
           await msg.reply("pong")
-          return
-        if text == "raw sender":
-          sender = await event.get_sender()
-          await msg.reply(sender.stringify())
-          return
-        if text == "raw chat":
-          peer = await event.get_chat()
-          #  await msg.reply(peer.stringify())
-          await send_tg(peer.stringify(), chat_id, topic=msg.id)
-          return
         if text == "dc":
           try:
             sender = await event.get_sender()
@@ -11478,7 +11477,6 @@ async def msgb(event):
           except Exception as e:
             await msg.reply("error")
             raise
-          return
     #  res = await run_cmd(text, CHAT_ID, "G me")
     if chat_id == CHAT_ID:
       if text == "id":
@@ -11690,7 +11688,7 @@ async def msgb(event):
             #  await msg2.reply(res)
             await send_tg(res, MY_ID, topic=msg2.id)
             send(res, ME)
-            await msg.reply("ok")
+            await msg.reply("已转发")
             await sleep(1)
       except TimeoutError:
         pass
