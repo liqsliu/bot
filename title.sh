@@ -16,17 +16,25 @@ LA='Accept-Language: zh-CN,zh-TW;q=0.9,zh;q=0.8,en-US;q=0.7,en;q=0.6'
 # if [[ "$4" == "down" ]]; then
 if [[ -n "$4" ]]; then
   # 暂时忽略自定义大小
-ulimit -f 2048000
 MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-1000000000}
 # MAX_TIMEOUT=300
 MAX_TIMEOUT=$4
-
 else
-ulimit -f 204800
 MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-10000000}
 MAX_TIMEOUT=16
+fi
+ulimit -f $[MAX_SHARE_FILE_SIZE/1024]
 
-
+if [[ "$3" == direct ]]; then
+  unset http_proxy
+  unset https_proxy
+  # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
+  # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+  # wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
+  # }
+else
+  export http_proxy="http://127.0.0.1:6080"
+  export https_proxy="http://127.0.0.1:6080"
 fi
 
 # https://stackoverflow.com/questions/55842311/get-page-titles-from-a-list-of-urls
@@ -61,20 +69,22 @@ cd "$HOME/t/" || {
 }
 # echo "$fn"
 
-[[ -e "$fn" ]] && rm -f "$fn"
 
 
-if [[ "$3" == direct ]]; then
-  unset http_proxy
-  unset https_proxy
-  # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
-  # wget --server-response -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
-  # wget -T $MAX_TIMEOUT -O "$fn" "$URL" || exit $?
-  # }
-else
-  export http_proxy="http://127.0.0.1:6080"
-  export https_proxy="http://127.0.0.1:6080"
+
+SIZE=$(wget --spider "$URL" 2>&1 | grep -i "Length" | awk '{print $2}')
+if [[ -z "$SIZE" ]]; then
+  echo "未知大小未知"
+  exit 1
 fi
+if [[ "$SIZE" -gt $MAX_SHARE_FILE_SIZE ]]; then
+  echo "文件大小超过限制: $SIZE"
+  exit 1
+fi
+
+
+
+[[ -e "$fn" ]] && rm -f "$fn"
 
 if [[ "$2" == curl ]]; then
   # curl -s -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || {
