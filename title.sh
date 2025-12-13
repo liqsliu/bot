@@ -74,7 +74,7 @@ cd "$HOME/t/" || {
 
 SIZE=$(wget --spider "$URL" 2>&1 | grep -i "Length" | awk '{print $2}')
 if [[ -z "$SIZE" ]]; then
-  echo "未知大小未知"
+  echo "文件大小未知"
   exit 1
 fi
 if [[ "$SIZE" -gt $MAX_SHARE_FILE_SIZE ]]; then
