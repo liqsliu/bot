@@ -25,6 +25,9 @@ MAX_TIMEOUT=16
 fi
 ulimit -f $[MAX_SHARE_FILE_SIZE/1024]
 
+
+
+
 if [[ "$3" == direct ]]; then
   unset http_proxy
   unset https_proxy
@@ -59,20 +62,13 @@ URL=$1
 # elif [[ "${fn}" == "index" ]]; then
 #   fn=tmp
 # fi
-# fno=$fn
-fno=tmp
-fn="$HOME/t/$fno"
-cd "$HOME/t/" || {
-# rm * &>/dev/null || true
-  echo "目录有问题"
-  exit 1
-}
-# echo "$fn"
 
 
 
 
-SIZE=$(wget --spider "$URL" 2>&1 | grep -i "Length" | awk '{print $2}')
+
+
+SIZE=$(wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT --spider "$URL" 2>&1 | grep -i "Length" | awk '{print $2}')
 if [[ -z "$SIZE" ]]; then
   echo "文件大小未知"
   exit 1
@@ -81,6 +77,20 @@ if [[ "$SIZE" -gt $MAX_SHARE_FILE_SIZE ]]; then
   echo "文件大小超过限制: $SIZE"
   exit 1
 fi
+
+
+
+# fno=$fn
+fno=tmp
+fn="$HOME/t/$fno"
+cd "$HOME/t/" || {
+# rm * &>/dev/null || true
+  echo "无法保存"
+  exit 1
+}
+# echo "$fn"
+
+
 
 
 
