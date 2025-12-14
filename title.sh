@@ -112,6 +112,14 @@ if [[ "$2" == curl ]]; then
   curl -v -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fno" -H "$LA" "$URL" -A "$UA" 
   sc=$?
   # }
+elif [[ "$2" == curlv6 ]]; then
+  unset http_proxy
+  unset https_proxy
+  # curl -s -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA" || {
+  # curl -v -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fn" -H "$LA" "$URL" -A "$UA"
+  curl -6 -v -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -o "$fno" -H "$LA" "$URL" -A "$UA" 
+  sc=$?
+  # }
 
 elif [[ "$2" == raw ]]; then
   # wget -T $MAX_TIMEOUT -q -O "$fn" "$URL" || {
