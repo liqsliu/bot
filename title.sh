@@ -44,6 +44,9 @@ fi
 # while read -r URL; do
     # echo -n "$URL --> "
 URL=$1
+
+DOM=${URL#*://}
+DOM=${DOM%%/*}
 # fn=${URL##*/}
 # fn=${fn##*:}
 # fn=${fn##*\?}
@@ -67,13 +70,14 @@ URL=$1
 
 
 
+if [[ "${DOM}" != "www.youtube.com" ]]; then
+if [[ "${DOM}" != "youtu.be" ]]; then
 
 # SIZE=$(wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT --spider "$URL" 2>&1 | grep -i "Length" | awk '{print $2}')
 # tmp=$(wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT --spider "$URL" 2>&1)
 tmp=$(wget --content-on-error --user-agent="$UA" --header="Accept-Language: en-US,en;q=2.9" --header="Accept: */*" -T $MAX_TIMEOUT --spider "$URL" 2>&1)
 SIZE=$(echo "$tmp" | grep -i  "Length\|长度\|長度" | awk '{print $2}')
 if [[ -z "$SIZE" ]]; then
-SIZE=$(echo "$tmp" | grep -i "Length" | awk '{print $4}')
   echo "文件大小未知"
   exit 1
 fi
@@ -82,6 +86,8 @@ if [[ "$SIZE" -gt $MAX_SHARE_FILE_SIZE ]]; then
   exit 1
 fi
 
+fi
+fi
 
 
 # fno=$fn
