@@ -6063,6 +6063,8 @@ async def parse_tg_file_msg(msg, chat_id=None):
           file_info = f"[{file_name}]({url})"
         else:
           file_info = url
+      else:
+        file_info = "未下载"
   else:
     file_info = "文件大小未知，终止下载"
   return file_info, path, backup_task
