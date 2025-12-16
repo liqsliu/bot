@@ -155,7 +155,7 @@ logger = logging.getLogger(__name__)
 
 
 interval = 3
-download_media_time_max = 60
+download_media_time_max = 300
 upload_media_time_max = 900
 run_shell_time_max = 60
 
@@ -5640,9 +5640,11 @@ async def tg_download_media(msg, src=None, path=f"{DOWNLOAD_PATH}/", in_memory=F
       res += f" {msg.file.name}"
     if size:
       res += f" {hbyte(size)}"
+    timeout = get_timeout(size)
     if res:
       send("准备下载:{}".format(res), src, tmp_msg=True)
-    timeout = get_timeout(size)
+      if res.endswith("flac"):
+        timeout *= 2
     if max_wait_time > timeout:
       timeout = max_wait_time
   else:
