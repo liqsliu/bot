@@ -72,7 +72,7 @@ DOM=${DOM%%/*}
 
 
 
-unset SIZE
+unset SIZE VID
 if [[ "${DOM}" != "www.youtube.com" && "${DOM}" != "youtu.be" ]]; then
 
 # SIZE=$(wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT --spider "$URL" 2>&1 | grep -i "Length" | awk '{print $2}')
