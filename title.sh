@@ -38,6 +38,8 @@ if [[ "$3" == direct ]]; then
 else
   export http_proxy="http://127.0.0.1:6080"
   export https_proxy="http://127.0.0.1:6080"
+  # export http_proxy="http://100.98.188.2:1085"
+  # export https_proxy="http://100.98.188.2:1085"
 fi
 
 # https://stackoverflow.com/questions/55842311/get-page-titles-from-a-list-of-urls
@@ -70,13 +72,14 @@ DOM=${DOM%%/*}
 
 
 
-if [[ "${DOM}" != "www.youtube.com" ]]; then
-if [[ "${DOM}" != "youtu.be" ]]; then
+unset SIZE
+if [[ "${DOM}" != "www.youtube.com" && "${DOM}" != "youtu.be" ]]; then
 
 # SIZE=$(wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT --spider "$URL" 2>&1 | grep -i "Length" | awk '{print $2}')
 # tmp=$(wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT --spider "$URL" 2>&1)
-tmp=$(wget --content-on-error --user-agent="$UA" --header="Accept-Language: en-US,en;q=2.9" --header="Accept: */*" -T $MAX_TIMEOUT --spider "$URL" 2>&1)
+# tmp=$(wget --content-on-error --user-agent="$UA" --header="Accept-Language: en-US,en;q=2.9" --header="Accept: */*" -T $MAX_TIMEOUT --spider "$URL" 2>&1)
 SIZE=$(echo "$tmp" | grep -i  "Length\|长度\|長度" | awk '{print $2}')
+# SIZE=1
 if [[ -z "$SIZE" ]]; then
   echo "文件大小未知"
   exit 1
@@ -86,9 +89,29 @@ if [[ "$SIZE" -gt $MAX_SHARE_FILE_SIZE ]]; then
   exit 1
 fi
 
-fi
-fi
+else
+VID=${URL##*/}
+VID=${VID##*=}
+# curl "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=$VID&format=json" | jq '.title'
+# {
+#   "title": "凄婉绝美的大提琴曲《殇》，电视剧《倩女幽魂》原声配乐",
+#   "author_name": "小墨音乐",
+#   "author_url": "https://www.youtube.com/@%E5%B0%8F%E5%A2%A8%E9%9F%B3%E4%B9%90",
+#   "type": "video",
+#   "height": 113,
+#   "width": 200,
+#   "version": "1.0",
+#   "provider_name": "YouTube",
+#   "provider_url": "https://www.youtube.com/",
+#   "thumbnail_height": 360,
+#   "thumbnail_width": 480,
+#   "thumbnail_url": "https://i.ytimg.com/vi/WYItNSKJWlE/hqdefault.jpg",
+#   "html": "<iframe width=\"200\" height=\"113\" src=\"https://www.youtube.com/embed/WYItNSKJWlE?feature=oembed\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share\" referrerpolicy=\"strict-origin-when-cross-origin\" allowfullscreen title=\"凄婉绝美的大提琴曲《殇》，电视剧《倩女幽魂》原声配乐\"></iframe>"
+# }
+#
+# echo "VID: $VID"
 
+fi
 
 # fno=$fn
 fno=tmp
@@ -134,6 +157,7 @@ else
   # wget --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL"
   # wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fn" "$URL"
   wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fno" "$URL"
+  # wget --content-on-error --user-agent="$UA" --header="$LA" --header="Accept: */*" -T $MAX_TIMEOUT -O "$fno" "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=WYItNSKJWlE&format=json"
   # wget -O "$fn" "$URL"
   sc=$?
   # }
@@ -273,8 +297,18 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   s=$(grep --binary-file=text -P -o '<title>.*?</title>'  "$fn" | cut -d'>' -f2- | cut -d'<' -f1)
   # if [[ -n "$s" ]]; then
   if [[ -n "$(echo $s)" ]]; then
-    # echo -n "${s:7:-8} "
-    echo -n "${s} "
+    # if [[ "$s" == " - YouTube" ]]; then
+    if [[ -n "$VID" && "$s" == " - YouTube" ]]; then
+      # echo -n "${s:7:-8} "
+        tmp=$(curl -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -H "$LA" -A "$UA" "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=$VID&format=json")
+        # echo "tmp: $tmp"
+        title=$(echo "$tmp" | jq -r '.title')
+        echo -n "$title"
+        author=$(echo "$tmp" | jq -r '.author_name')
+        echo -n " @$author"
+    else
+      echo -n "${s}"
+    fi
   else
     # s=$(grep --binary-file=text -P -o '<title ?[^>]+>.*?</title>' "$fn" | head -n1 | grep -o '>.*<' )
     s=$(grep --binary-file=text -P -o '<title ?[^>]+>.*?</title>' "$fn" | cut -d'>' -f2- | cut -d'<' -f1)
@@ -283,9 +317,10 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
       echo -n "${s} "
     else
       # echo null
-      echo -n "没找到标题 "
+      echo -n "没找到标题"
     fi
   fi
+  echo " "
   du -h -- "$fn" | cut -f1
   # rm "$fn"
   # exit
