@@ -295,10 +295,12 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   # echo
   # s=$(grep --binary-file=text -P -o '<title>.*?</title>'  "$fn" | head -n1 )
   s=$(grep --binary-file=text -P -o '<title>.*?</title>'  "$fn" | cut -d'>' -f2- | cut -d'<' -f1)
-  # if [[ -n "$s" ]]; then
-  if [[ -n "$(echo $s)" ]]; then
+  # if [[ -n "$(echo $s)" ]]; then
+  s=$(echo $s)
+  if [[ -n "$s" ]]; then
     # if [[ "$s" == " - YouTube" ]]; then
-    if [[ -n "$VID" && "$s" == " - YouTube" ]]; then
+    # if [[ -n "$VID" && "$s" == " - YouTube" ]]; then
+    if [[ -n "$VID" && "$s" == "- YouTube" ]]; then
       # echo -n "${s:7:-8} "
         tmp=$(curl -L -m $MAX_TIMEOUT --max-filesize $MAX_SHARE_FILE_SIZE -H "$LA" -A "$UA" "https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=$VID&format=json")
         # echo "tmp: $tmp"
@@ -314,7 +316,7 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
     s=$(grep --binary-file=text -P -o '<title ?[^>]+>.*?</title>' "$fn" | cut -d'>' -f2- | cut -d'<' -f1)
     if [[ -n "$(echo $s)" ]]; then
       # echo -n "${s:1:-1} "
-      echo -n "${s} "
+      echo -n "${s}"
     else
       # echo null
       echo -n "没找到标题"
