@@ -296,7 +296,7 @@ if [[ -z "$4" && "$ft" == "text/html" ]]; then
   # s=$(grep --binary-file=text -P -o '<title>.*?</title>'  "$fn" | head -n1 )
   s=$(grep --binary-file=text -P -o '<title>.*?</title>'  "$fn" | cut -d'>' -f2- | cut -d'<' -f1)
   # if [[ -n "$(echo $s)" ]]; then
-  s=$(echo $s)
+  s=$(echo $s| tr '\n' "/")
   if [[ -n "$s" ]]; then
     # if [[ "$s" == " - YouTube" ]]; then
     # if [[ -n "$VID" && "$s" == " - YouTube" ]]; then
