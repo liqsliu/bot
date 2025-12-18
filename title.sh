@@ -92,7 +92,7 @@ if [[ -z "$SIZE" ]]; then
   exit 1
 fi
 if [[ "$SIZE" -gt $MAX_SHARE_FILE_SIZE ]]; then
-  echo "文件大小超过限制: $SIZE"
+  echo "文件大小超过限制: $SIZE > $MAX_SHARE_FILE_SIZE"
   exit 1
 fi
 
