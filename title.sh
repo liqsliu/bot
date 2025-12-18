@@ -88,10 +88,15 @@ SIZE=$(echo "$tmp" | grep -i  "Length\|长度\|長度" | grep -o -P '\d+' | head
 # exit
 # SIZE=1
 if [[ -z "$SIZE" ]]; then
-  echo "文件大小未知"
-  exit 1
-fi
-if [[ "$SIZE" -gt "$MAX_SHARE_FILE_SIZE" ]]; then
+  if echo "$tmp" | grep -i  "Length\|长度\|長度" | grep -q -F " [text/plain]"; then
+    :
+  elif echo "$tmp" | grep -i  "Length\|长度\|長度" | grep -q -F " [text/html]"; then
+    :
+  else
+    echo "文件大小未知: $tmp"
+    exit 1
+  fi
+elif [[ "$SIZE" -gt "$MAX_SHARE_FILE_SIZE" ]]; then
   echo "文件大小超过限制: $SIZE > $MAX_SHARE_FILE_SIZE"
   exit 1
 fi
