@@ -5585,7 +5585,7 @@ def get_timeout(size):
   #    timeout = 10
   #  timeout = 247080/233-10768058155008000/54289/(size+43751833600/233)
   timeout = 247080/233-10768058155008000/54289/(size+43751833600/233) + 5
-  return int(timeout)
+  return int(timeout)*2
 
 
 def hbyte(size):
