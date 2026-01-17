@@ -2996,7 +2996,7 @@ async def ipfssum(path):
     if res1:
       #  res = res.split(" ")[0]
       return res1.split(" ")[0]
-    else
+    else:
       return f"res: {res} {shell_cmd}"
   else:
     return str(int(time.time()))
