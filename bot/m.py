@@ -2006,6 +2006,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
           warn("clean shell")
           #  await sleep(1)
           while not myshell_queue.empty():
+            await sleep(1)
             info("drop: %s" % str(await myshell_queue.get()) )
           info("clean ok")
 
@@ -2184,7 +2185,7 @@ async def myshell(cmds, max_time=run_shell_time_max, src=None):
               #      break
   except TimeoutError:
     warn("shell is busy")
-    return 512, None, "shell is busy"
+    return 512, None, "shell执行超时"
   #  if o:
   if len(o) > 0:
     o = o.decode("utf-8", errors="ignore")
@@ -2991,9 +2992,12 @@ async def ipfssum(path):
   res = await myshell(shell_cmd)
   if res:
     info(f"res: {res} {shell_cmd}")
-    res = res[1]
-    res = res.split(" ")[0]
-    return res
+    res1 = res[1]
+    if res1:
+      #  res = res.split(" ")[0]
+      return res1.split(" ")[0]
+    else
+      return f"res: {res} {shell_cmd}"
   else:
     return str(int(time.time()))
 
