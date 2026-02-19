@@ -14,8 +14,6 @@ cd bot
 bash init.sh
 bash mt_run.sh
 
-make
-tmux new-window ./toxbot
 
 ```
 
@@ -31,8 +29,6 @@ get messages from matterbridge and print them for tox.
 send messages from tox to matterbridge.
 
 
-### init.sh
-copy some necessary files to tmp dir.
 
 
 ...
