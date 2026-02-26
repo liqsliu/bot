@@ -951,6 +951,7 @@ def decode_base64(data, altchars=b'+/'):
 
 
 def encode_base64(data, altchars=b'+/'):
+    # https://docs.python.org/zh-cn/3.14/library/base64.html#base64.b64encode
     if isinstance(data, str):
         data = data.encode()
     return base64.b64encode(data, altchars=altchars).decode().rstrip("=")
