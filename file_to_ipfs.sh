@@ -8,7 +8,8 @@ LP=${LP:-$HOME/tera/tmp}
 MAX_SHARE_FILE_SIZE=${MAX_SHARE_FILE_SIZE:-64000000}
 
 
-export IPFS_PATH="/home/liqsliu/tera/var/ipfs"
+# export IPFS_PATH="/home/liqsliu/tera/var/ipfs"
+export IPFS_PATH="/opt/dav/tera/ipfs"
 
 PRIVATE_KEYS_PATH="${HOME}/vps/private_keys.txt"
 IPFS_API_KEY=$(grep IPFS_API_KEY "$PRIVATE_KEYS_PATH")
