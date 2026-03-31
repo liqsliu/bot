@@ -8433,7 +8433,7 @@ async def msgxp(msg):
               elif muc in rss_groups or muc == acg_group:
                 welcome = f"欢迎 {hide_nick(msg)} ,这里是rss频道，机器人推送消息很频繁。如有任何问题，建议根据群介绍前往主群沟通。该消息来自机器人(bot)，可不予理会。"
               elif muc == "wtfipfs@salas.suchat.org":
-                welcome = f"欢迎 {hide_nick(msg)} ,该群新人默认不能发言。\n如果没有发言权，建议使用gajim或cheogram客户端申请。conversations不支持xmpp原生的申请方式。也可以群内私信bot：“申请发言权”，然后等管理批准。也可以改群内名字，添加“申请发言权”。\n建议经常在该群保持在线，管理看到就会给成员身份和发言权。\n该消息来自机器人(bot)，可不予理会。"
+                welcome = f"欢迎 {hide_nick(msg)} ,该群新人不能发言，请私聊管理。\n该消息来自机器人(bot)，可不予理会。"
               else:
                 welcome = f"欢迎 {hide_nick(msg)} ,如需查看群介绍，请发送 “.help”。该消息来自机器人(bot)，可不予理会。muc: {muc}"
               send(welcome, muc, nick=nick)
